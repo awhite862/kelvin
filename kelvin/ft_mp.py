@@ -444,9 +444,10 @@ def mp3_new(e, no, f, eri, T):
 
 from . import ft_cc_energy
 from . import ft_cc_equations
-from cqcpy import ft_utils
+from . import quadrature
 from cqcpy.ov_blocks import one_e_blocks
 from cqcpy.ov_blocks import two_e_blocks
+#from cqcpy import cc_energy
 
 def mp23_int(e, no, nv, f, eri, T, ngrid=10):
     """Return the 2nd and 3rd order corrections to the free energy by 
@@ -469,10 +470,10 @@ def mp23_int(e, no, nv, f, eri, T, ngrid=10):
     Id = numpy.ones((ng))
     T1old = -numpy.einsum('v,ai,a,i->vai',Id,f,nv,no)
     T2old = -numpy.einsum('v,abij,a,b,i,j->vabij',Id,eri,nv,nv,no,no)
-    G = ft_utils.get_G(ng,delta)
-    g = ft_utils.get_gint(ng,delta)
-    T1old = ft_utils.int_tbar1(ng,T1old,ti,D1,G)
-    T2old = ft_utils.int_tbar2(ng,T2old,ti,D2,G)
+    G = quadrature.get_G(ng,delta)
+    g = quadrature.get_gint(ng,delta)
+    T1old = quadrature.int_tbar1(ng,T1old,ti,D1,G)
+    T2old = quadrature.int_tbar2(ng,T2old,ti,D2,G)
 
     E23_1 = ft_cc_energy.ft_cc_energy(T1old,T2old,f,eri,
             ti,g,beta)
@@ -501,7 +502,7 @@ def mp23_int(e, no, nv, f, eri, T, ngrid=10):
     T1,T2 = ft_cc_equations.lccsd_simple(F,I,T1old,T2old,
             D1,D2,ti,ng,G)
 
-    E23_2 = cc_energy.ft_cc_energy(T1,T2,f,eri,
+    E23_2 = ft_cc_energy.ft_cc_energy(T1,T2,f,eri,
             ti,g,beta,Qterm=False)
 
     #print(E23_Q, E23_2)
