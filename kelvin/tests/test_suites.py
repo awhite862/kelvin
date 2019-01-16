@@ -18,6 +18,7 @@ from kelvin.tests import test_neq_lambda
 from kelvin.tests import test_neq_lambda_equation
 from kelvin.tests import test_neq_prop
 from kelvin.tests import test_quadrature
+from kelvin.tests import test_scf
 from kelvin.tests import test_test
 from kelvin.tests import test_ueg
 
@@ -30,6 +31,7 @@ def full_suite():
     suite.addTest(test_ccsd.CCSDTest("test_N2p_631G"))
     suite.addTest(test_ccsd.CCSDTest("test_Be_sto3g_gen"))
     suite.addTest(test_ccsd.CCSDTest("test_N2p_631G_gen"))
+    #suite.addTest(test_ccsd.CCSDTest("test_diamond"))
 
     suite.addTest(test_ft_cc_ampl.FTamplEquationsTest("test_ccsd_stanton"))
     suite.addTest(test_ft_cc_ampl.FTamplEquationsTest("test_uccsd"))
@@ -103,6 +105,9 @@ def full_suite():
     suite.addTest(test_quadrature.QuadTest("test_int_keldysh"))
     suite.addTest(test_quadrature.QuadTest("test_Lint_keldysh"))
 
+    suite.addTest(test_scf.SCFTest("test_Be_sto3g"))
+    suite.addTest(test_scf.SCFTest("test_diamond"))
+
     suite.addTest(test_ueg.UEGTest("test_2_07_4"))
     suite.addTest(test_ueg.UEGTest("test_2_07_8"))
 
@@ -112,12 +117,6 @@ def default_suite():
     suite = unittest.TestSuite()
 
     suite.addTest(test_test.TestTest("test_framework"))
-    #suite.addTest(test_test.TestTest("test_Isym"))
-    #suite.addTest(test_test.TestTest("test_int_sym"))
-    #suite.addTest(test_test.TestTest("test_Tsym"))
-    #suite.addTest(test_test.TestTest("test_Lsym"))
-    #suite.addTest(test_test.TestTest("test_ft_int_sym"))
-    #suite.addTest(test_test.TestTest("test_ft_Tsym"))
  
     suite.addTest(test_ft_cc_ampl.FTamplEquationsTest("test_ccsd_stanton"))
 
@@ -125,6 +124,7 @@ def default_suite():
     suite.addTest(test_ccsd.CCSDTest("test_N2p_631G"))
     suite.addTest(test_ccsd.CCSDTest("test_Be_sto3g_gen"))
     suite.addTest(test_ccsd.CCSDTest("test_N2p_631G_gen"))
+    #suite.addTest(test_ccsd.CCSDTest("test_diamond"))
 
     suite.addTest(test_ft_cc_ampl.FTamplEquationsTest("test_ccsd_stanton"))
     suite.addTest(test_ft_cc_ampl.FTamplEquationsTest("test_uccsd"))
@@ -197,6 +197,9 @@ def default_suite():
 
     suite.addTest(test_quadrature.QuadTest("test_int_keldysh"))
     suite.addTest(test_quadrature.QuadTest("test_Lint_keldysh"))
+
+    suite.addTest(test_scf.SCFTest("test_Be_sto3g"))
+    suite.addTest(test_scf.SCFTest("test_diamond"))
 
     suite.addTest(test_ueg.UEGTest("test_2_07_4"))
     #suite.addTest(test_ueg.UEGTest("test_2_07_8"))

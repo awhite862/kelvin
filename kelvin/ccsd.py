@@ -239,6 +239,9 @@ class ccsd(object):
         max_iter = self.max_iter
         i = 0
         Eold = 1000000
+        nl1 = numpy.sqrt(T1old.size)
+        nl2 = numpy.sqrt(T2old.size)
+        alpha = self.damp
         while i < max_iter and not converged:
             if self.singles:
                 T1,T2 = cc_equations.ccsd_stanton(F,I,T1old,T2old)
@@ -247,9 +250,13 @@ class ccsd(object):
                 T2 = cc_equations.ccd_simple(F,I,T2old)
             T1 = einsum('ai,ia->ai',T1,Dov)
             T2 = einsum('abij,ijab->abij',T2,Doovv)
-            E = cc_energy.cc_energy(T1,T2,F.ov,I.oovv)
+            res1 = numpy.linalg.norm(T1 - T1old) / nl1
+            res2 = numpy.linalg.norm(T2 - T2old) / nl2
+            T1old = alpha*T1old + (1.0 - alpha)*T1
+            T2old = alpha*T2old + (1.0 - alpha)*T2
+            E = cc_energy.cc_energy(T1old,T2old,F.ov,I.oovv)
             if self.iprint > 0:
-                print(' %2d  %.10f' % (i+1,E))
+                print(' {:2d}  {:.10f}  {:.10f}'.format(i+1,E,res1+res2))
             i = i + 1
             if numpy.abs(E - Eold) < thresh:
                 converged = True

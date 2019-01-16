@@ -1,4 +1,5 @@
 import unittest
+import numpy
 from pyscf import gto, scf, cc
 from kelvin.ccsd import ccsd
 from kelvin.scf_system import scf_system
@@ -84,6 +85,53 @@ class CCSDTest(unittest.TestCase):
         diff = abs(res[1] - res[0])
         error = "Expected: {}  Actual: {}".format(res[0],res[1])
         self.assertTrue(diff < self.thresh,error)
+
+    def test_diamond(self):
+        from pyscf.pbc import gto, scf, dft
+        #cell = gto.M(
+        #    unit='B',
+        #    a=[[0., 3.37013733, 3.37013733],
+        #       [3.37013733, 0., 3.37013733],
+        #       [3.37013733, 3.37013733, 0.]],
+        #    mesh=[24,]*3,
+        #    atom='''C 0 0 0
+        #              C 1.68506866 1.68506866 1.68506866''',
+        #    basis='gth-szv',
+        #    pseudo='gth-pade',
+        #    verbose=4
+        #)
+        cell = gto.Cell()
+        cell.a = '''
+        3.5668  0       0
+        0       3.5668  0
+        0       0       3.5668'''
+        cell.atom = '''C     0.      0.      0.    
+                      C     0.8917  0.8917  0.8917
+                      C     1.7834  1.7834  0.    
+                      C     2.6751  2.6751  0.8917
+                      C     1.7834  0.      1.7834
+                      C     2.6751  0.8917  2.6751
+                      C     0.      1.7834  1.7834
+                      C     0.8917  2.6751  2.6751'''
+        cell.basis = 'gth-szv'
+        cell.pseudo = 'gth-pade'
+        cell.verbose = 4
+        cell.build()
+
+        mf = scf.RHF(cell,exxdiv=None)
+        mf.conv_tol_grad = 1e-8
+        mf.conv_tol = 1e-12
+        Escf = mf.kernel()
+        mycc = cc.CCSD(mf)
+        mycc.conv_tol = 1e-10
+        mycc.conv_tol_normt = 1e-8
+        Ecc = mycc.kernel()
+        sys = scf_system(mf,0.0,0.0,orbtype='g')
+        ccsd0 = ccsd(sys,iprint=1,max_iter=100,econv=1e-10,damp=0.0)
+        Etot,Ecc2 = ccsd0.run()
+        diff = abs(Ecc[0] - Ecc2)
+        self.assertTrue(diff < self.thresh)
+        #print(Ecc[0],Ecc2)
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,46 +1,27 @@
 import unittest
-from pyscf import gto, scf, mp
-from kelvin.mp2 import mp2
+from kelvin import zt_mp
 from kelvin.scf_system import scf_system
 
-def test_mp2(m):
-    sys = scf_system(m,0.0,0.0)
-    mp20 = mp2(sys,iprint=0)
-    E00,E10,E20 = mp20.run()
-
-    pt = mp.MP2(m)
-    Emp, temp = pt.kernel()
-
-    return (Emp,E20)
-
-class MP2Test(unittest.TestCase):
+class SCFTest(unittest.TestCase):
     def setUp(self):
-        self.thresh = 1e-12
+        self.thresh = 1e-10
 
     def test_Be_sto3g(self):
+        from pyscf import gto, scf, cc
         mol = gto.M(
             verbose = 0,
             atom = 'Be 0 0 0',
             basis = 'sto-3G')
         m = scf.RHF(mol)
-        m.conv_tol = 1e-12
+        m.conv_tol = 1e-13
         Escf = m.scf()
-        res = test_mp2(m)
-        diff = abs(res[1] - res[0])
-        self.assertTrue(diff < self.thresh)
-
-    def test_N2p_631G(self):
-        mol = gto.M(
-            verbose = 0,
-            atom = 'N 0 0 0; N 0 0 1.1',
-            basis = '6-31G',
-            charge = 1,
-            spin = 1)
-        m = scf.UHF(mol)
-        m.conv_tol = 1e-12
-        Escf = m.scf()
-        res = test_mp2(m)
-        diff = abs(res[1] - res[0])
+        sys = scf_system(m,0.0,0.0)
+        eo,ev = sys.g_energies()
+        En = sys.const_energy()
+        E0 = zt_mp.mp0(eo) + En
+        E1 = sys.get_mp1()
+        Ehf = E0 + E1
+        diff = abs(Ehf - Escf)
         self.assertTrue(diff < self.thresh)
 
     def test_diamond(self):
@@ -50,9 +31,9 @@ class MP2Test(unittest.TestCase):
         3.5668  0       0
         0       3.5668  0
         0       0       3.5668'''
-        cell.atom = '''C     0.      0.      0.
+        cell.atom = '''C     0.      0.      0.    
                       C     0.8917  0.8917  0.8917
-                      C     1.7834  1.7834  0.
+                      C     1.7834  1.7834  0.    
                       C     2.6751  2.6751  0.8917
                       C     1.7834  0.      1.7834
                       C     2.6751  0.8917  2.6751
@@ -67,12 +48,16 @@ class MP2Test(unittest.TestCase):
         mf.conv_tol_grad = 1e-8
         mf.conv_tol = 1e-12
         Escf = mf.kernel()
-        pt = mp.MP2(mf)
-        Emp, temp = pt.kernel()
-        #sys = scf_system(mf,0.0,0.0)
-        #mp20 = mp2(sys,iprint=0)
-        #E00,E10,E20 = mp20.run()
-        #print(Emp,E20)
+        #print("HF energy (per unit cell) = %.17g" % Escf)
+        sys = scf_system(mf,0.0,0.0)
+        eo,ev = sys.g_energies()
+        En = sys.const_energy()
+        E0 = zt_mp.mp0(eo) + En
+        E1 = sys.get_mp1()
+        Ehf = E0 + E1
+        #print(Ehf)
+        diff = abs(Ehf - Escf)
+        self.assertTrue(diff < self.thresh)
 
 if __name__ == '__main__':
     unittest.main()
