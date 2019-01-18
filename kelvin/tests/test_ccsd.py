@@ -86,20 +86,8 @@ class CCSDTest(unittest.TestCase):
         error = "Expected: {}  Actual: {}".format(res[0],res[1])
         self.assertTrue(diff < self.thresh,error)
 
-    def test_diamond(self):
+    def test_diamond_g(self):
         from pyscf.pbc import gto, scf, dft
-        #cell = gto.M(
-        #    unit='B',
-        #    a=[[0., 3.37013733, 3.37013733],
-        #       [3.37013733, 0., 3.37013733],
-        #       [3.37013733, 3.37013733, 0.]],
-        #    mesh=[24,]*3,
-        #    atom='''C 0 0 0
-        #              C 1.68506866 1.68506866 1.68506866''',
-        #    basis='gth-szv',
-        #    pseudo='gth-pade',
-        #    verbose=4
-        #)
         cell = gto.Cell()
         cell.a = '''
         3.5668  0       0
@@ -127,6 +115,42 @@ class CCSDTest(unittest.TestCase):
         mycc.conv_tol_normt = 1e-9
         Ecc = mycc.kernel()
         sys = scf_system(mf,0.0,0.0,orbtype='g')
+        ccsd0 = ccsd(sys,iprint=1,max_iter=100,econv=1e-11,damp=0.0)
+        Etot,Ecc2 = ccsd0.run()
+        diff = abs(Ecc[0] - Ecc2)
+        #print(diff)
+        self.assertTrue(diff < self.thresh)
+        #print(Ecc[0],Ecc2)
+
+    def test_diamond_u(self):
+        from pyscf.pbc import gto, scf, dft
+        cell = gto.Cell()
+        cell.a = '''
+        3.5668  0       0
+        0       3.5668  0
+        0       0       3.5668'''
+        cell.atom = '''C     0.      0.      0.    
+                      C     0.8917  0.8917  0.8917
+                      C     1.7834  1.7834  0.    
+                      C     2.6751  2.6751  0.8917
+                      C     1.7834  0.      1.7834
+                      C     2.6751  0.8917  2.6751
+                      C     0.      1.7834  1.7834
+                      C     0.8917  2.6751  2.6751'''
+        cell.basis = 'gth-szv'
+        cell.pseudo = 'gth-pade'
+        cell.verbose = 4
+        cell.build()
+
+        mf = scf.RHF(cell,exxdiv=None)
+        mf.conv_tol_grad = 1e-8
+        mf.conv_tol = 1e-12
+        Escf = mf.kernel()
+        mycc = cc.CCSD(mf)
+        mycc.conv_tol = 1e-11
+        mycc.conv_tol_normt = 1e-9
+        Ecc = mycc.kernel()
+        sys = scf_system(mf,0.0,0.0)
         ccsd0 = ccsd(sys,iprint=1,max_iter=100,econv=1e-11,damp=0.0)
         Etot,Ecc2 = ccsd0.run()
         diff = abs(Ecc[0] - Ecc2)
