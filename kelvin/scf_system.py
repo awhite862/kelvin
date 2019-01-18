@@ -5,6 +5,8 @@ from cqcpy import integrals
 from cqcpy.ov_blocks import one_e_blocks
 from cqcpy.ov_blocks import two_e_blocks
 from cqcpy.ov_blocks import two_e_blocks_full
+from cqcpy.ov_blocks import make_two_e_blocks
+from cqcpy.ov_blocks import make_two_e_blocks_full
 from cqcpy.integrals import eri_blocks
 from cqcpy import utils
 from . import scf_utils
@@ -188,81 +190,23 @@ class scf_system(system):
     def u_aint(self):
         mo_coeff = self.mf.mo_coeff
         mo_occ = self.mf.mo_occ
+        _Ia,_Ib,_Iabab = self.u_aint_tot()
         if len(mo_occ.shape) == 1:
-            oa = self.mf.mo_coeff[:,mo_occ>0]
-            va = self.mf.mo_coeff[:,mo_occ==0]
-            ob = oa
-            vb = va
+            noa = mo_occ[mo_occ>0].size
+            nva = mo_occ[mo_occ==0].size
+            nob = noa
+            nvb = nva
         elif len(mo_occ.shape) == 2:
             mo_occa = mo_occ[0]
             mo_occb = mo_occ[1]
-            oa = (self.mf.mo_coeff[0])[:,mo_occa>0]
-            va = (self.mf.mo_coeff[0])[:,mo_occa==0]
-            ob = (self.mf.mo_coeff[1])[:,mo_occb>0]
-            vb = (self.mf.mo_coeff[1])[:,mo_occb==0]
-
-        mol = self.mf.mol
-
-        # build alpha integrals
-        vvvv = integrals.get_phys_anti(mol,va,va,va,va)
-        vvvo = integrals.get_phys_anti(mol,va,va,va,oa)
-        vovv = integrals.get_phys_anti(mol,va,oa,va,va)
-        vvoo = integrals.get_phys_anti(mol,va,va,oa,oa)
-        vovo = integrals.get_phys_anti(mol,va,oa,va,oa)
-        oovv = integrals.get_phys_anti(mol,oa,oa,va,va)
-        vooo = integrals.get_phys_anti(mol,va,oa,oa,oa)
-        ooov = integrals.get_phys_anti(mol,oa,oa,oa,va)
-        oooo = integrals.get_phys_anti(mol,oa,oa,oa,oa)
-        Ia = two_e_blocks(
-                vvvv=vvvv, vvvo=vvvo,
-                vovv=vovv, vvoo=vvoo,
-                vovo=vovo, oovv=oovv,
-                vooo=vooo, ooov=ooov,
-                oooo=oooo)
-
-        # build beta integrals
-        vvvv = integrals.get_phys_anti(mol,vb,vb,vb,vb)
-        vvvo = integrals.get_phys_anti(mol,vb,vb,vb,ob)
-        vovv = integrals.get_phys_anti(mol,vb,ob,vb,vb)
-        vvoo = integrals.get_phys_anti(mol,vb,vb,ob,ob)
-        vovo = integrals.get_phys_anti(mol,vb,ob,vb,ob)
-        oovv = integrals.get_phys_anti(mol,ob,ob,vb,vb)
-        vooo = integrals.get_phys_anti(mol,vb,ob,ob,ob)
-        ooov = integrals.get_phys_anti(mol,ob,ob,ob,vb)
-        oooo = integrals.get_phys_anti(mol,ob,ob,ob,ob)
-        Ib = two_e_blocks(
-                vvvv=vvvv, vvvo=vvvo,
-                vovv=vovv, vvoo=vvoo,
-                vovo=vovo, oovv=oovv,
-                vooo=vooo, ooov=ooov,
-                oooo=oooo)
-
-        # build abab integrals
-        vvvv = integrals.get_phys(mol,va,vb,va,vb)
-        vvvo = integrals.get_phys(mol,va,vb,va,ob)
-        vvov = integrals.get_phys(mol,va,vb,oa,vb)
-        vovv = integrals.get_phys(mol,va,ob,va,vb)
-        ovvv = integrals.get_phys(mol,oa,vb,va,vb)
-        vvoo = integrals.get_phys(mol,va,vb,oa,ob)
-        vovo = integrals.get_phys(mol,va,ob,va,ob)
-        ovvo = integrals.get_phys(mol,oa,vb,va,ob)
-        ovov = integrals.get_phys(mol,oa,vb,oa,vb)
-        oovv = integrals.get_phys(mol,oa,ob,va,vb)
-        voov = integrals.get_phys(mol,va,ob,oa,vb)
-        vooo = integrals.get_phys(mol,va,ob,oa,ob)
-        ovoo = integrals.get_phys(mol,oa,vb,oa,ob)
-        oovo = integrals.get_phys(mol,oa,ob,va,ob)
-        ooov = integrals.get_phys(mol,oa,ob,oa,vb)
-        oooo = integrals.get_phys(mol,oa,ob,oa,ob)
-        Iabab = two_e_blocks_full(vvvv=vvvv,
-            vvvo=vvvo,vvov=vvov,
-            vovv=vovv,ovvv=ovvv,
-            vvoo=vvoo,vovo=vovo,
-            ovov=ovov,voov=voov,
-            ovvo=ovvo,oovv=oovv,
-            vooo=vooo,ovoo=ovoo,
-            oovo=oovo,ooov=ooov,
-            oooo=oooo)
+            noa = mo_occa[mo_occa>0].size
+            nva = mo_occa[mo_occa==0].size
+            nob = mo_occb[mo_occb>0].size
+            nvb = mo_occb[mo_occb==0].size
+        Ia = make_two_e_blocks(_Ia,noa,nva,noa,nva,noa,nva,noa,nva)
+        Ib = make_two_e_blocks(_Ib,nob,nvb,nob,nvb,nob,nvb,nob,nvb)
+        Iabab = make_two_e_blocks_full(_Iabab,
+                noa,nva,nob,nvb,noa,nva,nob,nvb)
 
         return Ia, Ib, Iabab
 
@@ -298,12 +242,13 @@ class scf_system(system):
             moa = self.mf.mo_coeff[0]
             mob = self.mf.mo_coeff[1]
 
-        mol = self.mf.mol
-        Ia = integrals.get_phys_anti(mol,moa,moa,moa,moa)
-        Ib = integrals.get_phys_anti(mol,mob,mob,mob,mob)
-        Iabab = integrals.get_phys(mol,moa,mob,moa,mob)
+        #mol = self.mf.mol
+        mf = self.mf
+        Ia = integrals.get_phys_gen(mf,moa,moa,moa,moa,anti=True)
+        Ib = integrals.get_phys_gen(mf,mob,mob,mob,mob,anti=True)
+        Iabab = integrals.get_phys_gen(mf,moa,mob,moa,mob,anti=False)
 
         return Ia,Ib,Iabab
 
     def g_int_tot(self):
-        return integrals.get_phys_antiu_all_gen(self.mf,anti=False)
+        return integrals.get_physu_all_gen(self.mf,anti=False)

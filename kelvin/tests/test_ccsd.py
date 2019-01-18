@@ -123,13 +123,14 @@ class CCSDTest(unittest.TestCase):
         mf.conv_tol = 1e-12
         Escf = mf.kernel()
         mycc = cc.CCSD(mf)
-        mycc.conv_tol = 1e-10
-        mycc.conv_tol_normt = 1e-8
+        mycc.conv_tol = 1e-11
+        mycc.conv_tol_normt = 1e-9
         Ecc = mycc.kernel()
         sys = scf_system(mf,0.0,0.0,orbtype='g')
-        ccsd0 = ccsd(sys,iprint=1,max_iter=100,econv=1e-10,damp=0.0)
+        ccsd0 = ccsd(sys,iprint=1,max_iter=100,econv=1e-11,damp=0.0)
         Etot,Ecc2 = ccsd0.run()
         diff = abs(Ecc[0] - Ecc2)
+        #print(diff)
         self.assertTrue(diff < self.thresh)
         #print(Ecc[0],Ecc2)
 
