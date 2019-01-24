@@ -32,6 +32,7 @@ def full_suite():
     suite.addTest(test_ccsd.CCSDTest("test_Be_sto3g_gen"))
     suite.addTest(test_ccsd.CCSDTest("test_N2p_631G_gen"))
     #suite.addTest(test_ccsd.CCSDTest("test_diamond"))
+    #suite.addTest(test_ccsd.CCSDTest("test_diamond_u"))
 
     suite.addTest(test_ft_cc_ampl.FTamplEquationsTest("test_ccsd_stanton"))
     suite.addTest(test_ft_cc_ampl.FTamplEquationsTest("test_uccsd"))
@@ -71,6 +72,7 @@ def full_suite():
 
     suite.addTest(test_ft_mp2.FTMP2Test("test_Be_vs_fd_all"))
     suite.addTest(test_ft_mp2.FTMP2Test("test_0T_Be_sto3g"))
+    suite.addTest(test_ft_mp2.FTMP2Test("test_Hdiamond_vs_fd"))
 
     suite.addTest(test_hubbard.HubbardTest("test_2_1"))
     suite.addTest(test_hubbard.HubbardTest("test_4_1_closed"))
@@ -105,8 +107,12 @@ def full_suite():
     suite.addTest(test_quadrature.QuadTest("test_int_keldysh"))
     suite.addTest(test_quadrature.QuadTest("test_Lint_keldysh"))
 
-    suite.addTest(test_scf.SCFTest("test_Be_sto3g"))
-    suite.addTest(test_scf.SCFTest("test_diamond"))
+    suite.addTest(test_scf.SCFTest("test_Be_sto3g_energy"))
+    suite.addTest(test_scf.SCFTest("test_diamond_energy"))
+    suite.addTest(test_scf.SCFTest("test_Be_sto3g_ft_deriv"))
+    suite.addTest(test_scf.SCFTest("test_diamond_ft_deriv"))
+    suite.addTest(test_scf.SCFTest("test_Be_sto3g_ft_mp_deriv"))
+    suite.addTest(test_scf.SCFTest("test_diamond_ft_mp_deriv"))
 
     suite.addTest(test_ueg.UEGTest("test_2_07_4"))
     suite.addTest(test_ueg.UEGTest("test_2_07_8"))
@@ -125,6 +131,7 @@ def default_suite():
     suite.addTest(test_ccsd.CCSDTest("test_Be_sto3g_gen"))
     suite.addTest(test_ccsd.CCSDTest("test_N2p_631G_gen"))
     #suite.addTest(test_ccsd.CCSDTest("test_diamond"))
+    #suite.addTest(test_ccsd.CCSDTest("test_diamond_u"))
 
     suite.addTest(test_ft_cc_ampl.FTamplEquationsTest("test_ccsd_stanton"))
     suite.addTest(test_ft_cc_ampl.FTamplEquationsTest("test_uccsd"))
@@ -198,8 +205,12 @@ def default_suite():
     suite.addTest(test_quadrature.QuadTest("test_int_keldysh"))
     suite.addTest(test_quadrature.QuadTest("test_Lint_keldysh"))
 
-    suite.addTest(test_scf.SCFTest("test_Be_sto3g"))
-    suite.addTest(test_scf.SCFTest("test_diamond"))
+    suite.addTest(test_scf.SCFTest("test_Be_sto3g_energy"))
+    suite.addTest(test_scf.SCFTest("test_diamond_energy"))
+    suite.addTest(test_scf.SCFTest("test_Be_sto3g_ft_deriv"))
+    suite.addTest(test_scf.SCFTest("test_diamond_ft_deriv"))
+    suite.addTest(test_scf.SCFTest("test_Be_sto3g_ft_mp_deriv"))
+    #suite.addTest(test_scf.SCFTest("test_diamond_ft_mp_deriv"))
 
     suite.addTest(test_ueg.UEGTest("test_2_07_4"))
     #suite.addTest(test_ueg.UEGTest("test_2_07_8"))

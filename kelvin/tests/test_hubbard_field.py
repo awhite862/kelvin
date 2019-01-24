@@ -7,20 +7,20 @@ from kelvin.neq_ccsd import neq_ccsd
 from kelvin.hubbard_site_system import hubbard_site_system 
 from kelvin.hubbard_system import hubbard_system 
 from kelvin.hubbard_field_system import hubbard_field_system 
-from lattice.hubbard import hubbard_1d
-from lattice.fci import fci_simple
+from lattice.hubbard import Hubbard1D
+from lattice.fci import FCISimple
 
 def buildH(hub, phase=None):
     dim = 16
-    myfci = fci_simple(hub, 1, m_s = 1)
+    myfci = FCISimple(hub, 1, m_s = 1)
     H1 = myfci.getH(phase=phase)
-    myfci = fci_simple(hub, 2, m_s = 0)
+    myfci = FCISimple(hub, 2, m_s = 0)
     H20 = myfci.getH(phase=phase)
-    myfci = fci_simple(hub, 2, m_s = 2)
+    myfci = FCISimple(hub, 2, m_s = 2)
     H22 = myfci.getH(phase=phase)
-    myfci = fci_simple(hub, 3, m_s = 1)
+    myfci = FCISimple(hub, 3, m_s = 1)
     H31 = myfci.getH(phase=phase)
-    myfci = fci_simple(hub, 4, m_s = 0)
+    myfci = FCISimple(hub, 4, m_s = 0)
     H4 = myfci.getH(phase=phase)
     H = numpy.zeros((dim,dim),dtype=complex)
     x = 1
@@ -72,7 +72,7 @@ class HubbardFieldTest(unittest.TestCase):
         beta = 1.0/T
         L = 2
         U = 1.0
-        hub = hubbard_1d(L,1.0,U,boundary='c')
+        hub = Hubbard1D(L,1.0,U,boundary='c')
         ti = numpy.asarray([deltat/2 + float(j)*deltat for j in range(ng)])
 
         Pa = numpy.zeros((2,2))
@@ -107,7 +107,7 @@ class HubbardFieldTest(unittest.TestCase):
         beta = 1.0/T
         L = 2
         U = 1.0
-        hub = hubbard_1d(L,1.0,U,boundary='c')
+        hub = Hubbard1D(L,1.0,U,boundary='c')
         ti = numpy.asarray([deltat/2 + float(j)*deltat for j in range(ng)])
 
         # 00 u0 0u d0 0d ud0 ud du 0ud uu dd udu uud udd dud udud

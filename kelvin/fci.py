@@ -79,7 +79,7 @@ class fci(object):
         na = cistring.num_strings(n, nalpha)
         nb = cistring.num_strings(n, nbeta)
         N = na*nb
-        assert(N < 2000)
+        assert(N < 4000)
         H = numpy.zeros((N,N))
         I = numpy.identity(N)
         for i in range(N):

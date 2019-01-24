@@ -44,7 +44,7 @@ class MP2Test(unittest.TestCase):
         self.assertTrue(diff < self.thresh)
 
     def test_diamond(self):
-        from pyscf.pbc import gto, scf, dft
+        from pyscf.pbc import gto, scf
         cell = gto.Cell()
         cell.a = '''
         3.5668  0       0

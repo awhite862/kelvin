@@ -1,5 +1,4 @@
 import unittest
-from pyscf import gto, scf, mp
 from kelvin.mp2 import mp2
 from kelvin.fci import fci
 from kelvin.scf_system import scf_system
@@ -36,7 +35,8 @@ class FTMP2Test(unittest.TestCase):
         self.t1 = 1e-6
         self.t2 = 1e-5
 
-    def test_Be_vs_fd(self, T, mu):
+    def _test_Be_vs_fd(self, T, mu):
+        from pyscf import gto, scf, mp
         mol = gto.M(
             verbose = 0,
             atom = 'Be 0 0 0',
@@ -57,15 +57,16 @@ class FTMP2Test(unittest.TestCase):
         self.assertTrue(d2 < self.t2,e2str)
 
     def test_Be_vs_fd_all(self):
-        self.test_Be_vs_fd(0.1,0.0)
-        self.test_Be_vs_fd(1.0,0.0)
-        self.test_Be_vs_fd(10.0,0.0)
+        self._test_Be_vs_fd(0.1,0.0)
+        self._test_Be_vs_fd(1.0,0.0)
+        self._test_Be_vs_fd(10.0,0.0)
 
-        self.test_Be_vs_fd(0.1,0.3)
-        self.test_Be_vs_fd(1.0,0.2)
-        self.test_Be_vs_fd(10.0,0.1)
+        self._test_Be_vs_fd(0.1,0.3)
+        self._test_Be_vs_fd(1.0,0.2)
+        self._test_Be_vs_fd(10.0,0.1)
 
     def test_0T_Be_sto3g(self):
+        from pyscf import gto, scf, mp
         mol = gto.M(
             verbose = 0,
             atom = 'Be 0 0 0',
@@ -85,6 +86,40 @@ class FTMP2Test(unittest.TestCase):
         self.assertTrue(d0 < 1e-9,e0str)
         self.assertTrue(d1 < 1e-9,e1str)
         self.assertTrue(d2 < 1e-9,e2str)
+
+    def test_Hdiamond_vs_fd(self):
+        import pyscf.pbc.gto as pbc_gto
+        import pyscf.pbc.scf as pbc_scf
+        cell = pbc_gto.Cell()
+        cell.atom='''
+        He 0.000000000000   0.000000000000   0.000000000000
+        He 1.685068664391   1.685068664391   1.685068664391
+        '''
+        cell.basis = 'gth-szv'
+        cell.pseudo = 'gth-pade'
+        cell.a = '''
+        0.000000000, 3.370137329, 3.370137329
+        3.370137329, 0.000000000, 3.370137329
+        3.370137329, 3.370137329, 0.000000000'''
+        cell.unit = 'B'
+        cell.verbose = 0
+        cell.build()
+        mf = pbc_scf.RHF(cell, exxdiv=None)
+        ehf = mf.kernel()
+        T = 0.5
+        mu = 0.0
+        out = compute_ft_mp2(mf,T,mu)
+        ref = compute_G012_fci(mf,T,mu)
+
+        e0str = "Expected: {}  Actual: {}".format(ref[0],out[0])
+        e1str = "Expected: {}  Actual: {}".format(ref[1],out[1])
+        e2str = "Expected: {}  Actual: {}".format(ref[2],out[2])
+        d0 = abs(ref[0] - out[0])
+        d1 = abs(ref[1] - out[1])
+        d2 = abs(ref[2] - out[2])
+        self.assertTrue(d0 < 1e-9,e0str)
+        self.assertTrue(d1 < 1e-9,e1str)
+        self.assertTrue(d2 < 1e-7,e2str)
 
 if __name__ == '__main__':
     unittest.main()

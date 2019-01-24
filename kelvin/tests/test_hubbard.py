@@ -4,11 +4,11 @@ from kelvin.fci import fci
 from kelvin.ccsd import ccsd
 from kelvin.hubbard_site_system import hubbard_site_system 
 from kelvin.hubbard_system import hubbard_system 
-from lattice.hubbard import hubbard_1d
-from lattice.fci import fci_simple
+from lattice.hubbard import Hubbard1D
+from lattice.fci import FCISimple
 
-def compute_fci_simple(hub, nelec):
-    myfci = fci_simple(hub,nelec,m_s=0)
+def compute_FCISimple(hub, nelec):
+    myfci = FCISimple(hub,nelec,m_s=0)
     e,v = myfci.run()
     return e[0]
 
@@ -33,14 +33,14 @@ class HubbardTest(unittest.TestCase):
         self.thresh = 1e-10
 
     def _compare_closed(self,nelec,L,U,t=1.0):
-        hub = hubbard_1d(L,t,U,boundary='c')
-        Es = compute_fci_simple(hub,nelec)
+        hub = Hubbard1D(L,t,U,boundary='c')
+        Es = compute_FCISimple(hub,nelec)
         Ec = compute_fci_kelvin(hub,nelec)
         return (Es,Ec)
 
     def _compare_open(self,nelec,L,U,t=1.0):
-        hub = hubbard_1d(L,t,U)
-        Es = compute_fci_simple(hub,nelec)
+        hub = Hubbard1D(L,t,U)
+        Es = compute_FCISimple(hub,nelec)
         Ec = compute_fci_kelvin(hub,nelec)
         return (Es,Ec)
 
@@ -84,8 +84,8 @@ class HubbardTest(unittest.TestCase):
         nelec = 2
         L = 2
         U = 1.0
-        hub = hubbard_1d(L,1.0,U,boundary='c')
-        Eref = compute_fci_simple(hub,nelec)
+        hub = Hubbard1D(L,1.0,U,boundary='c')
+        Eref = compute_FCISimple(hub,nelec)
 
         Oa = numpy.zeros((2))
         Ob = numpy.zeros((2))
@@ -113,8 +113,8 @@ class HubbardTest(unittest.TestCase):
         nelec = 2
         L = 2
         U = 1.0
-        hub = hubbard_1d(L,1.0,U,boundary='c')
-        Eref = compute_fci_simple(hub,nelec)
+        hub = Hubbard1D(L,1.0,U,boundary='c')
+        Eref = compute_FCISimple(hub,nelec)
 
         Oa = numpy.zeros((2))
         Ob = numpy.zeros((2))
@@ -135,7 +135,7 @@ class HubbardTest(unittest.TestCase):
         U = 1.0
         T = 1.0
         mu = 0.0
-        hub = hubbard_1d(L,1.0,U,boundary='c')
+        hub = Hubbard1D(L,1.0,U,boundary='c')
         Eref = compute_fci_kelvinT(hub,T,mu)
 
         Oa = numpy.zeros((2))
@@ -155,7 +155,7 @@ class HubbardTest(unittest.TestCase):
         nelec = 2
         L = 2
         U = 1.0
-        hub = hubbard_1d(L,1.0,U,boundary='c')
+        hub = Hubbard1D(L,1.0,U,boundary='c')
         Oa = numpy.zeros((2))
         Ob = numpy.zeros((2))
         Oa[0] = 1.0
@@ -178,7 +178,7 @@ class HubbardTest(unittest.TestCase):
         U = 1.0
         T = 1.0
         mu = 0.0
-        hub = hubbard_1d(L,1.0,U,boundary='c')
+        hub = Hubbard1D(L,1.0,U,boundary='c')
         Eref = compute_fci_kelvinT(hub,T,mu)
 
         Oa = numpy.zeros((2))

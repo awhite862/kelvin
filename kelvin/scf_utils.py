@@ -138,7 +138,16 @@ def get_ao_fock(mf):
         pb = numpy.dot(ob, ob.T)
         dm = numpy.array((pa,pb))
         h1 = mf.get_hcore(mf.mol)
-        veff = mf.get_veff(mf.mol, dm)
+        pbc = False
+        try:
+            ktemp = mf.kpt
+            pbc = True
+        except AttributeError:
+            pbc = False
+        if pbc:
+            veff = mf.get_veff(mf.cell, dm)
+        else:
+            veff = mf.get_veff(mf.mol, dm)
         f = (h1 + veff[0], h1 + veff[1])
         return utils.block_diag(f[0], f[1])
 
@@ -178,11 +187,20 @@ def u_mo_tran_1e(mf, h):
 def get_ao_ft_fock(mf, fo):
     f0 = get_ao_fock(mf)
     n = fo.shape[0]/2
+    pbc = False
+    try:
+        ktemp = mf.kpt
+        pbc = True
+    except AttributeError:
+        pbc = False
     if len(mf.mo_occ.shape) == 1:
         mo = mf.mo_coeff
         p = numpy.dot(numpy.dot(mo,numpy.diag(fo[:n])),mo.T)
         h1 = mf.get_hcore(mf.mol)
-        veff = mf.get_veff(mf.mol,p)
+        if pbc:
+            veff = mf.get_veff(mf.cell,p)
+        else:
+            veff = mf.get_veff(mf.mol,p)
         fT = h1 + 2*veff
         return utils.block_diag(fT,fT)
 
@@ -193,7 +211,11 @@ def get_ao_ft_fock(mf, fo):
         pb = numpy.dot(numpy.dot(mob,numpy.diag(fo[n:])),mob.T)
         d = (pa,pb)
         h1 = mf.get_hcore(mf.mol)
-        veff = mf.get_veff(mf.mol,d)
+        if pbc:
+            veff = mf.get_veff(mf.cell,p)
+        else:
+            veff = mf.get_veff(mf.mol,p)
+        #veff = mf.get_veff(mf.mol,d)
         fTa = h1 + veff[0]
         fTb = h1 + veff[1]
         return utils.block_diag(fTa,fTb)
@@ -203,25 +225,41 @@ def get_ao_ft_fock(mf, fo):
 
 def get_r_ft_fock(mf, fo):
     n = fo.shape[0]
+    pbc = False
+    try:
+        ktemp = mf.kpt
+        pbc = True
+    except AttributeError:
+        pbc = False
     if len(mf.mo_occ.shape) == 1:
         mo = mf.mo_coeff
         p = numpy.dot(numpy.dot(mo,numpy.diag(fo[:n])),mo.T)
         h1 = mf.get_hcore(mf.mol)
-        veff = mf.get_veff(mf.mol,p)
+        if pbc:
+            veff = mf.get_veff(mf.cell,p)
+        else:
+            veff = mf.get_veff(mf.mol,p)
         fT = h1 + 2*veff
-        #f0 = mf.get_fock()
-        #f = fT - f0
         fmo = numpy.einsum('mp,mn,nq->pq',mo,fT,mo)
         return fmo 
     else:
         raise Exception("SCF is not resstricted")
 
 def get_u_ft_fock(mf, foa, fob):
+    pbc = False
+    try:
+        ktemp = mf.kpt
+        pbc = True
+    except AttributeError:
+        pbc = False
     if len(mf.mo_occ.shape) == 1:
         mo = mf.mo_coeff
         p = numpy.dot(numpy.dot(mo,numpy.diag(foa)),mo.T)
         h1 = mf.get_hcore(mf.mol)
-        veff = mf.get_veff(mf.mol,p)
+        if pbc:
+            veff = mf.get_veff(mf.cell,p)
+        else:
+            veff = mf.get_veff(mf.mol,p)
         fT = h1 + 2*veff
         fmo = numpy.einsum('mp,mn,nq->pq',mo,fT,mo)
         return fmo,fmo
@@ -232,7 +270,10 @@ def get_u_ft_fock(mf, foa, fob):
         pa = numpy.dot(numpy.dot(moa,numpy.diag(foa)),moa.T)
         pb = numpy.dot(numpy.dot(mob,numpy.diag(fob)),mob.T)
         d = (pa,pb)
-        veff = mf.get_veff(mf.mol,d)
+        if pbc:
+            veff = mf.get_veff(mf.cell,d)
+        else:
+            veff = mf.get_veff(mf.mol,d)
         fTa = h1 + veff[0]
         fTb = h1 + veff[1]
         fmoa = numpy.einsum('mp,mn,nq->pq',moa,fTa,moa)
@@ -245,11 +286,20 @@ def get_u_ft_fock(mf, foa, fob):
 
 def get_mo_ft_fock(mf, fo):
     n = fo.shape[0]/2
+    pbc = False
+    try:
+        ktemp = mf.kpt
+        pbc = True
+    except AttributeError:
+        pbc = False
     if len(mf.mo_occ.shape) == 1:
         mo = mf.mo_coeff
         p = numpy.dot(numpy.dot(mo,numpy.diag(fo[:n])),mo.T)
         h1 = mf.get_hcore(mf.mol)
-        veff = mf.get_veff(mf.mol,p)
+        if pbc:
+            veff = mf.get_veff(mf.cell,p)
+        else:
+            veff = mf.get_veff(mf.mol,p)
         fT = h1 + 2*veff
         fmo = numpy.einsum('mp,mn,nq->pq',mo,fT,mo)
         return utils.block_diag(fmo,fmo)
@@ -260,7 +310,10 @@ def get_mo_ft_fock(mf, fo):
         pa = numpy.dot(numpy.dot(moa,numpy.diag(fo[:n])),moa.T)
         pb = numpy.dot(numpy.dot(mob,numpy.diag(fo[n:])),mob.T)
         d = (pa,pb)
-        veff = mf.get_veff(mf.mol,d)
+        if pbc:
+            veff = mf.get_veff(mf.cell,d)
+        else:
+            veff = mf.get_veff(mf.mol,d)
         fTa = h1 + veff[0]
         fTb = h1 + veff[1]
         fmoa = numpy.einsum('mp,mn,nq->pq',moa,fTa,moa)
@@ -273,11 +326,20 @@ def get_mo_ft_fock(mf, fo):
 def get_mo_d_ft_fock(mf, fo, fv, dvec):
     n = fo.shape[0]/2
     fov = dvec*fo*fv
+    pbc = False
+    try:
+        ktemp = mf.kpt
+        pbc = True
+    except AttributeError:
+        pbc = False
     if len(mf.mo_occ.shape) == 1:
         mo = mf.mo_coeff
         p = numpy.dot(numpy.dot(mo,numpy.diag(fov[:n])),mo.T)
         h1 = mf.get_hcore(mf.mol)
-        veff = mf.get_veff(mf.mol,p)
+        if pbc:
+            veff = mf.get_veff(mf.cell,p)
+        else:
+            veff = mf.get_veff(mf.mol,p)
         fT = 2*veff
         fmo = numpy.einsum('mp,mn,nq->pq',mo,fT,mo)
         return utils.block_diag(fmo,fmo)
@@ -288,7 +350,10 @@ def get_mo_d_ft_fock(mf, fo, fv, dvec):
         pa = numpy.dot(numpy.dot(moa,numpy.diag(fov[:n])),moa.T)
         pb = numpy.dot(numpy.dot(mob,numpy.diag(fov[n:])),mob.T)
         d = (pa,pb)
-        veff = mf.get_veff(mf.mol,d)
+        if pbc:
+            veff = mf.get_veff(mf.cell,d)
+        else:
+            veff = mf.get_veff(mf.mol,d)
         fTa = veff[0]
         fTb = veff[1]
         fmoa = numpy.einsum('mp,mn,nq->pq',moa,fTa,moa)
@@ -303,11 +368,20 @@ def u_mo_d_ft_fock(mf, foa, fva, fob, fvb, dveca, dvecb):
     nb = fob.shape[0]
     fova = dveca*foa*fva
     fovb = dvecb*fob*fvb
+    pbc = False
+    try:
+        ktemp = mf.kpt
+        pbc = True
+    except AttributeError:
+        pbc = False
     if len(mf.mo_occ.shape) == 1:
         mo = mf.mo_coeff
         p = numpy.dot(numpy.dot(mo,numpy.diag(fova)),mo.T)
         h1 = mf.get_hcore(mf.mol)
-        veff = mf.get_veff(mf.mol,p)
+        if pbc:
+            veff = mf.get_veff(mf.cell,p)
+        else:
+            veff = mf.get_veff(mf.mol,p)
         fT = 2*veff
         fmo = numpy.einsum('mp,mn,nq->pq',mo,fT,mo)
         return fmo,fmo
@@ -318,7 +392,10 @@ def u_mo_d_ft_fock(mf, foa, fva, fob, fvb, dveca, dvecb):
         pa = numpy.dot(numpy.dot(moa,numpy.diag(fova)),moa.T)
         pb = numpy.dot(numpy.dot(mob,numpy.diag(fovb)),mob.T)
         d = (pa,pb)
-        veff = mf.get_veff(mf.mol,d)
+        if pbc:
+            veff = mf.get_veff(mf.cell,d)
+        else:
+            veff = mf.get_veff(mf.mol,d)
         fTa = veff[0]
         fTb = veff[1]
         fmoa = numpy.einsum('mp,mn,nq->pq',moa,fTa,moa)
@@ -357,6 +434,12 @@ class r_fock_blocks(object):
 class g_fock_blocks(object):
     def __init__(self,mf):
         mo_occ = mf.mo_occ
+        pbc = False
+        try:
+            ktemp = mf.kpt
+            pbc = True
+        except AttributeError:
+            pbc = False
         if len(mo_occ.shape) == 1:
             o = mf.mo_coeff[:,mo_occ>0]
             v = mf.mo_coeff[:,mo_occ==0]
@@ -373,7 +456,10 @@ class g_fock_blocks(object):
             pb = numpy.dot(ob, ob.T)
             dm = numpy.array((pa,pb))
             h1 = mf.get_hcore(mf.mol)
-            veff = mf.get_veff(mf.mol, dm)
+            if pbc:
+                veff = mf.get_veff(mf.cell, dm)
+            else:
+                veff = mf.get_veff(mf.mol, dm)
             f = (h1 + veff[0], h1 + veff[1])
             self._transform_fock(mf,oa,ob,va,vb,f[0],f[1])
         else:
