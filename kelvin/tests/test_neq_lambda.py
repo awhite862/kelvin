@@ -2,14 +2,14 @@ import unittest
 import numpy
 from pyscf import gto, scf, cc
 from cqcpy import integrals
-from ft_mbpt import cc_utils
-from ft_mbpt import ft_cc_energy
-from ft_mbpt import ft_cc_equations
-from ft_mbpt import quadrature
-from ft_mbpt.h2_field_system import h2_field_system
-from ft_mbpt.neq_ccsd import neq_ccsd
-from ft_mbpt.ccsd import ccsd
-from ft_mbpt.h2_pol_system import h2_pol_system
+from kelvin import cc_utils
+from kelvin import ft_cc_energy
+from kelvin import ft_cc_equations
+from kelvin import quadrature
+from kelvin.h2_field_system import h2_field_system
+from kelvin.neq_ccsd import neq_ccsd
+from kelvin.ccsd import ccsd
+from kelvin.h2_pol_system import h2_pol_system
 
 def evalL(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
         Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta):

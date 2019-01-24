@@ -1,6 +1,6 @@
 import unittest
-from ft_mbpt.fci import fci
-from ft_mbpt.ueg_system import ueg_system
+from kelvin.fci import fci
+from kelvin.ueg_system import ueg_system
 import numpy
 
 def rs_to_L(rs,N):
