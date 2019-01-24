@@ -1,0 +1,251 @@
+#INFO: **** input file is /home/alec/Source/kelvin/examples/Diamond_ft_ccsd.py ****
+from kelvin.ccsd import ccsd
+from kelvin.scf_system import scf_system
+from pyscf.pbc import gto, scf, dft
+
+T = 0.1
+mu = 0.11
+cell = gto.Cell()
+cell.a = '''
+0.000000000, 3.370137329, 3.370137329
+3.370137329, 0.000000000, 3.370137329
+3.370137329, 3.370137329, 0.000000000'''
+cell.atom='''
+C 0.000000000000   0.000000000000   0.000000000000
+C 1.685068664391   1.685068664391   1.685068664391
+'''
+cell.basis = 'gth-szv'
+cell.pseudo = 'gth-pade'
+cell.verbose = 4
+cell.build()
+
+mf = scf.RHF(cell,exxdiv=None)
+mf.conv_tol_grad = 1e-8
+mf.conv_tol = 1e-12
+Escf = mf.kernel()
+sys = scf_system(mf,T,mu)
+ccsdT = ccsd(sys,iprint=1,max_iter=100,econv=1e-11,damp=0.0,T=T,mu=mu)
+Etot,Ecc = ccsdT.run()
+ccsdT.compute_ESN()
+print('N = {}'.format(ccsdT.N))
+print('E = {}'.format(ccsdT.E))
+print('S = {}'.format(ccsdT.S))
+#INFO: ******************** input file end ********************
+
+
+System: ('Linux', 'alec-Precision-T1650', '4.15.0-43-generic', '#46-Ubuntu SMP Thu Dec 6 14:45:28 UTC 2018', 'x86_64', 'x86_64')  Threads 1
+Python 2.7.15rc1 (default, Nov 12 2018, 14:31:15) 
+[GCC 7.3.0]
+numpy 1.13.3  scipy 0.19.1
+Date: Thu Jan 24 14:29:53 2019
+PySCF version 1.6a
+PySCF path  /home/alec/pyscf/pyscf
+GIT ORIG_HEAD 4bb7e548e6bd2927fd7042ee2095f21f5f13af4b
+GIT HEAD      ref: refs/heads/kuccsd
+GIT kuccsd branch  a0559736ca5f4c8cde20a6f387e07bc10250e232
+
+[CONFIG] conf_file None
+[INPUT] verbose = 4
+[INPUT] num. atoms = 2
+[INPUT] num. electrons = 8
+[INPUT] charge = 0
+[INPUT] spin (= nelec alpha-beta = 2S) = 0
+[INPUT] symmetry False subgroup None
+[INPUT] Mole.unit = angstrom
+[INPUT]  1 C      0.000000000000   0.000000000000   0.000000000000 AA    0.000000000000   0.000000000000   0.000000000000 Bohr
+[INPUT]  2 C      1.685068664391   1.685068664391   1.685068664391 AA    3.184318276786   3.184318276786   3.184318276786 Bohr
+
+nuclear repulsion = -6.76665782781844
+number of shells = 4
+number of NR pGTOs = 32
+number of NR cGTOs = 8
+basis = gth-szv
+ecp = {}
+CPU time:         0.28
+lattice vectors  a1 [0.000000000, 6.368636554, 6.368636554]
+                 a2 [6.368636554, 0.000000000, 6.368636554]
+                 a3 [6.368636554, 6.368636554, 0.000000000]
+dimension = 3
+low_dim_ft_type = None
+Cell volume = 516.618
+rcut = 19.7932586752 (nimgs = [3 3 3])
+lattice sum = 237 cells
+precision = 1e-08
+pseudo = gth-pade
+ke_cutoff = 257.061966474
+    = [54 54 54] mesh (157464 PWs)
+ew_eta = 2.21047
+ew_cut = 3.13541091342 (nimgs = [1 1 1])
+
+
+******** <class 'pyscf.pbc.scf.hf.RHF'> ********
+method = RHF-SCF
+initial guess = minao
+damping factor = 0
+level shift factor = 0
+DIIS = <class 'pyscf.scf.diis.CDIIS'>
+DIIS start cycle = 1
+DIIS space = 8
+SCF tol = 1e-12
+SCF gradient tol = 1e-08
+max. SCF cycles = 50
+direct_scf = False
+chkfile to save SCF result = /home/alec/Source/kelvin/examples/tmpGQnqF2
+max_memory 4000 MB (current use 64 MB)
+******** PBC SCF flags ********
+kpt = [ 0.  0.  0.]
+Exchange divergence treatment (exxdiv) = None
+DF object = <pyscf.pbc.df.fft.FFTDF object at 0x7fb43070f3d0>
+
+
+******** <class 'pyscf.pbc.df.fft.FFTDF'> ********
+mesh = [54 54 54] (157464 PWs)
+len(kpts) = 1
+init E= -9.06234486992166
+
+WARN: HOMO 0.127609889291095 == LUMO 0.127609889291166
+
+cycle= 1 E= -9.07573716188388  delta_E= -0.0134  |g|= 0.0339  |ddm|= 2.27
+  HOMO = 0.138382020093612  LUMO = 0.153684177083376
+cycle= 2 E= -9.07722981877757  delta_E= -0.00149  |g|= 0.0111  |ddm|= 0.238
+  HOMO = 0.137270733589092  LUMO = 0.153462074986831
+cycle= 3 E= -9.07765475139022  delta_E= -0.000425  |g|= 0.00422  |ddm|= 0.123
+  HOMO = 0.137072945426884  LUMO = 0.153410349341584
+cycle= 4 E= -9.07794379478499  delta_E= -0.000289  |g|= 0.00458  |ddm|= 0.0985
+  HOMO = 0.135453064797361  LUMO = 0.144951958203002
+cycle= 5 E= -9.07647284263371  delta_E= 0.00147  |g|= 0.01  |ddm|=    1
+  HOMO = 0.136158403483539  LUMO = 0.149810832425138
+cycle= 6 E= -9.07651372855149  delta_E= -4.09e-05  |g|= 0.00573  |ddm|= 0.0979
+  HOMO = 0.139263397610916  LUMO = 0.153443897866189
+cycle= 7 E= -9.07653040624217  delta_E= -1.67e-05  |g|= 0.0213  |ddm|= 0.426
+  HOMO = 0.139849832636671  LUMO = 0.153297607926607
+cycle= 8 E= -9.07698551686285  delta_E= -0.000455  |g|= 0.00569  |ddm|= 0.13
+  HOMO = 0.139828749811827  LUMO = 0.153271436157737
+cycle= 9 E= -9.0769633079762  delta_E= 2.22e-05  |g|= 0.00556  |ddm|= 0.0322
+  HOMO = 0.139169670934883  LUMO = 0.152798833450501
+cycle= 10 E= -9.07700259677755  delta_E= -3.93e-05  |g|= 0.00502  |ddm|= 0.262
+  HOMO = 0.137144691130704  LUMO = 0.152815292537799
+cycle= 11 E= -9.07685879573554  delta_E= 0.000144  |g|= 0.00277  |ddm|= 0.266
+  HOMO = 0.138122403651981  LUMO = 0.15286721530529
+cycle= 12 E= -9.07687346176135  delta_E= -1.47e-05  |g|= 0.00157  |ddm|= 0.112
+  HOMO = 0.13793677233412  LUMO = 0.153229877876777
+cycle= 13 E= -9.0769153769657  delta_E= -4.19e-05  |g|= 0.0034  |ddm|= 0.0795
+  HOMO = 0.137804121114379  LUMO = 0.15250355066033
+cycle= 14 E= -9.07687193410505  delta_E= 4.34e-05  |g|= 0.00133  |ddm|= 0.161
+  HOMO = 0.137823393018393  LUMO = 0.152640271251578
+cycle= 15 E= -9.07687258119907  delta_E= -6.47e-07  |g|= 0.00108  |ddm|= 0.00943
+  HOMO = 0.137868794764755  LUMO = 0.15285085070205
+cycle= 16 E= -9.07686969102006  delta_E= 2.89e-06  |g|= 0.00249  |ddm|= 0.0177
+  HOMO = 0.137969905050157  LUMO = 0.153167097908889
+cycle= 17 E= -9.07688744843777  delta_E= -1.78e-05  |g|= 0.000772  |ddm|= 0.055
+  HOMO = 0.138007568863425  LUMO = 0.153289134382797
+cycle= 18 E= -9.07688884467921  delta_E= -1.4e-06  |g|= 0.000887  |ddm|= 0.0129
+  HOMO = 0.138015149856514  LUMO = 0.153290498135752
+cycle= 19 E= -9.07688877536709  delta_E= 6.93e-08  |g|= 0.000955  |ddm|= 0.0121
+  HOMO = 0.138036117650981  LUMO = 0.153269297098502
+cycle= 20 E= -9.07687592940258  delta_E= 1.28e-05  |g|= 0.000665  |ddm|= 0.0527
+  HOMO = 0.138032107554862  LUMO = 0.153238843717051
+cycle= 21 E= -9.07687359466766  delta_E= 2.33e-06  |g|= 0.000161  |ddm|= 0.0272
+  HOMO = 0.138033759281193  LUMO = 0.153281854621894
+cycle= 22 E= -9.07687368171106  delta_E= -8.7e-08  |g|= 8.96e-05  |ddm|= 0.00529
+  HOMO = 0.13803344763078  LUMO = 0.153275317747577
+cycle= 23 E= -9.07687382012266  delta_E= -1.38e-07  |g|= 1.87e-05  |ddm|= 0.0125
+  HOMO = 0.138034117346222  LUMO = 0.153279715547314
+cycle= 24 E= -9.07687381915299  delta_E= 9.7e-10  |g|= 6.81e-06  |ddm|= 0.00122
+  HOMO = 0.138034303376829  LUMO = 0.153279569777308
+cycle= 25 E= -9.07687381987437  delta_E= -7.21e-10  |g|= 1.21e-05  |ddm|= 0.00102
+  HOMO = 0.13803427920108  LUMO = 0.153279558067378
+cycle= 26 E= -9.07687381977895  delta_E= 9.54e-11  |g|= 1.66e-05  |ddm|= 0.000162
+  HOMO = 0.138034276553028  LUMO = 0.153279680768101
+cycle= 27 E= -9.07687381997845  delta_E= -1.99e-10  |g|= 2.98e-06  |ddm|= 0.000143
+  HOMO = 0.138034227203084  LUMO = 0.153279661278461
+cycle= 28 E= -9.07687382002627  delta_E= -4.78e-11  |g|= 3.67e-06  |ddm|= 7.32e-05
+  HOMO = 0.138034228095316  LUMO = 0.15327962664548
+cycle= 29 E= -9.07687381993668  delta_E= 8.96e-11  |g|= 5.8e-06  |ddm|= 0.000167
+  HOMO = 0.138034233691843  LUMO = 0.153279599614697
+cycle= 30 E= -9.07687381997103  delta_E= -3.44e-11  |g|= 6.01e-06  |ddm|= 0.000127
+  HOMO = 0.138034218349202  LUMO = 0.153279684785056
+cycle= 31 E= -9.07687381992961  delta_E= 4.14e-11  |g|= 1.17e-06  |ddm|= 0.000298
+  HOMO = 0.138034216345544  LUMO = 0.153279685656736
+cycle= 32 E= -9.07687381992973  delta_E= -1.24e-13  |g|= 1.81e-07  |ddm|= 2.49e-05
+  HOMO = 0.138034216419745  LUMO = 0.153279685312625
+cycle= 33 E= -9.07687381992971  delta_E= 2.31e-14  |g|= 1.56e-07  |ddm|= 4.39e-06
+  HOMO = 0.138034216799688  LUMO = 0.153279685397572
+cycle= 34 E= -9.07687381992975  delta_E= -4.09e-14  |g|= 8.09e-08  |ddm|= 7.87e-06
+  HOMO = 0.13803421678562  LUMO = 0.153279685401603
+cycle= 35 E= -9.07687381992975  delta_E= -3.55e-15  |g|= 1.36e-08  |ddm|= 9.81e-07
+  HOMO = 0.138034216769016  LUMO = 0.153279685403466
+cycle= 36 E= -9.07687381992975  delta_E=    0  |g|= 1.19e-08  |ddm|= 2.53e-07
+  HOMO = 0.138034216760097  LUMO = 0.153279685400993
+cycle= 37 E= -9.07687381992975  delta_E=    0  |g|= 6.78e-09  |ddm|= 5.7e-07
+  HOMO = 0.138034216709412  LUMO = 0.153279685393269
+Extra cycle  E= -9.07687381992971  delta_E= 3.91e-14  |g|= 2.52e-07  |ddm|= 5e-07
+converged SCF energy = -9.07687381992971
+Running CCSD at an electronic temperature of 31577.512891 K
+  FT-CCSD will use 26.570312 mb
+MP2 Energy: -0.4256485773
+  1  0.0358119892   3.5871E+00
+  2  -0.4244767305   4.6241E+00
+  3  -0.0852425212   2.7193E+00
+  4  -0.2986231444   3.1939E+00
+  5  -0.1482411356   2.3386E+00
+  6  -0.2398870926   2.2400E+00
+  7  -0.1874090820   1.3677E+00
+  8  -0.2127693780   9.0882E-01
+  9  -0.2009085173   4.4736E-01
+ 10  -0.2058298894   2.1565E-01
+ 11  -0.2038763092   9.0855E-02
+ 12  -0.2045998265   3.6328E-02
+ 13  -0.2043427313   1.3617E-02
+ 14  -0.2044303487   4.8796E-03
+ 15  -0.2044014309   1.6782E-03
+ 16  -0.2044107096   5.5813E-04
+ 17  -0.2044078014   1.8034E-04
+ 18  -0.2044086949   5.6867E-05
+ 19  -0.2044084249   1.7563E-05
+ 20  -0.2044085053   5.3296E-06
+ 21  -0.2044084817   1.5934E-06
+ 22  -0.2044084886   4.7042E-07
+ 23  -0.2044084866   1.3743E-07
+ 24  -0.2044084871   3.9796E-08
+ 25  -0.2044084870   1.1440E-08
+ 26  -0.2044084870   3.2690E-09
+ 27  -0.2044084870   9.2954E-10
+ 28  -0.2044084870   2.6326E-10
+Total CCSD time: 5.2877 s
+  FT-CCSD will use 26.570312 mb
+  1  13.0984350564
+  2  7.8478840388
+  3  1.0125537516
+  4  2.3161991533
+  5  1.0006418347
+  6  1.4058008826
+  7  0.6287343294
+  8  0.5181085955
+  9  0.2360712791
+ 10  0.1279861124
+ 11  0.0553517560
+ 12  0.0237697267
+ 13  0.0093193861
+ 14  0.0035048706
+ 15  0.0012536803
+ 16  0.0004319778
+ 17  0.0001438716
+ 18  0.0000465762
+ 19  0.0000147137
+ 20  0.0000045524
+ 21  0.0000013837
+ 22  0.0000004143
+ 23  0.0000001225
+ 24  0.0000000358
+ 25  0.0000000104
+ 26  0.0000000030
+ 27  0.0000000009
+ 28  0.0000000002
+ 29  0.0000000001
+ 30  0.0000000000
+ 31  0.0000000000
+Total CCSD Lambda time: 17.439499 s
+N = 8.1020708328
+E = -9.09520869558
+S = 8.34450799042
