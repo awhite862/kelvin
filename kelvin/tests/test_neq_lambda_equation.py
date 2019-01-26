@@ -13,7 +13,7 @@ def evalL(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
     ngr = gr.shape[0]
     ngi = gi.shape[0]
     E = ft_cc_energy.ft_cc_energy_neq(T1f,T1b,T1i,T2f,T2b,T2i,
-            Ff.ov,Fb.ov,F.ov,I.oovv,tir,tii,gr,gi,beta)
+            Ff.ov,Fb.ov,F.ov,I.oovv,gr,gi,beta)
     T1f_,T1b_,T1i_,T2f_,T2b_,T2i_ =\
         ft_cc_equations.neq_ccsd_stanton(Ff,Fb,F,I,T1f,T1b,T1i,
                 T2f,T2b,T2i,D1,D2,tir,tii,ngr,ngi,Gr,Gi)

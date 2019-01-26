@@ -45,6 +45,17 @@ class lccsd(object):
             self.realtime = True
         if not sys.verify(self.T,self.mu):
             raise Exception("Sytem temperature inconsistent with LCCSD temp")
+        if self.realtime:
+            if self.finite_T:
+                beta_max = 1.0/(T + 1e-12)
+            else:
+                beta_max = 80.0
+            ng = self.ngrid
+            self.delta = beta_max/(ng - 1.0)
+            self.ti = numpy.asarray([float(i)*self.delta for i in range(ng)])
+            self.G = quadrature.get_G(ng, self.delta)
+            self.g = quadrature.get_gint(ng, self.delta)
+
         self.sys = sys
 
     def run(self,T1=None,T2=None):
@@ -134,10 +145,9 @@ class lccsd(object):
         # get time-grid
         beta_max = 80.0
         ng = self.ngrid
-        delta = beta_max/(ng - 1.0)
-        ti = numpy.asarray([float(i)*delta for i in range(ng)])
-        G = quadrature.get_G(ng,delta)
-        g = quadrature.get_gint(ng, delta)
+        ti = self.ti
+        G = self.G
+        g = self.g
 
         # get HF energy
         En = self.sys.const_energy()
@@ -167,7 +177,7 @@ class lccsd(object):
             T2old = -numpy.einsum('v,abij->vabij',Id,I.vvoo)
             T2old = quadrature.int_tbar2(ng,T2old,ti,Dvvoo,G)
         E2 = ft_cc_energy.ft_cc_energy(T1old,T2old,
-            F.ov,I.oovv,ti,g,beta_max,Qterm=False)
+            F.ov,I.oovv,g,beta_max,Qterm=False)
         if self.iprint > 0:
             print('MP2 energy: {:.10f}'.format(E2))
 
@@ -190,10 +200,9 @@ class lccsd(object):
 
         # get time-grid
         ng = self.ngrid
-        delta = beta/(ng - 1.0)
-        ti = numpy.asarray([float(i)*delta for i in range(ng)])
-        G = quadrature.get_G(ng,delta)
-        g = quadrature.get_gint(ng, delta)
+        ti = self.ti
+        G = self.G
+        g = self.g
 
         # get energies and occupation numbers
         en = self.sys.g_energies_tot()
@@ -237,7 +246,7 @@ class lccsd(object):
         if not self.singles:
             T1old = numpy.zeros(T1old.shape)
         E2 = ft_cc_energy.ft_cc_energy(T1old,T2old,
-            F.ov,I.oovv,ti,g,beta,Qterm=False)
+            F.ov,I.oovv,g,beta,Qterm=False)
 
         # run CC iterations
         conv_options = {"econv":self.econv, "max_iter":self.max_iter, "damp":self.damp}
@@ -258,17 +267,14 @@ class lccsd(object):
 
         # get time-grid
         ng = self.ngrid
-        delta = beta/(ng - 1.0)
-        ti = numpy.asarray([float(i)*delta for i in range(ng)])
-        G = quadrature.get_G(ng,delta)
-        g = quadrature.get_gint(ng, delta)
+        ti = self.ti
+        G = self.G
+        g = self.g
 
         # get energies and occupation numbers
         en = self.sys.g_energies_tot()
         fo = ft_utils.ff(beta, en, mu)
         fv = ft_utils.ffv(beta, en, mu)
-        print(fo)
-        print(fv)
 
         # compute active space
         n = en.shape[0]
@@ -293,7 +299,6 @@ class lccsd(object):
         mem1e = 6*n*n + 3*ng*n*n
         mem2e = 3*n*n*n*n + 3*ng*n*n*n*n
         mem_mb = 2.0*(mem1e + mem2e)*8.0/1024.0/1024.0
-        #assert(mem_mb < 4000)
         if self.iprint > 0:
             print('  FT-LCCSD will use %f mb' % mem_mb)
 
@@ -325,7 +330,7 @@ class lccsd(object):
             T1old = quadrature.int_tbar1(ng,T1old,ti,D1,G)
             T2old = quadrature.int_tbar2(ng,T2old,ti,D2,G)
         E2 = ft_cc_energy.ft_cc_energy(T1old,T2old,
-            F.ov,I.oovv,ti,g,beta,Qterm=False)
+            F.ov,I.oovv,g,beta,Qterm=False)
 
         # run CC iterations
         method = "LCCSD" if self.singles else "LCCD"
@@ -345,10 +350,9 @@ class lccsd(object):
 
         # get time-grid
         ng = self.ngrid
-        delta = beta/(ng - 1.0)
-        ti = numpy.asarray([float(i)*delta for i in range(ng)])
-        G = quadrature.get_G(ng,delta)
-        g = quadrature.get_gint(ng, delta)
+        ti = self.ti
+        G = self.G
+        g = self.g
 
         # get energies and occupation numbers
         en = self.sys.g_energies_tot()

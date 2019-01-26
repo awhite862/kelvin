@@ -99,7 +99,7 @@ class neq_ccsd(object):
 
         Ei = ft_cc_energy.ft_cc_energy_neq(
             T1oldf,T1oldb,T1oldi,T2oldf,T2oldb,T2oldi,
-            Ff.ov,Fb.ov,F.ov,I.oovv,tir,tii,gr,gi,beta,Qterm=False)
+            Ff.ov,Fb.ov,F.ov,I.oovv,gr,gi,beta,Qterm=False)
         if self.iprint > 0:
             print('MP2 Energy {:.10f}'.format(Ei))
 
@@ -144,7 +144,7 @@ class neq_ccsd(object):
             # compute energy
             E = ft_cc_energy.ft_cc_energy_neq(
                 T1oldf,T1oldb,T1oldi,T2oldf,T2oldb,T2oldi,
-                Ff.ov,Fb.ov,F.ov,I.oovv,tir,tii,gr,gi,beta)
+                Ff.ov,Fb.ov,F.ov,I.oovv,gr,gi,beta)
 
             # determine convergence
             if self.iprint > 0:

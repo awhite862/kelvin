@@ -476,9 +476,9 @@ def mp23_int(e, no, nv, f, eri, T, ngrid=10):
     T2old = quadrature.int_tbar2(ng,T2old,ti,D2,G)
 
     E23_1 = ft_cc_energy.ft_cc_energy(T1old,T2old,f,eri,
-            ti,g,beta)
+            g,beta)
     E23_1F = ft_cc_energy.ft_cc_energy(T1old,T2old,f,eri,
-            ti,g,beta,Qterm=False)
+            g,beta,Qterm=False)
     E23_Q = E23_1 - E23_1F
 
     # pre-contract with fermi factors
@@ -503,7 +503,7 @@ def mp23_int(e, no, nv, f, eri, T, ngrid=10):
             D1,D2,ti,ng,G)
 
     E23_2 = ft_cc_energy.ft_cc_energy(T1,T2,f,eri,
-            ti,g,beta,Qterm=False)
+            g,beta,Qterm=False)
 
     #print(E23_Q, E23_2)
     return E23_Q + E23_2

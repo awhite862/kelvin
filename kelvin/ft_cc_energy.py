@@ -5,7 +5,7 @@ from cqcpy import ft_utils
 einsum = lib.einsum
 #einsum = einsum
 
-def ft_cc_energy(T1, T2, f, eri, ti, g, beta, Qterm=True):
+def ft_cc_energy(T1, T2, f, eri, g, beta, Qterm=True):
     """Return the FT-CC free-energy.
 
     Args:
@@ -13,7 +13,6 @@ def ft_cc_energy(T1, T2, f, eri, ti, g, beta, Qterm=True):
         T2 (array): T2 amplitudes.
         f (array): 1-electron (Fock matrix) integrals.
         eri (array): 2-electron (ERI) integrals.
-        ti (array): Time grid.
         delta (float): Grid spacing.
         beta (float): Inverse temperature.
         Qterm (bool,optional): Include quadratic contribution?
@@ -34,7 +33,7 @@ def ft_cc_energy(T1, T2, f, eri, ti, g, beta, Qterm=True):
 
     return (Es1 + Es2) / beta
 
-def ft_ucc_energy(T1a, T1b, T2aa, T2ab, T2bb, fa, fb, Ia, Ib, Iabab, ti, g, beta, Qterm=True):
+def ft_ucc_energy(T1a, T1b, T2aa, T2ab, T2bb, fa, fb, Ia, Ib, Iabab, g, beta, Qterm=True):
     """Return the FT-CC free-energy.
 
     Args:
@@ -42,7 +41,6 @@ def ft_ucc_energy(T1a, T1b, T2aa, T2ab, T2bb, fa, fb, Ia, Ib, Iabab, ti, g, beta
         T2 (array): T2 amplitudes.
         f (array): 1-electron (Fock matrix) integrals.
         eri (array): 2-electron (ERI) integrals.
-        ti (array): Time grid.
         delta (float): Grid spacing.
         beta (float): Inverse temperature.
         Qterm (bool,optional): Include quadratic contribution?
@@ -76,7 +74,7 @@ def ft_ucc_energy(T1a, T1b, T2aa, T2ab, T2bb, fa, fb, Ia, Ib, Iabab, ti, g, beta
 
 def ft_cc_energy_neq(
         T1f,T1b,T1i,T2f,T2b,T2i,
-        Ff,Fb,F,eri,tir,tii,gr,gi,beta,Qterm=True):
+        Ff,Fb,F,eri,gr,gi,beta,Qterm=True):
 
     t1f_temp = T1f
     t1b_temp = T1b

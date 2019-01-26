@@ -53,6 +53,16 @@ class ccsd(object):
             self.realtime = True
         if not sys.verify(self.T,self.mu):
             raise Exception("Sytem temperature inconsistent with CC temp")
+        if self.realtime:
+            if self.finite_T:
+                beta_max = 1.0/(T + 1e-12)
+            else:
+                beta_max = 80
+            ng = self.ngrid
+            self.delta = beta_max/(ng - 1.0)
+            self.ti = numpy.asarray([float(i)*self.delta for i in range(ng)])
+            self.G = quadrature.get_G(ng, self.delta)
+            self.g = quadrature.get_gint(ng, self.delta)
         self.sys = sys
         self.T1 = None
         self.T2 = None
@@ -572,10 +582,9 @@ class ccsd(object):
         # get time-grid
         beta_max = 80.0
         ng = self.ngrid
-        delta = beta_max/(ng - 1.0)
-        ti = numpy.asarray([float(i)*delta for i in range(ng)])
-        G = quadrature.get_G(ng,delta)
-        g = quadrature.get_gint(ng, delta)
+        ti = self.ti
+        G = self.G
+        g = self.g
 
         # get HF energy
         En = self.sys.const_energy()
@@ -597,7 +606,6 @@ class ccsd(object):
             T1old = T1in if self.singles else numpy.zeros((ng,n,n))
             T2old = T2in
         else:
-            G = quadrature.get_G(ng,delta)
             if self.singles:
                 T1old = -einsum('v,ai->vai',Id,F.vo)
                 T1old = quadrature.int_tbar1(ng,T1old,ti,Dvo,G)
@@ -606,7 +614,7 @@ class ccsd(object):
             T2old = -einsum('v,abij->vabij',Id,I.vvoo)
             T2old = quadrature.int_tbar2(ng,T2old,ti,Dvvoo,G)
         E2 = ft_cc_energy.ft_cc_energy(T1old,T2old,
-            F.ov,I.oovv,ti,g,beta_max,Qterm=False)
+            F.ov,I.oovv,g,beta_max,Qterm=False)
         if self.iprint > 0:
             print('MP2 energy: {:.10f}'.format(E2))
 
@@ -630,10 +638,9 @@ class ccsd(object):
 
         # get time-grid
         ng = self.ngrid
-        delta = beta/(ng - 1.0)
-        ti = numpy.asarray([float(i)*delta for i in range(ng)])
-        G = quadrature.get_G(ng,delta)
-        g = quadrature.get_gint(ng, delta)
+        ti = self.ti
+        G = self.G
+        g = self.g
 
         # get orbital energies
         en = self.sys.g_energies_tot()
@@ -673,11 +680,10 @@ class ccsd(object):
                 T1old = numpy.zeros((ng,n,n))
             Id = numpy.ones((ng))
             T2old = -einsum('v,abij->vabij',Id,I.vvoo)
-            G = quadrature.get_G(ng,delta)
             T1old = quadrature.int_tbar1(ng,T1old,ti,D1,G)
             T2old = quadrature.int_tbar2(ng,T2old,ti,D2,G)
         E2 = ft_cc_energy.ft_cc_energy(T1old,T2old,
-            F.ov,I.oovv,ti,g,beta,Qterm=False)
+            F.ov,I.oovv,g,beta,Qterm=False)
         if self.iprint > 0:
             print('MP2 Energy: {:.10f}'.format(E2))
 
@@ -705,10 +711,9 @@ class ccsd(object):
 
         # get time-grid
         ng = self.ngrid
-        delta = beta/(ng - 1.0)
-        ti = numpy.asarray([float(i)*delta for i in range(ng)])
-        G = quadrature.get_G(ng,delta)
-        g = quadrature.get_gint(ng, delta)
+        ti = self.ti
+        G = self.G
+        g = self.g
 
         # get orbital energies
         ea,eb = self.sys.u_energies_tot()
@@ -761,7 +766,6 @@ class ccsd(object):
             T2aaold = -einsum('v,abij->vabij',Id,Ia.vvoo)
             T2abold = -einsum('v,abij->vabij',Id,Iabab.vvoo)
             T2bbold = -einsum('v,abij->vabij',Id,Ib.vvoo)
-            G = quadrature.get_G(ng,delta)
             T1aold = quadrature.int_tbar1(ng,T1aold,ti,D1a,G)
             T1bold = quadrature.int_tbar1(ng,T1bold,ti,D1b,G)
             T2aaold = quadrature.int_tbar2(ng,T2aaold,ti,D2aa,G)
@@ -770,7 +774,7 @@ class ccsd(object):
 
         # MP2 energy
         E2 = ft_cc_energy.ft_ucc_energy(T1aold,T1bold,T2aaold,T2abold,T2bbold,
-            Fa.ov,Fb.ov,Ia.oovv,Ib.oovv,Iabab.oovv,ti,g,beta,Qterm=False)
+            Fa.ov,Fb.ov,Ia.oovv,Ib.oovv,Iabab.oovv,g,beta,Qterm=False)
         if self.iprint > 0:
             print('MP2 Energy: {:.10f}'.format(E2))
 
@@ -802,10 +806,9 @@ class ccsd(object):
 
         # get time-grid
         ng = self.ngrid
-        delta = beta/(ng - 1.0)
-        ti = numpy.asarray([float(i)*delta for i in range(ng)])
-        G = quadrature.get_G(ng,delta)
-        g = quadrature.get_gint(ng, delta)
+        ti = self.ti
+        G = self.G
+        g = self.g
 
         # get energies and occupation numbers
         en = self.sys.g_energies_tot()
@@ -866,11 +869,10 @@ class ccsd(object):
                 T1old = numpy.zeros((ng,nvir,nocc))
             Id = numpy.ones((ng))
             T2old = -einsum('v,abij->vabij',Id,I.vvoo)
-            G = quadrature.get_G(ng,delta)
             T1old = quadrature.int_tbar1(ng,T1old,ti,D1,G)
             T2old = quadrature.int_tbar2(ng,T2old,ti,D2,G)
         E2 = ft_cc_energy.ft_cc_energy(T1old,T2old,
-            F.ov,I.oovv,ti,g,beta,Qterm=False)
+            F.ov,I.oovv,g,beta,Qterm=False)
         if self.iprint > 0:
             print('MP2 Energy: {:.10f}'.format(E2))
 
@@ -894,10 +896,9 @@ class ccsd(object):
 
         # get time-grid
         ng = self.ngrid
-        delta = beta/(ng - 1.0)
-        ti = numpy.asarray([float(i)*delta for i in range(ng)])
-        G = quadrature.get_G(ng,delta)
-        g = quadrature.get_gint(ng, delta)
+        ti = self.ti
+        G = self.G
+        g = self.g
 
         # get energies and occupation numbers
         en = self.sys.g_energies_tot()
@@ -958,10 +959,9 @@ class ccsd(object):
 
         # get time-grid
         ng = self.ngrid
-        delta = beta/(ng - 1.0)
-        ti = numpy.asarray([float(i)*delta for i in range(ng)])
-        G = quadrature.get_G(ng,delta)
-        g = quadrature.get_gint(ng, delta)
+        ti = self.ti
+        G = self.G
+        g = self.g
 
         # get energies and occupation numbers
         en = self.sys.g_energies_tot()
@@ -1051,10 +1051,9 @@ class ccsd(object):
 
         # get time-grid
         ng = self.ngrid
-        delta = beta/(ng - 1.0)
-        ti = numpy.asarray([float(i)*delta for i in range(ng)])
-        G = quadrature.get_G(ng,delta)
-        g = quadrature.get_gint(ng, delta)
+        ti = self.ti
+        G = self.G
+        g = self.g
 
         # get exponentials
         D1 = en[:,None] - en[None,:]
@@ -1062,25 +1061,6 @@ class ccsd(object):
             - en[None,None,:,None] - en[None,None,None,:]
 
         F,I = cc_utils.get_ft_d_integrals(self.sys, en, fo, fv, dvec)
-        #Eterm = ft_cc_energy.ft_cc_energy(self.T1,self.T2,
-        #    F.ov,I.oovv,ti,g,beta)
-
-        #Fvo = F.vo.copy()
-        #Fvv = F.vv.copy()
-        #F.vo = numpy.zeros(Fvo.shape)
-        #F.vv = numpy.zeros(Fvv.shape)
-        #T1temp,T2temp = ft_cc_equations.ccsd_stanton(F,I,self.T1,self.T2,
-        #        D1,D2,ti,ng,G)
-
-        #print(numpy.linalg.norm(Fvv))
-        #A1 = (1.0/beta)*einsum('via,vai->v',self.L1, T1temp)
-        #A2 = (1.0/beta)*0.25*einsum('vijab,vabij->v',self.L2, T2temp)
-        #A1 += (1.0/beta)*einsum('via,ai->v',self.dia,Fvo)
-        #A1 += (1.0/beta)*einsum('vba,ab->v',self.dba,Fvv)
-
-        #g = ft_utils.get_gint(ng, delta)
-        #A1g = einsum('v,v->',A1,g)
-        #A2g = einsum('v,v->',A2,g)
         A1 = (1.0/beta)*einsum('ia,ai->',self.dia,F.vo)
         A1 += (1.0/beta)*einsum('ba,ab->',self.dba,F.vv)
         A1 += (1.0/beta)*einsum('ji,ij->',self.dji,F.oo)
@@ -1121,10 +1101,9 @@ class ccsd(object):
 
         # get time-grid
         ng = self.ngrid
-        delta = beta/(ng - 1.0)
-        ti = numpy.asarray([float(i)*delta for i in range(ng)])
-        G = quadrature.get_G(ng,delta)
-        g = quadrature.get_gint(ng, delta)
+        ti = self.ti
+        G = self.G
+        g = self.g
 
         # get exponentials
         D1a = ea[:,None] - ea[None,:]
@@ -1143,7 +1122,7 @@ class ccsd(object):
         L2aaold,L2abold,L2bbold = self.L2
 
         Eterm = ft_cc_energy.ft_ucc_energy(T1aold,T1bold,T2aaold,T2abold,T2bbold,
-            Fa.ov,Fb.ov,Ia.oovv,Ib.oovv,Iabab.oovv,ti,g,beta)
+            Fa.ov,Fb.ov,Ia.oovv,Ib.oovv,Iabab.oovv,g,beta)
 
         T1t,T2t = ft_cc_equations.uccsd_stanton(Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,
                 T2aaold,T2abold,T2bbold,D1a,D1b,D2aa,D2ab,D2bb,ti,ng,G)
@@ -1154,7 +1133,6 @@ class ccsd(object):
         A2b = (1.0/beta)*0.25*einsum('vijab,vabij->v',L2bbold, T2t[2])
         A2ab = (1.0/beta)*einsum('vijab,vabij->v',L2abold, T2t[1])
 
-        g = quadrature.get_gint(ng, delta)
         A2g = einsum('v,v->',A2a,g)
         A2g += einsum('v,v->',A2ab,g)
         A2g += einsum('v,v->',A2b,g)
@@ -1181,12 +1159,11 @@ class ccsd(object):
 
         # get time-grid
         ng = self.ngrid
-        delta = beta/(ng - 1.0)
-        ddelta = delta/beta
-        ti = numpy.asarray([float(i)*delta for i in range(ng)])
-        G = quadrature.get_G(ng,delta)
-        g = quadrature.get_gint(ng, delta)
-        Gd = quadrature.get_G(ng,ddelta)
+        ddelta = self.delta/beta
+        ti = numpy.asarray([float(i)*self.delta for i in range(ng)])
+        G = self.G
+        g = self.g
+        Gd = quadrature.get_G(ng, ddelta)
         gd = quadrature.get_gint(ng, ddelta)
 
         # get exponentials
@@ -1198,7 +1175,7 @@ class ccsd(object):
 
         # get derivative with respect to g
         Eterm = ft_cc_energy.ft_cc_energy(self.T1,self.T2,
-            F.ov,I.oovv,ti,gd,beta)
+            F.ov,I.oovv,gd,beta)
 
         dg = Eterm
 
@@ -1209,7 +1186,6 @@ class ccsd(object):
         A1 = (1.0/beta)*einsum('via,vai->v',self.L1, T1temp)
         A2 = (1.0/beta)*0.25*einsum('vijab,vabij->v',self.L2, T2temp)
 
-        g = quadrature.get_gint(ng, delta)
         A1g = einsum('v,v->',A1,g)
         A2g = einsum('v,v->',A2,g)
         dG = A1g + A2g
@@ -1253,12 +1229,11 @@ class ccsd(object):
 
         # get time-grid
         ng = self.ngrid
-        delta = beta/(ng - 1.0)
-        ddelta = delta/beta
-        ti = numpy.asarray([float(i)*delta for i in range(ng)])
-        G = quadrature.get_G(ng,delta)
-        g = quadrature.get_gint(ng, delta)
-        Gd = quadrature.get_G(ng,ddelta)
+        ddelta = self.delta/beta
+        ti = self.ti
+        G = self.G
+        g = self.g
+        Gd = quadrature.get_G(ng, ddelta)
         gd = quadrature.get_gint(ng, ddelta)
 
         # get exponentials
@@ -1280,7 +1255,7 @@ class ccsd(object):
 
         # get derivative with respect to g
         Eterm = ft_cc_energy.ft_ucc_energy(T1aold,T1bold,T2aaold,T2abold,T2bbold,
-            Fa.ov,Fb.ov,Ia.oovv,Ib.oovv,Iabab.oovv,ti,gd,beta)
+            Fa.ov,Fb.ov,Ia.oovv,Ib.oovv,Iabab.oovv,gd,beta)
 
         dg = Eterm
 
@@ -1294,7 +1269,6 @@ class ccsd(object):
         A2b = (1.0/beta)*0.25*einsum('vijab,vabij->v',L2bbold, T2t[2])
         A2ab = (1.0/beta)*einsum('vijab,vabij->v',L2abold, T2t[1])
 
-        g = quadrature.get_gint(ng, delta)
         A2g = einsum('v,v->',A2a,g)
         A2g += einsum('v,v->',A2ab,g)
         A2g += einsum('v,v->',A2b,g)
@@ -1343,8 +1317,7 @@ class ccsd(object):
 
         # get time-grid
         ng = self.ngrid
-        delta = beta/(ng - 1.0)
-        ti = numpy.asarray([float(i)*delta for i in range(ng)])
+        ti = self.ti
 
         # get energies and occupation numbers
         en = self.sys.g_energies_tot()
@@ -1356,7 +1329,7 @@ class ccsd(object):
         D2 = en[:,None,None,None] + en[None,:,None,None] \
                 - en[None,None,:,None] - en[None,None,None,:]
 
-        pia,pba,pji,pai = ft_cc_equations.ccsd_1rdm(self.T1,self.T2,self.L1,self.L2,D1,D2,ti,ng,delta)
+        pia,pba,pji,pai = ft_cc_equations.ccsd_1rdm(self.T1,self.T2,self.L1,self.L2,D1,D2,ti,ng,self.delta)
         self.dia = pia
         self.dba = pba
         self.dji = pji
@@ -1370,8 +1343,7 @@ class ccsd(object):
 
         # get time-grid
         ng = self.ngrid
-        delta = beta/(ng - 1.0)
-        ti = numpy.asarray([float(i)*delta for i in range(ng)])
+        ti = self.ti
 
         # get energies and occupation numbers
         en = self.sys.g_energies_tot()
@@ -1383,5 +1355,5 @@ class ccsd(object):
         D2 = en[:,None,None,None] + en[None,:,None,None] \
                 - en[None,None,:,None] - en[None,None,None,:]
 
-        P2 = ft_cc_equations.ccsd_2rdm(self.T1,self.T2,self.L1,self.L2,D1,D2,ti,ng,delta)
+        P2 = ft_cc_equations.ccsd_2rdm(self.T1,self.T2,self.L1,self.L2,D1,D2,ti,ng,self.delta)
         self.P2 = P2

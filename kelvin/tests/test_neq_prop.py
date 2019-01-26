@@ -20,7 +20,7 @@ def evalLd(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
     ngr = gr.shape[0]
     ngi = gi.shape[0]
     E = ft_cc_energy.ft_cc_energy_neq(T1f,T1b,T1i,T2f,T2b,T2i,
-            Ff.ov,Fb.ov,F.ov,I.oovv,tir,tii,gr,gi,beta)
+            Ff.ov,Fb.ov,F.ov,I.oovv,gr,gi,beta)
     T1f_,T1b_,T1i_,T2f_,T2b_,T2i_ =\
         ft_cc_equations.neq_ccsd_simple(Ff,Fb,F,I,T1f,T1b,T1i,
                 T2f,T2b,T2i,D1,D2,tir,tii,ngr,ngi,Gr,Gi)
@@ -138,10 +138,10 @@ class NEQPropTest(unittest.TestCase):
         # compute that static part from finite differences
         Ef = ft_cc_energy.ft_cc_energy_neq(
             cc.T1f,cc.T1b,cc.T1i,cc.T2f,cc.T2b,cc.T2i,
-            Ff_f.ov,Fb_f.ov,F_f.ov,I_f.oovv,tir,tii,gr,gi,beta)
+            Ff_f.ov,Fb_f.ov,F_f.ov,I_f.oovv,gr,gi,beta)
         Eb = ft_cc_energy.ft_cc_energy_neq(
             cc.T1f,cc.T1b,cc.T1i,cc.T2f,cc.T2b,cc.T2i,
-            Ff_b.ov,Fb_b.ov,F_b.ov,I_b.oovv,tir,tii,gr,gi,beta)
+            Ff_b.ov,Fb_b.ov,F_b.ov,I_b.oovv,gr,gi,beta)
 
         Esfd = (Ef - Eb)/(2*d)
         #print("1st ord.: {}".format(E1))
@@ -168,7 +168,7 @@ class NEQPropTest(unittest.TestCase):
         # compute the static part directly
         Es = ft_cc_energy.ft_cc_energy_neq(
             cc.T1f,cc.T1b,cc.T1i,cc.T2f,cc.T2b,cc.T2i,
-            Ffn.ov,Fbn.ov,Fn.ov,In.oovv,tir,tii,gr,gi,beta)
+            Ffn.ov,Fbn.ov,Fn.ov,In.oovv,gr,gi,beta)
         #print(Es+E1)
 
         # get actual integrals
@@ -188,10 +188,10 @@ class NEQPropTest(unittest.TestCase):
                     TM[y,a,i] -= d
                     EP = ft_cc_energy.ft_cc_energy_neq(
                         cc.T1f,cc.T1b,TP,cc.T2f,cc.T2b,cc.T2i,
-                        Ff.ov,Fb.ov,F.ov,I.oovv,tir,tii,gr,gi,beta)
+                        Ff.ov,Fb.ov,F.ov,I.oovv,gr,gi,beta)
                     EM = ft_cc_energy.ft_cc_energy_neq(
                         cc.T1f,cc.T1b,TM,cc.T2f,cc.T2b,cc.T2i,
-                        Ff.ov,Fb.ov,F.ov,I.oovv,tir,tii,gr,gi,beta)
+                        Ff.ov,Fb.ov,F.ov,I.oovv,gr,gi,beta)
                     dT1i[y,i,a] = (EP - EM)/(2*d)
         for y in range(ngr):
             for i in range(n):
@@ -203,10 +203,10 @@ class NEQPropTest(unittest.TestCase):
                     TM[y,a,i] -= d
                     EP = ft_cc_energy.ft_cc_energy_neq(
                         cc.T1f,TP,cc.T1i,cc.T2f,cc.T2b,cc.T2i,
-                        Ff.ov,Fb.ov,F.ov,I.oovv,tir,tii,gr,gi,beta)
+                        Ff.ov,Fb.ov,F.ov,I.oovv,gr,gi,beta)
                     EM = ft_cc_energy.ft_cc_energy_neq(
                         cc.T1f,TM,cc.T1i,cc.T2f,cc.T2b,cc.T2i,
-                        Ff.ov,Fb.ov,F.ov,I.oovv,tir,tii,gr,gi,beta)
+                        Ff.ov,Fb.ov,F.ov,I.oovv,gr,gi,beta)
                     dT1b[y,i,a] = (EP - EM)/(2*d)
         for y in range(ngr):
             for i in range(n):
@@ -218,10 +218,10 @@ class NEQPropTest(unittest.TestCase):
                     TM[y,a,i] -= d
                     EP = ft_cc_energy.ft_cc_energy_neq(
                         TP,cc.T1b,cc.T1i,cc.T2f,cc.T2b,cc.T2i,
-                        Ff.ov,Fb.ov,F.ov,I.oovv,tir,tii,gr,gi,beta)
+                        Ff.ov,Fb.ov,F.ov,I.oovv,gr,gi,beta)
                     EM = ft_cc_energy.ft_cc_energy_neq(
                         TM,cc.T1b,cc.T1i,cc.T2f,cc.T2b,cc.T2i,
-                        Ff.ov,Fb.ov,F.ov,I.oovv,tir,tii,gr,gi,beta)
+                        Ff.ov,Fb.ov,F.ov,I.oovv,gr,gi,beta)
                     dT1f[y,i,a] = (EP - EM)/(2*d)
 
         dT2i = numpy.zeros((ngi,n,n,n,n),dtype=complex)
@@ -245,10 +245,10 @@ class NEQPropTest(unittest.TestCase):
                             TM[y,b,a,j,i] -= d
                             EP = ft_cc_energy.ft_cc_energy_neq(
                                 cc.T1f,cc.T1b,cc.T1i,cc.T2f,cc.T2b,TP,
-                                Ff.ov,Fb.ov,F.ov,I.oovv,tir,tii,gr,gi,beta)
+                                Ff.ov,Fb.ov,F.ov,I.oovv,gr,gi,beta)
                             EM = ft_cc_energy.ft_cc_energy_neq(
                                 cc.T1f,cc.T1b,cc.T1i,cc.T2f,cc.T2b,TM,
-                                Ff.ov,Fb.ov,F.ov,I.oovv,tir,tii,gr,gi,beta)
+                                Ff.ov,Fb.ov,F.ov,I.oovv,gr,gi,beta)
                             dT2i[y,i,j,a,b] = (EP - EM)/(2*d)
         #print("I")
         for y in range(ngr):
@@ -269,10 +269,10 @@ class NEQPropTest(unittest.TestCase):
                             TM[y,b,a,j,i] -= d
                             EP = ft_cc_energy.ft_cc_energy_neq(
                                 cc.T1f,cc.T1b,cc.T1i,cc.T2f,TP,cc.T2i,
-                                Ff.ov,Fb.ov,F.ov,I.oovv,tir,tii,gr,gi,beta)
+                                Ff.ov,Fb.ov,F.ov,I.oovv,gr,gi,beta)
                             EM = ft_cc_energy.ft_cc_energy_neq(
                                 cc.T1f,cc.T1b,cc.T1i,cc.T2f,TM,cc.T2i,
-                                Ff.ov,Fb.ov,F.ov,I.oovv,tir,tii,gr,gi,beta)
+                                Ff.ov,Fb.ov,F.ov,I.oovv,gr,gi,beta)
                             dT2b[y,i,j,a,b] = (EP - EM)/(2*d)
         #print("B")
         for y in range(ngr):
@@ -293,10 +293,10 @@ class NEQPropTest(unittest.TestCase):
                             TM[y,b,a,j,i] -= d
                             EP = ft_cc_energy.ft_cc_energy_neq(
                                 cc.T1f,cc.T1b,cc.T1i,TP,cc.T2b,cc.T2i,
-                                Ff.ov,Fb.ov,F.ov,I.oovv,tir,tii,gr,gi,beta)
+                                Ff.ov,Fb.ov,F.ov,I.oovv,gr,gi,beta)
                             EM = ft_cc_energy.ft_cc_energy_neq(
                                 cc.T1f,cc.T1b,cc.T1i,TM,cc.T2b,cc.T2i,
-                                Ff.ov,Fb.ov,F.ov,I.oovv,tir,tii,gr,gi,beta)
+                                Ff.ov,Fb.ov,F.ov,I.oovv,gr,gi,beta)
                             dT2f[y,i,j,a,b] = (EP - EM)/(2*d)
         #print("F")
         Ers1 = numpy.einsum('yia,yai->',dT1f,td1f)

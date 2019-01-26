@@ -33,8 +33,8 @@ def test_L1(cc,thresh):
                 TB = cc.T1.copy()
                 TF[y,a,i] += d
                 TB[y,a,i] -= d
-                EF = ft_cc_energy.ft_cc_energy(TF,cc.T2,F.ov,I.oovv,ti,g,beta)
-                EB = ft_cc_energy.ft_cc_energy(TB,cc.T2,F.ov,I.oovv,ti,g,beta)
+                EF = ft_cc_energy.ft_cc_energy(TF,cc.T2,F.ov,I.oovv,g,beta)
+                EB = ft_cc_energy.ft_cc_energy(TB,cc.T2,F.ov,I.oovv,g,beta)
                 TF1,TF2 = ft_cc_equations.ccsd_stanton(F,I,TF,cc.T2,D1,D2,ti,ng,G)
                 TB1,TB2 = ft_cc_equations.ccsd_stanton(F,I,TB,cc.T2,D1,D2,ti,ng,G)
                 TF2 -= cc.T2
@@ -87,8 +87,8 @@ def test_L2(cc,thresh):
                         TB[y,a,b,j,i] += d
                         TB[y,b,a,i,j] += d
                         TB[y,b,a,j,i] -= d
-                        EF = ft_cc_energy.ft_cc_energy(cc.T1,TF,F.ov,I.oovv,ti,g,beta)
-                        EB = ft_cc_energy.ft_cc_energy(cc.T1,TB,F.ov,I.oovv,ti,g,beta)
+                        EF = ft_cc_energy.ft_cc_energy(cc.T1,TF,F.ov,I.oovv,g,beta)
+                        EB = ft_cc_energy.ft_cc_energy(cc.T1,TB,F.ov,I.oovv,g,beta)
                         TF1,TF2 = ft_cc_equations.ccsd_stanton(F,I,cc.T1,TF,D1,D2,ti,ng,G)
                         TB1,TB2 = ft_cc_equations.ccsd_stanton(F,I,cc.T1,TB,D1,D2,ti,ng,G)
                         TF2 -= TF

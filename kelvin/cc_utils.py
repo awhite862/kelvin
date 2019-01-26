@@ -123,7 +123,7 @@ def ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G, beta, ng, ti,
 
         # compute energy
         E = ft_cc_energy.ft_cc_energy(T1old,T2old,
-            F.ov,I.oovv,ti,g,beta)
+            F.ov,I.oovv,g,beta)
 
         # determine convergence
         if iprint > 0:
@@ -197,7 +197,7 @@ def ft_ucc_iter(method, T1aold, T1bold, T2aaold, T2abold, T2bbold, Fa, Fb, Ia, I
 
         # compute energy
         E = ft_cc_energy.ft_ucc_energy(T1aold,T1bold,T2aaold,T2abold,T2bbold,
-            Fa.ov,Fb.ov,Ia.oovv,Ib.oovv,Iabab.oovv,ti,g,beta)
+            Fa.ov,Fb.ov,Ia.oovv,Ib.oovv,Iabab.oovv,g,beta)
 
         # determine convergence
         if iprint > 0:
