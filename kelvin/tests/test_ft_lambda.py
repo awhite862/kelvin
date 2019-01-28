@@ -15,10 +15,7 @@ def test_L1(cc,thresh):
     beta = 1.0 / (T + 1e-12)
     mu = cc.mu
     ng = cc.ngrid
-    delta = beta/(ng - 1.0)
-    G = quadrature.get_G(ng,delta)
-    g = quadrature.get_gint(ng, delta)
-    ti = numpy.asarray([float(i)*delta for i in range(ng)])
+    ti,g,G = quadrature.simpsons(ng, beta)
     en = cc.sys.g_energies_tot()
     D1 = en[:,None] - en[None,:]
     D2 = en[:,None,None,None] + en[None,:,None,None] \
@@ -45,7 +42,6 @@ def test_L1(cc,thresh):
                 TEb = 0.25*numpy.einsum('yijab,yabij->y',cc.L2, TB2)
                 TEf += numpy.einsum('yia,yai->y',cc.L1,TF1)
                 TEb += numpy.einsum('yia,yai->y',cc.L1,TB1)
-                g = quadrature.get_gint(ng, delta)
                 Tef = (1.0/beta)*numpy.einsum('y,y->',TEf,g)
                 Teb = (1.0/beta)*numpy.einsum('y,y->',TEb,g)
                 fw = EF + Tef
@@ -61,10 +57,7 @@ def test_L2(cc,thresh):
     beta = 1.0 / (T + 1e-12)
     mu = cc.mu
     ng = cc.ngrid
-    delta = beta/(ng - 1.0)
-    G = quadrature.get_G(ng,delta)
-    g = quadrature.get_gint(ng, delta)
-    ti = numpy.asarray([float(i)*delta for i in range(ng)])
+    ti,g,G = quadrature.simpsons(ng, beta)
     en = cc.sys.g_energies_tot()
     D1 = en[:,None] - en[None,:]
     D2 = en[:,None,None,None] + en[None,:,None,None] \
@@ -99,7 +92,6 @@ def test_L2(cc,thresh):
                         TEb = 0.25*numpy.einsum('yijab,yabij->y',cc.L2, TB2)
                         TEf += numpy.einsum('yia,yai->y',cc.L1,TF1)
                         TEb += numpy.einsum('yia,yai->y',cc.L1,TB1)
-                        g = quadrature.get_gint(ng, delta)
                         Tef = (1.0/beta)*numpy.einsum('y,y->',TEf,g)
                         Teb = (1.0/beta)*numpy.einsum('y,y->',TEb,g)
                         fw = EF + Tef
@@ -128,7 +120,6 @@ class FTLambdaTest(unittest.TestCase):
         Etot,Ecc = ccsdT.run()
         ccsdT._ft_ccsd_lambda()
         out = test_L1(ccsdT, self.thresh)
-        #out = test_L2(ccsdT, self.thresh)
         self.assertTrue(out[1],out[0]) 
 
     def test_Be_sto3g(self):
@@ -166,7 +157,6 @@ class FTLambdaTest(unittest.TestCase):
         nccsdT.T1 = T1
         nccsdT.T2 = T2
         out = test_L1(nccsdT, self.thresh)
-        #out = test_L2(nccsdT, self.thresh)
         self.assertTrue(out[1],out[0])
 
 

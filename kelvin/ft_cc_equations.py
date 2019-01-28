@@ -48,28 +48,6 @@ def lccsd_simple(F,I,T1old,T2old,D1,D2,ti,ng,G):
 
     return T1new,T2new
 
-#def lccsd_rt(f,eri,T1old,T2old,Dvo,Dvvoo,ti,ng,delta):
-#
-#    t1 = time.time()
-#
-#    # form the new T-amplitudes by contraction
-#    Id = numpy.ones(ng)
-#    T1new = -numpy.einsum('v,ai->vai',Id,f.vo)
-#    T2new = -numpy.einsum('v,abij->vabij',Id,eri.vvoo)
-#
-#    for y in range(ng):
-#        cc_equations._S_S(T1new[y,:,:],f,eri,T1old[y,:,:],fac=-1.0)
-#        cc_equations._S_D(T1new[y,:,:],f,eri,T2old[y,:,:,:,:],fac=-1.0)
-#        cc_equations._D_S(T2new[y,:,:,:,:],f,eri,T1old[y,:,:],fac=-1.0)
-#        cc_equations._D_D(T2new[y,:,:,:,:],f,eri,T2old[y,:,:,:,:],fac=-1.0)
-#
-#    # integrate the new T-amplitudes
-#    G = quadrature.get_G(ng,delta)
-#    T1new = quadrature.int_tbar1(ng,T1new,ti,Dvo,G)
-#    T2new = quadrature.int_tbar2(ng,T2new,ti,Dvvoo,G)
-#
-#    return T1new,T2new
-
 def ccd_simple(F,I,T2old,D2,ti,ng,G):
     """Time-dependent coupled cluster doubles (CCD) 
     iteration.
@@ -657,11 +635,9 @@ def ccd_lambda_simple(F,I,T2old,L2old,D2,ti,ng,g,G,beta):
 
     return L2
 
-def ccsd_1rdm(T1,T2,L1,L2,D1,D2,ti,ng,delta):
+def ccsd_1rdm(T1,T2,L1,L2,D1,D2,ti,ng,g,G):
 
     # integrate the new L-amplitudes
-    G = quadrature.get_G(ng,delta)
-    g = quadrature.get_gint(ng,delta)
     L1new = quadrature.int_L1(ng,L1,ti,D1,g,G)
     L2new = quadrature.int_L2(ng,L2,ti,D2,g,G)
     nt,nv,no = T1.shape
@@ -679,13 +655,11 @@ def ccsd_1rdm(T1,T2,L1,L2,D1,D2,ti,ng,delta):
 
     return pia,pba,pji,pai
 
-def ccsd_2rdm(T1,T2,L1,L2,D1,D2,ti,ng,delta):
+def ccsd_2rdm(T1,T2,L1,L2,D1,D2,ti,ng,g,G):
     nt,nv,no = T1.shape
     assert(nt == ng)
 
     # integrate the new L-amplitudes
-    G = quadrature.get_G(ng,delta)
-    g = quadrature.get_gint(ng,delta)
     L1new = quadrature.int_L1(ng,L1,ti,D1,g,G)
     L2new = quadrature.int_L2(ng,L2,ti,D2,g,G)
 
@@ -723,18 +697,18 @@ def neq_1rdm(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
     assert(ntr == ngr)
 
     # compute response densities
-    piaf = -einsum('y,yia->yia',gr,L1intf)
+    piaf = -L1intf
     pbaf = numpy.zeros((ntr,nv,nv),dtype=complex)
     pjif = numpy.zeros((ntr,no,no),dtype=complex)
     paif = numpy.zeros((ntr,nv,no),dtype=complex)
     for i in range(ntr):
-        pbaf[i] = gr[i]*cc_equations.ccsd_1rdm_ba(T1f[i],T2f[i],L1intf[i],L2intf[i])
-        pjif[i] = gr[i]*cc_equations.ccsd_1rdm_ji(T1f[i],T2f[i],L1intf[i],L2intf[i])
-        paif[i] = gr[i]*cc_equations.ccsd_1rdm_ai(T1f[i],T2f[i],L1intf[i],L2intf[i])
+        pbaf[i] = cc_equations.ccsd_1rdm_ba(T1f[i],T2f[i],L1intf[i],L2intf[i])
+        pjif[i] = cc_equations.ccsd_1rdm_ji(T1f[i],T2f[i],L1intf[i],L2intf[i])
+        paif[i] = cc_equations.ccsd_1rdm_ai(T1f[i],T2f[i],L1intf[i],L2intf[i])
 
     return piaf,pbaf,pjif,paif
 
-def neq_2rdm(T1,T2,L1,L2,D1,D2,ti,tir,tii,ngr,ngi,gr,gi,Gr,Gi,ng,delta,t):
+def neq_2rdm(T1,T2,L1,L2,D1,D2,ti,tir,tii,ngr,ngi,gr,gi,Gr,Gi,ng,t):
     nt,nv,no = T1.shape
     assert(nt == ng)
 
@@ -747,14 +721,14 @@ def neq_2rdm(T1,T2,L1,L2,D1,D2,ti,tir,tii,ngr,ngi,gr,gi,Gr,Gi,ng,delta,t):
     assert(ntr == ngr)
 
     # compute response densities
-    Pijab = -gr[t]*L2new
-    Pcdab = gr[t]*cc_equations.ccsd_2rdm_cdab(T1[t],T2[t],L1new[t],L2new[t])
-    Pciab = gr[t]*cc_equations.ccsd_2rdm_ciab(T1[t],T2[t],L1new[t],L2new[t])
-    Pbcai = gr[t]*cc_equations.ccsd_2rdm_bcai(T1[t],T2[t],L1new[t],L2new[t])
-    Pbjai = gr[t]*cc_equations.ccsd_2rdm_bjai(T1[t],T2[t],L1new[t],L2new[t])
-    Pabij = gr[t]*cc_equations.ccsd_2rdm_abij(T1[t],T2[t],L1new[t],L2new[t])
-    Pjkai = gr[t]*cc_equations.ccsd_2rdm_jkai(T1[t],T2[t],L1new[t],L2new[t])
-    Pkaij = ge[t]*cc_equations.ccsd_2rdm_kaij(T1[t],T2[t],L1new[i],L2new[t])
-    Pklij = ge[t]*cc_equations.ccsd_2rdm_klij(T1[t],T2[t],L1new[i],L2new[t])
+    Pijab = -L2new
+    Pcdab = cc_equations.ccsd_2rdm_cdab(T1[t],T2[t],L1new[t],L2new[t])
+    Pciab = cc_equations.ccsd_2rdm_ciab(T1[t],T2[t],L1new[t],L2new[t])
+    Pbcai = cc_equations.ccsd_2rdm_bcai(T1[t],T2[t],L1new[t],L2new[t])
+    Pbjai = cc_equations.ccsd_2rdm_bjai(T1[t],T2[t],L1new[t],L2new[t])
+    Pabij = cc_equations.ccsd_2rdm_abij(T1[t],T2[t],L1new[t],L2new[t])
+    Pjkai = cc_equations.ccsd_2rdm_jkai(T1[t],T2[t],L1new[t],L2new[t])
+    Pkaij = cc_equations.ccsd_2rdm_kaij(T1[t],T2[t],L1new[i],L2new[t])
+    Pklij = cc_equations.ccsd_2rdm_klij(T1[t],T2[t],L1new[i],L2new[t])
 
     return (Pcdab, Pciab, Pbcai, Pijab, Pbjai, Pabij, Pjkai, Pkaij, Pklij)

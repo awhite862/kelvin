@@ -22,10 +22,7 @@ class FTLambdaEquationsTest(unittest.TestCase):
         L1old,L2old = test_utils.make_random_ft_T(ng,n)
         F,I = test_utils.make_random_integrals(n,n)
         D1,D2 = test_utils.make_random_ft_D(n)
-        delta = beta/(ng - 1.0)
-        ti = numpy.asarray([float(i)*delta for i in range(ng)])
-        G = quadrature.get_G(ng, delta)
-        g = quadrature.get_gint(ng, delta)
+        ti,g,G = quadrature.simpsons(ng, beta)
 
         L1sim,L2sim = ft_cc_equations.ccsd_lambda_simple(
             F,I,T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G,beta)
@@ -132,11 +129,7 @@ class FTLambdaEquationsTest(unittest.TestCase):
         D1 = spin_utils.T1_to_spin(D1a,D1b,na,na,nb,nb)
         D2 = spin_utils.D2_to_spin(D2aa,D2ab,D2bb,na,na,nb,nb)
 
-        delta = beta/(ng - 1.0)
-        ti = numpy.asarray([float(i)*delta for i in range(ng)])
-        G = quadrature.get_G(ng, delta)
-        g = quadrature.get_gint(ng, delta)
-
+        ti,g,G = quadrature.simpsons(ng, beta)
         L1ref,L2ref = ft_cc_equations.ccsd_lambda_simple(
             F,I,T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G,beta)
         L1a,L1b,L2aa,L2ab,L2bb = ft_cc_equations.uccsd_lambda_opt(

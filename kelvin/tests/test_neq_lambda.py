@@ -38,24 +38,16 @@ def evalL(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
     Te -= (1.j/beta)*numpy.einsum('y,y->',TEb,gr)
     Te += (1.0/beta)*numpy.einsum('y,y->',TEi,gi)
 
-    #print(E,Te)
     return E + Te
 
 def test_L1(cc,thresh):
-    # test lambdas
     T = cc.T
     beta = 1.0 / (T + 1e-12)
     mu = cc.mu
     ngr = cc.ngr
     ngi = cc.ngi
-    deltar = cc.tmax/float(ngr)
-    deltai = beta/float(ngi - 1)
-    Gr = quadrature.get_G_midpoint(ngr, deltar)
-    gr = quadrature.get_g_midpoint(ngr, deltar)
-    Gi = quadrature.get_G(ngi, deltai)
-    gi = quadrature.get_gint(ngi, deltai)
-    tir = numpy.asarray([deltar/2.0 + float(i)*deltar for i in range(ngr)])
-    tii = numpy.asarray([float(i)*deltai for i in range(ngi)])
+    tii,gi,Gi = quadrature.simpsons(ngi, beta)
+    tir,gr,Gr = quadrature.midpoint(ngr, cc.tmax)
     en = cc.sys.g_energies_tot()
     D1 = en[:,None] - en[None,:]
     D2 = en[:,None,None,None] + en[None,:,None,None] \
@@ -131,14 +123,8 @@ class NEQLambdaTest(unittest.TestCase):
         
         # Check that L is zero
         beta = 1.0 / (T + 1e-12)
-        deltar = tmax/(ngr)
-        deltai = beta/(ngi - 1)
-        Gr = quadrature.get_G_midpoint(ngr, deltar)
-        gr = quadrature.get_g_midpoint(ngr, deltar)
-        Gi = quadrature.get_G(ngi, deltai)
-        gi = quadrature.get_gint(ngi, deltai)
-        tir = numpy.asarray([deltar/2.0 + float(i)*deltar for i in range(ngr)])
-        tii = numpy.asarray([float(i)*deltai for i in range(ngi)])
+        tii,gi,Gi = quadrature.simpsons(ngi, beta)
+        tir,gr,Gr = quadrature.midpoint(ngr, tmax)
         en = ccsdT.sys.g_energies_tot()
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
@@ -162,22 +148,15 @@ class NEQLambdaTest(unittest.TestCase):
 
         deltat = 0.04
         tmax = (ngr)*deltat
-        tir = numpy.asarray([deltat/2.0 + float(j)*deltat for j in range(ngr)])
+        beta = 1.0 / (T + 1e-12)
+        tii,gi,Gi = quadrature.simpsons(ngi, beta)
+        tir,gr,Gr = quadrature.midpoint(ngr, tmax)
         sys = h2_field_system(T,mu,omega,tir,O=None,ot=None)
         ccsdT = neq_ccsd(sys,T,mu=mu,tmax=tmax,econv=1e-12,max_iter=40,damp=0.0,ngr=ngr,ngi=ngi,iprint=0)
         E = ccsdT.run()
         ccsdT._neq_ccsd_lambda()
         
         # Check that L is zero
-        beta = 1.0 / (T + 1e-12)
-        deltar = tmax/(ngr)
-        deltai = beta/(ngi - 1)
-        Gr = quadrature.get_G_midpoint(ngr, deltar)
-        gr = quadrature.get_g_midpoint(ngr, deltar)
-        Gi = quadrature.get_G(ngi, deltai)
-        gi = quadrature.get_gint(ngi, deltai)
-        tir = numpy.asarray([deltar/2.0 + float(i)*deltar for i in range(ngr)])
-        tii = numpy.asarray([float(i)*deltai for i in range(ngi)])
         en = ccsdT.sys.g_energies_tot()
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
@@ -186,7 +165,6 @@ class NEQLambdaTest(unittest.TestCase):
         F,Ff,Fb,I = cc_utils.get_ft_integrals_neq(cc.sys, en, beta, mu)
         L = evalL(cc.T1f,cc.T1b,cc.T1i,cc.T2f,cc.T2b,cc.T2i,cc.L1f,cc.L1b,cc.L1i,cc.L2f,cc.L2b,cc.L2i,
             Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta)
-        #print(abs(L - E[1]))
         self.assertTrue(abs(L - E[1]) < self.thresh, "Lagrangian does not equal the Energy: {}  {}".format(L,E[1]))
 
         out = test_L1(ccsdT, self.thresh)

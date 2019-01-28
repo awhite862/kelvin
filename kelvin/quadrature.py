@@ -54,6 +54,27 @@ def get_gint(ng, delta):
             g[y] += delta / 3.0
     return g
 
+def midpoint(ng, beta):
+    delta = beta/ng
+    ti = numpy.asarray([float(i)*delta + delta/2 for i in range(ng)])
+    G = get_G_midpoint(ng, delta)
+    g = get_g_midpoint(ng, delta)
+    return ti,g,G
+
+def simpsons(ng, beta):
+    delta = beta/(ng - 1.0)
+    ti = numpy.asarray([float(i)*delta for i in range(ng)])
+    g = get_gint(ng,delta)
+    G = get_G(ng,delta)
+    return ti,g,G
+
+def d_simpsons(ng, beta):
+    delta = beta/(ng - 1.0)
+    ddelta = delta/beta
+    Gd = get_G(ng, ddelta)
+    gd = get_gint(ng, ddelta)
+    return gd,Gd
+
 #def integrate_new(T,G,ng):
 #    shape = T.shape
 #    T = T.reshape((ng,-1))

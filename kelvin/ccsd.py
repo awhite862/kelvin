@@ -59,10 +59,7 @@ class ccsd(object):
             else:
                 beta_max = 80
             ng = self.ngrid
-            self.delta = beta_max/(ng - 1.0)
-            self.ti = numpy.asarray([float(i)*self.delta for i in range(ng)])
-            self.G = quadrature.get_G(ng, self.delta)
-            self.g = quadrature.get_gint(ng, self.delta)
+            self.ti,self.g,self.G = quadrature.simpsons(self.ngrid,beta_max)
         self.sys = sys
         self.T1 = None
         self.T2 = None
@@ -1159,12 +1156,10 @@ class ccsd(object):
 
         # get time-grid
         ng = self.ngrid
-        ddelta = self.delta/beta
-        ti = numpy.asarray([float(i)*self.delta for i in range(ng)])
+        ti = self.ti
         G = self.G
         g = self.g
-        Gd = quadrature.get_G(ng, ddelta)
-        gd = quadrature.get_gint(ng, ddelta)
+        gd,Gd = quadrature.d_simpsons(ng, beta)
 
         # get exponentials
         D1 = en[:,None] - en[None,:]
@@ -1229,12 +1224,10 @@ class ccsd(object):
 
         # get time-grid
         ng = self.ngrid
-        ddelta = self.delta/beta
         ti = self.ti
         G = self.G
         g = self.g
-        Gd = quadrature.get_G(ng, ddelta)
-        gd = quadrature.get_gint(ng, ddelta)
+        gd,Gd = quadrature.d_simpsons(ng, beta)
 
         # get exponentials
         D1a = ea[:,None] - ea[None,:]
@@ -1329,7 +1322,8 @@ class ccsd(object):
         D2 = en[:,None,None,None] + en[None,:,None,None] \
                 - en[None,None,:,None] - en[None,None,None,:]
 
-        pia,pba,pji,pai = ft_cc_equations.ccsd_1rdm(self.T1,self.T2,self.L1,self.L2,D1,D2,ti,ng,self.delta)
+        pia,pba,pji,pai = ft_cc_equations.ccsd_1rdm(
+                self.T1,self.T2,self.L1,self.L2,D1,D2,ti,ng,self.g,self.G)
         self.dia = pia
         self.dba = pba
         self.dji = pji
@@ -1355,5 +1349,6 @@ class ccsd(object):
         D2 = en[:,None,None,None] + en[None,:,None,None] \
                 - en[None,None,:,None] - en[None,None,None,:]
 
-        P2 = ft_cc_equations.ccsd_2rdm(self.T1,self.T2,self.L1,self.L2,D1,D2,ti,ng,self.delta)
+        P2 = ft_cc_equations.ccsd_2rdm(
+                self.T1,self.T2,self.L1,self.L2,D1,D2,ti,ng,self.g,self.G)
         self.P2 = P2

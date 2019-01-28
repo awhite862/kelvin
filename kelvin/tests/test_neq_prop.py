@@ -35,7 +35,6 @@ def evalLd(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
     Te -= (1.j/beta)*numpy.einsum('y,y->',TEb,gr)
     Te += (1.0/beta)*numpy.einsum('y,y->',TEi,gi)
 
-    #print(E,Te)
     return E + Te
 
 class NEQPropTest(unittest.TestCase):
@@ -50,7 +49,6 @@ class NEQPropTest(unittest.TestCase):
         omega = 0.5
         ngi = 2
         n = 2
-        deltati = beta/(ngi - 1)
 
         mol = gto.M(
             verbose = 0,
@@ -74,9 +72,10 @@ class NEQPropTest(unittest.TestCase):
         deltat = 0.5
         tmax = 1.0
         ng = int(tmax/deltat)
+        ngr = ng
+        tii,gi,Gi = quadrature.simpsons(ngi, beta)
+        tir,gr,Gr = quadrature.midpoint(ngr, tmax)
         d = 1e-4
-        tir = numpy.asarray([deltat/2 + float(j)*deltat for j in range(ng)])
-        tii = numpy.asarray([float(i)*deltati for i in range(ngi)])
         sys = h2_field_system(T,mu,omega,tir,O=(d*field),ot=ng - 1)
         en = sys.g_energies_tot()
         F_f,Ff_f,Fb_f,I_f = cc_utils.get_ft_integrals_neq(sys, en, beta, mu)
@@ -130,12 +129,6 @@ class NEQPropTest(unittest.TestCase):
         # compute first order part
         E1 = numpy.einsum('ii,i->',field,fo)
 
-        ngr = ng
-        gr = quadrature.get_g_midpoint(ngr, deltat)
-        Gr = quadrature.get_G_midpoint(ngr, deltat)
-        Gi = quadrature.get_G(ngi,deltati)
-        gi = quadrature.get_gint(ngi, deltati)
-        # compute that static part from finite differences
         Ef = ft_cc_energy.ft_cc_energy_neq(
             cc.T1f,cc.T1b,cc.T1i,cc.T2f,cc.T2b,cc.T2i,
             Ff_f.ov,Fb_f.ov,F_f.ov,I_f.oovv,gr,gi,beta)
@@ -144,10 +137,6 @@ class NEQPropTest(unittest.TestCase):
             Ff_b.ov,Fb_b.ov,F_b.ov,I_b.oovv,gr,gi,beta)
 
         Esfd = (Ef - Eb)/(2*d)
-        #print("1st ord.: {}".format(E1))
-        #print("static:   {}".format(Esfd))
-        #print("dynamic:  {}".format(Efd - E1 - Esfd))
-        #print("total:    {}".format(Efd))
 
         # integrals
         Fock = numpy.zeros((ng,n,n),dtype=complex)
@@ -169,7 +158,6 @@ class NEQPropTest(unittest.TestCase):
         Es = ft_cc_energy.ft_cc_energy_neq(
             cc.T1f,cc.T1b,cc.T1i,cc.T2f,cc.T2b,cc.T2i,
             Ffn.ov,Fbn.ov,Fn.ov,In.oovv,gr,gi,beta)
-        #print(Es+E1)
 
         # get actual integrals
         F,Ff,Fb,I = cc_utils.get_ft_integrals_neq(sys, en, beta, mu)
@@ -298,7 +286,6 @@ class NEQPropTest(unittest.TestCase):
                                 cc.T1f,cc.T1b,cc.T1i,TM,cc.T2b,cc.T2i,
                                 Ff.ov,Fb.ov,F.ov,I.oovv,gr,gi,beta)
                             dT2f[y,i,j,a,b] = (EP - EM)/(2*d)
-        #print("F")
         Ers1 = numpy.einsum('yia,yai->',dT1f,td1f)
         Ers1 += numpy.einsum('yia,yai->',dT1b,td1b)
         Ers1 += numpy.einsum('yia,yai->',dT1i,td1i)
@@ -306,10 +293,6 @@ class NEQPropTest(unittest.TestCase):
         Ers2 += 0.25*numpy.einsum('yijab,yabij->',dT2b,td2b)
         Ers2 += 0.25*numpy.einsum('yijab,yabij->',dT2i,td2i)
 
-        #print("1st ord.: {}".format(E1))
-        #print("static:   {}".format(Es))
-        #print("dynamic:  {}".format(Ers1 + Ers2))
-        #print("total:    {}".format(E1 + Es + Ers1 + Ers2))
         Ds = abs(Es - Esfd)
         Dd = abs(Ers1 + Ers2 - Efd + E1 + Esfd)
         self.assertTrue(Ds < self.fd_thresh,"Error in energy response: {}".format(Ds))
@@ -356,7 +339,6 @@ class NEQPropTest(unittest.TestCase):
         nuc_e = m.mol.energy_nuc() 
 
         # Neq-CCSD reference with FD
-        #ngi = 10
         Aref = []
         deltat = 0.01
         for i in range(9):
@@ -392,8 +374,6 @@ class NEQPropTest(unittest.TestCase):
             t = (i+1)*int(0.1/deltat)
             out = cc.compute_prop(field,t - 1)
             diff = abs(ref - out)
-            #print(diff)
-            #print("{} -- Expected: {}  Actual: {} ".format(i,ref,out))
             msg = "{} -- Expected: {}  Actual: {} ".format(i,ref,out)
             self.assertTrue(diff < self.fd_thresh,msg)
 

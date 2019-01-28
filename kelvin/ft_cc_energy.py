@@ -13,7 +13,6 @@ def ft_cc_energy(T1, T2, f, eri, g, beta, Qterm=True):
         T2 (array): T2 amplitudes.
         f (array): 1-electron (Fock matrix) integrals.
         eri (array): 2-electron (ERI) integrals.
-        delta (float): Grid spacing.
         beta (float): Inverse temperature.
         Qterm (bool,optional): Include quadratic contribution?
 
@@ -41,7 +40,6 @@ def ft_ucc_energy(T1a, T1b, T2aa, T2ab, T2bb, fa, fb, Ia, Ib, Iabab, g, beta, Qt
         T2 (array): T2 amplitudes.
         f (array): 1-electron (Fock matrix) integrals.
         eri (array): 2-electron (ERI) integrals.
-        delta (float): Grid spacing.
         beta (float): Inverse temperature.
         Qterm (bool,optional): Include quadratic contribution?
 

@@ -228,7 +228,6 @@ def ft_lambda_iter(method, L1old, L2old, T1, T2, F, I, D1, D2,
         T2old (array): T2 amplitudes.
         D1 (array): 1-electron denominators.
         D2 (array): 2-electron denominators.
-        delta (float): grid spacing.
         beta (float): inverse temperature.
         ti (array): time grid.
         ng (int): number of time points.
@@ -300,7 +299,6 @@ def ft_ulambda_iter(method, L1ain, L1bin, L2aain, L2abin, L2bbin, T1aold, T1bold
         T2old (array): T2 amplitudes.
         D1 (array): 1-electron denominators.
         D2 (array): 2-electron denominators.
-        delta (float): grid spacing.
         beta (float): inverse temperature.
         ti (array): time grid.
         ng (int): number of time points.

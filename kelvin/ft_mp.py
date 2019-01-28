@@ -447,7 +447,6 @@ from . import ft_cc_equations
 from . import quadrature
 from cqcpy.ov_blocks import one_e_blocks
 from cqcpy.ov_blocks import two_e_blocks
-#from cqcpy import cc_energy
 
 def mp23_int(e, no, nv, f, eri, T, ngrid=10):
     """Return the 2nd and 3rd order corrections to the free energy by 
@@ -458,8 +457,7 @@ def mp23_int(e, no, nv, f, eri, T, ngrid=10):
 
     # get time-grid
     ng = ngrid
-    delta = beta/(ng - 1.0)
-    ti = numpy.asarray([float(i)*delta for i in range(ng)])
+    ti,g,G = quadrature.simpsons(ng, beta)
 
     # get exponentials
     D1 = e[:,None] - e[None,:]
@@ -470,8 +468,6 @@ def mp23_int(e, no, nv, f, eri, T, ngrid=10):
     Id = numpy.ones((ng))
     T1old = -numpy.einsum('v,ai,a,i->vai',Id,f,nv,no)
     T2old = -numpy.einsum('v,abij,a,b,i,j->vabij',Id,eri,nv,nv,no,no)
-    G = quadrature.get_G(ng,delta)
-    g = quadrature.get_gint(ng,delta)
     T1old = quadrature.int_tbar1(ng,T1old,ti,D1,G)
     T2old = quadrature.int_tbar2(ng,T2old,ti,D2,G)
 

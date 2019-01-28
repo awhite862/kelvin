@@ -33,7 +33,6 @@ def evalL(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
     Te -= (1.j/beta)*numpy.einsum('y,y->',TEb,gr)
     Te += (1.0/beta)*numpy.einsum('y,y->',TEi,gi)
 
-    #print(E,Te)
     return E + Te
 
 class NEQDensityTest(unittest.TestCase):
@@ -65,14 +64,8 @@ class NEQDensityTest(unittest.TestCase):
         L2b = L2b.astype(complex)
         D1,D2 = test_utils.make_random_ft_D(n)
         D1 = numpy.zeros((n,n))
-        deltar = tmax/(ngr)
-        deltai = beta/(ngi)
-        tir = numpy.asarray([deltar/2.0 + float(i)*deltar for i in range(ngr)])
-        tii = numpy.asarray([deltai/2.0 + float(i)*deltai for i in range(ngi)])
-        Gr = quadrature.get_G_midpoint(ngr, deltar)
-        gr = quadrature.get_g_midpoint(ngr, deltar)
-        Gi = quadrature.get_G_midpoint(ngi, deltai)
-        gi = quadrature.get_g_midpoint(ngi, deltai)
+        tii,gi,Gi = quadrature.midpoint(ngi, beta)
+        tir,gr,Gr = quadrature.midpoint(ngr, tmax)
         Aov = numpy.random.random((ngr,n,n))
         Avv = numpy.random.random((ngr,n,n))
         Aoo = numpy.random.random((ngr,n,n))
@@ -84,17 +77,13 @@ class NEQDensityTest(unittest.TestCase):
         zzr = numpy.zeros((ngr,n,n),dtype=complex)
         zzi = numpy.zeros((n,n),dtype=complex)
         for i in range(ngr):
-            if i == tf:
-                Aov[i] *= 1.0/gr[i]
-                Avv[i] *= 1.0/gr[i]
-                Aoo[i] *= 1.0/gr[i]
-                Avo[i] *= 1.0/gr[i]
-            else:
+            if i != tf:
                 Aov[i] = numpy.zeros((n,n))
                 Avv[i] = numpy.zeros((n,n))
                 Aoo[i] = numpy.zeros((n,n))
                 Avo[i] = numpy.zeros((n,n))
-        Ftemp = one_e_blocks(Aoo,Aov,Avo,Avv)
+        # for the Lagrangian, divide through by measure
+        Ftemp = one_e_blocks(Aoo/gr[tf],Aov/gr[tf],Avo/gr[tf],Avv/gr[tf])
         Fzr = one_e_blocks(zzr,zzr,zzr,zzr)
         Fzi = one_e_blocks(zzi,zzi,zzi,zzi)
         Inull = numpy.zeros((n,n,n,n),dtype=complex)

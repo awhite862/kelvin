@@ -38,16 +38,8 @@ class neq_ccsd(object):
         # get time-grid
         ngr = self.ngr
         ngi = self.ngi
-        deltar = tmax/(ngr)
-        deltai = beta/(ngi - 1)
-        tir = numpy.asarray([float(i)*deltar + deltar/2 for i in range(ngr)])
-        tii = numpy.asarray([float(i)*deltai for i in range(ngi)])
-        Gi = quadrature.get_G(ngi,deltai)
-        gi = quadrature.get_gint(ngi, deltai)
-        Gr = quadrature.get_G_midpoint(ngr,deltar)
-        gr = quadrature.get_g_midpoint(ngr, deltar)
-        self.deltar = deltar
-        self.deltai = deltai
+        tii,gi,Gi = quadrature.simpsons(self.ngi, beta)
+        tir,gr,Gr = quadrature.midpoint(ngr, tmax)
         self.gr = gr
         self.Gr = Gr
         self.gi = gi
@@ -327,7 +319,6 @@ class neq_ccsd(object):
         fo = ft_utils.ff(beta, en, mu)
         fv = ft_utils.ffv(beta, en, mu)
         ngr = self.ngr
-        deltar = self.deltar
         tir = self.tir
         tii = self.tii
         Gi = self.Gi
@@ -339,16 +330,12 @@ class neq_ccsd(object):
         prop = numpy.einsum('ii,i->',A,fo)
 
         # compute higher order contribution
-        E21 = numpy.einsum('ai,ia,i,a->',A,pia,fo,fv)/(deltar)
-        E22 = numpy.einsum('ab,ba,a->',A,pba,fv)/(deltar)
-        E23 = numpy.einsum('ij,ji,j->',A,pji,fo)/(deltar)
-        E24 = numpy.einsum('ia,ai->',A,pai)/(deltar)
+        E21 = numpy.einsum('ai,ia,i,a->',A,pia,fo,fv)
+        E22 = numpy.einsum('ab,ba,a->',A,pba,fv)
+        E23 = numpy.einsum('ij,ji,j->',A,pji,fo)
+        E24 = numpy.einsum('ia,ai->',A,pai)
         #print(E21,E22,E23,E24)
         E2 = E21 + E22 + E23 + E24
-        #E2 += 1.j*0.2*numpy.einsum('ai,ia,i,a->',A,pia,fo,fv)/gr[t]
-        #E2 += 1.j*0.2*numpy.einsum('ab,ba,a,b->',A,pba,fv,fv)/gr[t]
-        #E2 += 1.j*0.2*numpy.einsum('ij,ji,j,i->',A,pji,fo,fo)/gr[t]
-        #E2 += 1.j*0.2*numpy.einsum('ia,ai,a,i->',A,pai,fv,fo)/gr[t]
         prop += E2
 
         return prop
@@ -363,7 +350,6 @@ class neq_ccsd(object):
         fo = ft_utils.ff(beta, en, mu)
         fv = ft_utils.ffv(beta, en, mu)
         ngr = self.ngr
-        deltar = self.deltar
         tir = self.tir
         tii = self.tii
         Gi = self.Gi

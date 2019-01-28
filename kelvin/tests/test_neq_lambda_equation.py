@@ -47,6 +47,8 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         n = 3
         beta = 2.0
         tmax = 0.1
+        tii,gi,Gi = quadrature.simpsons(ngi, beta)
+        tir,gr,Gr = quadrature.simpsons(ngr, tmax)
         T1f,T2f = test_utils.make_random_ft_T(ngr,n)
         T1b,T2b = test_utils.make_random_ft_T(ngr,n)
         T1i,T2i = test_utils.make_random_ft_T(ngi,n)
@@ -79,14 +81,6 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         F = one_e_blocks(Foo,Fov,Fvo,Fvv)
         Fb = Ff
         D1,D2 = test_utils.make_random_ft_D(n)
-        deltar = tmax/(ngr - 1.0)
-        deltai = beta/(ngi - 1.0)
-        tir = numpy.asarray([float(i)*deltar for i in range(ngr)])
-        tii = numpy.asarray([float(i)*deltai for i in range(ngi)])
-        Gr = quadrature.get_G(ngr, deltar)
-        gr = quadrature.get_gint(ngr, deltar)
-        Gi = quadrature.get_G(ngi, deltai)
-        gi = quadrature.get_gint(ngi, deltai)
 
         # compute dL/dt1 from Lagrangian directly
         dT1i = numpy.zeros((ngi,n,n),dtype=complex)
@@ -94,7 +88,6 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         dT1f = numpy.zeros((ngr,n,n),dtype=complex)
         Ltest = evalL(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
             Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta)
-        #print(Ltest)
         for y in range(ngi):
             for i in range(n):
                 for a in range(n):
@@ -143,7 +136,6 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         L1in -= L1i
         L1bn -= L1b
         L1fn -= L1f
-        #print(L1fn[ngr - 1])
         for y in range(ngi):
             L1in[y] *= gi[y]/beta
         for y in range(ngr):
@@ -195,14 +187,8 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         F = one_e_blocks(Foo,Fov,Fvo,Fvv)
         Fb = Ff
         D1,D2 = test_utils.make_random_ft_D(n)
-        deltar = tmax/(ngr - 1.0)
-        deltai = beta/(ngi - 1.0)
-        tir = numpy.asarray([float(i)*deltar for i in range(ngr)])
-        tii = numpy.asarray([float(i)*deltai for i in range(ngi)])
-        Gr = quadrature.get_G(ngr, deltar)
-        gr = quadrature.get_gint(ngr, deltar)
-        Gi = quadrature.get_G(ngi, deltai)
-        gi = quadrature.get_gint(ngi, deltai)
+        tii,gi,Gi = quadrature.simpsons(ngi, beta)
+        tir,gr,Gr = quadrature.simpsons(ngr, tmax)
 
         # compute dL/dt2 from Lagrangian directly
         dT2i = numpy.zeros((ngi,n,n,n,n),dtype=complex)
@@ -210,7 +196,6 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         dT2f = numpy.zeros((ngr,n,n,n,n),dtype=complex)
         Ltest = evalL(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
             Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta)
-        #print(Ltest)
         for y in range(ngi):
             for i in range(n):
                 for j in range(n):
@@ -304,6 +289,8 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         n = 3
         beta = 2.0
         tmax = 0.1
+        tii,gi,Gi = quadrature.simpsons(ngi, beta)
+        tir,gr,Gr = quadrature.simpsons(ngr, tmax)
         T1f,T2f = test_utils.make_random_ft_T(ngr,n)
         T1b,T2b = test_utils.make_random_ft_T(ngr,n)
         T1i,T2i = test_utils.make_random_ft_T(ngi,n)
@@ -336,14 +323,6 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         F = one_e_blocks(Foo,Fov,Fvo,Fvv)
         Fb = Ff
         D1,D2 = test_utils.make_random_ft_D(n)
-        deltar = tmax/(ngr - 1.0)
-        deltai = beta/(ngi - 1.0)
-        tir = numpy.asarray([float(i)*deltar for i in range(ngr)])
-        tii = numpy.asarray([float(i)*deltai for i in range(ngi)])
-        Gr = quadrature.get_G(ngr, deltar)
-        gr = quadrature.get_gint(ngr, deltar)
-        Gi = quadrature.get_G(ngi, deltai)
-        gi = quadrature.get_gint(ngi, deltai)
 
         L1fs,L1bs,L1is,L2fs,L2bs,L2is = \
             ft_cc_equations.neq_lambda_simple(

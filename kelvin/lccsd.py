@@ -51,10 +51,7 @@ class lccsd(object):
             else:
                 beta_max = 80.0
             ng = self.ngrid
-            self.delta = beta_max/(ng - 1.0)
-            self.ti = numpy.asarray([float(i)*self.delta for i in range(ng)])
-            self.G = quadrature.get_G(ng, self.delta)
-            self.g = quadrature.get_gint(ng, self.delta)
+            self.ti,self.g,self.G = quadrature.simpsons(self.ngrid,beta_max)
 
         self.sys = sys
 

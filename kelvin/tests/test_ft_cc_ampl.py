@@ -21,10 +21,7 @@ class FTamplEquationsTest(unittest.TestCase):
         L1old,L2old = test_utils.make_random_ft_T(ng,n)
         F,I = test_utils.make_random_integrals(n,n)
         D1,D2 = test_utils.make_random_ft_D(n)
-        delta = self.beta/(ng - 1.0)
-        ti = numpy.asarray([float(i)*delta for i in range(ng)])
-        G = quadrature.get_G(ng, delta)
-        g = quadrature.get_gint(ng, delta)
+        ti,g,G = quadrature.simpsons(ng, self.beta)
 
         T1sim,T2sim = ft_cc_equations.ccsd_simple(
                 F,I,T1old,T2old,D1,D2,ti,ng,G)
@@ -79,18 +76,13 @@ class FTamplEquationsTest(unittest.TestCase):
             T2old[i,:,:,:,:] = spin_utils.T2_to_spin(
                     T2aa[i,:,:,:,:],T2ab[i,:,:,:,:],T2bb[i,:,:,:,:],na,na,nb,nb)
 
-        #D1a = test_utils.make_random_ft_D1(na)
-        #D1b = test_utils.make_random_ft_D1(nb)
         D1a,D2aa = test_utils.make_random_ft_D(na)
         D2ab = test_utils.make_random_ft_D2(na,nb)
         D1b,D2bb = test_utils.make_random_ft_D(nb)
         D1 = spin_utils.T1_to_spin(D1a,D1b,na,na,nb,nb)
         D2 = spin_utils.D2_to_spin(D2aa,D2ab,D2bb,na,na,nb,nb)
 
-        delta = self.beta/(ng - 1.0)
-        ti = numpy.asarray([float(i)*delta for i in range(ng)])
-        G = quadrature.get_G(ng, delta)
-        g = quadrature.get_gint(ng, delta)
+        ti,g,G = quadrature.simpsons(ng, self.beta)
 
         T1ref,T2ref = ft_cc_equations.ccsd_stanton(
                 F,I,T1old,T2old,D1,D2,ti,ng,G)
