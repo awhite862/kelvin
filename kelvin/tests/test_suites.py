@@ -60,6 +60,8 @@ def full_suite():
     suite.addTest(test_ft_ccsd_rdm.FTCCSD_RDMTest("test_dklij"))
 
     suite.addTest(test_ft_deriv.FTDerivTest("test_Be_sto3g_gen"))
+    suite.addTest(test_ft_deriv.FTDerivTest("test_Be_sto3g"))
+    suite.addTest(test_ft_deriv.FTDerivTest("test_Be_sto3g_ln"))
     suite.addTest(test_ft_deriv.FTDerivTest("test_UEG"))
     suite.addTest(test_ft_deriv.FTDerivTest("test_UEG_gen"))
     suite.addTest(test_ft_deriv.FTDerivTest("test_PUEG"))
@@ -106,6 +108,9 @@ def full_suite():
 
     suite.addTest(test_quadrature.QuadTest("test_int_keldysh"))
     suite.addTest(test_quadrature.QuadTest("test_Lint_keldysh"))
+    suite.addTest(test_quadrature.QuadTest("test_d_simpson"))
+    suite.addTest(test_quadrature.QuadTest("test_d_simpson_ln"))
+    suite.addTest(test_quadrature.QuadTest("test_d_simpson_sin"))
 
     suite.addTest(test_scf.SCFTest("test_Be_sto3g_energy"))
     suite.addTest(test_scf.SCFTest("test_diamond_energy"))
@@ -159,6 +164,8 @@ def default_suite():
     suite.addTest(test_ft_ccsd_rdm.FTCCSD_RDMTest("test_dklij"))
 
     suite.addTest(test_ft_deriv.FTDerivTest("test_Be_sto3g_gen"))
+    suite.addTest(test_ft_deriv.FTDerivTest("test_Be_sto3g"))
+    suite.addTest(test_ft_deriv.FTDerivTest("test_Be_sto3g_ln"))
     suite.addTest(test_ft_deriv.FTDerivTest("test_UEG"))
     #suite.addTest(test_ft_deriv.FTDerivTest("test_UEG_gen"))
     suite.addTest(test_ft_deriv.FTDerivTest("test_PUEG"))
@@ -204,6 +211,9 @@ def default_suite():
 
     suite.addTest(test_quadrature.QuadTest("test_int_keldysh"))
     suite.addTest(test_quadrature.QuadTest("test_Lint_keldysh"))
+    suite.addTest(test_quadrature.QuadTest("test_d_simpson"))
+    suite.addTest(test_quadrature.QuadTest("test_d_simpson_ln"))
+    suite.addTest(test_quadrature.QuadTest("test_d_simpson_sin"))
 
     suite.addTest(test_scf.SCFTest("test_Be_sto3g_energy"))
     suite.addTest(test_scf.SCFTest("test_diamond_energy"))

@@ -75,6 +75,51 @@ def d_simpsons(ng, beta):
     gd = get_gint(ng, ddelta)
     return gd,Gd
 
+def simpsons_ln(ng, beta):
+    e = numpy.exp(1)
+    delta = (e - 1.0)/(ng - 1.0)
+    si = numpy.asarray([(float(i)*delta + 1.0) for i in range(ng)])
+    ti = beta*numpy.log(si)
+    g = get_gint(ng,delta)
+    G = get_G(ng,delta)
+    g = beta*g/si
+    for i in range(ng):
+        G[i,:] = beta*G[i,:]/si
+    return ti,g,G
+
+def d_simpsons_ln(ng, beta):
+    e = numpy.exp(1)
+    delta = (e - 1.0)/(ng - 1.0)
+    si = numpy.asarray([(float(i)*delta + 1.0) for i in range(ng)])
+    g = get_gint(ng,delta)
+    G = get_G(ng,delta)
+    g = g/si
+    for i in range(ng):
+        G[i,:] = G[i,:]/si
+
+    return g,G
+
+def simpsons_sin(ng, beta):
+    delta = numpy.pi/(ng  - 1.0)
+    si = numpy.asarray([(float(i)*delta - numpy.pi/2) for i in range(ng)])
+    ti = beta*(numpy.sin(si) + 1.0)/2.0
+    g = get_gint(ng,delta)
+    G = get_G(ng,delta)
+    g = beta*g*numpy.cos(si)/2.0
+    for i in range(ng):
+        G[i,:] = beta*G[i,:]*numpy.cos(si)/2.0
+    return ti,g,G
+
+def d_simpsons_sin(ng, beta):
+    delta = numpy.pi/(ng  - 1.0)
+    si = numpy.asarray([(float(i)*delta - numpy.pi/2) for i in range(ng)])
+    g = get_gint(ng,delta)
+    G = get_G(ng,delta)
+    g = g*numpy.cos(si)
+    for i in range(ng):
+        G[i,:] = G[i,:]*numpy.cos(si)
+    return g,G
+
 #def integrate_new(T,G,ng):
 #    shape = T.shape
 #    T = T.reshape((ng,-1))

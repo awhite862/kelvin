@@ -86,6 +86,48 @@ class QuadTest(unittest.TestCase):
         s2 = diff2 < self.thresh
         self.assertTrue(s1,"Difference in L1: {}".format(diff1))
 
+    def test_d_simpson(self):
+        ng = 10
+        beta = 10.0
+        delta = 5e-4
+        ti,gp,Gp = quadrature.simpsons(ng, beta + delta)
+        ti,gm,Gm = quadrature.simpsons(ng, beta - delta)
+        gd,Gd = quadrature.d_simpsons(ng, beta)
+        go = (gp - gm)/(2.0*delta)
+        Go = (Gp - Gm)/(2.0*delta)
+        eg = numpy.linalg.norm(go - gd)
+        eG = numpy.linalg.norm(Go - Go)
+        self.assertTrue(eg < self.thresh,"Difference in g: {}".format(eg))
+        self.assertTrue(eG < self.thresh,"Difference in G: {}".format(eG))
+
+    def test_d_simpson_ln(self):
+        ng = 10
+        beta = 10.0
+        delta = 5e-4
+        ti,gp,Gp = quadrature.simpsons_ln(ng, beta + delta)
+        ti,gm,Gm = quadrature.simpsons_ln(ng, beta - delta)
+        gd,Gd = quadrature.d_simpsons_ln(ng, beta)
+        go = (gp - gm)/(2.0*delta)
+        Go = (Gp - Gm)/(2.0*delta)
+        eg = numpy.linalg.norm(go - gd)
+        eG = numpy.linalg.norm(Go - Go)
+        self.assertTrue(eg < self.thresh,"Difference in g: {}".format(eg))
+        self.assertTrue(eG < self.thresh,"Difference in G: {}".format(eG))
+
+    def test_d_simpson_sin(self):
+        ng = 10
+        beta = 10.0
+        delta = 5e-4
+        ti,gp,Gp = quadrature.simpsons_sin(ng, beta + delta)
+        ti,gm,Gm = quadrature.simpsons_sin(ng, beta - delta)
+        gd,Gd = quadrature.d_simpsons_sin(ng, beta)
+        go = (gp - gm)/(2.0*delta)
+        Go = (Gp - Gm)/(2.0*delta)
+        eg = numpy.linalg.norm(go - gd)
+        eG = numpy.linalg.norm(Go - Go)
+        self.assertTrue(eg < self.thresh,"Difference in g: {}".format(eg))
+        self.assertTrue(eG < self.thresh,"Difference in G: {}".format(eG))
+
 if __name__ == '__main__':
     unittest.main()
 
