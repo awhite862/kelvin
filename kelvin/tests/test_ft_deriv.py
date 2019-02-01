@@ -7,7 +7,7 @@ from kelvin.scf_system import scf_system
 from kelvin.ueg_system import ueg_system
 from kelvin.pueg_system import pueg_system
 
-def fd_ESN(m, T, mu, ng, Ecctot, quad = 's'):
+def fd_ESN(m, T, mu, ng, Ecctot, quad = 'lin'):
     delta = 5e-4
     muf = mu + delta
     mub = mu - delta

@@ -29,7 +29,7 @@ class ccsd(object):
         ngrid (int): Number of grid points.
         realtime (bool): Force time-dependent formulation for zero T
         athresh (float): Threshold for ignoring small occupations
-        quad (string): Quadrature rule
+        quad (string): Transformation for quadrature rule
         T1: Saved T1 amplitudes
         T2: Saved T2 amplitudes
         L1: Saved L1 amplitudes
@@ -38,7 +38,7 @@ class ccsd(object):
     def __init__(self, sys, T=0.0, mu=0.0, iprint=0,
         singles=True, econv=1e-8, max_iter=40,
         damp=0.0, ngrid=10, realtime=False, athresh=0.0, 
-        quad='s'):
+        quad='lin'):
 
         self.T = T
         self.mu = mu
@@ -63,14 +63,7 @@ class ccsd(object):
                 beta_max = 80
                 self._beta_max = 80
             ng = self.ngrid
-            if self.quad == 's':
-                self.ti,self.g,self.G = quadrature.simpsons(self.ngrid,beta_max)
-            elif self.quad == 'ln':
-                self.ti,self.g,self.G = quadrature.simpsons_ln(self.ngrid,beta_max)
-            elif self.quad == 'sin':
-                self.ti,self.g,self.G = quadrature.simpsons_sin(self.ngrid,beta_max)
-            else:
-                raise Exception("Unrecognized quadrature rule: {}".format(self.quad))
+            self.ti,self.g,self.G = quadrature.ft_quad(self.ngrid,beta_max,self.quad)
         self.sys = sys
         self.T1 = None
         self.T2 = None
@@ -1170,14 +1163,7 @@ class ccsd(object):
         ti = self.ti
         G = self.G
         g = self.g
-        if self.quad == 's':
-            gd,Gd = quadrature.d_simpsons(ng, beta)
-        elif self.quad == 'ln':
-            gd,Gd = quadrature.d_simpsons_ln(ng, beta)
-        elif self.quad == 'sin':
-            gd,Gd = quadrature.d_simpsons_sin(ng, beta)
-        else:
-            raise Exception("Unrecognized quadrature rule: {}".format(self.quad))
+        gd,Gd = quadrature.d_ft_quad(ng, beta, self.quad)
 
         # get exponentials
         D1 = en[:,None] - en[None,:]
@@ -1209,7 +1195,7 @@ class ccsd(object):
         n = G.shape[0]
         for i in range(m):
             for j in range(n):
-                Gnew[i,j] *= (j - i)/(ng - 1.0)
+                Gnew[i,j] *= (self.ti[j] - self.ti[i])/beta
  
         T1temp,T2temp = ft_cc_equations.ccsd_stanton(F,I,self.T1,self.T2,
                 D1,D2,ti,ng,Gnew)
@@ -1245,14 +1231,7 @@ class ccsd(object):
         ti = self.ti
         G = self.G
         g = self.g
-        if self.quad == 's':
-            gd,Gd = quadrature.d_simpsons(ng, beta)
-        elif self.quad == 'ln':
-            gd,Gd = quadrature.d_simpsons_ln(ng, beta)
-        elif self.quad == 'sin':
-            gd,Gd = quadrature.d_simpsons_sin(ng, beta)
-        else:
-            raise Exception("Unrecognized quadrature rule: {}".format(self.quad))
+        gd,Gd = quadrature.d_ft_quad(ng, beta, self.quad)
 
         # get exponentials
         D1a = ea[:,None] - ea[None,:]
@@ -1300,7 +1279,7 @@ class ccsd(object):
         n = G.shape[0]
         for i in range(m):
             for j in range(n):
-                Gnew[i,j] *= (j - i)/(ng - 1.0)
+                Gnew[i,j] *= (self.ti[j] - self.ti[i])/beta
 
         T1t,T2t = ft_cc_equations.uccsd_stanton(Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,
                 T2aaold,T2abold,T2bbold,D1a,D1b,D2aa,D2ab,D2bb,ti,ng,Gnew)

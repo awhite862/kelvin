@@ -128,6 +128,34 @@ class QuadTest(unittest.TestCase):
         self.assertTrue(eg < self.thresh,"Difference in g: {}".format(eg))
         self.assertTrue(eG < self.thresh,"Difference in G: {}".format(eG))
 
+    def test_d_simpson_exp(self):
+        ng = 10
+        beta = 10.0
+        delta = 5e-4
+        ti,gp,Gp = quadrature.simpsons_exp(ng, beta + delta)
+        ti,gm,Gm = quadrature.simpsons_exp(ng, beta - delta)
+        gd,Gd = quadrature.d_simpsons_exp(ng, beta)
+        go = (gp - gm)/(2.0*delta)
+        Go = (Gp - Gm)/(2.0*delta)
+        eg = numpy.linalg.norm(go - gd)
+        eG = numpy.linalg.norm(Go - Go)
+        self.assertTrue(eg < self.thresh,"Difference in g: {}".format(eg))
+        self.assertTrue(eG < self.thresh,"Difference in G: {}".format(eG))
+
+    def test_d_simpson_p(self):
+        ng = 10
+        beta = 10.0
+        delta = 5e-4
+        n = 3
+        ti,gp,Gp = quadrature.simpsons_p(ng, beta + delta, n)
+        ti,gm,Gm = quadrature.simpsons_p(ng, beta - delta, n)
+        gd,Gd = quadrature.d_simpsons_p(ng, beta, n)
+        go = (gp - gm)/(2.0*delta)
+        Go = (Gp - Gm)/(2.0*delta)
+        eg = numpy.linalg.norm(go - gd)
+        eG = numpy.linalg.norm(Go - Go)
+        self.assertTrue(eg < self.thresh,"Difference in g: {}".format(eg))
+        self.assertTrue(eG < self.thresh,"Difference in G: {}".format(eG))
+
 if __name__ == '__main__':
     unittest.main()
-

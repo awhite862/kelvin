@@ -111,6 +111,8 @@ def full_suite():
     suite.addTest(test_quadrature.QuadTest("test_d_simpson"))
     suite.addTest(test_quadrature.QuadTest("test_d_simpson_ln"))
     suite.addTest(test_quadrature.QuadTest("test_d_simpson_sin"))
+    suite.addTest(test_quadrature.QuadTest("test_d_simpson_exp"))
+    suite.addTest(test_quadrature.QuadTest("test_d_simpson_p"))
 
     suite.addTest(test_scf.SCFTest("test_Be_sto3g_energy"))
     suite.addTest(test_scf.SCFTest("test_diamond_energy"))
@@ -214,6 +216,8 @@ def default_suite():
     suite.addTest(test_quadrature.QuadTest("test_d_simpson"))
     suite.addTest(test_quadrature.QuadTest("test_d_simpson_ln"))
     suite.addTest(test_quadrature.QuadTest("test_d_simpson_sin"))
+    suite.addTest(test_quadrature.QuadTest("test_d_simpson_exp"))
+    suite.addTest(test_quadrature.QuadTest("test_d_simpson_p"))
 
     suite.addTest(test_scf.SCFTest("test_Be_sto3g_energy"))
     suite.addTest(test_scf.SCFTest("test_diamond_energy"))

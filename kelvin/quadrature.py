@@ -115,10 +115,90 @@ def d_simpsons_sin(ng, beta):
     si = numpy.asarray([(float(i)*delta - numpy.pi/2) for i in range(ng)])
     g = get_gint(ng,delta)
     G = get_G(ng,delta)
-    g = g*numpy.cos(si)
+    g = g*numpy.cos(si)/2.0
     for i in range(ng):
-        G[i,:] = G[i,:]*numpy.cos(si)
+        G[i,:] = G[i,:]*numpy.cos(si)/2.0
     return g,G
+
+def simpsons_exp(ng, beta):
+    ln2 = numpy.log(2.0)
+    delta = ln2/(ng  - 1.0)
+    si = numpy.asarray([float(i)*delta for i in range(ng)])
+    ti = beta*(numpy.exp(si) - 1.0)
+    g = get_gint(ng,delta)
+    G = get_G(ng,delta)
+    g = beta*g*numpy.exp(si)
+    for i in range(ng):
+        G[i,:] = beta*G[i,:]*numpy.exp(si)
+    return ti,g,G
+
+def d_simpsons_exp(ng, beta):
+    ln2 = numpy.log(2.0)
+    delta = ln2/(ng  - 1.0)
+    si = numpy.asarray([float(i)*delta for i in range(ng)])
+    g = get_gint(ng,delta)
+    G = get_G(ng,delta)
+    g = g*numpy.exp(si)
+    for i in range(ng):
+        G[i,:] = G[i,:]*numpy.exp(si)
+    return g,G
+
+def simpsons_p(ng, beta, n=2):
+    delta = 1.0/(ng  - 1.0)
+    si = numpy.asarray([float(i)*delta for i in range(ng)])
+    ti = beta*(numpy.power(si,n) + si)/2.0
+    g = get_gint(ng,delta)
+    G = get_G(ng,delta)
+    g = beta*g*(numpy.power(si,n - 1)*float(n) + 1.0)/2.0
+    for i in range(ng):
+        G[i,:] = beta*G[i,:]*(numpy.power(si,n - 1)*float(n) + 1.0)/2.0
+    return ti,g,G
+
+def d_simpsons_p(ng, beta, n=2):
+    delta = 1.0/(ng  - 1.0)
+    si = numpy.asarray([float(i)*delta for i in range(ng)])
+    g = get_gint(ng,delta)
+    G = get_G(ng,delta)
+    g = g*(numpy.power(si,n - 1)*float(n) + 1.0)/2.0
+    for i in range(ng):
+        G[i,:] = G[i,:]*(numpy.power(si,n - 1)*float(n) + 1.0)/2.0
+    return g,G
+
+def ft_quad(ng, beta, quad):
+    if quad == 'lin':
+        return simpsons(ng, beta)
+    elif quad == 'ln':
+        return simpsons_ln(ng, beta)
+    elif quad == 'sin':
+        return simpsons_sin(ng, beta)
+    elif quad == 'exp':
+        return simpsons_exp(ng, beta)
+    elif quad == 'quad':
+        return simpsons_p(ng, beta, 2)
+    elif quad == 'cub':
+        return simpsons_p(ng, beta, 3)
+    elif quad == 'quar':
+        return simpsons_p(ng, beta, 4)
+    else:
+        raise Exception("Unrecognized quadrature rule: {}".format(quad))
+
+def d_ft_quad(ng, beta, quad):
+    if quad == 'lin':
+        return d_simpsons(ng, beta)
+    elif quad == 'ln':
+        return d_simpsons_ln(ng, beta)
+    elif quad == 'sin':
+        return d_simpsons_sin(ng, beta)
+    elif quad == 'exp':
+        return d_simpsons_exp(ng, beta)
+    elif quad == 'quad':
+        return d_simpsons_p(ng, beta, 2)
+    elif quad == 'cub':
+        return d_simpsons_p(ng, beta, 3)
+    elif quad == 'quar':
+        return d_simpsons_p(ng, beta, 4)
+    else:
+        raise Exception("Unrecognized quadrature rule: {}".format(quad))
 
 #def integrate_new(T,G,ng):
 #    shape = T.shape
