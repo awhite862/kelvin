@@ -119,6 +119,22 @@ def ccsd_stanton(F,I,T1old,T2old,D1,D2,ti,ng,G):
 
     return T1new,T2new
 
+def ccsd_stanton_single(ig,F,I,T1old,T2old,T1bar,T2bar,D1,D2,ti,ng,G):
+    t1 = time.time()
+
+    Id = numpy.ones((ng))
+    T1new = -F.vo
+    T2new = -I.vvoo
+
+    cc_equations._Stanton(T1new,T2new,F,I,T1old,T2old,fac=-1.0)
+
+    T1bar[ig] = T1new
+    T2bar[ig] = T2new
+
+    T1new = quadrature.int_tbar1_single(ng,ig,T1bar,ti,D1,G)
+    T2new = quadrature.int_tbar2_single(ng,ig,T2bar,ti,D2,G)
+    return T1new,T2new
+
 def uccsd_stanton(Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,T2aaold,T2abold,T2bbold,
         D1a,D1b,D2aa,D2ab,D2bb,ti,ng,G):
     """Time-dependent coupled cluster singles and

@@ -177,7 +177,7 @@ class LambdaTest(unittest.TestCase):
         m.conv_tol = 1e-13
         Escf = m.scf()
         sys = scf_system(m,0.0,0.0,orbtype='g')
-        ccsd0 = ccsd(sys,iprint=0,max_iter=44,econv=1e-12)
+        ccsd0 = ccsd(sys,iprint=0,max_iter=44,econv=1e-12,tconv=1e-10)
         Etot,Ecc = ccsd0.run()
         ccsd0._ccsd_lambda()
         outs = test_L1(ccsd0, self.thresh)

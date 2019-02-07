@@ -7,6 +7,7 @@ from cqcpy.ov_blocks import two_e_blocks_full
 from pyscf import lib
 from . import ft_cc_energy
 from . import ft_cc_equations
+from . import quadrature
 
 einsum = lib.einsum
 #einsum = einsum
@@ -45,7 +46,7 @@ def form_new_ampl(method, F, I, T1old, T2old, D1, D2, ti, ng, G):
 
     return T1,T2
 
-def form_new_ampl_u(method, Fa, Fb, Ia, Ib, Iabab, T1aold, T1bold, T2aaold, T2abold, T2bbold, 
+def form_new_ampl_u(method, Fa, Fb, Ia, Ib, Iabab, T1aold, T1bold, T2aaold, T2abold, T2bbold,
         D1a, D1b, D2aa, D2ab, D2bb, ti, ng, G):
     """Form new amplitudes.
 
@@ -80,7 +81,15 @@ def form_new_ampl_u(method, Fa, Fb, Ia, Ib, Iabab, T1aold, T1bold, T2aaold, T2ab
 
     return T1out,T2out
 
-def ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G, beta, ng, ti, 
+def form_new_ampl_extrap(ig,method,F,I,T1,T2,T1bar,T2bar,D1,D2,ti,ng,G):
+    if method == "CCSD":
+        T1,T2 = ft_cc_equations.ccsd_stanton_single(ig,F,I,T1,T2,
+                T1bar,T2bar,D1,D2,ti,ng,G)
+    else:
+        raise Exception("Unrecognized method keyword")
+    return T1,T2
+
+def ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G, beta, ng, ti,
         iprint, conv_options):
     """Form new amplitudes.
 
@@ -102,7 +111,8 @@ def ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G, beta, ng, ti,
     """
     tbeg = time.time()
     converged = False
-    thresh = conv_options["econv"]
+    ethresh = conv_options["econv"]
+    tthresh = conv_options["tconv"]
     max_iter = conv_options["max_iter"]
     alpha = conv_options["damp"]
     i = 0
@@ -129,7 +139,7 @@ def ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G, beta, ng, ti,
         if iprint > 0:
             print(' %2d  %.10f   %.4E' % (i+1,E,res1+res2))
         i = i + 1
-        if numpy.abs(E - Eold) < thresh:
+        if numpy.abs(E - Eold) < ethresh and res1+res2 < tthresh:
             converged = True
         Eold = E
 
@@ -142,7 +152,77 @@ def ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G, beta, ng, ti,
 
     return Eold,T1,T2
 
-def ft_ucc_iter(method, T1aold, T1bold, T2aaold, T2abold, T2bbold, Fa, Fb, Ia, Ib, Iabab, 
+def ft_cc_iter_extrap(method, F, I, D1, D2, g, G, beta, ng, ti,
+        iprint, conv_options):
+    """Form new amplitudes.
+
+    Arguments:
+        method (str): Amplitude equation type.
+        F (array): Fock matrix.
+        I (array): ERI tensor.
+        D1 (array): 1-electron denominators.
+        D2 (array): 2-electron denominators.
+        g (array): quadrature weight vector.
+        G (array): quadrature weight matrix.
+        beta (float): inverse temperature.
+        ti (array): time grid.
+        ng (int): number of time points.
+        iprint (int): print level.
+        conv_options (dict): Convergence options.
+    """
+    tbeg = time.time()
+    thresh = conv_options["tconv"]
+    max_iter = conv_options["max_iter"]
+    alpha = conv_options["damp"]
+
+    no,nv = F.ov.shape
+    t1bar = numpy.zeros((ng,nv,no))
+    t2bar = numpy.zeros((ng,nv,nv,no,no))
+    T1new = numpy.zeros((ng,nv,no))
+    T2new = numpy.zeros((ng,nv,nv,no,no))
+
+    # loop over grid points
+    for ig in range(ng):
+        if ig == 0:
+            t1bar[0] = -F.vo
+            t2bar[0] = -I.vvoo
+            continue # don't bother computing at T = inf
+        elif ig == 1:
+            t1bar[ig] = -F.vo
+            t2bar[ig] = -I.vvoo
+            T1new[ig] = quadrature.int_tbar1_single(ng,ig,t1bar,ti,D1,G)
+            T2new[ig] = quadrature.int_tbar2_single(ng,ig,t2bar,ti,D2,G)
+        else:
+            # linear extrapolation
+            T1new[ig] = T1new[ig - 1] + (T1new[ig - 2] - T1new[ig - 1])\
+                    *(ti[ig] - ti[ig - 1])/(ti[ig - 2] - ti[ig - 1])
+            T2new[ig] = T2new[ig - 1] + (T2new[ig - 2] - T2new[ig - 1])\
+                    *(ti[ig] - ti[ig - 1])/(ti[ig - 2] - ti[ig - 1])
+        converged = False
+        nl1 = numpy.sqrt(float(T1new[ig].size))
+        nl2 = numpy.sqrt(float(T2new[ig].size))
+        print("Time point {}".format(ig))
+        i = 0
+        while i < max_iter and not converged:
+            # form new T1 and T2
+            T1,T2 = form_new_ampl_extrap(ig,method,F,I,T1new[ig],T2new[ig],
+                    t1bar,t2bar,D1,D2,ti,ng,G)
+
+            res1 = numpy.linalg.norm(T1 - T1new[ig]) / nl1
+            res2 = numpy.linalg.norm(T2 - T2new[ig]) / nl2
+            # damp new T-amplitudes
+            T1new[ig] = alpha*T1new[ig] + (1.0 - alpha)*T1.copy()
+            T2new[ig] = alpha*T2new[ig] + (1.0 - alpha)*T2.copy()
+
+            # determine convergence
+            if iprint > 0:
+                print(' %2d  %.4E' % (i+1,res1+res2))
+            i = i + 1
+            if res1 + res2 < thresh:
+                converged = True
+    return T1new,T2new
+
+def ft_ucc_iter(method, T1aold, T1bold, T2aaold, T2abold, T2bbold, Fa, Fb, Ia, Ib, Iabab,
         D1a, D1b, D2aa, D2ab, D2bb, g, G, beta, ng, ti, iprint, conv_options):
     """Form new amplitudes.
 
@@ -164,7 +244,8 @@ def ft_ucc_iter(method, T1aold, T1bold, T2aaold, T2abold, T2bbold, Fa, Fb, Ia, I
     """
     tbeg = time.time()
     converged = False
-    thresh = conv_options["econv"]
+    ethresh = conv_options["econv"]
+    tthresh = conv_options["tconv"]
     max_iter = conv_options["max_iter"]
     alpha = conv_options["damp"]
     i = 0
@@ -203,7 +284,7 @@ def ft_ucc_iter(method, T1aold, T1bold, T2aaold, T2abold, T2bbold, Fa, Fb, Ia, I
         if iprint > 0:
             print(' %2d  %.10f   %.4E' % (i+1,E,res1+res2))
         i = i + 1
-        if numpy.abs(E - Eold) < thresh:
+        if numpy.abs(E - Eold) < ethresh and res1+res2 < tthresh:
             converged = True
         Eold = E
 
@@ -236,7 +317,7 @@ def ft_lambda_iter(method, L1old, L2old, T1, T2, F, I, D1, D2,
     """
     tbeg = time.time()
     converged = False
-    thresh = conv_options["econv"]
+    thresh = conv_options["tconv"]
     max_iter = conv_options["max_iter"]
     alpha = conv_options["damp"]
     i = 0
@@ -286,7 +367,7 @@ def ft_lambda_iter(method, L1old, L2old, T1, T2, F, I, D1, D2,
 
     return L1old,L2old
 
-def ft_ulambda_iter(method, L1ain, L1bin, L2aain, L2abin, L2bbin, T1aold, T1bold, 
+def ft_ulambda_iter(method, L1ain, L1bin, L2aain, L2abin, L2bbin, T1aold, T1bold,
         T2aaold, T2abold, T2bbold, Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb,
         g, G, beta, ng, ti, iprint, conv_options):
     """Form new amplitudes.
@@ -307,7 +388,7 @@ def ft_ulambda_iter(method, L1ain, L1bin, L2aain, L2abin, L2bbin, T1aold, T1bold
     """
     tbeg = time.time()
     converged = False
-    thresh = conv_options["econv"]
+    thresh = conv_options["tconv"]
     max_iter = conv_options["max_iter"]
     alpha = conv_options["damp"]
     na = D1a.shape[0]

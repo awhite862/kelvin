@@ -283,6 +283,30 @@ def int_L2(ng,L2old,ti,D2,g,G):
 
     return L2_out
 
+def int_tbar1_single(ng,ig,t1bar,ti,D1,G):
+    """Integrate t1bar with exponential factor."""
+    t1_out = numpy.zeros(t1bar.shape)
+    dt = numpy.zeros((ng))
+    for i in range(ig):
+        dt[i] = ti[i] - ti[ig]
+    gtemp = numpy.exp(dt[:,None,None]*D1[None,:,:])
+    t1_temp = gtemp*t1bar
+    t1_out = einsum('x,xai->ai',G[ig,:],t1_temp)
+
+    return t1_out
+
+def int_tbar2_single(ng,ig,t2bar,ti,D2,G):
+    """Integrate t1bar with exponential factor."""
+    t2_out = numpy.zeros(t2bar.shape)
+    dt = numpy.zeros((ng))
+    for i in range(ig):
+        dt[i] = ti[i] - ti[ig]
+    gtemp = numpy.exp(dt[:,None,None,None,None]*D2[None,:,:,:,:])
+    t2_temp = gtemp*t2bar
+    t2_out = einsum('x,xabij->abij',G[ig,:],t2_temp)
+
+    return t2_out
+
 def int_tbar1_keldysh(ngr,ngi,t1barf,t1barb,t1bari,tir,tii,D1,Gr,Gi):
     """Integrate t1bar with exponential factor."""
     t1_outf = numpy.zeros(t1barf.shape,dtype=complex)

@@ -24,6 +24,7 @@ class ccsd(object):
         iprint (int): Print level.
         singles (bool): Include singles (False -> CCD).
         econv (float): Energy difference convergence threshold.
+        tconv (float): Amplitude difference convergence threshold.
         max_iter (int): Max number of iterations.
         damp (float): Mixing parameter to damp iterations.
         ngrid (int): Number of grid points.
@@ -36,7 +37,7 @@ class ccsd(object):
         L2: Saved L2 amplitudes
     """
     def __init__(self, sys, T=0.0, mu=0.0, iprint=0,
-        singles=True, econv=1e-8, max_iter=40,
+        singles=True, econv=1e-8, tconv=None, max_iter=40,
         damp=0.0, ngrid=10, realtime=False, athresh=0.0, 
         quad='lin'):
 
@@ -46,6 +47,7 @@ class ccsd(object):
         self.iprint = iprint
         self.singles = singles
         self.econv = econv
+        self.tconv = tconv if tconv is not None else 1000.0*econv
         self.max_iter = max_iter
         self.damp = damp
         self.ngrid = ngrid
@@ -246,7 +248,6 @@ class ccsd(object):
 
         # run CC iterations
         converged = False
-        thresh = self.econv
         max_iter = self.max_iter
         i = 0
         Eold = 1000000
@@ -269,7 +270,7 @@ class ccsd(object):
             if self.iprint > 0:
                 print(' {:2d}  {:.10f}  {:.10f}'.format(i+1,E,res1+res2))
             i = i + 1
-            if numpy.abs(E - Eold) < thresh:
+            if numpy.abs(E - Eold) < self.econv and res1+res2 < self.tconv:
                 converged = True
             Eold = E
             T1old = T1
@@ -366,11 +367,12 @@ class ccsd(object):
 
         # run CC iterations
         converged = False
-        thresh = self.econv
         max_iter = self.max_iter
         i = 0
         Eold = 1000000
         alpha = self.damp
+        nl1 = numpy.sqrt(T1aold.size)
+        nl2 = numpy.sqrt(T2aaold.size)
         while i < max_iter and not converged:
             (T1a,T1b),(T2aa,T2ab,T2bb) = cc_equations.uccsd_stanton(Fa, Fb, Ia, Ib, Iabab, T1olds, T2olds)
             T1a = einsum('ai,ia->ai',T1a,Dova)
@@ -380,17 +382,22 @@ class ccsd(object):
             T2bb = einsum('abij,ijab->abij',T2bb,Doovvbb)
             E = cc_energy.ucc_energy((T1a,T1b),(T2aa,T2ab,T2bb),
                     Fa.ov,Fb.ov,Ia.oovv,Ib.oovv,Iabab.oovv)
-            if self.iprint > 0:
-                print(' %2d  %.10f' % (i+1,E))
-            i = i + 1
-            if numpy.abs(E - Eold) < thresh:
-                converged = True
-            Eold = E
+            res1 = numpy.linalg.norm(T1olds[0] - T1a)/nl1
+            res1 += numpy.linalg.norm(T1olds[1] - T1b)/nl1
+            res2 = numpy.linalg.norm(T2olds[0] - T2aa)/nl2
+            res2 += numpy.linalg.norm(T2olds[1] - T2ab)/nl2
+            res2 += numpy.linalg.norm(T2olds[2] - T2bb)/nl2
             T1a = alpha*T1olds[0] + (1.0 - alpha)*T1a
             T1b = alpha*T1olds[1] + (1.0 - alpha)*T1b
             T2aa = alpha*T2olds[0] + (1.0 - alpha)*T2aa
             T2ab = alpha*T2olds[1] + (1.0 - alpha)*T2ab
             T2bb = alpha*T2olds[2] + (1.0 - alpha)*T2bb
+            if self.iprint > 0:
+                print(' %2d  %.10f' % (i+1,E))
+            i = i + 1
+            if numpy.abs(E - Eold) < self.econv and res1+res2 < self.tconv:
+                converged = True
+            Eold = E
 
             T1olds = (T1a,T1b)
             T2olds = (T2aa,T2ab,T2bb)
@@ -445,7 +452,6 @@ class ccsd(object):
         converged = False
         nl1 = numpy.sqrt(L1old.size)
         nl2 = numpy.sqrt(L2old.size)
-        thresh = self.econv
         max_iter = self.max_iter
         i = 0
         while i < max_iter and not converged:
@@ -461,7 +467,7 @@ class ccsd(object):
             if self.iprint > 0:
                 print(' %2d  %.10f' % (i+1,res1 + res2))
             i = i + 1
-            if res1 + res2 < thresh:
+            if res1 + res2 < self.tconv:
                 converged = True
             L1old = L1
             L2old = L2
@@ -519,7 +525,6 @@ class ccsd(object):
 
         # run CC-Lambda iterations
         converged = False
-        thresh = self.econv
         max_iter = self.max_iter
         nl1 = numpy.sqrt(L1aold.size + L1bold.size)
         nl2 = numpy.sqrt(L2aaold.size + L2abold.size + L2bbold.size)
@@ -548,7 +553,7 @@ class ccsd(object):
             if self.iprint > 0:
                 print(' %2d  %.10f' % (i+1,res1 + res2))
             i = i + 1
-            if res1 + res2 < thresh:
+            if res1 + res2 < self.tconv:
                 converged = True
             L1aold = L1a
             L1bold = L1b
@@ -621,7 +626,11 @@ class ccsd(object):
 
         # run CC iterations
         method = "CCSD" if self.singles else "CCD"
-        conv_options = {"econv":self.econv, "max_iter":self.max_iter, "damp":self.damp}
+        conv_options = {
+                "econv":self.econv,
+                "tconv":self.tconv,
+                "max_iter":self.max_iter,
+                "damp":self.damp}
         Ecc,T1,T2 = cc_utils.ft_cc_iter(method, T1old, T2old, F, I, Dvo, Dvvoo,
                 g, G, beta_max, ng, ti, self.iprint, conv_options)
 
@@ -669,30 +678,40 @@ class ccsd(object):
         D2 = en[:,None,None,None] + en[None,:,None,None] \
                 - en[None,None,:,None] - en[None,None,None,:]
 
-        # get MP2 T-amplitudes
-        if T1in is not None and T2in is not None:
-            T1old = T1in if self.singles else numpy.zeros((ng,n,n))
-            T2old = T2in
-        else:
-            if self.singles:
-                Id = numpy.ones((ng))
-                T1old = -einsum('v,ai->vai',Id,F.vo)
-            else:
-                T1old = numpy.zeros((ng,n,n))
-            Id = numpy.ones((ng))
-            T2old = -einsum('v,abij->vabij',Id,I.vvoo)
-            T1old = quadrature.int_tbar1(ng,T1old,ti,D1,G)
-            T2old = quadrature.int_tbar2(ng,T2old,ti,D2,G)
-        E2 = ft_cc_energy.ft_cc_energy(T1old,T2old,
-            F.ov,I.oovv,g,beta,Qterm=False)
-        if self.iprint > 0:
-            print('MP2 Energy: {:.10f}'.format(E2))
-
-        # run CC iterations
         method = "CCSD" if self.singles else "CCD"
-        conv_options = {"econv":self.econv, "max_iter":self.max_iter, "damp":self.damp}
-        Eccn,T1,T2 = cc_utils.ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G,
-                beta, ng, ti, self.iprint, conv_options)
+        conv_options = {
+                "econv":self.econv,
+                "tconv":self.tconv,
+                "max_iter":self.max_iter,
+                "damp":self.damp}
+        if True:
+            # get MP2 T-amplitudes
+            if T1in is not None and T2in is not None:
+                T1old = T1in if self.singles else numpy.zeros((ng,n,n))
+                T2old = T2in
+            else:
+                if self.singles:
+                    Id = numpy.ones((ng))
+                    T1old = -einsum('v,ai->vai',Id,F.vo)
+                else:
+                    T1old = numpy.zeros((ng,n,n))
+                Id = numpy.ones((ng))
+                T2old = -einsum('v,abij->vabij',Id,I.vvoo)
+                T1old = quadrature.int_tbar1(ng,T1old,ti,D1,G)
+                T2old = quadrature.int_tbar2(ng,T2old,ti,D2,G)
+            E2 = ft_cc_energy.ft_cc_energy(T1old,T2old,
+                F.ov,I.oovv,g,beta,Qterm=False)
+            if self.iprint > 0:
+                print('MP2 Energy: {:.10f}'.format(E2))
+
+            # run CC iterations
+            Eccn,T1,T2 = cc_utils.ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G,
+                    beta, ng, ti, self.iprint, conv_options)
+        else:
+            T1,T2 = cc_utils.ft_cc_iter_extrap(method, F, I, D1, D2, g, G, beta, ng, ti,
+                    self.iprint, conv_options)
+            Eccn = ft_cc_energy.ft_cc_energy(T1,T2,
+                F.ov,I.oovv,g,beta)
 
         # save T amplitudes
         self.T1 = T1
@@ -782,7 +801,11 @@ class ccsd(object):
 
         # run CC iterations
         method = "CCSD" if self.singles else "CCD"
-        conv_options = {"econv":self.econv, "max_iter":self.max_iter, "damp":self.damp}
+        conv_options = {
+                "econv":self.econv,
+                "tconv":self.tconv,
+                "max_iter":self.max_iter,
+                "damp":self.damp}
         Eccn,T1,T2 = cc_utils.ft_ucc_iter(method, T1aold, T1bold, T2aaold, T2abold, T2bbold,
                 Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb,
                 g, G, beta, ng, ti, self.iprint, conv_options)
@@ -879,7 +902,11 @@ class ccsd(object):
 
         # run CC iterations
         method = "CCSD" if self.singles else "CCD"
-        conv_options = {"econv":self.econv, "max_iter":self.max_iter, "damp":self.damp}
+        conv_options = {
+                "econv":self.econv,
+                "tconv":self.tconv,
+                "max_iter":self.max_iter,
+                "damp":self.damp}
         Eccn,T1,T2 = cc_utils.ft_cc_iter(method, T1old, T2old, F, I, D1, D2,
                 g, G, beta, ng, ti, self.iprint, conv_options)
 
@@ -943,7 +970,11 @@ class ccsd(object):
                 L1old = L1
 
         # run lambda iterations
-        conv_options = {"econv":self.econv, "max_iter":self.max_iter, "damp":self.damp}
+        conv_options = {
+                "econv":self.econv,
+                "tconv":self.tconv,
+                "max_iter":self.max_iter,
+                "damp":self.damp}
         method = "CCSD" if self.singles else "CCD"
         L1,L2 = cc_utils.ft_lambda_iter(method, L1old, L2old, self.T1, self.T2, F, I,
                 D1, D2, g, G, beta, ng, ti, self.iprint, conv_options)
@@ -1023,7 +1054,11 @@ class ccsd(object):
                 L1bold = L1[1]
 
         # run lambda iterations
-        conv_options = {"econv":self.econv, "max_iter":self.max_iter, "damp":self.damp}
+        conv_options = {
+                "econv":self.econv,
+                "tconv":self.tconv,
+                "max_iter":self.max_iter,
+                "damp":self.damp}
         method = "CCSD" if self.singles else "CCD"
         L1a,L1b,L2aa,L2ab,L2bb = cc_utils.ft_ulambda_iter(
                 method, L1aold, L1bold, L2aaold, L2abold, L2bbold, T1aold, T1bold, 
