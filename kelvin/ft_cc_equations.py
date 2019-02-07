@@ -172,6 +172,34 @@ def uccsd_stanton(Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,T2aaold,T2abold,T2bbold,
 
     return (T1a,T1b),(T2aa,T2ab,T2bb)
 
+def uccsd_stanton_single(ig,Fa,Fb,Ia,Ib,Iabab,
+        T1a,T1b,T2aa,T2ab,T2bb,T1bara,T1barb,T2baraa,T2barab,T2barbb,
+        D1a,D1b,D2aa,D2ab,D2bb,ti,ng,G):
+    t1 = time.time()
+
+    #Id = numpy.ones((ng))
+    T1newa = -Fa.vo
+    T1newb = -Fb.vo
+    T2newaa = -Ia.vvoo
+    T2newbb = -Ib.vvoo
+    T2newab = -Iabab.vvoo
+
+    cc_equations._u_Stanton(T1newa,T1newb,T2newaa,T2newab,T2newbb,
+            Fa,Fb,Ia,Ib,Iabab,(T1a,T1b),(T2aa,T2ab,T2bb),fac=-1.0)
+
+    T1bara[ig] = T1newa
+    T1barb[ig] = T1newb
+    T2baraa[ig] = T2newaa
+    T2barab[ig] = T2newab
+    T2barbb[ig] = T2newbb
+
+    T1newa = quadrature.int_tbar1_single(ng,ig,T1bara,ti,D1a,G)
+    T1newb = quadrature.int_tbar1_single(ng,ig,T1barb,ti,D1b,G)
+    T2newaa = quadrature.int_tbar2_single(ng,ig,T2baraa,ti,D2aa,G)
+    T2newab = quadrature.int_tbar2_single(ng,ig,T2barab,ti,D2ab,G)
+    T2newbb = quadrature.int_tbar2_single(ng,ig,T2barbb,ti,D2bb,G)
+    return (T1newa,T1newb),(T2newaa,T2newab,T2newbb)
+
 def neq_ccsd_simple(Ff,Fb,F,I,T1oldf,T1oldb,T1oldi,
         T2oldf,T2oldb,T2oldi,D1,D2,tir,tii,ngr,ngi,Gr,Gi):
 

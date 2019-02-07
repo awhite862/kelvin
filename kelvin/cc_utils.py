@@ -89,6 +89,17 @@ def form_new_ampl_extrap(ig,method,F,I,T1,T2,T1bar,T2bar,D1,D2,ti,ng,G):
         raise Exception("Unrecognized method keyword")
     return T1,T2
 
+def form_new_ampl_extrap_u(ig,method,Fa,Fb,Ia,Ib,Iabab,
+        T1a,T1b,T2aa,T2ab,T2bb,T1bara,T1barb,T2baraa,T2barab,T2barbb,
+        D1a,D1b,D2aa,D2ab,D2bb,ti,ng,G):
+    if method == "CCSD":
+        T1,T2 = ft_cc_equations.uccsd_stanton_single(ig,Fa,Fb,Ia,Ib,Iabab,
+                T1a,T1b,T2aa,T2ab,T2bb,T1bara,T1barb,T2baraa,T2barab,T2barbb,
+                D1a,D1b,D2aa,D2ab,D2bb,ti,ng,G)
+    else:
+        raise Exception("Unrecognized method keyword")
+    return T1,T2
+
 def ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G, beta, ng, ti,
         iprint, conv_options):
     """Form new amplitudes.
@@ -201,7 +212,8 @@ def ft_cc_iter_extrap(method, F, I, D1, D2, g, G, beta, ng, ti,
         converged = False
         nl1 = numpy.sqrt(float(T1new[ig].size))
         nl2 = numpy.sqrt(float(T2new[ig].size))
-        print("Time point {}".format(ig))
+        if iprint > 0:
+            print("Time point {}".format(ig))
         i = 0
         while i < max_iter and not converged:
             # form new T1 and T2
@@ -296,6 +308,102 @@ def ft_ucc_iter(method, T1aold, T1bold, T2aaold, T2abold, T2bbold, Fa, Fb, Ia, I
         print("Total {} time: {:.4f} s".format(method,(tend - tbeg)))
 
     return Eold,(T1aold,T1bold),(T2aaold,T2abold,T2bbold)
+
+def ft_ucc_iter_extrap(method, Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb,
+        g, G, beta, ng, ti, iprint, conv_options):
+    """Form new amplitudes.
+
+    Arguments:
+        method (str): Amplitude equation type.
+        F (array): Fock matrix.
+        I (array): ERI tensor.
+        D1 (array): 1-electron denominators.
+        D2 (array): 2-electron denominators.
+        g (array): quadrature weight vector.
+        G (array): quadrature weight matrix.
+        beta (float): inverse temperature.
+        ti (array): time grid.
+        ng (int): number of time points.
+        iprint (int): print level.
+        conv_options (dict): Convergence options.
+    """
+    tbeg = time.time()
+    thresh = conv_options["tconv"]
+    max_iter = conv_options["max_iter"]
+    alpha = conv_options["damp"]
+
+    noa,nva = Fa.ov.shape
+    nob,nvb = Fb.ov.shape
+    t1bara = numpy.zeros((ng,nva,noa))
+    t1barb = numpy.zeros((ng,nvb,nob))
+    t2baraa = numpy.zeros((ng,nva,nva,noa,noa))
+    t2barab = numpy.zeros((ng,nva,nvb,noa,nob))
+    t2barbb = numpy.zeros((ng,nvb,nvb,nob,nob))
+    T1newa = numpy.zeros(t1bara.shape)
+    T1newb = numpy.zeros(t1barb.shape)
+    T2newaa = numpy.zeros(t2baraa.shape)
+    T2newab = numpy.zeros(t2barab.shape)
+    T2newbb = numpy.zeros(t2barbb.shape)
+
+    # loop over grid points
+    for ig in range(ng):
+        if ig == 0:
+            t1bara[0] = -Fa.vo
+            t1barb[0] = -Fb.vo
+            t2baraa[0] = -Ia.vvoo
+            t2barab[0] = -Iabab.vvoo
+            t2barbb[0] = -Ib.vvoo
+            continue # don't bother computing at T = inf
+        elif ig == 1:
+            t1bara[ig] = -Fa.vo
+            t1barb[ig] = -Fb.vo
+            t2baraa[ig] = -Ia.vvoo
+            t2barab[ig] = -Iabab.vvoo
+            t2barbb[ig] = -Ib.vvoo
+            T1newa[ig] = quadrature.int_tbar1_single(ng,ig,t1bara,ti,D1a,G)
+            T1newb[ig] = quadrature.int_tbar1_single(ng,ig,t1barb,ti,D1b,G)
+            T2newaa[ig] = quadrature.int_tbar2_single(ng,ig,t2baraa,ti,D2aa,G)
+            T2newab[ig] = quadrature.int_tbar2_single(ng,ig,t2barab,ti,D2ab,G)
+            T2newbb[ig] = quadrature.int_tbar2_single(ng,ig,t2barbb,ti,D2bb,G)
+        else:
+            # linear extrapolation
+            fac = (ti[ig] - ti[ig - 1])/(ti[ig - 2] - ti[ig - 1])
+            T1newa[ig] = T1newa[ig - 1] + (T1newa[ig - 2] - T1newa[ig - 1])*fac
+            T1newb[ig] = T1newb[ig - 1] + (T1newb[ig - 2] - T1newb[ig - 1])*fac
+            T2newaa[ig] = T2newaa[ig - 1] + (T2newaa[ig - 2] - T2newaa[ig - 1])*fac
+            T2newab[ig] = T2newab[ig - 1] + (T2newab[ig - 2] - T2newab[ig - 1])*fac
+            T2newbb[ig] = T2newbb[ig - 1] + (T2newbb[ig - 2] - T2newbb[ig - 1])*fac
+        converged = False
+        nl1 = numpy.sqrt(float(T1newa[ig].size))
+        nl2 = numpy.sqrt(float(T2newaa[ig].size))
+        if iprint > 0:
+            print("Time point {}".format(ig))
+        i = 0
+        while i < max_iter and not converged:
+            # form new T1 and T2
+            (T1a,T1b),(T2aa,T2ab,T2bb) = form_new_ampl_extrap_u(ig,method,Fa,Fb,Ia,Ib,Iabab,
+                    T1newa[ig],T1newb[ig],T2newaa[ig],T2newab[ig],T2newbb[ig],
+                    t1bara,t1barb,t2baraa,t2barab,t2barbb,D1a,D1b,D2aa,D2ab,D2bb,ti,ng,G)
+
+            res1 = numpy.linalg.norm(T1a - T1newa[ig]) / nl1
+            res1 += numpy.linalg.norm(T1b - T1newb[ig]) / nl1
+            res2 = numpy.linalg.norm(T2aa - T2newaa[ig]) / nl2
+            res2 += numpy.linalg.norm(T2ab - T2newab[ig]) / nl2
+            res2 += numpy.linalg.norm(T2bb - T2newbb[ig]) / nl2
+            # damp new T-amplitudes
+            T1newa[ig] = alpha*T1newa[ig] + (1.0 - alpha)*T1a.copy()
+            T1newb[ig] = alpha*T1newb[ig] + (1.0 - alpha)*T1b.copy()
+            T2newaa[ig] = alpha*T2newaa[ig] + (1.0 - alpha)*T2aa.copy()
+            T2newab[ig] = alpha*T2newab[ig] + (1.0 - alpha)*T2ab.copy()
+            T2newbb[ig] = alpha*T2newbb[ig] + (1.0 - alpha)*T2bb.copy()
+
+            # determine convergence
+            if iprint > 0:
+                print(' %2d  %.4E' % (i+1,res1+res2))
+            i = i + 1
+            if res1 + res2 < thresh:
+                converged = True
+    return (T1newa,T1newb),(T2newaa,T2newab,T2newbb)
 
 def ft_lambda_iter(method, L1old, L2old, T1, T2, F, I, D1, D2,
         g, G, beta, ng, ti, iprint, conv_options):

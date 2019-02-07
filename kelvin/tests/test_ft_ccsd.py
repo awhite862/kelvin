@@ -138,5 +138,39 @@ class FTCCSDTest(unittest.TestCase):
         diff = abs(self.ueg_ref - Ecc)
         error = "Expected: {}  Actual: {}".format(self.pueg_ref,Ecc)
 
+    def test_ueg_gen_conv(self):
+        T = 0.1
+        mu = 0.1
+        L = 2*numpy.pi/numpy.sqrt(1.0)
+        norb = 7
+        cut = 1.2
+        damp = 0.2
+        mi = 50
+        ueg = ueg_system(T,L,cut,mu=mu,norb=norb,orbtype='g')
+        ccsdT = ccsd(ueg,T=T,mu=mu,iprint=0,max_iter=mi,damp=damp,tconv=1e-8,ngrid=10)
+        Ecctot1,Ecc1 = ccsdT.run()
+        ccsdT = ccsd(ueg,T=T,mu=mu,iprint=0,max_iter=mi,damp=damp,tconv=1e-8,rt_iter="point")
+        Ecctot2,Ecc2 = ccsdT.run()
+        diff = abs(Ecc1 - Ecc2)
+        error = "Expected: {}  Actual: {}".format(Ecc1,Ecc2)
+        self.assertTrue(diff < 1e-8,error)
+
+    def test_ueg_conv(self):
+        T = 0.1
+        mu = 0.1
+        L = 2*numpy.pi/numpy.sqrt(1.0)
+        norb = 7
+        cut = 1.2
+        damp = 0.2
+        mi = 50
+        ueg = ueg_system(T,L,cut,mu=mu,norb=norb,orbtype='u')
+        ccsdT = ccsd(ueg,T=T,mu=mu,iprint=0,max_iter=mi,damp=damp,tconv=1e-8,ngrid=10)
+        Ecctot1,Ecc1 = ccsdT.run()
+        ccsdT = ccsd(ueg,T=T,mu=mu,iprint=0,max_iter=mi,damp=damp,tconv=1e-8,rt_iter="point")
+        Ecctot2,Ecc2 = ccsdT.run()
+        diff = abs(Ecc1 - Ecc2)
+        error = "Expected: {}  Actual: {}".format(Ecc1,Ecc2)
+        self.assertTrue(diff < 1e-8,error)
+
 if __name__ == '__main__':
     unittest.main()

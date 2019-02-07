@@ -31,6 +31,7 @@ class ccsd(object):
         realtime (bool): Force time-dependent formulation for zero T
         athresh (float): Threshold for ignoring small occupations
         quad (string): Transformation for quadrature rule
+        rt_iter (string): "all" or "point" for all-at-once or pointwise convergence
         T1: Saved T1 amplitudes
         T2: Saved T2 amplitudes
         L1: Saved L1 amplitudes
@@ -39,7 +40,7 @@ class ccsd(object):
     def __init__(self, sys, T=0.0, mu=0.0, iprint=0,
         singles=True, econv=1e-8, tconv=None, max_iter=40,
         damp=0.0, ngrid=10, realtime=False, athresh=0.0, 
-        quad='lin'):
+        quad='lin', rt_iter="all"):
 
         self.T = T
         self.mu = mu
@@ -54,6 +55,7 @@ class ccsd(object):
         self.realtime = realtime
         self.athresh = athresh
         self.quad = quad
+        self.rt_iter = rt_iter
         if self.finite_T:
             self.realtime = True
         if not sys.verify(self.T,self.mu):
@@ -684,7 +686,9 @@ class ccsd(object):
                 "tconv":self.tconv,
                 "max_iter":self.max_iter,
                 "damp":self.damp}
-        if True:
+        if self.rt_iter[0] == 'a' or T2in is not None:
+            if self.rt_iter[0] != 'a' and iprint > 0:
+                print("WARNING: Converngece scheme ({}) is being ignored.".format(self.rt_iter))
             # get MP2 T-amplitudes
             if T1in is not None and T2in is not None:
                 T1old = T1in if self.singles else numpy.zeros((ng,n,n))
@@ -768,47 +772,55 @@ class ccsd(object):
         D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
                 - eb[None,None,:,None] - eb[None,None,None,:]
 
-        # get MP2 T-amplitudes
-        if T1in is not None and T2in is not None:
-            T1aold = T1in[0] if self.singles else numpy.zeros((ng, na, na))
-            T1bold = T1in[1] if self.singles else numpy.zeros((ng, na, na))
-            T2aaold = T2in[0]
-            T2abold = T2in[1]
-            T2bbold = T2in[2]
-        else:
-            if self.singles:
-                Id = numpy.ones((ng))
-                T1aold = -einsum('v,ai->vai',Id,Fa.vo)
-                T1bold = -einsum('v,ai->vai',Id,Fb.vo)
-            else:
-                T1old = numpy.zeros((ng,n,n))
-            Id = numpy.ones((ng))
-            T2aaold = -einsum('v,abij->vabij',Id,Ia.vvoo)
-            T2abold = -einsum('v,abij->vabij',Id,Iabab.vvoo)
-            T2bbold = -einsum('v,abij->vabij',Id,Ib.vvoo)
-            T1aold = quadrature.int_tbar1(ng,T1aold,ti,D1a,G)
-            T1bold = quadrature.int_tbar1(ng,T1bold,ti,D1b,G)
-            T2aaold = quadrature.int_tbar2(ng,T2aaold,ti,D2aa,G)
-            T2abold = quadrature.int_tbar2(ng,T2abold,ti,D2ab,G)
-            T2bbold = quadrature.int_tbar2(ng,T2bbold,ti,D2bb,G)
-
-        # MP2 energy
-        E2 = ft_cc_energy.ft_ucc_energy(T1aold,T1bold,T2aaold,T2abold,T2bbold,
-            Fa.ov,Fb.ov,Ia.oovv,Ib.oovv,Iabab.oovv,g,beta,Qterm=False)
-        if self.iprint > 0:
-            print('MP2 Energy: {:.10f}'.format(E2))
-
-
-        # run CC iterations
         method = "CCSD" if self.singles else "CCD"
         conv_options = {
                 "econv":self.econv,
                 "tconv":self.tconv,
                 "max_iter":self.max_iter,
                 "damp":self.damp}
-        Eccn,T1,T2 = cc_utils.ft_ucc_iter(method, T1aold, T1bold, T2aaold, T2abold, T2bbold,
-                Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb,
-                g, G, beta, ng, ti, self.iprint, conv_options)
+        if self.rt_iter[0] == 'a' or T2in is not None:
+            if self.rt_iter[0] != 'a' and iprint > 0:
+                print("WARNING: Converngece scheme ({}) is being ignored.".format(self.rt_iter))
+            # get MP2 T-amplitudes
+            if T1in is not None and T2in is not None:
+                T1aold = T1in[0] if self.singles else numpy.zeros((ng, na, na))
+                T1bold = T1in[1] if self.singles else numpy.zeros((ng, na, na))
+                T2aaold = T2in[0]
+                T2abold = T2in[1]
+                T2bbold = T2in[2]
+            else:
+                if self.singles:
+                    Id = numpy.ones((ng))
+                    T1aold = -einsum('v,ai->vai',Id,Fa.vo)
+                    T1bold = -einsum('v,ai->vai',Id,Fb.vo)
+                else:
+                    T1old = numpy.zeros((ng,n,n))
+                Id = numpy.ones((ng))
+                T2aaold = -einsum('v,abij->vabij',Id,Ia.vvoo)
+                T2abold = -einsum('v,abij->vabij',Id,Iabab.vvoo)
+                T2bbold = -einsum('v,abij->vabij',Id,Ib.vvoo)
+                T1aold = quadrature.int_tbar1(ng,T1aold,ti,D1a,G)
+                T1bold = quadrature.int_tbar1(ng,T1bold,ti,D1b,G)
+                T2aaold = quadrature.int_tbar2(ng,T2aaold,ti,D2aa,G)
+                T2abold = quadrature.int_tbar2(ng,T2abold,ti,D2ab,G)
+                T2bbold = quadrature.int_tbar2(ng,T2bbold,ti,D2bb,G)
+
+            # MP2 energy
+            E2 = ft_cc_energy.ft_ucc_energy(T1aold,T1bold,T2aaold,T2abold,T2bbold,
+                Fa.ov,Fb.ov,Ia.oovv,Ib.oovv,Iabab.oovv,g,beta,Qterm=False)
+            if self.iprint > 0:
+                print('MP2 Energy: {:.10f}'.format(E2))
+
+
+            # run CC iterations
+            Eccn,T1,T2 = cc_utils.ft_ucc_iter(method, T1aold, T1bold, T2aaold, T2abold, T2bbold,
+                    Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb,
+                    g, G, beta, ng, ti, self.iprint, conv_options)
+        else:
+            T1,T2 = cc_utils.ft_ucc_iter_extrap(method, Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb,
+                    g, G, beta, ng, ti, self.iprint, conv_options)
+            Eccn = ft_cc_energy.ft_ucc_energy(T1[0], T1[1], T2[0], T2[1], T2[2],
+                Fa.ov,Fb.ov,Ia.oovv,Ib.oovv,Iabab.oovv,g,beta)
 
         # save T amplitudes
         self.T1 = T1

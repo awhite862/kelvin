@@ -44,6 +44,8 @@ def full_suite():
     suite.addTest(test_ft_ccsd.FTCCSDTest("test_ueg_gen"))
     suite.addTest(test_ft_ccsd.FTCCSDTest("test_ueg"))
     suite.addTest(test_ft_ccsd.FTCCSDTest("test_pueg"))
+    suite.addTest(test_ft_ccsd.FTCCSDTest("test_ueg_gen_conv"))
+    suite.addTest(test_ft_ccsd.FTCCSDTest("test_ueg_conv"))
 
     suite.addTest(test_ft_ccsd_rdm.FTCCSD_RDMTest("test_dia"))
     suite.addTest(test_ft_ccsd_rdm.FTCCSD_RDMTest("test_dba"))
@@ -150,6 +152,8 @@ def default_suite():
     suite.addTest(test_ft_ccsd.FTCCSDTest("test_ueg"))
     #suite.addTest(test_ft_ccsd.FTCCSDTest("test_ueg_gen"))
     suite.addTest(test_ft_ccsd.FTCCSDTest("test_pueg"))
+    suite.addTest(test_ft_ccsd.FTCCSDTest("test_ueg_gen_conv"))
+    suite.addTest(test_ft_ccsd.FTCCSDTest("test_ueg_conv"))
 
     suite.addTest(test_ft_ccsd_rdm.FTCCSD_RDMTest("test_dia"))
     suite.addTest(test_ft_ccsd_rdm.FTCCSD_RDMTest("test_dba"))
