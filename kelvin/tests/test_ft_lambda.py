@@ -2,6 +2,7 @@ import unittest
 import numpy
 from pyscf import gto, scf, cc
 from cqcpy import spin_utils
+from cqcpy import test_utils
 from kelvin.ccsd import ccsd
 from kelvin.scf_system import scf_system
 from kelvin import cc_utils
@@ -159,6 +160,73 @@ class FTLambdaTest(unittest.TestCase):
         out = test_L1(nccsdT, self.thresh)
         self.assertTrue(out[1],out[0])
 
+    def test_Be_deriv(self):
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+        m = scf.RHF(mol)
+        m.conv_tol = 1e-13
+        Escf = m.scf()
+        ng = 10
+        T = self.T
+        mu = self.mu
+        sys = scf_system(m,T,mu,orbtype='g')
+        cc = ccsd(sys,T=T,mu=mu,iprint=0,max_iter=44,ngrid=ng,econv=1e-12)
+        Etot,Ecc = cc.run()
+        n = sys.g_energies_tot().shape[0]
+        G = cc.G
+        g = cc.g
+        ti = cc.ti
+
+        # random Lambda amplitudes
+        L1,L2 = test_utils.make_random_ft_T(ng,n)
+
+        # compute derivative from L
+        T = cc.T
+        beta = 1.0 / (T + 1e-12)
+        en = cc.sys.g_energies_tot()
+        D1 = en[:,None] - en[None,:]
+        D2 = en[:,None,None,None] + en[None,:,None,None] \
+                - en[None,None,:,None] - en[None,None,None,:]
+        F,I = cc_utils.get_ft_integrals(sys, en, beta, mu)
+        dT1 = numpy.zeros((ng,n,n))
+        for y in range(ng):
+            for i in range(n):
+                for a in range(n):
+                    d = 1.e-4
+                    TF = cc.T1.copy()
+                    TB = cc.T1.copy()
+                    TF[y,a,i] += d
+                    TB[y,a,i] -= d
+                    EF = ft_cc_energy.ft_cc_energy(TF,cc.T2,F.ov,I.oovv,g,beta)
+                    EB = ft_cc_energy.ft_cc_energy(TB,cc.T2,F.ov,I.oovv,g,beta)
+                    TF1,TF2 = ft_cc_equations.ccsd_stanton(F,I,TF,cc.T2,D1,D2,ti,ng,G)
+                    TB1,TB2 = ft_cc_equations.ccsd_stanton(F,I,TB,cc.T2,D1,D2,ti,ng,G)
+                    TF2 -= cc.T2
+                    TB2 -= cc.T2
+                    TF1 -= TF
+                    TB1 -= TB
+                    TEf = 0.25*numpy.einsum('yijab,yabij->y',L2, TF2)
+                    TEb = 0.25*numpy.einsum('yijab,yabij->y',L2, TB2)
+                    TEf += numpy.einsum('yia,yai->y',L1,TF1)
+                    TEb += numpy.einsum('yia,yai->y',L1,TB1)
+                    Tef = (1.0/beta)*numpy.einsum('y,y->',TEf,g)
+                    Teb = (1.0/beta)*numpy.einsum('y,y->',TEb,g)
+                    fw = EF + Tef
+                    bw = EB + Teb
+                    dT1[y,a,i] = (fw - bw)/(2*d)
+
+        # compute derivative from Lambda equations
+        dT1L = numpy.zeros((ng,n,n))
+        dT1L,L2n = ft_cc_equations.ccsd_lambda_simple(F,I,cc.T1,cc.T2,L1,L2,D1,D2,ti,ng,g,G,beta)
+        dT1L -= L1
+        dT1L = dT1L.transpose((0,2,1))
+        for y in range(ng):
+            dT1L[y] *= g[y]/beta
+
+        diff = numpy.linalg.norm(dT1L - dT1)/numpy.sqrt(dT1L.size)
+        self.assertTrue(diff < 1e-8)
 
 if __name__ == '__main__':
     unittest.main()
