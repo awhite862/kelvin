@@ -85,7 +85,7 @@ class FTCCSDTest(unittest.TestCase):
         Escf = m.scf()
         T = 0.02
         mu = 0.0
-        sys = scf_system(m,T,mu)
+        sys = scf_system(m,T,mu,orbtype='g') # TODO change orbtype to u
         ccsdT = ccsd(
                 sys,iprint=0,singles=True,T=T,mu=mu,damp=0.1,
                 max_iter=80,ngrid=160,athresh=1e-30)

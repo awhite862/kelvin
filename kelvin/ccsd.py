@@ -80,18 +80,15 @@ class ccsd(object):
             if self.iprint > 0:
                 print('Running CCSD at an electronic temperature of %f K'
                     % ft_utils.HtoK(self.T))
-            if self.athresh > 0.0:
-                return self._ft_ccsd_active(T1in=T1,T2in=T2)
+            if self.sys.has_u():
+                return self._ft_uccsd(T1in=T1,T2in=T2)
             else:
-                if self.sys.has_u():
-                    return self._ft_uccsd(T1in=T1,T2in=T2)
-                else:
-                    return self._ft_ccsd(T1in=T1,T2in=T2)
+                return self._ft_ccsd(T1in=T1,T2in=T2)
         else:
             if self.iprint > 0:
                 print('Running CCSD at zero Temperature')
             if self.realtime:
-                return self._ccsd_rt()
+                return self._ft_ccsd()
             else:
                 if self.sys.has_u():
                     return self._uccsd(T1in=T1,T2in=T2)
@@ -575,78 +572,11 @@ class ccsd(object):
         self.L2 = (L2aaold,L2abold,L2bbold)
         tend = time.time()
 
-    def _ccsd_rt(self,T1in=None,T2in=None):
-        """Solve CCSD equations at zero temperature with time-dependent 
-        formulation.
-        """
-        # create energies in spin-orbital basis
-        eo,ev = self.sys.g_energies()
-        no = eo.shape[0]
-        nv = ev.shape[0]
-        Dvo = (ev[:,None] - eo[None,:])
-        Dvvoo = (ev[:,None,None,None] + ev[None,:,None,None]
-            - eo[None,None,:,None] - eo[None,None,None,:])
-
-        # get time-grid
-        beta_max = self._beta_max
-        ng = self.ngrid
-        ti = self.ti
-        G = self.G
-        g = self.g
-
-        # get HF energy
-        En = self.sys.const_energy()
-        E0 = zt_mp.mp0(eo) + En
-        E1 = self.sys.get_mp1()
-        Ehf = E0 + E1
-
-        # get Fock matrix
-        F = self.sys.g_fock()
-        F.oo = F.oo - numpy.diag(eo) # subtract diagonal
-        F.vv = F.vv - numpy.diag(ev) # subtract diagonal
-
-        # get ERIs
-        I = self.sys.g_aint()
-
-        # get MP2 T-amplitudes
-        Id = numpy.ones(ng)
-        if T1in is not None and T2in is not None:
-            T1old = T1in if self.singles else numpy.zeros((ng,n,n))
-            T2old = T2in
-        else:
-            if self.singles:
-                T1old = -einsum('v,ai->vai',Id,F.vo)
-                T1old = quadrature.int_tbar1(ng,T1old,ti,Dvo,G)
-            else:
-                T1old = numpy.zeros((ng,nr,no))
-            T2old = -einsum('v,abij->vabij',Id,I.vvoo)
-            T2old = quadrature.int_tbar2(ng,T2old,ti,Dvvoo,G)
-        E2 = ft_cc_energy.ft_cc_energy(T1old,T2old,
-            F.ov,I.oovv,g,beta_max,Qterm=False)
-        if self.iprint > 0:
-            print('MP2 energy: {:.10f}'.format(E2))
-
-        # run CC iterations
-        method = "CCSD" if self.singles else "CCD"
-        conv_options = {
-                "econv":self.econv,
-                "tconv":self.tconv,
-                "max_iter":self.max_iter,
-                "damp":self.damp}
-        Ecc,T1,T2 = cc_utils.ft_cc_iter(method, T1old, T2old, F, I, Dvo, Dvvoo,
-                g, G, beta_max, ng, ti, self.iprint, conv_options)
-
-        # save T amplitudes
-        self.T1 = T1
-        self.T2 = T2
-
-        return (Ecc+Ehf,Ecc)
-
     def _ft_ccsd(self,T1in=None,T2in=None):
         """Solve finite temperature coupled cluster equations."""
-        T = self.T
-        beta = 1.0 / (T + 1e-12)
-        mu = self.mu
+        #T = self.T if not self.realtime else 1.0e-5
+        beta = 1.0 / (self.T + 1e-12) if self.finite_T else self._beta_max
+        mu = self.mu if self.finite_T else None
 
         # get time-grid
         ng = self.ngrid
@@ -654,31 +584,84 @@ class ccsd(object):
         G = self.G
         g = self.g
 
-        # get orbital energies
-        en = self.sys.g_energies_tot()
-
         # compute requisite memory
-        n = en.shape[0]
-        mem1e = 6*n*n + 3*ng*n*n
-        mem2e = 3*n*n*n*n + 5*ng*n*n*n*n
-        mem_mb = (mem1e + mem2e)*8.0/1024.0/1024.0
-        if self.iprint > 0:
-            print('  FT-CCSD will use %f mb' % mem_mb)
+        #n = en.shape[0]
+        #mem1e = 6*n*n + 3*ng*n*n
+        #mem2e = 3*n*n*n*n + 5*ng*n*n*n*n
+        #mem_mb = (mem1e + mem2e)*8.0/1024.0/1024.0
+        #if self.iprint > 0:
+        #    print('  FT-CCSD will use %f mb' % mem_mb)
 
-        # get 0th and 1st order contributions
-        En = self.sys.const_energy()
-        g0 = ft_utils.GP0(beta, en, mu)
-        E0 = ft_mp.mp0(g0) + En
-        E1 = self.sys.get_mp1()
-        E01 = E0 + E1
+        if not self.finite_T:
+            # create energies in spin-orbital basis
+            eo,ev = self.sys.g_energies()
+            no = eo.shape[0]
+            nv = ev.shape[0]
+            D1 = (ev[:,None] - eo[None,:])
+            D2 = (ev[:,None,None,None] + ev[None,:,None,None]
+                - eo[None,None,:,None] - eo[None,None,None,:])
 
-        # get scaled integrals
-        F,I = cc_utils.get_ft_integrals(self.sys, en, beta, mu)
+            # get HF energy
+            En = self.sys.const_energy()
+            E0 = zt_mp.mp0(eo) + En
+            E1 = self.sys.get_mp1()
+            E01 = E0 + E1
 
-        # get energy differences
-        D1 = en[:,None] - en[None,:]
-        D2 = en[:,None,None,None] + en[None,:,None,None] \
-                - en[None,None,:,None] - en[None,None,None,:]
+            # get Fock matrix
+            F = self.sys.g_fock()
+            F.oo = F.oo - numpy.diag(eo) # subtract diagonal
+            F.vv = F.vv - numpy.diag(ev) # subtract diagonal
+
+            # get ERIs
+            I = self.sys.g_aint()
+        else:
+            # get orbital energies
+            en = self.sys.g_energies_tot()
+            fo = ft_utils.ff(beta, en, mu)
+            fv = ft_utils.ffv(beta, en, mu)
+            n = en.shape[0]
+
+            # get 0th and 1st order contributions
+            En = self.sys.const_energy()
+            g0 = ft_utils.GP0(beta, en, mu)
+            E0 = ft_mp.mp0(g0) + En
+            E1 = self.sys.get_mp1()
+            E01 = E0 + E1
+            if self.athresh > 0.0:
+                athresh = self.athresh
+                focc = [x for x in fo if x > athresh]
+                fvir = [x for x in fv if x > athresh]
+                iocc = [i for i,x in enumerate(fo) if x > athresh]
+                ivir = [i for i,x in enumerate(fv) if x > athresh]
+                nocc = len(focc)
+                nvir = len(fvir)
+                nact = nocc + nvir - n
+                ncor = nocc - nact
+                nvvv = nvir - nact
+                if self.iprint > 0:
+                    print("FT-CCSD orbital info:")
+                    print('  nocc: {:d}'.format(nocc))
+                    print('  nvir: {:d}'.format(nvir))
+                    print('  nact: {:d}'.format(nact))
+
+                # get scaled active space integrals
+                F,I = cc_utils.get_ft_active_integrals(self.sys, en, focc, fvir, iocc, ivir)
+
+                # get exponentials
+                D1 = en[:,None] - en[None,:]
+                D2 = en[:,None,None,None] + en[None,:,None,None] \
+                        - en[None,None,:,None] - en[None,None,None,:]
+                D1 = D1[numpy.ix_(ivir,iocc)]
+                D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
+
+            else:
+                # get scaled integrals
+                F,I = cc_utils.get_ft_integrals(self.sys, en, beta, mu)
+
+                # get energy differences
+                D1 = en[:,None] - en[None,:]
+                D2 = en[:,None,None,None] + en[None,:,None,None] \
+                        - en[None,None,:,None] - en[None,None,None,:]
 
         method = "CCSD" if self.singles else "CCD"
         conv_options = {
@@ -779,7 +762,7 @@ class ccsd(object):
                 "max_iter":self.max_iter,
                 "damp":self.damp}
         if self.rt_iter[0] == 'a' or T2in is not None:
-            if self.rt_iter[0] != 'a' and iprint > 0:
+            if self.rt_iter[0] != 'a':
                 print("WARNING: Converngece scheme ({}) is being ignored.".format(self.rt_iter))
             # get MP2 T-amplitudes
             if T1in is not None and T2in is not None:
@@ -829,102 +812,6 @@ class ccsd(object):
         self.G1 = E1
         self.Gcc = Eccn
         self.Gtot = E0 + E1 + Eccn
-
-        return (Eccn+E01,Eccn)
-
-    def _ft_ccsd_active(self,T1in=None,T2in=None):
-        """Solve finite temperature coupled cluster equations with some 
-        frozen occupations.
-        """
-        T = self.T
-        beta = 1.0 / (T + 1e-12)
-        mu = self.mu
-
-        # get time-grid
-        ng = self.ngrid
-        ti = self.ti
-        G = self.G
-        g = self.g
-
-        # get energies and occupation numbers
-        en = self.sys.g_energies_tot()
-        fo = ft_utils.ff(beta, en, mu)
-        fv = ft_utils.ffv(beta, en, mu)
-
-        # compute active space
-        n = en.shape[0]
-        athresh = self.athresh
-        focc = [x for x in fo if x > athresh]
-        fvir = [x for x in fv if x > athresh]
-        iocc = [i for i,x in enumerate(fo) if x > athresh]
-        ivir = [i for i,x in enumerate(fv) if x > athresh]
-        nocc = len(focc)
-        nvir = len(fvir)
-        nact = nocc + nvir - n
-        ncor = nocc - nact
-        nvvv = nvir - nact
-        if self.iprint > 0:
-            print("FT-CCSD orbital info:")
-            print('  nocc: {:d}'.format(nocc))
-            print('  nvir: {:d}'.format(nvir))
-            print('  nact: {:d}'.format(nact))
-
-        # compute requisite memory
-        mem1e = 6*n*n + 3*ng*n*n
-        mem2e = 3*n*n*n*n + 5*ng*n*n*n*n
-        mem_mb = (mem1e + mem2e)*8.0/1024.0/1024.0
-        if self.iprint > 0:
-            print('  FT-CCSD will use %f mb' % mem_mb)
-
-        # get 0th and 1st order contributions
-        En = self.sys.const_energy()
-        g0 = ft_utils.GP0(beta, en, mu)
-        E0 = ft_mp.mp0(g0) + En
-        E1 = self.sys.get_mp1()
-        E01 = E0 + E1
-
-        # get scaled active space integrals
-        F,I = cc_utils.get_ft_active_integrals(self.sys, en, focc, fvir, iocc, ivir)
-
-        # get exponentials
-        D1 = en[:,None] - en[None,:]
-        D2 = en[:,None,None,None] + en[None,:,None,None] \
-                - en[None,None,:,None] - en[None,None,None,:]
-        D1 = D1[numpy.ix_(ivir,iocc)]
-        D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
-
-        # get MP2 T-amplitudes
-        if T1in is not None and T2in is not None:
-            T1old = T1in if self.singles else numpy.zeros((ng,n,n))
-            T2old = T2in
-        else:
-            if self.singles:
-                Id = numpy.ones((ng))
-                T1old = -einsum('v,ai->vai',Id,F.vo)
-            else:
-                T1old = numpy.zeros((ng,nvir,nocc))
-            Id = numpy.ones((ng))
-            T2old = -einsum('v,abij->vabij',Id,I.vvoo)
-            T1old = quadrature.int_tbar1(ng,T1old,ti,D1,G)
-            T2old = quadrature.int_tbar2(ng,T2old,ti,D2,G)
-        E2 = ft_cc_energy.ft_cc_energy(T1old,T2old,
-            F.ov,I.oovv,g,beta,Qterm=False)
-        if self.iprint > 0:
-            print('MP2 Energy: {:.10f}'.format(E2))
-
-        # run CC iterations
-        method = "CCSD" if self.singles else "CCD"
-        conv_options = {
-                "econv":self.econv,
-                "tconv":self.tconv,
-                "max_iter":self.max_iter,
-                "damp":self.damp}
-        Eccn,T1,T2 = cc_utils.ft_cc_iter(method, T1old, T2old, F, I, D1, D2,
-                g, G, beta, ng, ti, self.iprint, conv_options)
-
-        # save T amplitudes
-        self.T1 = T1
-        self.T2 = T2
 
         return (Eccn+E01,Eccn)
 
@@ -1372,6 +1259,14 @@ class ccsd(object):
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
                 - en[None,None,:,None] - en[None,None,None,:]
+        if self.athresh > 0.0:
+            athresh = self.athresh
+            focc = [x for x in fo if x > athresh]
+            fvir = [x for x in fv if x > athresh]
+            iocc = [i for i,x in enumerate(fo) if x > athresh]
+            ivir = [i for i,x in enumerate(fv) if x > athresh]
+            D1 = D1[numpy.ix_(ivir,iocc)]
+            D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
 
         pia,pba,pji,pai = ft_cc_equations.ccsd_1rdm(
                 self.T1,self.T2,self.L1,self.L2,D1,D2,ti,ng,self.g,self.G)
@@ -1399,6 +1294,14 @@ class ccsd(object):
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
                 - en[None,None,:,None] - en[None,None,None,:]
+        if self.athresh > 0.0:
+            athresh = self.athresh
+            focc = [x for x in fo if x > athresh]
+            fvir = [x for x in fv if x > athresh]
+            iocc = [i for i,x in enumerate(fo) if x > athresh]
+            ivir = [i for i,x in enumerate(fv) if x > athresh]
+            D1 = D1[numpy.ix_(ivir,iocc)]
+            D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
 
         P2 = ft_cc_equations.ccsd_2rdm(
                 self.T1,self.T2,self.L1,self.L2,D1,D2,ti,ng,self.g,self.G)
