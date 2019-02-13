@@ -1,6 +1,7 @@
 import unittest
 import numpy
 from pyscf import gto, scf, cc
+from cqcpy import ft_utils
 from cqcpy import spin_utils
 from cqcpy import test_utils
 from kelvin.ccsd import ccsd
@@ -18,15 +19,31 @@ def test_L1(cc,thresh):
     ng = cc.ngrid
     ti,g,G = quadrature.simpsons(ng, beta)
     en = cc.sys.g_energies_tot()
-    D1 = en[:,None] - en[None,:]
-    D2 = en[:,None,None,None] + en[None,:,None,None] \
-            - en[None,None,:,None] - en[None,None,None,:]
-    F,I = cc_utils.get_ft_integrals(cc.sys, en, beta, mu)
-    n = cc.L2.shape[1]
+    fo = ft_utils.ff(beta, en, mu)
+    fv = ft_utils.ffv(beta, en, mu)
+    if cc.athresh > 0.0:
+        athresh = cc.athresh
+        focc = [x for x in fo if x > athresh]
+        fvir = [x for x in fv if x > athresh]
+        iocc = [i for i,x in enumerate(fo) if x > athresh]
+        ivir = [i for i,x in enumerate(fv) if x > athresh]
+        F,I = cc_utils.get_ft_active_integrals(cc.sys, en, focc, fvir, iocc, ivir)
+
+        D1 = en[:,None] - en[None,:]
+        D2 = en[:,None,None,None] + en[None,:,None,None] \
+                - en[None,None,:,None] - en[None,None,None,:]
+        D1 = D1[numpy.ix_(ivir,iocc)]
+        D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
+    else:
+        D1 = en[:,None] - en[None,:]
+        D2 = en[:,None,None,None] + en[None,:,None,None] \
+                - en[None,None,:,None] - en[None,None,None,:]
+        F,I = cc_utils.get_ft_integrals(cc.sys, en, beta, mu)
+    ng,no,nv = cc.L1.shape
     d = 1e-4
     for y in range(ng):
-        for i in range(n):
-            for a in range(n):
+        for i in range(no):
+            for a in range(nv):
                 TF = cc.T1.copy()
                 TB = cc.T1.copy()
                 TF[y,a,i] += d
@@ -121,6 +138,23 @@ class FTLambdaTest(unittest.TestCase):
         Etot,Ecc = ccsdT.run()
         ccsdT._ft_ccsd_lambda()
         out = test_L1(ccsdT, self.thresh)
+        self.assertTrue(out[1],out[0]) 
+
+    def test_Be_sto3g_gen_active(self):
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+        m = scf.RHF(mol)
+        m.conv_tol = 1e-13
+        Escf = m.scf()
+        T = 0.03
+        mu = 0.0
+        sys = scf_system(m,T,mu,orbtype='g')
+        ccsdT = ccsd(sys,T=T,mu=mu,iprint=0,damp=0.45,max_iter=240,ngrid=25,econv=1e-10,tconv=1e-9,athresh=1e-20)
+        Etot,Ecc = ccsdT.run()
+        ccsdT._ft_ccsd_lambda()
+        out = test_L1(ccsdT, 1e-7)
         self.assertTrue(out[1],out[0]) 
 
     def test_Be_sto3g(self):

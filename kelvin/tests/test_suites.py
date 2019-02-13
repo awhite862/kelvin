@@ -69,6 +69,7 @@ def full_suite():
     suite.addTest(test_ft_deriv.FTDerivTest("test_PUEG"))
 
     suite.addTest(test_ft_lambda.FTLambdaTest("test_Be_sto3g_gen"))
+    suite.addTest(test_ft_lambda.FTLambdaTest("test_Be_sto3g_gen_active"))
     suite.addTest(test_ft_lambda.FTLambdaTest("test_Be_sto3g"))
     suite.addTest(test_ft_lambda.FTLambdaTest("test_Be_deriv"))
 
@@ -178,6 +179,7 @@ def default_suite():
     suite.addTest(test_ft_deriv.FTDerivTest("test_PUEG"))
 
     #suite.addTest(test_ft_lambda.FTLambdaTest("test_Be_sto3g_gen"))
+    #suite.addTest(test_ft_lambda.FTLambdaTest("test_Be_sto3g_gen_active"))
     #suite.addTest(test_ft_lambda.FTLambdaTest("test_Be_sto3g"))
     #suite.addTest(test_ft_lambda.FTLambdaTest("test_Be_deriv"))
 

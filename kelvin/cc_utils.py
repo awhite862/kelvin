@@ -596,7 +596,8 @@ def get_ft_integrals(sys, en, beta, mu):
         return F,I
 
 def get_ft_integrals_neq(sys, en, beta, mu):
-        """Return one and two-electron integrals in the general spin orbital basis."""
+        """Return one and two-electron integrals in the general spin orbital basis
+        including real-time component."""
         fo = ft_utils.ff(beta, en, mu)
         fv = ft_utils.ffv(beta, en, mu)
 
@@ -718,7 +719,7 @@ def get_uft_integrals(sys, ea, eb, beta, mu):
 
 def get_ft_active_integrals(sys, en, focc, fvir, iocc, ivir):
         """Return one and two-electron integrals in the general spin orbital basis
-        with different ."""
+        with small occupations excluded."""
         # get FT Fock matrix
         fmo = sys.g_fock_tot()
         fmo = fmo - numpy.diag(en)
@@ -748,7 +749,8 @@ def get_ft_active_integrals(sys, en, focc, fvir, iocc, ivir):
         return F,I
 
 def get_ft_d_integrals(sys, en, fo, fv, dvec):
-        """form integrals contracted with derivatives of occupation numbers.""" 
+        """form integrals contracted with derivatives of occupation numbers in the
+        spin-orbital basis."""
 
         # get FT Fock matrix
         fmo = sys.g_fock_tot()
@@ -790,7 +792,7 @@ def get_ft_d_integrals(sys, en, fo, fv, dvec):
         return F,I
 
 def u_ft_d_integrals(sys, ea, eb, foa, fob, fva, fvb, dveca, dvecb):
-        """form integrals contracted with derivatives of occupation numbers."""
+        """form unrestricted integrals contracted with derivatives of occupation numbers."""
         na = ea.shape[0]
         nb = eb.shape[0]
 

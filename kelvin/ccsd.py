@@ -817,8 +817,8 @@ class ccsd(object):
 
     def _ft_ccsd_lambda(self, L1=None, L2=None):
         """Solve FT-CCSD Lambda equations."""
-        T = self.T
-        beta = 1.0 / (T + 1e-12)
+        #T = self.T
+        beta = 1.0 / (self.T + 1e-12)
         mu = self.mu
 
         # get time-grid
@@ -829,30 +829,60 @@ class ccsd(object):
 
         # get energies and occupation numbers
         en = self.sys.g_energies_tot()
+        n = en.shape[0]
+        fo = ft_utils.ff(beta, en, mu)
+        fv = ft_utils.ffv(beta, en, mu)
 
         # compute requisite memory
-        n = en.shape[0]
-        mem1e = 6*n*n + 3*ng*n*n
-        mem2e = 3*n*n*n*n + 5*ng*n*n*n*n
-        mem_mb = (mem1e + mem2e)*8.0/1024.0/1024.0
-        if self.iprint > 0:
-            print('  FT-CCSD will use %f mb' % mem_mb)
+        #n = en.shape[0]
+        #mem1e = 6*n*n + 3*ng*n*n
+        #mem2e = 3*n*n*n*n + 5*ng*n*n*n*n
+        #mem_mb = (mem1e + mem2e)*8.0/1024.0/1024.0
+        #if self.iprint > 0:
+        #    print('  FT-CCSD will use %f mb' % mem_mb)
 
         En = self.sys.const_energy()
         g0 = ft_utils.GP0(beta, en, mu)
         E0 = ft_mp.mp0(g0) + En
 
-        # get FT Fock matrix
+        # get HF free energies  
         E1 = self.sys.get_mp1()
         E01 = E0 + E1
+        
+        if self.athresh > 0.0:
+            athresh = self.athresh
+            focc = [x for x in fo if x > athresh]
+            fvir = [x for x in fv if x > athresh]
+            iocc = [i for i,x in enumerate(fo) if x > athresh]
+            ivir = [i for i,x in enumerate(fv) if x > athresh]
+            nocc = len(focc)
+            nvir = len(fvir)
+            nact = nocc + nvir - n
+            ncor = nocc - nact
+            nvvv = nvir - nact
+            if self.iprint > 0:
+                print("FT-CCSD orbital info:")
+                print('  nocc: {:d}'.format(nocc))
+                print('  nvir: {:d}'.format(nvir))
+                print('  nact: {:d}'.format(nact))
 
-        # get scaled integrals
-        F,I = cc_utils.get_ft_integrals(self.sys, en, beta, mu)
+            # get scaled active space integrals
+            F,I = cc_utils.get_ft_active_integrals(self.sys, en, focc, fvir, iocc, ivir)
 
-        # get energy differences
-        D1 = en[:,None] - en[None,:]
-        D2 = en[:,None,None,None] + en[None,:,None,None] \
-                - en[None,None,:,None] - en[None,None,None,:]
+            # get exponentials
+            D1 = en[:,None] - en[None,:]
+            D2 = en[:,None,None,None] + en[None,:,None,None] \
+                    - en[None,None,:,None] - en[None,None,None,:]
+            D1 = D1[numpy.ix_(ivir,iocc)]
+            D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
+        else:
+            # get scaled integrals
+            F,I = cc_utils.get_ft_integrals(self.sys, en, beta, mu)
+
+            # get energy differences
+            D1 = en[:,None] - en[None,:]
+            D2 = en[:,None,None,None] + en[None,:,None,None] \
+                    - en[None,None,:,None] - en[None,None,None,:]
 
         if L2 is None:
             # Use T^{\dagger} as a guess for Lambda
@@ -900,13 +930,13 @@ class ccsd(object):
         na = ea.shape[0]
         nb = eb.shape[0]
 
-        # compute requisite memory
-        n = en.shape[0]
-        mem1e = 6*n*n + 3*ng*n*n
-        mem2e = 3*n*n*n*n + 5*ng*n*n*n*n
-        mem_mb = (mem1e + mem2e)*8.0/1024.0/1024.0
-        if self.iprint > 0:
-            print('  FT-CCSD will use %f mb' % mem_mb)
+        # compute requisite memory TODO: fix this 
+        #n = en.shape[0]
+        #mem1e = 6*n*n + 3*ng*n*n
+        #mem2e = 3*n*n*n*n + 5*ng*n*n*n*n
+        #mem_mb = (mem1e + mem2e)*8.0/1024.0/1024.0
+        #if self.iprint > 0:
+        #    print('  FT-CCSD will use %f mb' % mem_mb)
 
         En = self.sys.const_energy()
         g0 = ft_utils.uGP0(beta, ea, eb, mu)
