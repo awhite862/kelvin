@@ -48,7 +48,7 @@ Eb,Ecb = ccsdT.run()
 
 Nccx = -(Ecf - Ecb)/(2*delta)
 Nx = -(Ef - Eb)/(2*delta)
-#N1x = Nx - N0 - Nccx
+print(Nx - Nccx,Nccx)
 
 Tf = T + delta
 Tb = T - delta

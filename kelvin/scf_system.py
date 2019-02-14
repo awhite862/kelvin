@@ -74,8 +74,8 @@ class scf_system(system):
         hmo = scf_utils.mo_tran_1e(self.mf, hcore)
         eri = self.g_aint_tot()
 
-        d1 = numpy.einsum('ii,i->',hmo - numpy.diag(en),fov)
-        d2 = numpy.einsum('ijij,i,j->',eri,fov,fo)
+        d1 = -numpy.einsum('ii,i->',hmo - numpy.diag(en),fov)
+        d2 = -numpy.einsum('ijij,i,j->',eri,fov,fo)
         return (d1 + d2)
 
     # TODO: Do this with Fock build
@@ -92,12 +92,12 @@ class scf_system(system):
         fova = dveca*foa*fva
         fovb = dvecb*fob*fvb
         Ia,Ib,Iabab = self.u_aint_tot()
-        d1 = numpy.einsum('ii,i->',ha - numpy.diag(ea),fova)
-        d1 += numpy.einsum('ii,i->',hb - numpy.diag(eb),fovb)
-        d2 = numpy.einsum('ijij,i,j->',Ia,fova,foa)
-        d2 += numpy.einsum('ijij,i,j->',Ib,fovb,fob)
-        d2 += numpy.einsum('ijij,i,j->',Iabab,fova,fob)
-        d2 += numpy.einsum('ijij,i,j->',Iabab,foa,fovb)
+        d1 = -numpy.einsum('ii,i->',ha - numpy.diag(ea),fova)
+        d1 -= numpy.einsum('ii,i->',hb - numpy.diag(eb),fovb)
+        d2 = -numpy.einsum('ijij,i,j->',Ia,fova,foa)
+        d2 -= numpy.einsum('ijij,i,j->',Ib,fovb,fob)
+        d2 -= numpy.einsum('ijij,i,j->',Iabab,fova,fob)
+        d2 -= numpy.einsum('ijij,i,j->',Iabab,foa,fovb)
         return (d1 + d2)
 
     def r_energies(self):

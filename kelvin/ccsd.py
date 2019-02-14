@@ -134,7 +134,9 @@ class ccsd(object):
             # higher order contributions
             dvec = -beta*numpy.ones(en.shape) # mu derivative
             N1,Ncc = self._g_nocc_deriv(dvec)
-            dvec = mu - en
+            N1 *= -1.0 # N = - dG/dmu
+            Ncc *= -1.0
+            dvec = en - mu # beta derivative
             B1,Bcc = self._g_nocc_deriv(dvec)
 
             # compute other contributions to CC derivative
@@ -142,6 +144,7 @@ class ccsd(object):
             dg,dG = self._g_nocc_gderiv()
             Bcc += dG + dg
 
+            # E = beta*dG/dbeta + G + mu*N
             E1 = beta*B1 + mu*N1 + self.G1
             Ecc = beta*Bcc + mu*Ncc + self.Gcc
 
@@ -154,6 +157,9 @@ class ccsd(object):
             self.Ecc = Ecc
             self.E = E0 + E1 + Ecc
             self.S = -beta*(self.Gtot - self.E + mu*self.N)
+            self.S0 = -beta*(self.G0 - self.E0 + mu*self.N0)
+            self.S1 = -beta*(self.G1 - self.E1 + mu*self.N1)
+            self.Scc = self.S - self.S0 - self.S1
 
     def _u_ft_ESN(self,L1=None,L2=None):
             # temperature info
@@ -176,8 +182,10 @@ class ccsd(object):
             dveca = -beta*numpy.ones(ea.shape) # mu derivative
             dvecb = -beta*numpy.ones(eb.shape) # mu derivative
             N1,Ncc = self._u_nocc_deriv(dveca,dvecb)
-            dveca = mu - ea
-            dvecb = mu - eb
+            N1 *= -1.0 # N = - dG/dmu
+            Ncc *= -1.0
+            dveca = ea - mu
+            dvecb = eb - mu
             B1,Bcc = self._u_nocc_deriv(dveca,dvecb)
 
             # compute other contributions to CC derivative
@@ -185,6 +193,7 @@ class ccsd(object):
             dg,dG = self._u_nocc_gderiv()
             Bcc += dG + dg
 
+            # E = beta*dG/dbeta + G + mu*N
             E1 = beta*B1 + mu*N1 + self.G1
             Ecc = beta*Bcc + mu*Ncc + self.Gcc
 
@@ -196,6 +205,8 @@ class ccsd(object):
             self.E1 = E1
             self.Ecc = Ecc
             self.E = E0 + E1 + Ecc
+            self.S0 = -beta*(self.G0 - self.E0 + mu*self.N0)
+            self.S1 = -beta*(self.G1 - self.E1 + mu*self.N1)
             self.S = -beta*(self.Gtot - self.E + mu*self.N)
 
     def _ccsd(self):
@@ -1021,9 +1032,9 @@ class ccsd(object):
         g = self.g
 
         # get exponentials
-        D1 = en[:,None] - en[None,:]
-        D2 = en[:,None,None,None] + en[None,:,None,None] \
-            - en[None,None,:,None] - en[None,None,None,:]
+        #D1 = en[:,None] - en[None,:]
+        #D2 = en[:,None,None,None] + en[None,:,None,None] \
+        #    - en[None,None,:,None] - en[None,None,None,:]
 
         F,I = cc_utils.get_ft_d_integrals(self.sys, en, fo, fv, dvec)
         A1 = (1.0/beta)*einsum('ia,ai->',self.dia,F.vo)
@@ -1118,9 +1129,9 @@ class ccsd(object):
 
         # get energies and occupation numbers
         en = self.sys.g_energies_tot()
-        fo = ft_utils.ff(beta, en, mu)
-        fv = ft_utils.ffv(beta, en, mu)
-        n = fo.shape[0]
+        #fo = ft_utils.ff(beta, en, mu)
+        #fv = ft_utils.ffv(beta, en, mu)
+        #n = fo.shape[0]
 
         # get time-grid
         ng = self.ngrid

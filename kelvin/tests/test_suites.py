@@ -1,5 +1,6 @@
 import sys
 import unittest
+from kelvin.tests import test_cc_utils
 from kelvin.tests import test_ccsd
 from kelvin.tests import test_ft_cc_ampl
 from kelvin.tests import test_ft_ccsd
@@ -26,6 +27,9 @@ def full_suite():
     suite = unittest.TestSuite()
 
     suite.addTest(test_test.TestTest("test_framework"))
+
+    suite.addTest(test_cc_utils.CCUtilsTest("test_Be_gen"))
+    suite.addTest(test_cc_utils.CCUtilsTest("test_Be"))
 
     suite.addTest(test_ccsd.CCSDTest("test_Be_sto3g"))
     suite.addTest(test_ccsd.CCSDTest("test_N2p_631G"))
@@ -135,7 +139,8 @@ def default_suite():
 
     suite.addTest(test_test.TestTest("test_framework"))
  
-    suite.addTest(test_ft_cc_ampl.FTamplEquationsTest("test_ccsd_stanton"))
+    suite.addTest(test_cc_utils.CCUtilsTest("test_Be_gen"))
+    suite.addTest(test_cc_utils.CCUtilsTest("test_Be"))
 
     suite.addTest(test_ccsd.CCSDTest("test_Be_sto3g"))
     suite.addTest(test_ccsd.CCSDTest("test_N2p_631G"))

@@ -85,7 +85,7 @@ class pueg_system(system):
             fo = ft_utils.ff(beta, en, self.mu)
             fv = ft_utils.ffv(beta, en, self.mu)
             vec = dvec*fo*fv
-            return numpy.einsum('ijij,i,j->',V,vec,fo)
+            return -numpy.einsum('ijij,i,j->',V,vec,fo)
         else:
             print("WARNING: Derivative of MP1 energy is zero at OK")
             return 0.0
@@ -162,7 +162,7 @@ class pueg_system(system):
         I = numpy.identity(n)
         den = numpy.einsum('pi,i,qi->pq',I,vec,I)
         V = self.g_aint_tot()
-        JK = numpy.einsum('prqs,rs->pq',V,den)
+        JK = -numpy.einsum('prqs,rs->pq',V,den)
         return JK
 
     def g_hcore(self):

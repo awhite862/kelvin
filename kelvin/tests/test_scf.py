@@ -73,7 +73,7 @@ class SCFTest(unittest.TestCase):
 
         # derivative with respect to mu
         en = sys.g_energies_tot()
-        dvec = beta*numpy.ones(en.shape)
+        dvec = -beta*numpy.ones(en.shape)
         Fda = sys.g_fock_d_tot(dvec)
 
         delta = 5e-4
@@ -95,7 +95,7 @@ class SCFTest(unittest.TestCase):
 
         # derivative with respect to mu
         en = sys.g_energies_tot()
-        dvec = beta*numpy.ones(en.shape)
+        dvec = -beta*numpy.ones(en.shape)
         Fda = sys.g_fock_d_tot(dvec)
 
         delta = 5e-4
@@ -117,7 +117,7 @@ class SCFTest(unittest.TestCase):
 
         # derivative with respect to mu
         en = sys.g_energies_tot()
-        dvec = beta*numpy.ones(en.shape)
+        dvec = -beta*numpy.ones(en.shape)
         dMP1a = sys.g_d_mp1(dvec)
 
         delta = 5e-4
@@ -139,10 +139,10 @@ class SCFTest(unittest.TestCase):
 
         # derivative with respect to mu
         en = sys.g_energies_tot()
-        dvec = beta*numpy.ones(en.shape)
+        dvec = -beta*numpy.ones(en.shape)
         ea,eb = sys.u_energies_tot()
-        dveca = beta*numpy.ones(ea.shape)
-        dvecb = beta*numpy.ones(eb.shape)
+        dveca = -beta*numpy.ones(ea.shape)
+        dvecb = -beta*numpy.ones(eb.shape)
         dMP1au = sys.u_d_mp1(dveca,dvecb)
         dMP1a = sys.g_d_mp1(dvec)
 

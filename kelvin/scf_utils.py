@@ -342,7 +342,7 @@ def get_mo_d_ft_fock(mf, fo, fv, dvec):
             veff = mf.get_veff(mf.mol,p)
         fT = 2*veff
         fmo = numpy.einsum('mp,mn,nq->pq',mo,fT,mo)
-        return utils.block_diag(fmo,fmo)
+        return utils.block_diag(-fmo,-fmo)
  
     elif len(mf.mo_occ.shape) == 2:
         moa = mf.mo_coeff[0]
@@ -358,7 +358,7 @@ def get_mo_d_ft_fock(mf, fo, fv, dvec):
         fTb = veff[1]
         fmoa = numpy.einsum('mp,mn,nq->pq',moa,fTa,moa)
         fmob = numpy.einsum('mp,mn,nq->pq',mob,fTb,mob)
-        return utils.block_diag(fmoa,fmob)
+        return utils.block_diag(-fmoa,-fmob)
 
     else:
         raise Exception("unrecognized SCF type")
@@ -384,7 +384,7 @@ def u_mo_d_ft_fock(mf, foa, fva, fob, fvb, dveca, dvecb):
             veff = mf.get_veff(mf.mol,p)
         fT = 2*veff
         fmo = numpy.einsum('mp,mn,nq->pq',mo,fT,mo)
-        return fmo,fmo
+        return -fmo,-fmo
 
     elif len(mf.mo_occ.shape) == 2:
         moa = mf.mo_coeff[0]
@@ -400,7 +400,7 @@ def u_mo_d_ft_fock(mf, foa, fva, fob, fvb, dveca, dvecb):
         fTb = veff[1]
         fmoa = numpy.einsum('mp,mn,nq->pq',moa,fTa,moa)
         fmob = numpy.einsum('mp,mn,nq->pq',mob,fTb,mob)
-        return fmoa,fmob
+        return -fmoa,-fmob
     else:
         raise Exception("unrecognized SCF type")
 

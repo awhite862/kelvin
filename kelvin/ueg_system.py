@@ -128,10 +128,10 @@ class ueg_system(system):
             fob = ft_utils.ff(beta, eb, self.mu)
             fvb = ft_utils.ffv(beta, eb, self.mu)
             vecb = dvecb*fob*fvb
-            D =  einsum('ijij,i,j->',Va,veca,foa)
-            D +=  einsum('ijij,i,j->',Vb,vecb,fob)
-            D +=  einsum('ijij,i,j->',Vabab,veca,fob)
-            D +=  einsum('ijij,i,j->',Vabab,foa,vecb)
+            D = -einsum('ijij,i,j->',Va,veca,foa)
+            D -= einsum('ijij,i,j->',Vb,vecb,fob)
+            D -= einsum('ijij,i,j->',Vabab,veca,fob)
+            D -= einsum('ijij,i,j->',Vabab,foa,vecb)
             return D
         else:
             print("WARNING: Derivative of MP1 energy is zero at OK")
@@ -145,7 +145,7 @@ class ueg_system(system):
             fo = ft_utils.ff(beta, en, self.mu)
             fv = ft_utils.ffv(beta, en, self.mu)
             vec = dvec*fo*fv
-            return einsum('ijij,i,j->',V,vec,fo)
+            return -einsum('ijij,i,j->',V,vec,fo)
         else:
             print("WARNING: Derivative of MP1 energy is zero at OK")
             return 0.0
@@ -334,7 +334,7 @@ class ueg_system(system):
         JKa += einsum('prqs,rs->pq',Vabab,denb)
         JKb = einsum('prqs,rs->pq',Vb,denb)
         JKb += einsum('prqs,rs->pq',Vabab,dena)
-        return JKa,JKb
+        return -JKa,-JKb
 
     def g_fock_d_tot(self,dvec):
         d = self.g_energies_tot()
@@ -350,7 +350,7 @@ class ueg_system(system):
         den = einsum('pi,i,qi->pq',I,vec,I)
         V = self.g_aint_tot()
         JK = einsum('prqs,rs->pq',V,den)
-        return JK
+        return -JK
 
     def r_hcore(self):
         return numpy.diag(self.r_energies_tot())

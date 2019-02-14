@@ -28,7 +28,7 @@ class lccsd(object):
         athresh (float): Threshold for ignoring small occupations
     """
     def __init__(self, sys, T=0, mu=0, iprint=0, 
-            singles=True, econv=1e-8, max_iter=40, 
+            singles=True, econv=1e-8, tconv=None, max_iter=40, 
             damp=0.0, ngrid=10, realtime=False, athresh=0.0):
         self.T = T
         self.mu = mu
@@ -36,6 +36,7 @@ class lccsd(object):
         self.iprint = iprint
         self.singles = singles
         self.econv = econv
+        self.tconv = tconv if tconv is not None else self.econv*1000.0
         self.max_iter = max_iter
         self.damp = damp
         self.ngrid = ngrid
@@ -246,7 +247,11 @@ class lccsd(object):
             F.ov,I.oovv,g,beta,Qterm=False)
 
         # run CC iterations
-        conv_options = {"econv":self.econv, "max_iter":self.max_iter, "damp":self.damp}
+        conv_options = {
+            "econv":self.econv,
+            "tconv":self.tconv,
+            "max_iter":self.max_iter,
+            "damp":self.damp}
         method = "LCCSD" if self.singles else "LCCD"
         Eccn,T1,T2 = cc_utils.ft_cc_iter(method, T1old, T2old, F, I, D1, D2,
                 g, G, beta, ng, ti, self.iprint, conv_options)
@@ -331,7 +336,11 @@ class lccsd(object):
 
         # run CC iterations
         method = "LCCSD" if self.singles else "LCCD"
-        conv_options = {"econv":self.econv, "max_iter":self.max_iter, "damp":self.damp}
+        conv_options = {
+            "econv":self.econv,
+            "tconv":self.tconv,
+            "max_iter":self.max_iter,
+            "damp":self.damp}
         Eccn,T1,T2 = cc_utils.ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G, beta, 
                 ng, ti, self.iprint, conv_options)
         self.T1 = T1
@@ -386,7 +395,11 @@ class lccsd(object):
             L1old = numpy.zeros(self.T1.shape)
         L2old = numpy.transpose(self.T2,(0,3,4,1,2))
         method = "LCCSD" if self.singles else "LCCD"
-        conv_options = {"econv":self.econv, "max_iter":self.max_iter, "damp":self.damp}
+        conv_options = {
+            "econv":self.econv,
+            "tconv":self.tconv,
+            "max_iter":self.max_iter,
+            "damp":self.damp}
         L1,L2 = cc_utils.ft_lambda_iter(method, L1old, L2old, self.T1, self.T2, F, I,
                 D1, D2, g, G, beta, ng, ti, self.iprint, conv_options)
 
