@@ -498,6 +498,9 @@ def ccsd_lambda_opt_int(F,I,T1old,T2old,L1old,L2old,intor,D1,D2,ti,ng,g,G,beta):
 
     return L1,L2
 
+def ccd_lambda_guess(F,I,T2old,beta):
+    raise Exception("CCD Lambda equations not implemented")
+
 def ccsd_lambda_guess(F,I,T1old,T2old,beta):
     """Time-dependent coupled cluster singles and doubles (CCSD) 
     Lambda guess.

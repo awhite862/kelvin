@@ -895,19 +895,41 @@ class ccsd(object):
             D2 = en[:,None,None,None] + en[None,:,None,None] \
                     - en[None,None,:,None] - en[None,None,None,:]
 
-        if L2 is None:
-            # Use T^{\dagger} as a guess for Lambda
+        #if L2 is None:
+        #    # Use T^{\dagger} as a guess for Lambda
+        #    if self.singles:
+        #        #L1old = numpy.transpose(self.T1,(0,2,1))
+        #        L1old = numpy.zeros((ng,no,nv))
+        #    else:
+        #        L1old = numpy.zeros(self.T1.shape)
+        #    #L2old = numpy.transpose(self.T2,(0,3,4,1,2))
+        #    L2old = numpy.zeros((ng,no,no,nv,nv))
+        #else:
+        #    L2old = L2
+        #    if L1 is None:
+        #        L1old = numpy.zeros(self.T1.shape)
+        #    else:
+        #        L1old = L1
+        if L2 is None and L1 is None:
             if self.singles:
-                L1old = numpy.transpose(self.T1,(0,2,1))
+                L1old,L2old = ft_cc_equations.ccsd_lambda_guess(F,I,self.T1,self.T2,beta)
             else:
-                L1old = numpy.zeros(self.T1.shape)
-            L2old = numpy.transpose(self.T2,(0,3,4,1,2))
-        else:
+                L2old = ft_cc_equations.ccd_lambda_guess(F,I,self.T2,beta)
+        elif L2 is not None and L1 is None:
             L2old = L2
-            if L1 is None:
-                L1old = numpy.zeros(self.T1.shape)
-            else:
-                L1old = L1
+            if self.singles:
+                ng,nv,no = self.T1.shape
+                L1old = numpy.zeros((ng,no,nv))
+        elif L1 is not None and L2 is None:
+            ng,nv,no = self.T1.shape
+            L1old = L1
+            L2old = numpy.zeros((ng,no,nv))
+            if not self.singles:
+                raise Exception("Singles guess provided to FT-CCD Lambda equations")
+        else:
+            assert(L1 is not None and L2 is not None)
+            L1old = L1
+            L2old = L2
 
         # run lambda iterations
         conv_options = {

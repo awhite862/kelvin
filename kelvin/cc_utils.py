@@ -128,8 +128,8 @@ def ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G, beta, ng, ti,
     alpha = conv_options["damp"]
     i = 0
     Eold = 888888888.888888888
-    nl1 = numpy.linalg.norm(T1old) + 0.0001
-    nl2 = numpy.linalg.norm(T2old) + 0.0001
+    nl1 = numpy.linalg.norm(T1old) + 0.1
+    nl2 = numpy.linalg.norm(T2old) + 0.1
     while i < max_iter and not converged:
         # form new T1 and T2
         T1,T2 = form_new_ampl(method,F,I,T1old,T2old,D1,D2,ti,ng,G)
@@ -139,8 +139,8 @@ def ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G, beta, ng, ti,
         # damp new T-amplitudes
         T1old = alpha*T1old + (1.0 - alpha)*T1
         T2old = alpha*T2old + (1.0 - alpha)*T2
-        nl1 = numpy.linalg.norm(T1old) + 0.000001
-        nl2 = numpy.linalg.norm(T2old) + 0.000001
+        nl1 = numpy.linalg.norm(T1old) + 0.1
+        nl2 = numpy.linalg.norm(T2old) + 0.1
 
         # compute energy
         E = ft_cc_energy.ft_cc_energy(T1old,T2old,
@@ -269,9 +269,9 @@ def ft_ucc_iter(method, T1aold, T1bold, T2aaold, T2abold, T2bbold, Fa, Fb, Ia, I
         T1out,T2out = form_new_ampl_u(method,Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,
                 T2aaold,T2abold,T2bbold, D1a,D1b,D2aa,D2ab,D2bb,ti,ng,G)
 
-        nl1 = numpy.linalg.norm(T1aold) + 0.0001
+        nl1 = numpy.linalg.norm(T1aold) + 0.1
         nl1 += numpy.linalg.norm(T1bold)
-        nl2 = numpy.linalg.norm(T2aaold) + 0.0001
+        nl2 = numpy.linalg.norm(T2aaold) + 0.1
         nl2 += numpy.linalg.norm(T2abold)
         nl2 += numpy.linalg.norm(T2bbold)
 
@@ -429,8 +429,8 @@ def ft_lambda_iter(method, L1old, L2old, T1, T2, F, I, D1, D2,
     max_iter = conv_options["max_iter"]
     alpha = conv_options["damp"]
     i = 0
-    nl1 = numpy.linalg.norm(L1old)
-    nl2 = numpy.linalg.norm(L2old)
+    nl1 = numpy.linalg.norm(L1old) + 0.1
+    nl2 = numpy.linalg.norm(L2old) + 0.1
     while i < max_iter and not converged:
         if method == "LCCSD":
             L1,L2 = ft_cc_equations.lccsd_lambda_simple(
@@ -454,8 +454,8 @@ def ft_lambda_iter(method, L1old, L2old, T1, T2, F, I, D1, D2,
         # compute new L-amplitudes
         L1old = alpha*L1old + (1.0 - alpha)*L1
         L2old = alpha*L2old + (1.0 - alpha)*L2
-        nl1 = numpy.linalg.norm(L1old)
-        nl2 = numpy.linalg.norm(L2old)
+        nl1 = numpy.linalg.norm(L1old) + 0.1
+        nl2 = numpy.linalg.norm(L2old) + 0.1
         L1 = None
         L2 = None
 
