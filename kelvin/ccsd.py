@@ -105,8 +105,8 @@ class ccsd(object):
             print('  N = {}'.format(N))
         else:
             if self.L1 is None:
-                if self.athresh > 0.0:
-                    raise Exception("Lambda equations for A-FT-CCSD aren't implemented")
+                #if self.athresh > 0.0:
+                #    raise Exception("Lambda equations for A-FT-CCSD aren't implemented")
                 if self.sys.has_u():
                     self._ft_uccsd_lambda(L1=L1,L2=L2)
                 else:
@@ -1088,7 +1088,16 @@ class ccsd(object):
         #D2 = en[:,None,None,None] + en[None,:,None,None] \
         #    - en[None,None,:,None] - en[None,None,None,:]
 
-        F,I = cc_utils.get_ft_d_integrals(self.sys, en, fo, fv, dvec)
+        if self.athresh > 0.0:
+            athresh = self.athresh
+            focc = [x for x in fo if x > athresh]
+            fvir = [x for x in fv if x > athresh]
+            iocc = [i for i,x in enumerate(fo) if x > athresh]
+            ivir = [i for i,x in enumerate(fv) if x > athresh]
+            F,I = cc_utils.get_ft_d_active_integrals(
+                    self.sys, en, fo, fv, iocc, ivir, dvec)
+        else:
+            F,I = cc_utils.get_ft_d_integrals(self.sys, en, fo, fv, dvec)
         A1 = (1.0/beta)*einsum('ia,ai->',self.dia,F.vo)
         A1 += (1.0/beta)*einsum('ba,ab->',self.dba,F.vv)
         A1 += (1.0/beta)*einsum('ji,ij->',self.dji,F.oo)

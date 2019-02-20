@@ -7,15 +7,15 @@ from kelvin.scf_system import scf_system
 from kelvin.ueg_system import ueg_system
 from kelvin.pueg_system import pueg_system
 
-def fd_ESN(m, T, mu, ng, Ecctot, quad = 'lin'):
+def fd_ESN(m, T, mu, ng, Ecctot, athresh = 0.0, quad = 'lin'):
     delta = 5e-4
     muf = mu + delta
     mub = mu - delta
     sys = scf_system(m,T,muf,orbtype='g')
-    ccsdT = ccsd(sys,iprint=0,T=T,mu=muf,max_iter=35,damp=0.0,ngrid=ng,econv=1e-10, quad=quad)
+    ccsdT = ccsd(sys,iprint=0,T=T,mu=muf,max_iter=35,damp=0.0,ngrid=ng,econv=1e-10,athresh=athresh,quad=quad)
     Ef,Ecf = ccsdT.run()
     sys = scf_system(m,T,mub,orbtype='g')
-    ccsdT = ccsd(sys,iprint=0,T=T,mu=mub,max_iter=35,damp=0.0,ngrid=ng,econv=1e-10, quad=quad)
+    ccsdT = ccsd(sys,iprint=0,T=T,mu=mub,max_iter=35,damp=0.0,ngrid=ng,econv=1e-10,athresh=athresh,quad=quad)
     Eb,Ecb = ccsdT.run()
     
     Nx = -(Ef - Eb)/(2*delta)
@@ -23,10 +23,10 @@ def fd_ESN(m, T, mu, ng, Ecctot, quad = 'lin'):
     Tf = T + delta
     Tb = T - delta
     sys = scf_system(m,Tf,mu,orbtype='g')
-    ccsdT = ccsd(sys,iprint=0,T=Tf,mu=mu,max_iter=35,damp=0.0,ngrid=ng,econv=1e-10, quad=quad)
+    ccsdT = ccsd(sys,iprint=0,T=Tf,mu=mu,max_iter=35,damp=0.0,ngrid=ng,econv=1e-10,athresh=athresh,quad=quad)
     Ef,Ecf = ccsdT.run()
     sys = scf_system(m,Tb,mu,orbtype='g')
-    ccsdT = ccsd(sys,iprint=0,T=Tb,mu=mu,max_iter=35,damp=0.0,ngrid=ng,econv=1e-10, quad=quad)
+    ccsdT = ccsd(sys,iprint=0,T=Tb,mu=mu,max_iter=35,damp=0.0,ngrid=ng,econv=1e-10,athresh=athresh,quad=quad)
     Eb,Ecb = ccsdT.run()
     
     Sx = -(Ef - Eb)/(2*delta)
@@ -55,9 +55,9 @@ class FTDerivTest(unittest.TestCase):
         Ecctot,Ecc = ccsdT.run()
         ccsdT.compute_ESN()
         Ex,Nx,Sx = fd_ESN(m, T, mu, ng, Ecctot)
-        dE = abs(ccsdT.E - Ex)/Ex
-        dS = abs(ccsdT.S - Sx)/Sx
-        dN = abs(ccsdT.N - Nx)/Nx
+        dE = abs((ccsdT.E - Ex)/Ex)
+        dS = abs((ccsdT.S - Sx)/Sx)
+        dN = abs((ccsdT.N - Nx)/Nx)
         eE = "Expected: {}  Actual: {}".format(Ex,ccsdT.E)
         eS = "Expected: {}  Actual: {}".format(Sx,ccsdT.S)
         eN = "Expected: {}  Actual: {}".format(Nx,ccsdT.N)
@@ -81,9 +81,36 @@ class FTDerivTest(unittest.TestCase):
         Ecctot,Ecc = ccsdT.run()
         ccsdT.compute_ESN()
         Ex,Nx,Sx = fd_ESN(m, T, mu, ng, Ecctot)
-        dE = abs(ccsdT.E - Ex)/Ex
-        dS = abs(ccsdT.S - Sx)/Sx
-        dN = abs(ccsdT.N - Nx)/Nx
+        dE = abs((ccsdT.E - Ex)/Ex)
+        dS = abs((ccsdT.S - Sx)/Sx)
+        dN = abs((ccsdT.N - Nx)/Nx)
+        eE = "Expected: {}  Actual: {}".format(Ex,ccsdT.E)
+        eS = "Expected: {}  Actual: {}".format(Sx,ccsdT.S)
+        eN = "Expected: {}  Actual: {}".format(Nx,ccsdT.N)
+        self.assertTrue(dE < self.Bethresh,eE)
+        self.assertTrue(dS < self.Bethresh,eS)
+        self.assertTrue(dN < self.Bethresh,eN)
+
+    def test_Be_sto3g_gen_active(self):
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+        m = scf.RHF(mol)
+        m.conv_tol = 1e-13
+        Escf = m.scf()
+        T = 0.5
+        mu = 0.0
+        ng = 20
+        athresh = 1e-20
+        sys = scf_system(m,T,mu,orbtype='g')
+        ccsdT = ccsd(sys,iprint=0,T=T,mu=mu,max_iter=35,damp=0.0,ngrid=ng,econv=1e-10,athresh=athresh,singles=True)
+        Ecctot,Ecc = ccsdT.run()
+        ccsdT.compute_ESN()
+        Ex,Nx,Sx = fd_ESN(m, T, mu, ng, Ecctot, athresh=athresh)
+        dE = abs((ccsdT.E - Ex)/Ex)
+        dS = abs((ccsdT.S - Sx)/Sx)
+        dN = abs((ccsdT.N - Nx)/Nx)
         eE = "Expected: {}  Actual: {}".format(Ex,ccsdT.E)
         eS = "Expected: {}  Actual: {}".format(Sx,ccsdT.S)
         eN = "Expected: {}  Actual: {}".format(Nx,ccsdT.N)
@@ -107,9 +134,9 @@ class FTDerivTest(unittest.TestCase):
         Ecctot,Ecc = ccsdT.run()
         ccsdT.compute_ESN()
         Ex,Nx,Sx = fd_ESN(m, T, mu, ng, Ecctot, quad='ln')
-        dE = abs(ccsdT.E - Ex)/Ex
-        dS = abs(ccsdT.S - Sx)/Sx
-        dN = abs(ccsdT.N - Nx)/Nx
+        dE = abs((ccsdT.E - Ex)/Ex)
+        dS = abs((ccsdT.S - Sx)/Sx)
+        dN = abs((ccsdT.N - Nx)/Nx)
         eE = "Expected: {}  Actual: {}".format(Ex,ccsdT.E)
         eS = "Expected: {}  Actual: {}".format(Sx,ccsdT.S)
         eN = "Expected: {}  Actual: {}".format(Nx,ccsdT.N)
@@ -133,9 +160,9 @@ class FTDerivTest(unittest.TestCase):
         Ecctot,Ecc = ccsdT.run()
         ccsdT.compute_ESN()
         Ex,Nx,Sx = fd_ESN(m, T, mu, ng, Ecctot, quad='sin')
-        dE = abs(ccsdT.E - Ex)/Ex
-        dS = abs(ccsdT.S - Sx)/Sx
-        dN = abs(ccsdT.N - Nx)/Nx
+        dE = abs((ccsdT.E - Ex)/Ex)
+        dS = abs((ccsdT.S - Sx)/Sx)
+        dN = abs((ccsdT.N - Nx)/Nx)
         eE = "Expected: {}  Actual: {}".format(Ex,ccsdT.E)
         eS = "Expected: {}  Actual: {}".format(Sx,ccsdT.S)
         eN = "Expected: {}  Actual: {}".format(Nx,ccsdT.N)
@@ -283,16 +310,15 @@ class FTDerivTest(unittest.TestCase):
         Sx = -(Ef - Eb)/(2*delta)
         Ex = Ecctot + T*Sx + mu*Nx
 
-        dE = abs(E - Ex)/Ex
-        dS = abs(S - Sx)/Sx
-        dN = abs(N - Nx)/Nx
+        dE = abs((E - Ex)/Ex)
+        dS = abs((S - Sx)/Sx)
+        dN = abs((N - Nx)/Nx)
         eE = "Expected: {}  Actual: {}".format(Ex,E)
         eS = "Expected: {}  Actual: {}".format(Sx,S)
         eN = "Expected: {}  Actual: {}".format(Nx,N)
         self.assertTrue(dE < self.uegthresh,eE)
         self.assertTrue(dS < self.uegthresh,eS)
         self.assertTrue(dN < self.uegthresh,eN)
-
 
 if __name__ == '__main__':
     unittest.main()

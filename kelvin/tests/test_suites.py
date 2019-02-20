@@ -28,8 +28,8 @@ def full_suite():
 
     suite.addTest(test_test.TestTest("test_framework"))
 
-    suite.addTest(test_cc_utils.CCUtilsTest("test_Be_gen"))
-    suite.addTest(test_cc_utils.CCUtilsTest("test_Be"))
+    suite.addTest(test_cc_utils.CCUtilsTest("test_Be_gen_deriv"))
+    suite.addTest(test_cc_utils.CCUtilsTest("test_Be_deriv"))
 
     suite.addTest(test_ccsd.CCSDTest("test_Be_sto3g"))
     suite.addTest(test_ccsd.CCSDTest("test_N2p_631G"))
@@ -139,8 +139,8 @@ def default_suite():
 
     suite.addTest(test_test.TestTest("test_framework"))
  
-    suite.addTest(test_cc_utils.CCUtilsTest("test_Be_gen"))
-    suite.addTest(test_cc_utils.CCUtilsTest("test_Be"))
+    suite.addTest(test_cc_utils.CCUtilsTest("test_Be_gen_deriv"))
+    suite.addTest(test_cc_utils.CCUtilsTest("test_Be_deriv"))
 
     suite.addTest(test_ccsd.CCSDTest("test_Be_sto3g"))
     suite.addTest(test_ccsd.CCSDTest("test_N2p_631G"))

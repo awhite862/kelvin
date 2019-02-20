@@ -15,7 +15,7 @@ class CCUtilsTest(unittest.TestCase):
         diff = numpy.linalg.norm(fd - D) 
         self.assertTrue(diff < thresh,"Difference in " + name + ": {}".format(diff))
 
-    def test_Be_gen(self):
+    def test_Be_gen_deriv(self):
         mol = gto.M(
             verbose = 0,
             atom = 'Be 0 0 0',
@@ -58,7 +58,7 @@ class CCUtilsTest(unittest.TestCase):
         self._test_fd(If.ooov, Ib.ooov, dI.ooov, delta, "Iooov", thresh)
         self._test_fd(If.oooo, Ib.oooo, dI.oooo, delta, "Ioooo", thresh)
 
-    def test_Be(self):
+    def test_Be_deriv(self):
         mol = gto.M(
             verbose = 0,
             atom = 'Be 0 0 0',
@@ -136,6 +136,76 @@ class CCUtilsTest(unittest.TestCase):
         self._test_fd(Iababf.oovo, Iababb.oovo, dIabab.oovo, delta, "Iababoovo", thresh)
         self._test_fd(Iababf.ooov, Iababb.ooov, dIabab.ooov, delta, "Iababooov", thresh)
         self._test_fd(Iababf.oooo, Iababb.oooo, dIabab.oooo, delta, "Iababoooo", thresh)
+
+    def test_Be_gen_active_deriv(self):
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+
+        m = scf.RHF(mol)
+        T = 0.02
+        mu = 0.0
+        beta = 1/T
+        delta = 1e-4
+        thresh = 1e-10
+        athresh = 1e-40
+        m.conv_tol = 1e-12
+        Escf = m.scf()
+        sys = scf_system(m,T,mu+delta,orbtype='g')
+        en = sys.g_energies_tot()
+        dvec = -beta*numpy.ones(en.shape)
+        fo = ft_utils.ff(beta, en, mu)
+        fv = ft_utils.ffv(beta, en, mu)
+        focc = [x for x in fo if x > athresh]
+        fvir = [x for x in fv if x > athresh]
+        iocc = [i for i,x in enumerate(fo) if x > athresh]
+        ivir = [i for i,x in enumerate(fv) if x > athresh]
+        F,I = cc_utils.get_ft_d_active_integrals(sys, en, fo, fv, iocc, ivir, dvec)
+        Fg,Ig = cc_utils.get_ft_d_integrals(sys, en, fo, fv, dvec)
+
+        # test Fock matrix
+        Foo = Fg.oo[numpy.ix_(iocc,iocc)]
+        Fov = Fg.oo[numpy.ix_(iocc,ivir)]
+        Fvo = Fg.oo[numpy.ix_(ivir,iocc)]
+        Fvv = Fg.oo[numpy.ix_(ivir,ivir)]
+        doo = numpy.linalg.norm(F.oo - Foo)/numpy.sqrt(Foo.size)
+        dov = numpy.linalg.norm(F.ov - Fov)/numpy.sqrt(Fov.size)
+        dvo = numpy.linalg.norm(F.vo - Fvo)/numpy.sqrt(Fvo.size)
+        dvv = numpy.linalg.norm(F.vv - Fvv)/numpy.sqrt(Fvv.size)
+        self.assertTrue(doo < thresh,"Error in Foo: {}".format(doo))
+        self.assertTrue(doo < thresh,"Error in Fov: {}".format(dov))
+        self.assertTrue(doo < thresh,"Error in Fvo: {}".format(dvo))
+        self.assertTrue(doo < thresh,"Error in Fvv: {}".format(dvv))
+
+        # test ERIs
+        Ivvvv = Ig.vvvv[numpy.ix_(ivir,ivir,ivir,ivir)]
+        Ivvvo = Ig.vvvo[numpy.ix_(ivir,ivir,ivir,iocc)]
+        Ivovv = Ig.vovv[numpy.ix_(ivir,iocc,ivir,ivir)]
+        Ivvoo = Ig.vvoo[numpy.ix_(ivir,ivir,iocc,iocc)]
+        Ioovv = Ig.oovv[numpy.ix_(iocc,iocc,ivir,ivir)]
+        Ivovo = Ig.vovo[numpy.ix_(ivir,iocc,ivir,iocc)]
+        Ivooo = Ig.vooo[numpy.ix_(ivir,iocc,iocc,iocc)]
+        Iooov = Ig.ooov[numpy.ix_(iocc,iocc,iocc,ivir)]
+        Ioooo = Ig.oooo[numpy.ix_(iocc,iocc,iocc,iocc)]
+        Dvvvv = numpy.linalg.norm(I.vvvv - Ivvvv)/numpy.sqrt(Ivvvv.size)
+        Dvvvo = numpy.linalg.norm(I.vvvo - Ivvvo)/numpy.sqrt(Ivvvo.size)
+        Dvovv = numpy.linalg.norm(I.vovv - Ivovv)/numpy.sqrt(Ivovv.size)
+        Dvvoo = numpy.linalg.norm(I.vvoo - Ivvoo)/numpy.sqrt(Ivvoo.size)
+        Doovv = numpy.linalg.norm(I.oovv - Ioovv)/numpy.sqrt(Ioovv.size)
+        Dvovo = numpy.linalg.norm(I.vovo - Ivovo)/numpy.sqrt(Ivovo.size)
+        Dvooo = numpy.linalg.norm(I.vooo - Ivooo)/numpy.sqrt(Ivooo.size)
+        Dooov = numpy.linalg.norm(I.ooov - Iooov)/numpy.sqrt(Iooov.size)
+        Doooo = numpy.linalg.norm(I.oooo - Ioooo)/numpy.sqrt(Ioooo.size)
+        self.assertTrue(Dvvvv < thresh,"Error in Ivvvv: {}".format(Dvvvv))
+        self.assertTrue(Dvvvo < thresh,"Error in Ivvvo: {}".format(Dvvvo))
+        self.assertTrue(Dvovv < thresh,"Error in Ivovv: {}".format(Dvovv))
+        self.assertTrue(Dvvoo < thresh,"Error in Ivvoo: {}".format(Dvvoo))
+        self.assertTrue(Doovv < thresh,"Error in Ioovv: {}".format(Doovv))
+        self.assertTrue(Dvovo < thresh,"Error in Ivovo: {}".format(Dvovo))
+        self.assertTrue(Dvooo < thresh,"Error in Ivooo: {}".format(Dvooo))
+        self.assertTrue(Dooov < thresh,"Error in Iooov: {}".format(Dooov))
+        self.assertTrue(Doooo < thresh,"Error in Ioooo: {}".format(Doooo))
 
 if __name__ == '__main__':
     unittest.main()
