@@ -498,14 +498,15 @@ def ccsd_lambda_opt_int(F,I,T1old,T2old,L1old,L2old,intor,D1,D2,ti,ng,g,G,beta):
 
     return L1,L2
 
-def ccd_lambda_guess(F,I,T2old,beta):
-    raise Exception("CCD Lambda equations not implemented")
+def ccd_lambda_guess(F,I,beta):
+    Id = numpy.ones((ng))
+    L2 = (1.0/beta)*einsum('v,ijab->vijab',Id,I.oovv)
+    return L2
 
-def ccsd_lambda_guess(F,I,T1old,T2old,beta):
+def ccsd_lambda_guess(F,I,T1old,beta,ng):
     """Time-dependent coupled cluster singles and doubles (CCSD) 
     Lambda guess.
     """
-    ng = T2old.shape[0]
     Id = numpy.ones((ng))
     L1 = (1.0/beta)*einsum('v,ia->via',Id,F.ov)
     L2 = (1.0/beta)*einsum('v,ijab->vijab',Id,I.oovv)
@@ -513,6 +514,27 @@ def ccsd_lambda_guess(F,I,T1old,T2old,beta):
         cc_equations._LS_TS(L1[y,:,:],I,T1old[y,:,:],fac=(1.0/beta))
 
     return L1,L2
+
+def uccsd_lambda_guess(Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,beta,ng):
+    Id = numpy.ones((ng))
+    L1a = (1.0/beta)*einsum('v,ia->via',Id,Fa.ov)
+    L1b = (1.0/beta)*einsum('v,ia->via',Id,Fb.ov)
+    L2aa = (1.0/beta)*einsum('v,ijab->vijab',Id,Ia.oovv)
+    L2ab = (1.0/beta)*einsum('v,ijab->vijab',Id,Iabab.oovv)
+    L2bb = (1.0/beta)*einsum('v,ijab->vijab',Id,Ib.oovv)
+    for y in range(ng):
+        T1olds = (T1aold[y,:,:],T1bold[y,:,:])
+        cc_equations._u_LS_TS(L1a[y,:,:],L1b[y,:,:],Ia,Ib,Iabab,T1olds[0],T1olds[1])
+
+    return L1a,L1b,L2aa,L2ab,L2bb
+
+def uccd_lambda_guess(Ia,Ib,Iabab,beta,ng):
+    Id = numpy.ones((ng))
+    L2aa = (1.0/beta)*einsum('v,ijab->vijab',Id,Ia.oovv)
+    L2ab = (1.0/beta)*einsum('v,ijab->vijab',Id,Iabab.oovv)
+    L2bb = (1.0/beta)*einsum('v,ijab->vijab',Id,Ib.oovv)
+
+    return L2aa,L2ab,L2bb
 
 def neq_lambda_simple(Ff,Fb,F,I,L1oldf,L1oldb,L1oldi,
         L2oldf,L2oldb,L2oldi,T1oldf,T1oldb,T1oldi,

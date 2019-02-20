@@ -12,7 +12,7 @@ from . import ft_cc_equations
 from . import quadrature
 
 einsum = lib.einsum
-#einsum = einsum
+#einsum = numpy.einsum
 
 class ccsd(object):
     """Coupled cluster singles and doubles (CCSD) driver.
@@ -912,9 +912,9 @@ class ccsd(object):
         #        L1old = L1
         if L2 is None and L1 is None:
             if self.singles:
-                L1old,L2old = ft_cc_equations.ccsd_lambda_guess(F,I,self.T1,self.T2,beta)
+                L1old,L2old = ft_cc_equations.ccsd_lambda_guess(F,I,self.T1,beta,ng)
             else:
-                L2old = ft_cc_equations.ccd_lambda_guess(F,I,self.T2,beta)
+                L2old = ft_cc_equations.ccd_lambda_guess(I,beta,ng)
         elif L2 is not None and L1 is None:
             L2old = L2
             if self.singles:
@@ -993,27 +993,57 @@ class ccsd(object):
         T1aold,T1bold = self.T1
         T2aaold,T2abold,T2bbold = self.T2
 
-        if L2 is None:
-            # Use T^{\dagger} as a guess for Lambda
+        #if L2 is None:
+        #    # Use T^{\dagger} as a guess for Lambda
+        #    if self.singles:
+        #        L1aold = numpy.transpose(T1aold,(0,2,1))
+        #        L1bold = numpy.transpose(T1bold,(0,2,1))
+        #    else:
+        #        L1aold = numpy.zeros((ng,na,na))
+        #        L1bold = numpy.zeros((ng,nb,nb))
+        #    L2aaold = numpy.transpose(T2aaold,(0,3,4,1,2))
+        #    L2abold = numpy.transpose(T2abold,(0,3,4,1,2))
+        #    L2bbold = numpy.transpose(T2bbold,(0,3,4,1,2))
+        #else:
+        #    L2aaold = L2[0]
+        #    L2abold = L2[1]
+        #    L2bbold = L2[2]
+        #    if L1 is None:
+        #        L1aold = numpy.zeros((ng,na,na))
+        #        L1bold = numpy.zeros((ng,nb,nb))
+        #    else:
+        #        L1aold = L1[0]
+        #        L1bold = L1[1]
+        if L2 is None and L1 is None:
             if self.singles:
-                L1aold = numpy.transpose(T1aold,(0,2,1))
-                L1bold = numpy.transpose(T1bold,(0,2,1))
+                L1aold,L1bold,L2aaold,L2abold,L2bbold = ft_cc_equations.uccsd_lambda_guess(
+                    Fa,Fb,Ia,Ib,Iabab,self.T1[0],self.T1[1],beta,ng)
             else:
-                L1aold = numpy.zeros((ng,na,na))
-                L1bold = numpy.zeros((ng,nb,nb))
-            L2aaold = numpy.transpose(T2aaold,(0,3,4,1,2))
-            L2abold = numpy.transpose(T2abold,(0,3,4,1,2))
-            L2bbold = numpy.transpose(T2bbold,(0,3,4,1,2))
+                L2aaold,L2abold,L2bbold = ft_cc_equations.uccd_lambda_guess(Ia,Ib,Iabab,beta,ng)
+        elif L2 is not None and L1 is None:
+            L2aaold = L2aa
+            L2abold = L2ab
+            L2bbold = L2bb
+            if self.singles:
+                ng,nv,no = self.T1.shape
+                L1aold = numpy.zeros((ng,no,nv))
+                L1bold = numpy.zeros((ng,no,nv))
+        elif L1 is not None and L2 is None:
+            ng,nv,no = self.T1.shape
+            L1aold = L1[0]
+            L1bold = L1[1]
+            L2aaold = numpy.zeros((ng,no,nv))
+            L2abold = numpy.zeros((ng,no,nv))
+            L2bbold = numpy.zeros((ng,no,nv))
+            if not self.singles:
+                raise Exception("Singles guess provided to FT-CCD Lambda equations")
         else:
+            assert(L1 is not None and L2 is not None)
+            L1aold = L1[0]
+            L1bold = L1[1]
             L2aaold = L2[0]
             L2abold = L2[1]
             L2bbold = L2[2]
-            if L1 is None:
-                L1aold = numpy.zeros((ng,na,na))
-                L1bold = numpy.zeros((ng,nb,nb))
-            else:
-                L1aold = L1[0]
-                L1bold = L1[1]
 
         # run lambda iterations
         conv_options = {
