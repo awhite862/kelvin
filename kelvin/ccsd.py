@@ -1190,9 +1190,6 @@ class ccsd(object):
 
         # get energies and occupation numbers
         en = self.sys.g_energies_tot()
-        #fo = ft_utils.ff(beta, en, mu)
-        #fv = ft_utils.ffv(beta, en, mu)
-        #n = fo.shape[0]
 
         # get time-grid
         ng = self.ngrid
@@ -1279,7 +1276,6 @@ class ccsd(object):
         D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
             - eb[None,None,:,None] - eb[None,None,None,:]
 
-        F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
         Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
         T1aold,T1bold = self.T1
         T2aaold,T2abold,T2bbold = self.T2
