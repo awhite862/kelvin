@@ -3,7 +3,6 @@ from kelvin.ccsd import ccsd
 from kelvin.hubbard_system import hubbard_system 
 from lattice.hubbard import Hubbard1D
 
-nelec = 2
 L = 6
 U = 1.0
 T = 1.0

@@ -15,6 +15,171 @@ class CCUtilsTest(unittest.TestCase):
         diff = numpy.linalg.norm(fd - D) 
         self.assertTrue(diff < thresh,"Difference in " + name + ": {}".format(diff))
 
+    def test_Be_active(self):
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+
+        m = scf.RHF(mol)
+        T = 0.02
+        mu = 0.0
+        beta = 1/T
+        delta = 1e-4
+        thresh = 1e-10
+        athresh = 1e-40
+        m.conv_tol = 1e-12
+        Escf = m.scf()
+        sys = scf_system(m,T,mu+delta,orbtype='u')
+        ea,eb = sys.u_energies_tot()
+        foa = ft_utils.ff(beta, ea, mu)
+        fva = ft_utils.ffv(beta, ea, mu)
+        fob = ft_utils.ff(beta, eb, mu)
+        fvb = ft_utils.ffv(beta, eb, mu)
+        focca = [x for x in foa if x > athresh]
+        fvira = [x for x in fva if x > athresh]
+        foccb = [x for x in fob if x > athresh]
+        fvirb = [x for x in fvb if x > athresh]
+        iocca = [i for i,x in enumerate(foa) if x > athresh]
+        ivira = [i for i,x in enumerate(fva) if x > athresh]
+        ioccb = [i for i,x in enumerate(fob) if x > athresh]
+        ivirb = [i for i,x in enumerate(fvb) if x > athresh]
+        Fa,Fb,Ia,Ib,Iabab = cc_utils.get_uft_active_integrals(
+                sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
+        Fga,Fgb,Iga,Igb,Igabab = cc_utils.get_uft_integrals(sys, ea, eb, beta, mu)
+
+        # test Fock matrix
+        Foo = Fga.oo[numpy.ix_(iocca,iocca)]
+        Fov = Fga.oo[numpy.ix_(iocca,ivira)]
+        Fvo = Fga.oo[numpy.ix_(ivira,iocca)]
+        Fvv = Fga.oo[numpy.ix_(ivira,ivira)]
+        doo = numpy.linalg.norm(Fa.oo - Foo)/numpy.sqrt(Foo.size)
+        dov = numpy.linalg.norm(Fa.ov - Fov)/numpy.sqrt(Fov.size)
+        dvo = numpy.linalg.norm(Fa.vo - Fvo)/numpy.sqrt(Fvo.size)
+        dvv = numpy.linalg.norm(Fa.vv - Fvv)/numpy.sqrt(Fvv.size)
+        self.assertTrue(doo < thresh,"Error in Fooa: {}".format(doo))
+        self.assertTrue(doo < thresh,"Error in Fova: {}".format(dov))
+        self.assertTrue(doo < thresh,"Error in Fvoa: {}".format(dvo))
+        self.assertTrue(doo < thresh,"Error in Fvva: {}".format(dvv))
+
+        Foo = Fgb.oo[numpy.ix_(ioccb,ioccb)]
+        Fov = Fgb.oo[numpy.ix_(ioccb,ivirb)]
+        Fvo = Fgb.oo[numpy.ix_(ivirb,ioccb)]
+        Fvv = Fgb.oo[numpy.ix_(ivirb,ivirb)]
+        doo = numpy.linalg.norm(Fa.oo - Foo)/numpy.sqrt(Foo.size)
+        dov = numpy.linalg.norm(Fa.ov - Fov)/numpy.sqrt(Fov.size)
+        dvo = numpy.linalg.norm(Fa.vo - Fvo)/numpy.sqrt(Fvo.size)
+        dvv = numpy.linalg.norm(Fa.vv - Fvv)/numpy.sqrt(Fvv.size)
+        self.assertTrue(doo < thresh,"Error in Foob: {}".format(doo))
+        self.assertTrue(doo < thresh,"Error in Fovb: {}".format(dov))
+        self.assertTrue(doo < thresh,"Error in Fvob: {}".format(dvo))
+        self.assertTrue(doo < thresh,"Error in Fvvb: {}".format(dvv))
+
+        # test ERIs
+        Ivvvv = Iga.vvvv[numpy.ix_(ivira,ivira,ivira,ivira)]
+        Ivvvo = Iga.vvvo[numpy.ix_(ivira,ivira,ivira,iocca)]
+        Ivovv = Iga.vovv[numpy.ix_(ivira,iocca,ivira,ivira)]
+        Ivvoo = Iga.vvoo[numpy.ix_(ivira,ivira,iocca,iocca)]
+        Ioovv = Iga.oovv[numpy.ix_(iocca,iocca,ivira,ivira)]
+        Ivovo = Iga.vovo[numpy.ix_(ivira,iocca,ivira,iocca)]
+        Ivooo = Iga.vooo[numpy.ix_(ivira,iocca,iocca,iocca)]
+        Iooov = Iga.ooov[numpy.ix_(iocca,iocca,iocca,ivira)]
+        Ioooo = Iga.oooo[numpy.ix_(iocca,iocca,iocca,iocca)]
+        Dvvvv = numpy.linalg.norm(Ia.vvvv - Ivvvv)/numpy.sqrt(Ivvvv.size)
+        Dvvvo = numpy.linalg.norm(Ia.vvvo - Ivvvo)/numpy.sqrt(Ivvvo.size)
+        Dvovv = numpy.linalg.norm(Ia.vovv - Ivovv)/numpy.sqrt(Ivovv.size)
+        Dvvoo = numpy.linalg.norm(Ia.vvoo - Ivvoo)/numpy.sqrt(Ivvoo.size)
+        Doovv = numpy.linalg.norm(Ia.oovv - Ioovv)/numpy.sqrt(Ioovv.size)
+        Dvovo = numpy.linalg.norm(Ia.vovo - Ivovo)/numpy.sqrt(Ivovo.size)
+        Dvooo = numpy.linalg.norm(Ia.vooo - Ivooo)/numpy.sqrt(Ivooo.size)
+        Dooov = numpy.linalg.norm(Ia.ooov - Iooov)/numpy.sqrt(Iooov.size)
+        Doooo = numpy.linalg.norm(Ia.oooo - Ioooo)/numpy.sqrt(Ioooo.size)
+        self.assertTrue(Dvvvv < thresh,"Error in Ivvvva: {}".format(Dvvvv))
+        self.assertTrue(Dvvvo < thresh,"Error in Ivvvoa: {}".format(Dvvvo))
+        self.assertTrue(Dvovv < thresh,"Error in Ivovva: {}".format(Dvovv))
+        self.assertTrue(Dvvoo < thresh,"Error in Ivvooa: {}".format(Dvvoo))
+        self.assertTrue(Doovv < thresh,"Error in Ioovva: {}".format(Doovv))
+        self.assertTrue(Dvovo < thresh,"Error in Ivovoa: {}".format(Dvovo))
+        self.assertTrue(Dvooo < thresh,"Error in Ivoooa: {}".format(Dvooo))
+        self.assertTrue(Dooov < thresh,"Error in Iooova: {}".format(Dooov))
+
+        Ivvvv = Igb.vvvv[numpy.ix_(ivirb,ivirb,ivirb,ivirb)]
+        Ivvvo = Igb.vvvo[numpy.ix_(ivirb,ivirb,ivirb,ioccb)]
+        Ivovv = Igb.vovv[numpy.ix_(ivirb,ioccb,ivirb,ivirb)]
+        Ivvoo = Igb.vvoo[numpy.ix_(ivirb,ivirb,ioccb,ioccb)]
+        Ioovv = Igb.oovv[numpy.ix_(ioccb,ioccb,ivirb,ivirb)]
+        Ivovo = Igb.vovo[numpy.ix_(ivirb,ioccb,ivirb,ioccb)]
+        Ivooo = Igb.vooo[numpy.ix_(ivirb,ioccb,ioccb,ioccb)]
+        Iooov = Igb.ooov[numpy.ix_(ioccb,ioccb,ioccb,ivirb)]
+        Ioooo = Igb.oooo[numpy.ix_(ioccb,ioccb,ioccb,ioccb)]
+        Dvvvv = numpy.linalg.norm(Ib.vvvv - Ivvvv)/numpy.sqrt(Ivvvv.size)
+        Dvvvo = numpy.linalg.norm(Ib.vvvo - Ivvvo)/numpy.sqrt(Ivvvo.size)
+        Dvovv = numpy.linalg.norm(Ib.vovv - Ivovv)/numpy.sqrt(Ivovv.size)
+        Dvvoo = numpy.linalg.norm(Ib.vvoo - Ivvoo)/numpy.sqrt(Ivvoo.size)
+        Doovv = numpy.linalg.norm(Ib.oovv - Ioovv)/numpy.sqrt(Ioovv.size)
+        Dvovo = numpy.linalg.norm(Ib.vovo - Ivovo)/numpy.sqrt(Ivovo.size)
+        Dvooo = numpy.linalg.norm(Ib.vooo - Ivooo)/numpy.sqrt(Ivooo.size)
+        Dooov = numpy.linalg.norm(Ib.ooov - Iooov)/numpy.sqrt(Iooov.size)
+        Doooo = numpy.linalg.norm(Ib.oooo - Ioooo)/numpy.sqrt(Ioooo.size)
+        self.assertTrue(Dvvvv < thresh,"Error in Ivvvvb: {}".format(Dvvvv))
+        self.assertTrue(Dvvvo < thresh,"Error in Ivvvob: {}".format(Dvvvo))
+        self.assertTrue(Dvovv < thresh,"Error in Ivovvb: {}".format(Dvovv))
+        self.assertTrue(Dvvoo < thresh,"Error in Ivvoob: {}".format(Dvvoo))
+        self.assertTrue(Doovv < thresh,"Error in Ioovvb: {}".format(Doovv))
+        self.assertTrue(Dvovo < thresh,"Error in Ivovob: {}".format(Dvovo))
+        self.assertTrue(Dvooo < thresh,"Error in Ivooob: {}".format(Dvooo))
+        self.assertTrue(Dooov < thresh,"Error in Iooovb: {}".format(Dooov))
+        self.assertTrue(Doooo < thresh,"Error in Ioooob: {}".format(Doooo))
+
+        Ivvvv = Igabab.vvvv[numpy.ix_(ivira,ivirb,ivira,ivirb)]
+        Ivvvo = Igabab.vvvo[numpy.ix_(ivira,ivirb,ivira,ioccb)]
+        Ivvov = Igabab.vvov[numpy.ix_(ivira,ivirb,iocca,ivirb)]
+        Ivovv = Igabab.vovv[numpy.ix_(ivira,ioccb,ivira,ivirb)]
+        Iovvv = Igabab.ovvv[numpy.ix_(iocca,ivirb,ivira,ivirb)]
+        Ivvoo = Igabab.vvoo[numpy.ix_(ivira,ivirb,iocca,ioccb)]
+        Ioovv = Igabab.oovv[numpy.ix_(iocca,ioccb,ivira,ivirb)]
+        Ivovo = Igabab.vovo[numpy.ix_(ivira,ioccb,ivira,ioccb)]
+        Ivoov = Igabab.voov[numpy.ix_(ivira,ioccb,iocca,ivirb)]
+        Iovvo = Igabab.ovvo[numpy.ix_(iocca,ivirb,ivira,ioccb)]
+        Iovov = Igabab.ovov[numpy.ix_(iocca,ivirb,iocca,ivirb)]
+        Ivooo = Igabab.vooo[numpy.ix_(ivira,ioccb,iocca,ioccb)]
+        Iovoo = Igabab.ovoo[numpy.ix_(iocca,ivirb,iocca,ioccb)]
+        Ioovo = Igabab.oovo[numpy.ix_(iocca,ioccb,ivira,ioccb)]
+        Iooov = Igabab.ooov[numpy.ix_(iocca,ioccb,iocca,ivirb)]
+        Ioooo = Igabab.oooo[numpy.ix_(iocca,ioccb,iocca,ioccb)]
+        Dvvvv = numpy.linalg.norm(Iabab.vvvv - Ivvvv)/numpy.sqrt(Ivvvv.size)
+        Dvvvo = numpy.linalg.norm(Iabab.vvvo - Ivvvo)/numpy.sqrt(Ivvvo.size)
+        Dvvov = numpy.linalg.norm(Iabab.vvov - Ivvov)/numpy.sqrt(Ivvov.size)
+        Dvovv = numpy.linalg.norm(Iabab.vovv - Ivovv)/numpy.sqrt(Ivovv.size)
+        Dovvv = numpy.linalg.norm(Iabab.ovvv - Iovvv)/numpy.sqrt(Iovvv.size)
+        Dvvoo = numpy.linalg.norm(Iabab.vvoo - Ivvoo)/numpy.sqrt(Ivvoo.size)
+        Doovv = numpy.linalg.norm(Iabab.oovv - Ioovv)/numpy.sqrt(Ioovv.size)
+        Dvovo = numpy.linalg.norm(Iabab.vovo - Ivovo)/numpy.sqrt(Ivovo.size)
+        Dovvo = numpy.linalg.norm(Iabab.ovvo - Iovvo)/numpy.sqrt(Iovvo.size)
+        Dvoov = numpy.linalg.norm(Iabab.voov - Ivoov)/numpy.sqrt(Ivoov.size)
+        Dovov = numpy.linalg.norm(Iabab.ovov - Iovov)/numpy.sqrt(Iovov.size)
+        Dvooo = numpy.linalg.norm(Iabab.vooo - Ivooo)/numpy.sqrt(Ivooo.size)
+        Dovoo = numpy.linalg.norm(Iabab.ovoo - Iovoo)/numpy.sqrt(Iovoo.size)
+        Doovo = numpy.linalg.norm(Iabab.oovo - Ioovo)/numpy.sqrt(Ioovo.size)
+        Dooov = numpy.linalg.norm(Iabab.ooov - Iooov)/numpy.sqrt(Iooov.size)
+        Doooo = numpy.linalg.norm(Iabab.oooo - Ioooo)/numpy.sqrt(Ioooo.size)
+        self.assertTrue(Dvvvv < thresh,"Error in Ivvvvab: {}".format(Dvvvv))
+        self.assertTrue(Dvvvo < thresh,"Error in Ivvvoab: {}".format(Dvvvo))
+        self.assertTrue(Dvvov < thresh,"Error in Ivvovab: {}".format(Dvvov))
+        self.assertTrue(Dvovv < thresh,"Error in Ivovvab: {}".format(Dvovv))
+        self.assertTrue(Dovvv < thresh,"Error in Iovvvab: {}".format(Dovvv))
+        self.assertTrue(Dvvoo < thresh,"Error in Ivvooab: {}".format(Dvvoo))
+        self.assertTrue(Doovv < thresh,"Error in Ioovvab: {}".format(Doovv))
+        self.assertTrue(Dvovo < thresh,"Error in Ivovoab: {}".format(Dvovo))
+        self.assertTrue(Dovvo < thresh,"Error in Iovvoab: {}".format(Dovvo))
+        self.assertTrue(Dvoov < thresh,"Error in Ivoovab: {}".format(Dvoov))
+        self.assertTrue(Dovov < thresh,"Error in Iovovab: {}".format(Dovov))
+        self.assertTrue(Dvooo < thresh,"Error in Ivoooab: {}".format(Dvooo))
+        self.assertTrue(Dovoo < thresh,"Error in Iovooab: {}".format(Dovoo))
+        self.assertTrue(Doovo < thresh,"Error in Iooovab: {}".format(Doovo))
+        self.assertTrue(Dooov < thresh,"Error in Iooovab: {}".format(Dooov))
+        self.assertTrue(Doooo < thresh,"Error in Iooooab: {}".format(Doooo))
+
     def test_Be_gen_deriv(self):
         mol = gto.M(
             verbose = 0,
@@ -206,6 +371,175 @@ class CCUtilsTest(unittest.TestCase):
         self.assertTrue(Dvooo < thresh,"Error in Ivooo: {}".format(Dvooo))
         self.assertTrue(Dooov < thresh,"Error in Iooov: {}".format(Dooov))
         self.assertTrue(Doooo < thresh,"Error in Ioooo: {}".format(Doooo))
+
+    def test_Be_active_deriv(self):
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+
+        m = scf.RHF(mol)
+        T = 0.05
+        mu = 0.0
+        beta = 1/T
+        delta = 1e-4
+        thresh = 1e-10
+        athresh = 1e-40
+        m.conv_tol = 1e-12
+        Escf = m.scf()
+        sys = scf_system(m,T,mu+delta,orbtype='u')
+        ea,eb = sys.u_energies_tot()
+        dveca = -beta*numpy.ones(ea.shape)
+        dvecb = -beta*numpy.ones(eb.shape)
+        foa = ft_utils.ff(beta, ea, mu)
+        fva = ft_utils.ffv(beta, ea, mu)
+        fob = ft_utils.ff(beta, eb, mu)
+        fvb = ft_utils.ffv(beta, eb, mu)
+        focca = [x for x in foa if x > athresh]
+        fvira = [x for x in fva if x > athresh]
+        foccb = [x for x in fob if x > athresh]
+        fvirb = [x for x in fvb if x > athresh]
+        iocca = [i for i,x in enumerate(foa) if x > athresh]
+        ivira = [i for i,x in enumerate(fva) if x > athresh]
+        ioccb = [i for i,x in enumerate(fob) if x > athresh]
+        ivirb = [i for i,x in enumerate(fvb) if x > athresh]
+        Fa,Fb,Ia,Ib,Iabab  = cc_utils.get_uft_d_active_integrals(
+                sys, ea, eb, foa, fva, fob, fvb, iocca, 
+                ivira, ioccb, ivirb, dveca, dvecb)
+        Fga,Fgb,Iga,Igb,Igabab = cc_utils.u_ft_d_integrals(
+                sys, ea, eb, foa, fob, fva, fvb, dveca, dvecb)
+
+        # test Fock matrix
+        Foo = Fga.oo[numpy.ix_(iocca,iocca)]
+        Fov = Fga.oo[numpy.ix_(iocca,ivira)]
+        Fvo = Fga.oo[numpy.ix_(ivira,iocca)]
+        Fvv = Fga.oo[numpy.ix_(ivira,ivira)]
+        doo = numpy.linalg.norm(Fa.oo - Foo)/numpy.sqrt(Foo.size)
+        dov = numpy.linalg.norm(Fa.ov - Fov)/numpy.sqrt(Fov.size)
+        dvo = numpy.linalg.norm(Fa.vo - Fvo)/numpy.sqrt(Fvo.size)
+        dvv = numpy.linalg.norm(Fa.vv - Fvv)/numpy.sqrt(Fvv.size)
+        self.assertTrue(doo < thresh,"Error in Fooa: {}".format(doo))
+        self.assertTrue(doo < thresh,"Error in Fova: {}".format(dov))
+        self.assertTrue(doo < thresh,"Error in Fvoa: {}".format(dvo))
+        self.assertTrue(doo < thresh,"Error in Fvva: {}".format(dvv))
+
+        Foo = Fgb.oo[numpy.ix_(ioccb,ioccb)]
+        Fov = Fgb.oo[numpy.ix_(ioccb,ivirb)]
+        Fvo = Fgb.oo[numpy.ix_(ivirb,ioccb)]
+        Fvv = Fgb.oo[numpy.ix_(ivirb,ivirb)]
+        doo = numpy.linalg.norm(Fa.oo - Foo)/numpy.sqrt(Foo.size)
+        dov = numpy.linalg.norm(Fa.ov - Fov)/numpy.sqrt(Fov.size)
+        dvo = numpy.linalg.norm(Fa.vo - Fvo)/numpy.sqrt(Fvo.size)
+        dvv = numpy.linalg.norm(Fa.vv - Fvv)/numpy.sqrt(Fvv.size)
+        self.assertTrue(doo < thresh,"Error in Foob: {}".format(doo))
+        self.assertTrue(doo < thresh,"Error in Fovb: {}".format(dov))
+        self.assertTrue(doo < thresh,"Error in Fvob: {}".format(dvo))
+        self.assertTrue(doo < thresh,"Error in Fvvb: {}".format(dvv))
+
+        # test integrals
+        Ivvvv = Iga.vvvv[numpy.ix_(ivira,ivira,ivira,ivira)]
+        Ivvvo = Iga.vvvo[numpy.ix_(ivira,ivira,ivira,iocca)]
+        Ivovv = Iga.vovv[numpy.ix_(ivira,iocca,ivira,ivira)]
+        Ivvoo = Iga.vvoo[numpy.ix_(ivira,ivira,iocca,iocca)]
+        Ioovv = Iga.oovv[numpy.ix_(iocca,iocca,ivira,ivira)]
+        Ivovo = Iga.vovo[numpy.ix_(ivira,iocca,ivira,iocca)]
+        Ivooo = Iga.vooo[numpy.ix_(ivira,iocca,iocca,iocca)]
+        Iooov = Iga.ooov[numpy.ix_(iocca,iocca,iocca,ivira)]
+        Ioooo = Iga.oooo[numpy.ix_(iocca,iocca,iocca,iocca)]
+        Dvvvv = numpy.linalg.norm(Ia.vvvv - Ivvvv)/numpy.sqrt(Ivvvv.size)
+        Dvvvo = numpy.linalg.norm(Ia.vvvo - Ivvvo)/numpy.sqrt(Ivvvo.size)
+        Dvovv = numpy.linalg.norm(Ia.vovv - Ivovv)/numpy.sqrt(Ivovv.size)
+        Dvvoo = numpy.linalg.norm(Ia.vvoo - Ivvoo)/numpy.sqrt(Ivvoo.size)
+        Doovv = numpy.linalg.norm(Ia.oovv - Ioovv)/numpy.sqrt(Ioovv.size)
+        Dvovo = numpy.linalg.norm(Ia.vovo - Ivovo)/numpy.sqrt(Ivovo.size)
+        Dvooo = numpy.linalg.norm(Ia.vooo - Ivooo)/numpy.sqrt(Ivooo.size)
+        Dooov = numpy.linalg.norm(Ia.ooov - Iooov)/numpy.sqrt(Iooov.size)
+        Doooo = numpy.linalg.norm(Ia.oooo - Ioooo)/numpy.sqrt(Ioooo.size)
+        self.assertTrue(Dvvvv < thresh,"Error in Ivvvva: {}".format(Dvvvv))
+        self.assertTrue(Dvvvo < thresh,"Error in Ivvvoa: {}".format(Dvvvo))
+        self.assertTrue(Dvovv < thresh,"Error in Ivovva: {}".format(Dvovv))
+        self.assertTrue(Dvvoo < thresh,"Error in Ivvooa: {}".format(Dvvoo))
+        self.assertTrue(Doovv < thresh,"Error in Ioovva: {}".format(Doovv))
+        self.assertTrue(Dvovo < thresh,"Error in Ivovoa: {}".format(Dvovo))
+        self.assertTrue(Dvooo < thresh,"Error in Ivoooa: {}".format(Dvooo))
+        self.assertTrue(Dooov < thresh,"Error in Iooova: {}".format(Dooov))
+
+        Ivvvv = Igb.vvvv[numpy.ix_(ivirb,ivirb,ivirb,ivirb)]
+        Ivvvo = Igb.vvvo[numpy.ix_(ivirb,ivirb,ivirb,ioccb)]
+        Ivovv = Igb.vovv[numpy.ix_(ivirb,ioccb,ivirb,ivirb)]
+        Ivvoo = Igb.vvoo[numpy.ix_(ivirb,ivirb,ioccb,ioccb)]
+        Ioovv = Igb.oovv[numpy.ix_(ioccb,ioccb,ivirb,ivirb)]
+        Ivovo = Igb.vovo[numpy.ix_(ivirb,ioccb,ivirb,ioccb)]
+        Ivooo = Igb.vooo[numpy.ix_(ivirb,ioccb,ioccb,ioccb)]
+        Iooov = Igb.ooov[numpy.ix_(ioccb,ioccb,ioccb,ivirb)]
+        Ioooo = Igb.oooo[numpy.ix_(ioccb,ioccb,ioccb,ioccb)]
+        Dvvvv = numpy.linalg.norm(Ib.vvvv - Ivvvv)/numpy.sqrt(Ivvvv.size)
+        Dvvvo = numpy.linalg.norm(Ib.vvvo - Ivvvo)/numpy.sqrt(Ivvvo.size)
+        Dvovv = numpy.linalg.norm(Ib.vovv - Ivovv)/numpy.sqrt(Ivovv.size)
+        Dvvoo = numpy.linalg.norm(Ib.vvoo - Ivvoo)/numpy.sqrt(Ivvoo.size)
+        Doovv = numpy.linalg.norm(Ib.oovv - Ioovv)/numpy.sqrt(Ioovv.size)
+        Dvovo = numpy.linalg.norm(Ib.vovo - Ivovo)/numpy.sqrt(Ivovo.size)
+        Dvooo = numpy.linalg.norm(Ib.vooo - Ivooo)/numpy.sqrt(Ivooo.size)
+        Dooov = numpy.linalg.norm(Ib.ooov - Iooov)/numpy.sqrt(Iooov.size)
+        Doooo = numpy.linalg.norm(Ib.oooo - Ioooo)/numpy.sqrt(Ioooo.size)
+        self.assertTrue(Dvvvv < thresh,"Error in Ivvvvb: {}".format(Dvvvv))
+        self.assertTrue(Dvvvo < thresh,"Error in Ivvvob: {}".format(Dvvvo))
+        self.assertTrue(Dvovv < thresh,"Error in Ivovvb: {}".format(Dvovv))
+        self.assertTrue(Dvvoo < thresh,"Error in Ivvoob: {}".format(Dvvoo))
+        self.assertTrue(Doovv < thresh,"Error in Ioovvb: {}".format(Doovv))
+        self.assertTrue(Dvovo < thresh,"Error in Ivovob: {}".format(Dvovo))
+        self.assertTrue(Dvooo < thresh,"Error in Ivooob: {}".format(Dvooo))
+        self.assertTrue(Dooov < thresh,"Error in Iooovb: {}".format(Dooov))
+        self.assertTrue(Doooo < thresh,"Error in Ioooob: {}".format(Doooo))
+
+        Ivvvv = Igabab.vvvv[numpy.ix_(ivira,ivirb,ivira,ivirb)]
+        Ivvvo = Igabab.vvvo[numpy.ix_(ivira,ivirb,ivira,ioccb)]
+        Ivvov = Igabab.vvov[numpy.ix_(ivira,ivirb,iocca,ivirb)]
+        Ivovv = Igabab.vovv[numpy.ix_(ivira,ioccb,ivira,ivirb)]
+        Iovvv = Igabab.ovvv[numpy.ix_(iocca,ivirb,ivira,ivirb)]
+        Ivvoo = Igabab.vvoo[numpy.ix_(ivira,ivirb,iocca,ioccb)]
+        Ioovv = Igabab.oovv[numpy.ix_(iocca,ioccb,ivira,ivirb)]
+        Ivovo = Igabab.vovo[numpy.ix_(ivira,ioccb,ivira,ioccb)]
+        Ivoov = Igabab.voov[numpy.ix_(ivira,ioccb,iocca,ivirb)]
+        Iovvo = Igabab.ovvo[numpy.ix_(iocca,ivirb,ivira,ioccb)]
+        Iovov = Igabab.ovov[numpy.ix_(iocca,ivirb,iocca,ivirb)]
+        Ivooo = Igabab.vooo[numpy.ix_(ivira,ioccb,iocca,ioccb)]
+        Iovoo = Igabab.ovoo[numpy.ix_(iocca,ivirb,iocca,ioccb)]
+        Ioovo = Igabab.oovo[numpy.ix_(iocca,ioccb,ivira,ioccb)]
+        Iooov = Igabab.ooov[numpy.ix_(iocca,ioccb,iocca,ivirb)]
+        Ioooo = Igabab.oooo[numpy.ix_(iocca,ioccb,iocca,ioccb)]
+        Dvvvv = numpy.linalg.norm(Iabab.vvvv - Ivvvv)/numpy.sqrt(Ivvvv.size)
+        Dvvvo = numpy.linalg.norm(Iabab.vvvo - Ivvvo)/numpy.sqrt(Ivvvo.size)
+        Dvvov = numpy.linalg.norm(Iabab.vvov - Ivvov)/numpy.sqrt(Ivvov.size)
+        Dvovv = numpy.linalg.norm(Iabab.vovv - Ivovv)/numpy.sqrt(Ivovv.size)
+        Dovvv = numpy.linalg.norm(Iabab.ovvv - Iovvv)/numpy.sqrt(Iovvv.size)
+        Dvvoo = numpy.linalg.norm(Iabab.vvoo - Ivvoo)/numpy.sqrt(Ivvoo.size)
+        Doovv = numpy.linalg.norm(Iabab.oovv - Ioovv)/numpy.sqrt(Ioovv.size)
+        Dvovo = numpy.linalg.norm(Iabab.vovo - Ivovo)/numpy.sqrt(Ivovo.size)
+        Dovvo = numpy.linalg.norm(Iabab.ovvo - Iovvo)/numpy.sqrt(Iovvo.size)
+        Dvoov = numpy.linalg.norm(Iabab.voov - Ivoov)/numpy.sqrt(Ivoov.size)
+        Dovov = numpy.linalg.norm(Iabab.ovov - Iovov)/numpy.sqrt(Iovov.size)
+        Dvooo = numpy.linalg.norm(Iabab.vooo - Ivooo)/numpy.sqrt(Ivooo.size)
+        Dovoo = numpy.linalg.norm(Iabab.ovoo - Iovoo)/numpy.sqrt(Iovoo.size)
+        Doovo = numpy.linalg.norm(Iabab.oovo - Ioovo)/numpy.sqrt(Ioovo.size)
+        Dooov = numpy.linalg.norm(Iabab.ooov - Iooov)/numpy.sqrt(Iooov.size)
+        Doooo = numpy.linalg.norm(Iabab.oooo - Ioooo)/numpy.sqrt(Ioooo.size)
+        self.assertTrue(Dvvvv < thresh,"Error in Ivvvvab: {}".format(Dvvvv))
+        self.assertTrue(Dvvvo < thresh,"Error in Ivvvoab: {}".format(Dvvvo))
+        self.assertTrue(Dvvov < thresh,"Error in Ivvovab: {}".format(Dvvov))
+        self.assertTrue(Dvovv < thresh,"Error in Ivovvab: {}".format(Dvovv))
+        self.assertTrue(Dovvv < thresh,"Error in Iovvvab: {}".format(Dovvv))
+        self.assertTrue(Dvvoo < thresh,"Error in Ivvooab: {}".format(Dvvoo))
+        self.assertTrue(Doovv < thresh,"Error in Ioovvab: {}".format(Doovv))
+        self.assertTrue(Dvovo < thresh,"Error in Ivovoab: {}".format(Dvovo))
+        self.assertTrue(Dovvo < thresh,"Error in Iovvoab: {}".format(Dovvo))
+        self.assertTrue(Dvoov < thresh,"Error in Ivoovab: {}".format(Dvoov))
+        self.assertTrue(Dovov < thresh,"Error in Iovovab: {}".format(Dovov))
+        self.assertTrue(Dvooo < thresh,"Error in Ivoooab: {}".format(Dvooo))
+        self.assertTrue(Dovoo < thresh,"Error in Iovooab: {}".format(Dovoo))
+        self.assertTrue(Doovo < thresh,"Error in Ioovoab: {}".format(Doovo))
+        self.assertTrue(Dooov < thresh,"Error in Iooovab: {}".format(Dooov))
+        self.assertTrue(Doooo < thresh,"Error in Iooooab: {}".format(Doooo))
 
 if __name__ == '__main__':
     unittest.main()
