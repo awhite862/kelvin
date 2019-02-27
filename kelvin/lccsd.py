@@ -224,7 +224,7 @@ class lccsd(object):
         E01 = E0 + E1
 
         # get scaled integrals
-        F,I = cc_utils.get_ft_integrals(self.sys, en, beta, mu)
+        F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
 
         # get energy differences
         D1 = en[:,None] - en[None,:]
@@ -312,7 +312,7 @@ class lccsd(object):
         E01 = E0 + E1
 
         # get scaled integrals
-        F,I = cc_utils.get_ft_active_integrals(self.sys, en, focc, fvir, iocc, ivir)
+        F,I = cc_utils.ft_active_integrals(self.sys, en, focc, fvir, iocc, ivir)
 
         # get exponentials
         D1 = en[:,None] - en[None,:]
@@ -381,7 +381,7 @@ class lccsd(object):
         E01 = E0 + E1
 
         # get scaled integrals
-        F,I = cc_utils.get_ft_integrals(self.sys, en, beta, mu)
+        F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
 
         # get energy differences
         D1 = en[:,None] - en[None,:]

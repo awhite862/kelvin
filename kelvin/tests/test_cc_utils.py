@@ -44,9 +44,9 @@ class CCUtilsTest(unittest.TestCase):
         ivira = [i for i,x in enumerate(fva) if x > athresh]
         ioccb = [i for i,x in enumerate(fob) if x > athresh]
         ivirb = [i for i,x in enumerate(fvb) if x > athresh]
-        Fa,Fb,Ia,Ib,Iabab = cc_utils.get_uft_active_integrals(
+        Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
                 sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
-        Fga,Fgb,Iga,Igb,Igabab = cc_utils.get_uft_integrals(sys, ea, eb, beta, mu)
+        Fga,Fgb,Iga,Igb,Igabab = cc_utils.uft_integrals(sys, ea, eb, beta, mu)
 
         # test Fock matrix
         Foo = Fga.oo[numpy.ix_(iocca,iocca)]
@@ -196,17 +196,17 @@ class CCUtilsTest(unittest.TestCase):
         Escf = m.scf()
         sys = scf_system(m,T,mu+delta,orbtype='g')
         en = sys.g_energies_tot()
-        Ff,If = cc_utils.get_ft_integrals(sys, en, beta, mu + delta)
+        Ff,If = cc_utils.ft_integrals(sys, en, beta, mu + delta)
         sys = scf_system(m,T,mu-delta,orbtype='g')
         en = sys.g_energies_tot()
-        Fb,Ib = cc_utils.get_ft_integrals(sys, en, beta, mu - delta)
+        Fb,Ib = cc_utils.ft_integrals(sys, en, beta, mu - delta)
 
         sys = scf_system(m,T,mu,orbtype='g')
         en = sys.g_energies_tot()
         fo = ft_utils.ff(beta, en, mu)
         fv = ft_utils.ffv(beta, en, mu)
         dvec = -beta*numpy.ones(en.shape)
-        dF, dI = cc_utils.get_ft_d_integrals(sys, en, fo, fv, dvec)
+        dF, dI = cc_utils.ft_d_integrals(sys, en, fo, fv, dvec)
 
         self._test_fd(Ff.oo, Fb.oo, dF.oo, delta, "Foo", thresh)
         self._test_fd(Ff.ov, Fb.ov, dF.ov, delta, "Fov", thresh)
@@ -239,10 +239,10 @@ class CCUtilsTest(unittest.TestCase):
         Escf = m.scf()
         sys = scf_system(m,T,mu+delta,orbtype='u')
         ea,eb = sys.u_energies_tot()
-        Faf,Fbf,Iaf,Ibf,Iababf = cc_utils.get_uft_integrals(sys, ea, eb, beta, mu + delta)
+        Faf,Fbf,Iaf,Ibf,Iababf = cc_utils.uft_integrals(sys, ea, eb, beta, mu + delta)
         sys = scf_system(m,T,mu-delta,orbtype='u')
         ea,eb = sys.u_energies_tot()
-        Fab,Fbb,Iab,Ibb,Iababb = cc_utils.get_uft_integrals(sys, ea, eb, beta, mu - delta)
+        Fab,Fbb,Iab,Ibb,Iababb = cc_utils.uft_integrals(sys, ea, eb, beta, mu - delta)
 
         sys = scf_system(m,T,mu,orbtype='u')
         ea,eb = sys.u_energies_tot()
@@ -253,7 +253,7 @@ class CCUtilsTest(unittest.TestCase):
         dveca = -beta*numpy.ones(ea.shape)
         dvecb = -beta*numpy.ones(eb.shape)
         dFa,dFb,dIa,dIb,dIabab = cc_utils.u_ft_d_integrals(
-                sys, ea, eb, foa, fob, fva, fvb, dveca, dvecb)
+                sys, ea, eb, foa, fva, fob, fvb, dveca, dvecb)
 
         self._test_fd(Faf.oo, Fab.oo, dFa.oo, delta, "Faoo", thresh)
         self._test_fd(Faf.ov, Fab.ov, dFa.ov, delta, "Faov", thresh)
@@ -326,8 +326,8 @@ class CCUtilsTest(unittest.TestCase):
         fvir = [x for x in fv if x > athresh]
         iocc = [i for i,x in enumerate(fo) if x > athresh]
         ivir = [i for i,x in enumerate(fv) if x > athresh]
-        F,I = cc_utils.get_ft_d_active_integrals(sys, en, fo, fv, iocc, ivir, dvec)
-        Fg,Ig = cc_utils.get_ft_d_integrals(sys, en, fo, fv, dvec)
+        F,I = cc_utils.ft_d_active_integrals(sys, en, fo, fv, iocc, ivir, dvec)
+        Fg,Ig = cc_utils.ft_d_integrals(sys, en, fo, fv, dvec)
 
         # test Fock matrix
         Foo = Fg.oo[numpy.ix_(iocc,iocc)]
@@ -403,11 +403,11 @@ class CCUtilsTest(unittest.TestCase):
         ivira = [i for i,x in enumerate(fva) if x > athresh]
         ioccb = [i for i,x in enumerate(fob) if x > athresh]
         ivirb = [i for i,x in enumerate(fvb) if x > athresh]
-        Fa,Fb,Ia,Ib,Iabab  = cc_utils.get_uft_d_active_integrals(
-                sys, ea, eb, foa, fva, fob, fvb, iocca, 
+        Fa,Fb,Ia,Ib,Iabab  = cc_utils.uft_d_active_integrals(
+                sys, ea, eb, focca, fvira, foccb, fvirb, iocca,
                 ivira, ioccb, ivirb, dveca, dvecb)
         Fga,Fgb,Iga,Igb,Igabab = cc_utils.u_ft_d_integrals(
-                sys, ea, eb, foa, fob, fva, fvb, dveca, dvecb)
+                sys, ea, eb, foa, fva, fob, fvb, dveca, dvecb)
 
         # test Fock matrix
         Foo = Fga.oo[numpy.ix_(iocca,iocca)]

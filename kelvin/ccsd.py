@@ -656,7 +656,7 @@ class ccsd(object):
                     print('  nact: {:d}'.format(nact))
 
                 # get scaled active space integrals
-                F,I = cc_utils.get_ft_active_integrals(self.sys, en, focc, fvir, iocc, ivir)
+                F,I = cc_utils.ft_active_integrals(self.sys, en, focc, fvir, iocc, ivir)
 
                 # get exponentials
                 D1 = en[:,None] - en[None,:]
@@ -667,7 +667,7 @@ class ccsd(object):
 
             else:
                 # get scaled integrals
-                F,I = cc_utils.get_ft_integrals(self.sys, en, beta, mu)
+                F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
 
                 # get energy differences
                 D1 = en[:,None] - en[None,:]
@@ -754,7 +754,7 @@ class ccsd(object):
         E01 = E0 + E1
 
         # get scaled integrals
-        Fa,Fb,Ia,Ib,Iabab = cc_utils.get_uft_integrals(self.sys, ea, eb, beta, mu)
+        Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
 
         # get energy differences
         D1a = ea[:,None] - ea[None,:]
@@ -878,7 +878,7 @@ class ccsd(object):
                 print('  nact: {:d}'.format(nact))
 
             # get scaled active space integrals
-            F,I = cc_utils.get_ft_active_integrals(self.sys, en, focc, fvir, iocc, ivir)
+            F,I = cc_utils.ft_active_integrals(self.sys, en, focc, fvir, iocc, ivir)
 
             # get exponentials
             D1 = en[:,None] - en[None,:]
@@ -888,7 +888,7 @@ class ccsd(object):
             D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
         else:
             # get scaled integrals
-            F,I = cc_utils.get_ft_integrals(self.sys, en, beta, mu)
+            F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
 
             # get energy differences
             D1 = en[:,None] - en[None,:]
@@ -978,7 +978,7 @@ class ccsd(object):
         E01 = E0 + E1
 
         # get scaled integrals
-        Fa,Fb,Ia,Ib,Iabab = cc_utils.get_uft_integrals(self.sys, ea, eb, beta, mu)
+        Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
 
         # get energy differences
         D1a = ea[:,None] - ea[None,:]
@@ -1094,10 +1094,10 @@ class ccsd(object):
             fvir = [x for x in fv if x > athresh]
             iocc = [i for i,x in enumerate(fo) if x > athresh]
             ivir = [i for i,x in enumerate(fv) if x > athresh]
-            F,I = cc_utils.get_ft_d_active_integrals(
+            F,I = cc_utils.ft_d_active_integrals(
                     self.sys, en, fo, fv, iocc, ivir, dvec)
         else:
-            F,I = cc_utils.get_ft_d_integrals(self.sys, en, fo, fv, dvec)
+            F,I = cc_utils.ft_d_integrals(self.sys, en, fo, fv, dvec)
         A1 = (1.0/beta)*einsum('ia,ai->',self.dia,F.vo)
         A1 += (1.0/beta)*einsum('ba,ab->',self.dba,F.vv)
         A1 += (1.0/beta)*einsum('ji,ij->',self.dji,F.oo)
@@ -1152,7 +1152,7 @@ class ccsd(object):
         D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
             - eb[None,None,:,None] - eb[None,None,None,:]
 
-        Fa,Fb,Ia,Ib,Iabab = cc_utils.u_ft_d_integrals(self.sys, ea, eb, foa, fob, fva, fvb, dveca, dvecb)
+        Fa,Fb,Ia,Ib,Iabab = cc_utils.u_ft_d_integrals(self.sys, ea, eb, foa, fva, fob, fvb, dveca, dvecb)
         T1aold,T1bold = self.T1
         T2aaold,T2abold,T2bbold = self.T2
         L1aold,L1bold = self.L1
@@ -1206,7 +1206,7 @@ class ccsd(object):
         D2 = en[:,None,None,None] + en[None,:,None,None] \
             - en[None,None,:,None] - en[None,None,None,:]
 
-        F,I = cc_utils.get_ft_integrals(self.sys, en, beta, mu)
+        F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
 
         # get derivative with respect to g
         Eterm = ft_cc_energy.ft_cc_energy(self.T1,self.T2,
@@ -1279,8 +1279,8 @@ class ccsd(object):
         D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
             - eb[None,None,:,None] - eb[None,None,None,:]
 
-        F,I = cc_utils.get_ft_integrals(self.sys, en, beta, mu)
-        Fa,Fb,Ia,Ib,Iabab = cc_utils.get_uft_integrals(self.sys, ea, eb, beta, mu)
+        F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
+        Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
         T1aold,T1bold = self.T1
         T2aaold,T2abold,T2bbold = self.T2
         L1aold,L1bold = self.L1

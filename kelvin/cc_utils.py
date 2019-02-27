@@ -565,7 +565,7 @@ def ft_ulambda_iter(method, L1ain, L1bin, L2aain, L2abin, L2bbin, T1aold, T1bold
 
     return L1aold,L1bold,L2aaold,L2abold,L2bbold
 
-def get_ft_integrals(sys, en, beta, mu):
+def ft_integrals(sys, en, beta, mu):
         """Return one and two-electron integrals in the general spin orbital basis."""
         fo = ft_utils.ff(beta, en, mu)
         fv = ft_utils.ffv(beta, en, mu)
@@ -642,13 +642,11 @@ def get_ft_integrals_neq(sys, en, beta, mu):
                 vovo=Ivovo,oovv=eri,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
         return F,Ff,Fb,I
 
-def get_uft_integrals(sys, ea, eb, beta, mu):
+def uft_integrals(sys, ea, eb, beta, mu):
         """Return one and two-electron integrals in the general spin orbital basis."""
         na = ea.shape[0]
         nb = eb.shape[0]
         #en = numpy.concatenate((ea,eb))
-        #fo = ft_utils.ff(beta, en, mu)
-        #fv = ft_utils.ffv(beta, en, mu)
         foa = ft_utils.ff(beta, ea, mu)
         fva = ft_utils.ffv(beta, ea, mu)
         fob = ft_utils.ff(beta, eb, mu)
@@ -730,7 +728,7 @@ def get_uft_integrals(sys, ea, eb, beta, mu):
 
         return Fa,Fb,Ia,Ib,Iabab
 
-def get_ft_active_integrals(sys, en, focc, fvir, iocc, ivir):
+def ft_active_integrals(sys, en, focc, fvir, iocc, ivir):
         """Return one and two-electron integrals in the general spin orbital basis
         with small occupations excluded."""
         # get FT Fock matrix
@@ -764,7 +762,7 @@ def get_ft_active_integrals(sys, en, focc, fvir, iocc, ivir):
 
         return F,I
 
-def get_uft_active_integrals(sys, ea, eb, foa, fva, fob, fvb, iocca, ivira, ioccb, ivirb):
+def uft_active_integrals(sys, ea, eb, foa, fva, fob, fvb, iocca, ivira, ioccb, ivirb):
         """Return one and two-electron integrals in the general spin orbital basis
         with small occupations excluded."""
         # get FT Fock matrix
@@ -945,7 +943,7 @@ def _form_ft_d_active_eris(eri, sfo, sfv, dso, dsv, iocc, ivir):
                 vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
         return I
 
-def get_ft_d_integrals(sys, en, fo, fv, dvec):
+def ft_d_integrals(sys, en, fo, fv, dvec):
         """form integrals contracted with derivatives of occupation numbers in the
         spin-orbital basis."""
 
@@ -979,7 +977,7 @@ def get_ft_d_integrals(sys, en, fo, fv, dvec):
         I = _form_ft_d_eris(eri,sfo,sfv,dso,dsv)
         return F,I
 
-def u_ft_d_integrals(sys, ea, eb, foa, fob, fva, fvb, dveca, dvecb):
+def u_ft_d_integrals(sys, ea, eb, foa, fva, fob, fvb, dveca, dvecb):
         """form unrestricted integrals contracted with derivatives of occupation numbers."""
         na = ea.shape[0]
         nb = eb.shape[0]
@@ -1028,103 +1026,12 @@ def u_ft_d_integrals(sys, ea, eb, foa, fob, fva, fvb, dveca, dvecb):
                 + einsum('ab,a,b->ab',fb,sfvb,dsvb)
         Fb = one_e_blocks(Foob,Fovb,Fvob,Fvvb)
 
-        # form derivative integrals
-        #fova = dveca*foa*fva
-        #fovb = dvecb*fob*fvb
-
-        #Fooa = einsum('ij,j->ij',fa,fova) + einsum('ij,j->ij',fda,foa)
-        #Fvoa = einsum('ai,a,i->ai',fda,fva,foa) + einsum('ai,a,i->ai',fa,fva,fova) \
-        #        - einsum('ai,a,i->ai',fa,fova,foa)
-        #Fvva = einsum('ab,a->ab',fda,fva) - einsum('ab,a->ab',fa,fova)
-        #Foob = einsum('ij,j->ij',fa,fova) + einsum('ij,j->ij',fda,foa)
-        #Fvob = einsum('ai,a,i->ai',fdb,fvb,fob) + einsum('ai,a,i->ai',fb,fvb,fovb) \
-        #        - einsum('ai,a,i->ai',fb,fovb,fob)
-        #Fvvb = einsum('ab,a->ab',fdb,fvb) - einsum('ab,a->ab',fb,fovb)
-        #Fa = one_e_blocks(Fooa,fda,Fvoa,Fvva)
-        #Fb = one_e_blocks(Foob,fdb,Fvob,Fvvb)
-
         # get ERIs
         Ia,Ib,Iabab = sys.u_aint_tot()
 
-        #Iavvvv = - einsum('abcd,a,b->abcd',Ia,fova,fva)\
-        #        - einsum('abcd,a,b->abcd',Ia,fva,fova)
-        #Iavvvo = - einsum('abci,a,b,i->abci',Ia,fova,fva,foa)\
-        #        - einsum('abci,a,b,i->abci',Ia,fva,fova,foa)\
-        #        + einsum('abci,a,b,i->abci',Ia,fva,fva,fova)
-        #Iavovv = - einsum('aibc,a->aibc',Ia,fova)
-        #Iavvoo = - einsum('abij,a,b,i,j->abij',Ia,fova,fva,foa,foa)\
-        #        - einsum('abij,a,b,i,j->abij',Ia,fva,fova,foa,foa)\
-        #        + einsum('abij,a,b,i,j->abij',Ia,fva,fva,fova,foa)\
-        #        + einsum('abij,a,b,i,j->abij',Ia,fva,fva,foa,fova)
-        #Iavovo = - einsum('ajbi,a,i->ajbi',Ia,fova,foa) \
-        #        + einsum('ajbi,a,i->ajbi',Ia,fva,fova)
-        #Iavooo = -einsum('akij,a,i,j->akij',Ia,fova,foa,foa)\
-        #        + einsum('akij,a,i,j->akij',Ia,fva,fova,foa)\
-        #        + einsum('akij,a,i,j->akij',Ia,fva,foa,fova)
-        #Iaooov = einsum('jkia,i->jkia',Ia,fova)
-        #Iaoooo = einsum('klij,i,j->klij',Ia,fova,foa) \
-        #        + einsum('klij,i,j->klij',Ia,foa,fova)
-        #Iaoovv = numpy.zeros(Ia.shape)
-        #Ia = two_e_blocks(vvvv=Iavvvv,vvvo=Iavvvo,vovv=Iavovv,vvoo=Iavvoo,
-        #        vovo=Iavovo,oovv=Iaoovv,vooo=Iavooo,ooov=Iaooov,oooo=Iaoooo)
         Ia = _form_ft_d_eris(Ia,sfoa,sfva,dsoa,dsva)
         Ib = _form_ft_d_eris(Ib,sfob,sfvb,dsob,dsvb)
 
-        #Ibvvvv = -einsum('abcd,a,b->abcd',Ib,fovb,fvb)\
-        #        - einsum('abcd,a,b->abcd',Ib,fvb,fovb)
-        #Ibvvvo = -einsum('abci,a,b,i->abci',Ib,fovb,fvb,fob)\
-        #        - einsum('abci,a,b,i->abci',Ib,fvb,fovb,fob)\
-        #        + einsum('abci,a,b,i->abci',Ib,fvb,fvb,fovb)
-        #Ibvovv = -einsum('aibc,a->aibc',Ib,fovb)
-        #Ibvvoo = -einsum('abij,a,b,i,j->abij',Ib,fovb,fvb,fob,fob)\
-        #        - einsum('abij,a,b,i,j->abij',Ib,fvb,fovb,fob,fob)\
-        #        + einsum('abij,a,b,i,j->abij',Ib,fvb,fvb,fovb,fob)\
-        #        + einsum('abij,a,b,i,j->abij',Ib,fvb,fvb,fob,fovb)
-        #Ibvovo = -einsum('ajbi,a,i->ajbi',Ib,fovb,fob) \
-        #        + einsum('ajbi,a,i->ajbi',Ib,fvb,fovb)
-        #Ibvooo = -einsum('akij,a,i,j->akij',Ib,fovb,fob,fob)\
-        #        + einsum('akij,a,i,j->akij',Ib,fvb,fovb,fob)\
-        #        + einsum('akij,a,i,j->akij',Ib,fvb,fob,fovb)
-        #Ibooov = einsum('jkia,i->jkia',Ib,fovb)
-        #Iboooo = einsum('klij,i,j->klij',Ib,fovb,fob) \
-        #        + einsum('klij,i,j->klij',Ib,fob,fovb)
-        #Iboovv = numpy.zeros(Ib.shape)
-        #Ib = two_e_blocks(vvvv=Ibvvvv,vvvo=Ibvvvo,vovv=Ibvovv,vvoo=Ibvvoo,
-        #        vovo=Ibvovo,oovv=Iboovv,vooo=Ibvooo,ooov=Ibooov,oooo=Iboooo)
-
-        #I2vvvv = -einsum('abcd,a,b->abcd',Iabab,fova,fvb)\
-        #        - einsum('abcd,a,b->abcd',Iabab,fva,fovb)
-        #I2vvvo = -einsum('abci,a,b,i->abci',Iabab,fova,fvb,fob)\
-        #        - einsum('abci,a,b,i->abci',Iabab,fva,fovb,fob)\
-        #        + einsum('abci,a,b,i->abci',Iabab,fva,fvb,fovb)
-        #I2vvov = -einsum('abic,a,b,i->abic',Iabab,fova,fvb,foa)\
-        #        - einsum('abic,a,b,i->abic',Iabab,fva,fovb,foa)\
-        #        + einsum('abic,a,b,i->abic',Iabab,fva,fvb,fova)
-        #I2vovv = -einsum('aibc,a->aibc',Iabab,fova)
-        #I2ovvv = -einsum('iabc,a->iabc',Iabab,fovb)
-        #I2vvoo = -einsum('abij,a,b,i,j->abij',Iabab,fova,fvb,foa,fob)\
-        #        - einsum('abij,a,b,i,j->abij',Iabab,fva,fovb,foa,fob)\
-        #        + einsum('abij,a,b,i,j->abij',Iabab,fva,fvb,fova,fob)\
-        #        + einsum('abij,a,b,i,j->abij',Iabab,fva,fvb,foa,fovb)
-        #I2vovo = -einsum('ajbi,a,i->ajbi',Iabab,fova,fob) \
-        #        + einsum('ajbi,a,i->ajbi',Iabab,fva,fovb)
-        #I2ovvo = -einsum('jabi,a,i->jabi',Iabab,fovb,fob) \
-        #        + einsum('jabi,a,i->jabi',Iabab,fvb,fovb)
-        #I2voov = -einsum('ajib,a,i->ajib',Iabab,fova,foa) \
-        #        + einsum('ajib,a,i->ajib',Iabab,fva,fova)
-        #I2ovov = -einsum('jaib,a,i->jaib',Iabab,fovb,foa) \
-        #        + einsum('jaib,a,i->jaib',Iabab,fvb,fova)
-        #I2vooo = -einsum('akij,a,i,j->akij',Iabab,fova,foa,fob)\
-        #        + einsum('akij,a,i,j->akij',Iabab,fva,fova,fob)\
-        #        + einsum('akij,a,i,j->akij',Iabab,fva,foa,fovb)
-        #I2ovoo = -einsum('kaij,a,i,j->kaij',Iabab,fovb,foa,fob)\
-        #        + einsum('kaij,a,i,j->kaij',Iabab,fvb,fova,fob)\
-        #        + einsum('kaij,a,i,j->kaij',Iabab,fvb,foa,fovb)
-        #I2ooov = einsum('jkia,i->jkia',Iabab,fova)
-        #I2oovo = einsum('jkai,i->jkai',Iabab,fovb)
-        #I2oooo = einsum('klij,i,j->klij',Iabab,fova,fob) \
-        #        + einsum('klij,i,j->klij',Iabab,foa,fovb)
-        #I2oovv = numpy.zeros(Iabab.shape)
         Ivvvv =  einsum('abcd,a,b,c,d->abcd',Iabab,dsva,sfvb,sfva,sfvb)
         Ivvvv += einsum('abcd,a,b,c,d->abcd',Iabab,sfva,dsvb,sfva,sfvb)
         Ivvvv += einsum('abcd,a,b,c,d->abcd',Iabab,sfva,sfvb,dsva,sfvb)
@@ -1217,7 +1124,7 @@ def u_ft_d_integrals(sys, ea, eb, foa, fob, fva, fvb, dveca, dvecb):
 
         return Fa,Fb,Ia,Ib,Iabab
 
-def get_ft_d_active_integrals(sys, en, fo, fv, iocc, ivir, dvec):
+def ft_d_active_integrals(sys, en, fo, fv, iocc, ivir, dvec):
         """Return one and two-electron integrals in the general spin orbital basis
         with small occupations excluded."""
         # get FT Fock matrix
@@ -1252,7 +1159,7 @@ def get_ft_d_active_integrals(sys, en, fo, fv, iocc, ivir, dvec):
         I = _form_ft_d_active_eris(eri, sfo, sfv, dso, dsv, iocc, ivir)
         return F,I
 
-def get_uft_d_active_integrals(
+def uft_d_active_integrals(
         sys, ea, eb, foa, fva, fob, fvb,
         iocca, ivira, ioccb, ivirb, dveca, dvecb):
         """Return derivatives of unrestricted one and two-electron integrals
@@ -1268,10 +1175,10 @@ def get_uft_d_active_integrals(
         sfva = numpy.sqrt(fva)
         sfob = numpy.sqrt(fob)
         sfvb = numpy.sqrt(fvb)
-        dsoa = -0.5*sfoa[numpy.ix_(iocca)]*fva[numpy.ix_(iocca)]*dveca[numpy.ix_(iocca)]
-        dsva = +0.5*sfva[numpy.ix_(ivira)]*foa[numpy.ix_(ivira)]*dveca[numpy.ix_(ivira)]
-        dsob = -0.5*sfob[numpy.ix_(ioccb)]*fvb[numpy.ix_(ioccb)]*dvecb[numpy.ix_(ioccb)]
-        dsvb = +0.5*sfvb[numpy.ix_(ivirb)]*fob[numpy.ix_(ivirb)]*dvecb[numpy.ix_(ivirb)]
+        dsoa = -0.5*sfoa*fva*dveca[numpy.ix_(iocca)]
+        dsva = +0.5*sfva*foa*dveca[numpy.ix_(ivira)]
+        dsob = -0.5*sfob*fvb*dvecb[numpy.ix_(ioccb)]
+        dsvb = +0.5*sfvb*fob*dvecb[numpy.ix_(ivirb)]
         sfoa = sfoa[numpy.ix_(iocca)]
         sfva = sfva[numpy.ix_(ivira)]
         sfob = sfob[numpy.ix_(ioccb)]

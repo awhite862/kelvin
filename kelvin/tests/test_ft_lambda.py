@@ -27,7 +27,7 @@ def test_L1(cc,thresh):
         fvir = [x for x in fv if x > athresh]
         iocc = [i for i,x in enumerate(fo) if x > athresh]
         ivir = [i for i,x in enumerate(fv) if x > athresh]
-        F,I = cc_utils.get_ft_active_integrals(cc.sys, en, focc, fvir, iocc, ivir)
+        F,I = cc_utils.ft_active_integrals(cc.sys, en, focc, fvir, iocc, ivir)
 
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
@@ -38,7 +38,7 @@ def test_L1(cc,thresh):
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
                 - en[None,None,:,None] - en[None,None,None,:]
-        F,I = cc_utils.get_ft_integrals(cc.sys, en, beta, mu)
+        F,I = cc_utils.ft_integrals(cc.sys, en, beta, mu)
     ng,no,nv = cc.L1.shape
     d = 1e-4
     for y in range(ng):
@@ -80,7 +80,7 @@ def test_L2(cc,thresh):
     D1 = en[:,None] - en[None,:]
     D2 = en[:,None,None,None] + en[None,:,None,None] \
             - en[None,None,:,None] - en[None,None,None,:]
-    F,I = cc_utils.get_ft_integrals(cc.sys, en, beta, mu)
+    F,I = cc_utils.ft_integrals(cc.sys, en, beta, mu)
     n = cc.L2.shape[1]
     d = 1e-4
     for y in range(ng):
@@ -223,7 +223,7 @@ class FTLambdaTest(unittest.TestCase):
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
                 - en[None,None,:,None] - en[None,None,None,:]
-        F,I = cc_utils.get_ft_integrals(sys, en, beta, mu)
+        F,I = cc_utils.ft_integrals(sys, en, beta, mu)
         dT1 = numpy.zeros((ng,n,n))
         for y in range(ng):
             for i in range(n):
