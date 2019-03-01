@@ -720,9 +720,9 @@ def ccsd_1rdm(T1,T2,L1,L2,D1,D2,ti,ng,g,G):
     pji = numpy.zeros((no,no))
     pai = numpy.zeros((nv,no))
     for i in range(nt):
-        pba -= g[i]*cc_equations.ccsd_1rdm_ba(T1[i],T2[i],L1new[i],L2new[i])
-        pji -= g[i]*cc_equations.ccsd_1rdm_ji(T1[i],T2[i],L1new[i],L2new[i])
-        pai -= g[i]*cc_equations.ccsd_1rdm_ai(T1[i],T2[i],L1new[i],L2new[i],tfac=-1.0)
+        pba -= g[i]*cc_equations.ccsd_1rdm_ba_opt(T1[i],T2[i],L1new[i],L2new[i])
+        pji -= g[i]*cc_equations.ccsd_1rdm_ji_opt(T1[i],T2[i],L1new[i],L2new[i])
+        pai -= g[i]*cc_equations.ccsd_1rdm_ai_opt(T1[i],T2[i],L1new[i],L2new[i],tfac=-1.0)
 
     return pia,pba,pji,pai
 
@@ -745,14 +745,14 @@ def ccsd_2rdm(T1,T2,L1,L2,D1,D2,ti,ng,g,G):
     Pkaij = numpy.zeros((no,nv,no,no))
     Pklij = numpy.zeros((no,no,no,no))
     for i in range(nt):
-        Pcdab -= g[i]*cc_equations.ccsd_2rdm_cdab(T1[i],T2[i],L1new[i],L2new[i])
-        Pciab -= g[i]*cc_equations.ccsd_2rdm_ciab(T1[i],T2[i],L1new[i],L2new[i])
-        Pbcai -= g[i]*cc_equations.ccsd_2rdm_bcai(T1[i],T2[i],L1new[i],L2new[i])
-        Pbjai -= g[i]*cc_equations.ccsd_2rdm_bjai(T1[i],T2[i],L1new[i],L2new[i])
-        Pabij -= g[i]*cc_equations.ccsd_2rdm_abij(T1[i],T2[i],L1new[i],L2new[i],tfac=-1.0)
-        Pjkai -= g[i]*cc_equations.ccsd_2rdm_jkai(T1[i],T2[i],L1new[i],L2new[i])
-        Pkaij -= g[i]*cc_equations.ccsd_2rdm_kaij(T1[i],T2[i],L1new[i],L2new[i])
-        Pklij -= g[i]*cc_equations.ccsd_2rdm_klij(T1[i],T2[i],L1new[i],L2new[i])
+        Pcdab -= g[i]*cc_equations.ccsd_2rdm_cdab_opt(T1[i],T2[i],L1new[i],L2new[i])
+        Pciab -= g[i]*cc_equations.ccsd_2rdm_ciab_opt(T1[i],T2[i],L1new[i],L2new[i])
+        Pbcai -= g[i]*cc_equations.ccsd_2rdm_bcai_opt(T1[i],T2[i],L1new[i],L2new[i])
+        Pbjai -= g[i]*cc_equations.ccsd_2rdm_bjai_opt(T1[i],T2[i],L1new[i],L2new[i])
+        Pabij -= g[i]*cc_equations.ccsd_2rdm_abij_opt(T1[i],T2[i],L1new[i],L2new[i],tfac=-1.0)
+        Pjkai -= g[i]*cc_equations.ccsd_2rdm_jkai_opt(T1[i],T2[i],L1new[i],L2new[i])
+        Pkaij -= g[i]*cc_equations.ccsd_2rdm_kaij_opt(T1[i],T2[i],L1new[i],L2new[i])
+        Pklij -= g[i]*cc_equations.ccsd_2rdm_klij_opt(T1[i],T2[i],L1new[i],L2new[i])
 
     return (Pcdab, Pciab, Pbcai, Pijab, Pbjai, Pabij, Pjkai, Pkaij, Pklij)
 
