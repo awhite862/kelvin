@@ -81,7 +81,7 @@ class ueg_system(system):
             return True
 
     def const_energy(self):
-        return 2.837297479 / self.L
+        return 0.0#(self.Na + self.Nb)*2.837297479 / (2*self.L)
 
     def get_mp1(self):
         if self.has_u():
@@ -98,9 +98,9 @@ class ueg_system(system):
             else:
                 Va,Vb,Vabab = self.u_aint()
                 beta = 1.0 / (self.T + 1e-12)
-                ea,eb = self.u_energies_tot()
-                foa = ft_utils.ff(beta, ea, self.mu)
-                fob = ft_utils.ff(beta, eb, self.mu)
+                #ea,eb = self.u_energies_tot()
+                #foa = ft_utils.ff(beta, ea, self.mu)
+                #fob = ft_utils.ff(beta, eb, self.mu)
                 E1 = 0.5*numpy.einsum('ijij->',Va.oooo)
                 E1 += 0.5*numpy.einsum('ijij->',Vb.oooo)
                 E1 += numpy.einsum('ijij->',Vabab.oooo)
@@ -161,6 +161,16 @@ class ueg_system(system):
         ev = d[na:]
         return (eo,ev)
 
+    def u_energies(self):
+        d = self.basis.Es
+        na = int(self.Na)
+        nb = int(self.Nb)
+        eoa = numpy.asarray(d[:na])
+        eva = numpy.asarray(d[na:])
+        eob = numpy.asarray(d[:nb])
+        evb = numpy.asarray(d[nb:])
+        return (eoa,eva,eob,evb)
+
     def g_energies(self):
         if self.T > 0.0:
             raise Exception("Undefined ov blocks at FT")
@@ -189,8 +199,6 @@ class ueg_system(system):
         F = self.r_hcore()
         d = self.r_energies_tot()
         mu = self.mu
-        d = self.g_energies_tot()
-        F = self.g_hcore()
         n = d.shape[0]
         occ = []
         vir = []
@@ -202,13 +210,42 @@ class ueg_system(system):
         oidx = numpy.r_[occ]
         vidx = numpy.r_[vir]
         V = self.r_int_tot()
-        V = V[numpy.ix_(numpy.arange(n),oidx,numpy.arange(n),oidx)]
-        F = F + 2*einsum('piri->pr',V) - einsum('piir->pr',V)
+        Vd = V[numpy.ix_(numpy.arange(n),oidx,numpy.arange(n),oidx)]
+        Vx = V[numpy.ix_(numpy.arange(n),oidx,oidx,numpy.arange(n))]
+        F = F + 2*einsum('piri->pr',Vd) - einsum('piir->pr',Vx)
         Foo = F[numpy.ix_(oidx,oidx)]
         Fvv = F[numpy.ix_(vidx,vidx)]
         Fov = F[numpy.ix_(oidx,vidx)]
         Fvo = F[numpy.ix_(vidx,oidx)]
         return one_e_blocks(Foo,Fov,Fvo,Fvv)
+
+    def u_fock(self):
+        if self.T > 0.0:
+            raise Exception("Undefined ov blocks at FT")
+        F = self.r_hcore()
+        d = self.r_energies_tot()
+        mu = self.mu
+        n = d.shape[0]
+        occ = []
+        vir = []
+        for p in range(n):
+            if d[p] < self.mu:
+                occ.append(p)
+            if d[p] > self.mu:
+                vir.append(p)
+        oidx = numpy.r_[occ]
+        vidx = numpy.r_[vir]
+        V = self.r_int_tot()
+        Vd = V[numpy.ix_(numpy.arange(n),oidx,numpy.arange(n),oidx)]
+        Vx = V[numpy.ix_(numpy.arange(n),oidx,oidx,numpy.arange(n))]
+        F = F + 2*einsum('piri->pr',Vd) - einsum('piir->pr',Vx)
+        Foo = F[numpy.ix_(oidx,oidx)]
+        Fvv = F[numpy.ix_(vidx,vidx)]
+        Fov = F[numpy.ix_(oidx,vidx)]
+        Fvo = F[numpy.ix_(vidx,oidx)]
+        Fa = one_e_blocks(Foo,Fov,Fvo,Fvv)
+        Fb = one_e_blocks(Foo,Fov,Fvo,Fvv)
+        return Fa,Fb
 
     def g_fock(self):
         if self.T > 0.0:
@@ -228,7 +265,10 @@ class ueg_system(system):
         vidx = numpy.r_[vir]
         V = self.g_aint_tot()
         V = V[numpy.ix_(numpy.arange(n),oidx,numpy.arange(n),oidx)]
-        F = F + einsum('piri->pr',V)
+        #Vd = Vb[numpy.ix_(numpy.arange(n),oidx,numpy.arange(n),oidx)]
+        #Vx = Vb[numpy.ix_(numpy.arange(n),oidx,oidx,numpy.arange(n))]
+        #Vb = Vd - Vx.transpose((0,1,3,2))
+        F = F + einsum('piri->pr',V)# - einsum('piir->pr',V.transpose((0,1,3,2)))
         Foo = F[numpy.ix_(oidx,oidx)]
         Fvv = F[numpy.ix_(vidx,vidx)]
         Fov = F[numpy.ix_(oidx,vidx)]
@@ -355,8 +395,8 @@ class ueg_system(system):
     def r_hcore(self):
         return numpy.diag(self.r_energies_tot())
 
-    #def g_hcore(self):
-    #    return self.basis.build_g_ke_matrix()
+    def g_hcore(self):
+        return self.basis.build_g_ke_matrix()
 
     def u_aint(self):
         if self.T > 0.0:

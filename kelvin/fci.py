@@ -58,7 +58,7 @@ class fci(object):
             if self.iprint > 0:
                 print("Running FCI at T=0")
             Efci = self._fci_fixedN(self.nalpha,self.nbeta)[0] 
-            E0 = self.sys.g_energies()[0].sum()
+            E0 = self.sys.g_energies()[0].sum() + En
             E1 = self.sys.get_mp1()
             return (Efci+En,Efci - E0 - E1)
 

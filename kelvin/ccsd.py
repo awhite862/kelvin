@@ -114,7 +114,11 @@ class ccsd(object):
                     self._ft_1rdm()
                     self._ft_2rdm()
             if self.sys.has_u():
+                ti = time.time()
                 self._u_ft_ESN(L1,L2)
+                tf = time.time()
+                if self.iprint > 0:
+                    print("Total derivative time: {} s".format(tf - ti))
             else:
                 self._g_ft_ESN(L1,L2)
 
@@ -229,6 +233,8 @@ class ccsd(object):
         # compute required memory
         no = eo.shape[0] 
         nv = ev.shape[0] 
+        noa = no//2
+        nva = nv//2
         mem1e = no*no + 5*no*nv + nv*nv  # include memory for D1
         mem2e = 6*no*no*nv*nv + nv*nv*nv*nv + 2*nv*nv*nv*no + \
                 2*nv*no*no*no + no*no*no*no # include memory for D2
@@ -345,6 +351,7 @@ class ccsd(object):
 
         # get ERIs
         Ia, Ib, Iabab = self.sys.u_aint()
+
         t4 = time.time()
 
         # TODO: Add CCD
@@ -1082,11 +1089,6 @@ class ccsd(object):
         ti = self.ti
         G = self.G
         g = self.g
-
-        # get exponentials
-        #D1 = en[:,None] - en[None,:]
-        #D2 = en[:,None,None,None] + en[None,:,None,None] \
-        #    - en[None,None,:,None] - en[None,None,None,:]
 
         if self.athresh > 0.0:
             athresh = self.athresh

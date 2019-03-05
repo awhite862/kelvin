@@ -22,6 +22,7 @@ from kelvin.tests import test_quadrature
 from kelvin.tests import test_scf
 from kelvin.tests import test_test
 from kelvin.tests import test_ueg
+from kelvin.tests import test_ueg_utils
 
 def full_suite():
     suite = unittest.TestSuite()
@@ -134,6 +135,10 @@ def full_suite():
     suite.addTest(test_ueg.UEGTest("test_2_07_4"))
     suite.addTest(test_ueg.UEGTest("test_2_07_8"))
 
+    suite.addTest(test_ueg_utils.UEGUtilsTest("test_integral_sym"))
+    suite.addTest(test_ueg_utils.UEGUtilsTest("test_ft_uint"))
+    suite.addTest(test_ueg_utils.UEGUtilsTest("test_ufock"))
+
     return suite
 
 def default_suite():
@@ -245,6 +250,10 @@ def default_suite():
 
     suite.addTest(test_ueg.UEGTest("test_2_07_4"))
     #suite.addTest(test_ueg.UEGTest("test_2_07_8"))
+
+    suite.addTest(test_ueg_utils.UEGUtilsTest("test_integral_sym"))
+    suite.addTest(test_ueg_utils.UEGUtilsTest("test_ft_uint"))
+    suite.addTest(test_ueg_utils.UEGUtilsTest("test_ufock"))
 
     return suite
 
