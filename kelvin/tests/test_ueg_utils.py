@@ -4,6 +4,7 @@ import numpy
 from cqcpy import spin_utils
 
 from kelvin.ueg_system import ueg_system
+from kelvin.ueg_scf_system import ueg_scf_system
 from kelvin import ueg_utils
 
 class UEGUtilsTest(unittest.TestCase):
@@ -52,6 +53,14 @@ class UEGUtilsTest(unittest.TestCase):
         L = 3.8855
         mu = 0.01
         ueg = ueg_system(0.0,L,7.4,mu=mu,norb=7,orbtype='u')
+        Fa,Fb = ueg.u_fock()
+        F = ueg.g_fock()
+        diff = numpy.linalg.norm(Fa.vv - F.vv[:6,:6])
+        self.assertTrue(diff < 1e-12)
+        diff = numpy.linalg.norm(Fa.oo - F.oo[:1,:1])
+        self.assertTrue(diff < 1e-12)
+
+        ueg = ueg_scf_system(0.0,L,7.4,mu=mu,norb=7,orbtype='u')
         Fa,Fb = ueg.u_fock()
         F = ueg.g_fock()
         diff = numpy.linalg.norm(Fa.vv - F.vv[:6,:6])

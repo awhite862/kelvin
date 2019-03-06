@@ -95,6 +95,7 @@ class hubbard_system(system):
     def const_energy(self):
         return 0.0
 
+    # TODO: clean this up
     def get_mp1(self):
         if self.T == 0:
             # orbital energies

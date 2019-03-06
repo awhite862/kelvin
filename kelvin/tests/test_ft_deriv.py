@@ -5,6 +5,7 @@ from kelvin.mp3 import mp3
 from kelvin.ccsd import ccsd
 from kelvin.scf_system import scf_system
 from kelvin.ueg_system import ueg_system
+from kelvin.ueg_scf_system import ueg_scf_system
 from kelvin.pueg_system import pueg_system
 
 def fd_ESN(m, T, mu, ng, Ecctot, athresh = 0.0, quad = 'lin'):
@@ -204,6 +205,56 @@ class FTDerivTest(unittest.TestCase):
         ccsdT = ccsd(ueg,iprint=0,T=Tf,mu=mu,max_iter=35,damp=0.0,ngrid=ng,econv=1e-10)
         Ef,Ecf = ccsdT.run()
         ueg = ueg_system(Tb,L,cut,mu=mu,norb=norb)
+        ccsdT = ccsd(ueg,iprint=0,T=Tb,mu=mu,max_iter=35,damp=0.0,ngrid=ng,econv=1e-10)
+        Eb,Ecb = ccsdT.run()
+
+        Sx = -(Ef - Eb)/(2*delta)
+        Ex = Ecctot + T*Sx + mu*Nx
+
+        dE = abs(E - Ex)
+        dS = abs(S - Sx)
+        dN = abs(N - Nx)
+        eE = "Expected: {}  Actual: {}".format(Ex,E)
+        eS = "Expected: {}  Actual: {}".format(Sx,S)
+        eN = "Expected: {}  Actual: {}".format(Nx,N)
+        self.assertTrue(dE < self.uegthresh,eE)
+        self.assertTrue(dS < self.uegthresh,eS)
+        self.assertTrue(dN < self.uegthresh,eN)
+
+    def test_UEG2(self):
+        T = 0.1
+        mu = 0.1
+        L = 2*numpy.pi/numpy.sqrt(1.0)
+        norb = 7
+        cut = 1.2
+        damp = 0.2
+        mi = 50
+        ng = 10
+        ueg = ueg_scf_system(T,L,cut,mu=mu,norb=norb)
+        ccsdT = ccsd(ueg,T=T,mu=mu,iprint=0,max_iter=mi,damp=damp,ngrid=ng)
+        Ecctot,Ecc = ccsdT.run()
+        ccsdT.compute_ESN()
+        E = ccsdT.E
+        S = ccsdT.S
+        N = ccsdT.N
+        delta = 1e-4
+        muf = mu + delta
+        mub = mu - delta
+        ueg = ueg_scf_system(T,L,cut,mu=muf,norb=norb)
+        ccsdT = ccsd(ueg,iprint=0,T=T,mu=muf,max_iter=35,damp=0.0,ngrid=ng,econv=1e-10)
+        Ef,Ecf = ccsdT.run()
+        ueg = ueg_scf_system(T,L,cut,mu=mub,norb=norb)
+        ccsdT = ccsd(ueg,iprint=0,T=T,mu=mub,max_iter=35,damp=0.0,ngrid=ng,econv=1e-10)
+        Eb,Ecb = ccsdT.run()
+
+        Nx = -(Ef - Eb)/(2*delta)
+
+        Tf = T + delta
+        Tb = T - delta
+        ueg = ueg_scf_system(Tf,L,cut,mu=mu,norb=norb)
+        ccsdT = ccsd(ueg,iprint=0,T=Tf,mu=mu,max_iter=35,damp=0.0,ngrid=ng,econv=1e-10)
+        Ef,Ecf = ccsdT.run()
+        ueg = ueg_scf_system(Tb,L,cut,mu=mu,norb=norb)
         ccsdT = ccsd(ueg,iprint=0,T=Tb,mu=mu,max_iter=35,damp=0.0,ngrid=ng,econv=1e-10)
         Eb,Ecb = ccsdT.run()
 

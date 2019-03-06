@@ -1,6 +1,7 @@
 import unittest
 from kelvin.fci import fci
 from kelvin.ueg_system import ueg_system
+from kelvin.ueg_scf_system import ueg_scf_system
 import numpy
 
 def rs_to_L(rs,N):
@@ -9,6 +10,12 @@ def rs_to_L(rs,N):
 
 def ueg_fci(L, Emax, norb, na, nb):
     ueg = ueg_system(0.0,L,Emax,na=na,nb=nb,norb=7)
+    assert(ueg.basis.get_nbsf() == norb)
+    fci0 = fci(ueg,T=0.0,nalpha=na,nbeta=nb,iprint=0)
+    return fci0.run()[1]
+
+def scf_ueg_fci(L, Emax, norb, na, nb):
+    ueg = ueg_scf_system(0.0,L,Emax,na=na,nb=nb,norb=7)
     assert(ueg.basis.get_nbsf() == norb)
     fci0 = fci(ueg,T=0.0,nalpha=na,nbeta=nb,iprint=0)
     return fci0.run()[1]
@@ -30,10 +37,20 @@ class UEGTest(unittest.TestCase):
         error = "Expected: {}  Actual: {}".format(ref,E)
         self.assertTrue(diff < self.thresh,error)
 
+        E = scf_ueg_fci(L, 1.0, 7, 1, 1)
+        diff = abs(E - ref)
+        error = "Expected: {}  Actual: {}".format(ref,E)
+        self.assertTrue(diff < self.thresh,error)
+
     def test_2_07_8(self):
         L = rs_to_L(8.0, 2.0)
         E = ueg_fci(L, 1.0, 7, 1, 1)
         ref = self.ref_2_07_8
+        diff = abs(E - ref)
+        error = "Expected: {}  Actual: {}".format(ref,E)
+        self.assertTrue(diff < self.thresh,error)
+
+        E = scf_ueg_fci(L, 1.0, 7, 1, 1)
         diff = abs(E - ref)
         error = "Expected: {}  Actual: {}".format(ref,E)
         self.assertTrue(diff < self.thresh,error)
