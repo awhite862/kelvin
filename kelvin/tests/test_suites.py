@@ -67,6 +67,8 @@ def full_suite():
     suite.addTest(test_ft_ccsd_rdm.FTCCSD_RDMTest("test_djkai"))
     suite.addTest(test_ft_ccsd_rdm.FTCCSD_RDMTest("test_dkaij"))
     suite.addTest(test_ft_ccsd_rdm.FTCCSD_RDMTest("test_dklij"))
+    suite.addTest(test_ft_ccsd_rdm.FTCCSD_RDMTest("test_u1rdm"))
+    suite.addTest(test_ft_ccsd_rdm.FTCCSD_RDMTest("test_u2rdm"))
 
     suite.addTest(test_ft_deriv.FTDerivTest("test_Be_sto3g_gen"))
     suite.addTest(test_ft_deriv.FTDerivTest("test_Be_sto3g"))
@@ -185,6 +187,8 @@ def default_suite():
     suite.addTest(test_ft_ccsd_rdm.FTCCSD_RDMTest("test_djkai"))
     suite.addTest(test_ft_ccsd_rdm.FTCCSD_RDMTest("test_dkaij"))
     suite.addTest(test_ft_ccsd_rdm.FTCCSD_RDMTest("test_dklij"))
+    suite.addTest(test_ft_ccsd_rdm.FTCCSD_RDMTest("test_u1rdm"))
+    suite.addTest(test_ft_ccsd_rdm.FTCCSD_RDMTest("test_u2rdm"))
 
     suite.addTest(test_ft_deriv.FTDerivTest("test_Be_sto3g_gen"))
     suite.addTest(test_ft_deriv.FTDerivTest("test_Be_sto3g"))

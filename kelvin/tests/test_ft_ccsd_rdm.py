@@ -1,6 +1,7 @@
 import unittest
 import numpy
 from cqcpy import test_utils
+from cqcpy import spin_utils
 from kelvin import ft_cc_equations
 from kelvin import ft_cc_energy
 from kelvin import quadrature
@@ -462,6 +463,255 @@ class FTCCSD_RDMTest(unittest.TestCase):
         diff = abs(out - ref)/abs(ref)
         error = "Error in Pklij: {}".format(diff)
         self.assertTrue(diff < self.thresh, error)
+
+    def test_u1rdm(self):
+        ng = 4
+        na = 8
+        nb = 8
+        thresh = 1e-14
+        beta = 2.0
+        ti,g,G = quadrature.simpsons(ng, beta)
+        n = na + nb
+        T1a,T1b = test_utils.make_random_ft_T1_spatial(ng,na,nb)
+        L1a,L1b = test_utils.make_random_ft_T1_spatial(ng,na,nb)
+        T2aa,T2ab,T2bb = test_utils.make_random_ft_T2_spatial(ng,na,nb)
+        L2aa,L2ab,L2bb = test_utils.make_random_ft_T2_spatial(ng,na,nb)
+        D1a = test_utils.make_random_ft_D1(na)
+        D1b = test_utils.make_random_ft_D1(nb)
+        D2aa = test_utils.make_random_ft_D2(na,na)
+        D2ab = test_utils.make_random_ft_D2(na,nb)
+        D2bb = test_utils.make_random_ft_D2(nb,nb)
+        T1 = numpy.zeros((ng,n,n))
+        L1 = numpy.zeros((ng,n,n))
+        T2 = numpy.zeros((ng,n,n,n,n))
+        L2 = numpy.zeros((ng,n,n,n,n))
+        D1 = spin_utils.T1_to_spin(D1a, D1b, na, na, nb, nb)
+        D2 = spin_utils.D2_to_spin(D2aa, D2ab, D2bb, na, na, nb, nb)
+        for i in range(ng):
+            T1[i] = spin_utils.T1_to_spin(T1a[i], T1b[i], na, na, nb, nb)
+            L1[i] = spin_utils.T1_to_spin(L1a[i], L1b[i], na, na, nb, nb)
+            T2[i] = spin_utils.T2_to_spin(T2aa[i], T2ab[i], T2bb[i], na, na, nb, nb)
+            L2[i] = spin_utils.T2_to_spin(L2aa[i], L2ab[i], L2bb[i], na, na, nb, nb)
+
+        urdm1 = ft_cc_equations.uccsd_1rdm(T1a,T1b,T2aa,T2ab,T2bb,
+                L1a,L1b,L2aa,L2ab,L2bb,D1a,D1b,D2aa,D2ab,D2bb,ti,ng,g,G)
+        grdm1 = ft_cc_equations.ccsd_1rdm(T1,T2,L1,L2,D1,D2,ti,ng,g,G)
+
+        # test ia
+        refa = grdm1[0][:na,:na]
+        refb = grdm1[0][na:,na:]
+        diffa = numpy.linalg.norm(refa - urdm1[0][0])/numpy.linalg.norm(refa)
+        diffb = numpy.linalg.norm(refb - urdm1[0][1])/numpy.linalg.norm(refa)
+        self.assertTrue(diffa < thresh)
+        self.assertTrue(diffb < thresh)
+        # test ba
+        refa = grdm1[1][:na,:na]
+        refb = grdm1[1][na:,na:]
+        diffa = numpy.linalg.norm(refa - urdm1[1][0])/numpy.linalg.norm(refa)
+        diffb = numpy.linalg.norm(refb - urdm1[1][1])/numpy.linalg.norm(refa)
+        self.assertTrue(diffa < thresh)
+        self.assertTrue(diffb < thresh)
+        # test ji
+        refa = grdm1[2][:na,:na]
+        refb = grdm1[2][na:,na:]
+        diffa = numpy.linalg.norm(refa - urdm1[2][0])/numpy.linalg.norm(refa)
+        diffb = numpy.linalg.norm(refb - urdm1[2][1])/numpy.linalg.norm(refa)
+        self.assertTrue(diffa < thresh)
+        self.assertTrue(diffb < thresh)
+        # test ai
+        refa = grdm1[3][:na,:na]
+        refb = grdm1[3][na:,na:]
+        diffa = numpy.linalg.norm(refa - urdm1[3][0])/numpy.linalg.norm(refa)
+        diffb = numpy.linalg.norm(refb - urdm1[3][1])/numpy.linalg.norm(refa)
+        self.assertTrue(diffa < thresh)
+        self.assertTrue(diffb < thresh)
+
+    def test_u2rdm(self):
+        ng = 4
+        na = 8
+        nb = 8
+        thresh = 1e-14
+        beta = 2.0
+        ti,g,G = quadrature.simpsons(ng, beta)
+        n = na + nb
+        T1a,T1b = test_utils.make_random_ft_T1_spatial(ng,na,nb)
+        L1a,L1b = test_utils.make_random_ft_T1_spatial(ng,na,nb)
+        T2aa,T2ab,T2bb = test_utils.make_random_ft_T2_spatial(ng,na,nb)
+        L2aa,L2ab,L2bb = test_utils.make_random_ft_T2_spatial(ng,na,nb)
+        D1a = test_utils.make_random_ft_D1(na)
+        D1b = test_utils.make_random_ft_D1(nb)
+        D2aa = test_utils.make_random_ft_D2(na,na)
+        D2ab = test_utils.make_random_ft_D2(na,nb)
+        D2bb = test_utils.make_random_ft_D2(nb,nb)
+        T1 = numpy.zeros((ng,n,n))
+        L1 = numpy.zeros((ng,n,n))
+        T2 = numpy.zeros((ng,n,n,n,n))
+        L2 = numpy.zeros((ng,n,n,n,n))
+        D1 = spin_utils.T1_to_spin(D1a, D1b, na, na, nb, nb)
+        D2 = spin_utils.D2_to_spin(D2aa, D2ab, D2bb, na, na, nb, nb)
+        for i in range(ng):
+            T1[i] = spin_utils.T1_to_spin(T1a[i], T1b[i], na, na, nb, nb)
+            L1[i] = spin_utils.T1_to_spin(L1a[i], L1b[i], na, na, nb, nb)
+            T2[i] = spin_utils.T2_to_spin(T2aa[i], T2ab[i], T2bb[i], na, na, nb, nb)
+            L2[i] = spin_utils.T2_to_spin(L2aa[i], L2ab[i], L2bb[i], na, na, nb, nb)
+
+        urdm2 = ft_cc_equations.uccsd_2rdm(T1a,T1b,T2aa,T2ab,T2bb,
+                L1a,L1b,L2aa,L2ab,L2bb,D1a,D1b,D2aa,D2ab,D2bb,ti,ng,g,G)
+        grdm2 = ft_cc_equations.ccsd_2rdm(T1,T2,L1,L2,D1,D2,ti,ng,g,G)
+
+        # test cdab
+        ref1 = grdm2[0][:na,:na,:na,:na]
+        ref2 = grdm2[0][na:,na:,na:,na:]
+        ref3 = grdm2[0][:na,na:,:na,na:]
+        out1 = urdm2[0][0]
+        out2 = urdm2[0][1]
+        out3 = urdm2[0][2]
+        diff1 = numpy.linalg.norm(ref1 - out1)/numpy.linalg.norm(ref1)
+        diff2 = numpy.linalg.norm(ref2 - out2)/numpy.linalg.norm(ref2)
+        diff3 = numpy.linalg.norm(ref3 - out3)/numpy.linalg.norm(ref3)
+        self.assertTrue(diff1 < thresh, "error in Pcdab: {}".format(diff1))
+        self.assertTrue(diff2 < thresh, "error in PCDAB: {}".format(diff2))
+        self.assertTrue(diff3 < thresh, "error in PcDaB: {}".format(diff3))
+
+        # test ciab
+        ref1 = grdm2[1][:na,:na,:na,:na]
+        ref2 = grdm2[1][na:,na:,na:,na:]
+        ref3 = grdm2[1][:na,na:,:na,na:]
+        ref4 = grdm2[1][na:,:na,na:,:na]
+        out1 = urdm2[1][0]
+        out2 = urdm2[1][1]
+        out3 = urdm2[1][2]
+        out4 = urdm2[1][3]
+        diff1 = numpy.linalg.norm(ref1 - out1)/numpy.linalg.norm(ref1)
+        diff2 = numpy.linalg.norm(ref2 - out2)/numpy.linalg.norm(ref2)
+        diff3 = numpy.linalg.norm(ref3 - out3)/numpy.linalg.norm(ref3)
+        diff4 = numpy.linalg.norm(ref4 - out4)/numpy.linalg.norm(ref4)
+        self.assertTrue(diff1 < thresh, "error in Pciab: {}".format(diff1))
+        self.assertTrue(diff2 < thresh, "error in PCIAB: {}".format(diff2))
+        self.assertTrue(diff3 < thresh, "error in PcIaB: {}".format(diff3))
+        self.assertTrue(diff4 < thresh, "error in PCiAb: {}".format(diff4))
+
+        # test bcai
+        ref1 = grdm2[2][:na,:na,:na,:na]
+        ref2 = grdm2[2][na:,na:,na:,na:]
+        ref3 = grdm2[2][:na,na:,:na,na:]
+        ref4 = grdm2[2][na:,:na,na:,:na]
+        out1 = urdm2[2][0]
+        out2 = urdm2[2][1]
+        out3 = urdm2[2][2]
+        out4 = urdm2[2][3]
+        diff1 = numpy.linalg.norm(ref1 - out1)/numpy.linalg.norm(ref1)
+        diff2 = numpy.linalg.norm(ref2 - out2)/numpy.linalg.norm(ref2)
+        diff3 = numpy.linalg.norm(ref3 - out3)/numpy.linalg.norm(ref3)
+        diff4 = numpy.linalg.norm(ref4 - out4)/numpy.linalg.norm(ref4)
+        self.assertTrue(diff1 < thresh, "error in Pbcai: {}".format(diff1))
+        self.assertTrue(diff2 < thresh, "error in PBCAI: {}".format(diff2))
+        self.assertTrue(diff3 < thresh, "error in PbCaI: {}".format(diff3))
+        self.assertTrue(diff4 < thresh, "error in PBcAi: {}".format(diff4))
+
+        # test ijab
+        ref1 = grdm2[3][:na,:na,:na,:na]
+        ref2 = grdm2[3][na:,na:,na:,na:]
+        ref3 = grdm2[3][:na,na:,:na,na:]
+        out1 = urdm2[3][0]
+        out2 = urdm2[3][1]
+        out3 = urdm2[3][2]
+        diff1 = numpy.linalg.norm(ref1 - out1)/numpy.linalg.norm(ref1)
+        diff2 = numpy.linalg.norm(ref2 - out2)/numpy.linalg.norm(ref2)
+        diff3 = numpy.linalg.norm(ref3 - out3)/numpy.linalg.norm(ref3)
+        self.assertTrue(diff1 < thresh, "error in Pijab: {}".format(diff1))
+        self.assertTrue(diff2 < thresh, "error in PIJAB: {}".format(diff2))
+        self.assertTrue(diff3 < thresh, "error in PiJaB: {}".format(diff3))
+
+        # test bjai
+        ref1 = grdm2[4][:na,:na,:na,:na]
+        ref2 = grdm2[4][na:,na:,na:,na:]
+        ref3 = grdm2[4][:na,na:,:na,na:]
+        ref4 = grdm2[4][:na,na:,na:,:na]
+        ref5 = grdm2[4][na:,:na,:na,na:]
+        ref6 = grdm2[4][na:,:na,na:,:na]
+        out1 = urdm2[4][0]
+        out2 = urdm2[4][1]
+        out3 = urdm2[4][2]
+        out4 = urdm2[4][3]
+        out5 = urdm2[4][4]
+        out6 = urdm2[4][5]
+        diff1 = numpy.linalg.norm(ref1 - out1)/numpy.linalg.norm(ref1)
+        diff2 = numpy.linalg.norm(ref2 - out2)/numpy.linalg.norm(ref2)
+        diff3 = numpy.linalg.norm(ref3 - out3)/numpy.linalg.norm(ref3)
+        diff4 = numpy.linalg.norm(ref4 - out4)/numpy.linalg.norm(ref4)
+        diff5 = numpy.linalg.norm(ref5 - out5)/numpy.linalg.norm(ref5)
+        diff6 = numpy.linalg.norm(ref6 - out6)/numpy.linalg.norm(ref6)
+        self.assertTrue(diff1 < thresh, "error in Pbjai: {}".format(diff1))
+        self.assertTrue(diff2 < thresh, "error in PBJAI: {}".format(diff2))
+        self.assertTrue(diff3 < thresh, "error in PbJaI: {}".format(diff3))
+        self.assertTrue(diff4 < thresh, "error in PbJAi: {}".format(diff4))
+        self.assertTrue(diff5 < thresh, "error in PBjaI: {}".format(diff5))
+        self.assertTrue(diff6 < thresh, "error in PBjAi: {}".format(diff6))
+
+        # test abij
+        ref1 = grdm2[5][:na,:na,:na,:na]
+        ref2 = grdm2[5][na:,na:,na:,na:]
+        ref3 = grdm2[5][:na,na:,:na,na:]
+        out1 = urdm2[5][0]
+        out2 = urdm2[5][1]
+        out3 = urdm2[5][2]
+        diff1 = numpy.linalg.norm(ref1 - out1)/numpy.linalg.norm(ref1)
+        diff2 = numpy.linalg.norm(ref2 - out2)/numpy.linalg.norm(ref2)
+        diff3 = numpy.linalg.norm(ref3 - out3)/numpy.linalg.norm(ref3)
+        self.assertTrue(diff1 < thresh, "error in Pabij: {}".format(diff1))
+        self.assertTrue(diff2 < thresh, "error in PABIJ: {}".format(diff2))
+        self.assertTrue(diff3 < thresh, "error in PaBiJ: {}".format(diff3))
+
+        # test jkai
+        ref1 = grdm2[6][:na,:na,:na,:na]
+        ref2 = grdm2[6][na:,na:,na:,na:]
+        ref3 = grdm2[6][:na,na:,:na,na:]
+        ref4 = grdm2[6][na:,:na,na:,:na]
+        out1 = urdm2[6][0]
+        out2 = urdm2[6][1]
+        out3 = urdm2[6][2]
+        out4 = urdm2[6][3]
+        diff1 = numpy.linalg.norm(ref1 - out1)/numpy.linalg.norm(ref1)
+        diff2 = numpy.linalg.norm(ref2 - out2)/numpy.linalg.norm(ref2)
+        diff3 = numpy.linalg.norm(ref3 - out3)/numpy.linalg.norm(ref3)
+        diff4 = numpy.linalg.norm(ref4 - out4)/numpy.linalg.norm(ref4)
+        self.assertTrue(diff1 < thresh, "error in Pjkai: {}".format(diff1))
+        self.assertTrue(diff2 < thresh, "error in PJKAI: {}".format(diff2))
+        self.assertTrue(diff3 < thresh, "error in PjKaI: {}".format(diff3))
+        self.assertTrue(diff4 < thresh, "error in PJkAi: {}".format(diff4))
+
+        # test kaij
+        ref1 = grdm2[7][:na,:na,:na,:na]
+        ref2 = grdm2[7][na:,na:,na:,na:]
+        ref3 = grdm2[7][:na,na:,:na,na:]
+        ref4 = grdm2[7][na:,:na,na:,:na]
+        out1 = urdm2[7][0]
+        out2 = urdm2[7][1]
+        out3 = urdm2[7][2]
+        out4 = urdm2[7][3]
+        diff1 = numpy.linalg.norm(ref1 - out1)/numpy.linalg.norm(ref1)
+        diff2 = numpy.linalg.norm(ref2 - out2)/numpy.linalg.norm(ref2)
+        diff3 = numpy.linalg.norm(ref3 - out3)/numpy.linalg.norm(ref3)
+        diff4 = numpy.linalg.norm(ref4 - out4)/numpy.linalg.norm(ref4)
+        self.assertTrue(diff1 < thresh, "error in Pkaij: {}".format(diff1))
+        self.assertTrue(diff2 < thresh, "error in PKAIJ: {}".format(diff2))
+        self.assertTrue(diff3 < thresh, "error in PkAiJ: {}".format(diff3))
+        self.assertTrue(diff4 < thresh, "error in PKaIj: {}".format(diff4))
+
+        # test klij
+        ref1 = grdm2[8][:na,:na,:na,:na]
+        ref2 = grdm2[8][na:,na:,na:,na:]
+        ref3 = grdm2[8][:na,na:,:na,na:]
+        out1 = urdm2[8][0]
+        out2 = urdm2[8][1]
+        out3 = urdm2[8][2]
+        diff1 = numpy.linalg.norm(ref1 - out1)/numpy.linalg.norm(ref1)
+        diff2 = numpy.linalg.norm(ref2 - out2)/numpy.linalg.norm(ref2)
+        diff3 = numpy.linalg.norm(ref3 - out3)/numpy.linalg.norm(ref3)
+        self.assertTrue(diff1 < thresh, "error in Pklij: {}".format(diff1))
+        self.assertTrue(diff2 < thresh, "error in PKLIJ: {}".format(diff2))
+        self.assertTrue(diff3 < thresh, "error in PkLiJ: {}".format(diff3))
 
 if __name__ == '__main__':
     unittest.main()

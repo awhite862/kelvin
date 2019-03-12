@@ -756,6 +756,168 @@ def ccsd_2rdm(T1,T2,L1,L2,D1,D2,ti,ng,g,G):
 
     return (Pcdab, Pciab, Pbcai, Pijab, Pbjai, Pabij, Pjkai, Pkaij, Pklij)
 
+def uccsd_1rdm(T1a,T1b,T2aa,T2ab,T2bb,L1a,L1b,L2aa,L2ab,L2bb,
+        D1a,D1b,D2aa,D2ab,D2bb,ti,ng,g,G):
+
+    # integrate the new L-amplitudes
+    nt1,nva,noa = T1a.shape
+    nt2,nvb,nob = T1b.shape
+    assert(nt1 == ng and nt2 == ng)
+
+    L1anew = quadrature.int_L1(ng,L1a,ti,D1a,g,G)
+    L1bnew = quadrature.int_L1(ng,L1b,ti,D1b,g,G)
+    L2aanew = quadrature.int_L2(ng,L2aa,ti,D2aa,g,G)
+    L2abnew = quadrature.int_L2(ng,L2ab,ti,D2ab,g,G)
+    L2bbnew = quadrature.int_L2(ng,L2bb,ti,D2bb,g,G)
+
+    # spin blocks of the response densities
+    pia = -numpy.einsum('sia,s->ia',L1anew,g)
+    pIA = -numpy.einsum('sia,s->ia',L1bnew,g)
+    pba = numpy.zeros((nva,nva))
+    pBA = numpy.zeros((nvb,nvb))
+    pji = numpy.zeros((noa,noa))
+    pJI = numpy.zeros((nob,nob))
+    pai = numpy.zeros((nva,noa))
+    pAI = numpy.zeros((nvb,nob))
+    for i in range(ng):
+        pba_tot = cc_equations.uccsd_1rdm_ba(T1a[i],T1b[i],T2aa[i],T2ab[i],T2bb[i],
+                L1anew[i],L1bnew[i],L2aanew[i],L2abnew[i],L2bbnew[i])
+        pba -= g[i]*pba_tot[0]
+        pBA -= g[i]*pba_tot[1]
+
+        pji_tot = cc_equations.uccsd_1rdm_ji(T1a[i],T1b[i],T2aa[i],T2ab[i],T2bb[i],
+                L1anew[i],L1bnew[i],L2aanew[i],L2abnew[i],L2bbnew[i])
+        pji -= g[i]*pji_tot[0]
+        pJI -= g[i]*pji_tot[1]
+
+        pai_tot = cc_equations.uccsd_1rdm_ai(T1a[i],T1b[i],T2aa[i],T2ab[i],T2bb[i],
+                L1anew[i],L1bnew[i],L2aanew[i],L2abnew[i],L2bbnew[i],tfac=-1.0)
+        pai -= g[i]*pai_tot[0]
+        pAI -= g[i]*pai_tot[1]
+
+    return (pia,pIA),(pba,pBA),(pji,pJI),(pai,pAI)
+
+def uccsd_2rdm(T1a,T1b,T2aa,T2ab,T2bb,L1a,L1b,L2aa,L2ab,L2bb,
+        D1a,D1b,D2aa,D2ab,D2bb,ti,ng,g,G):
+    nt1,nva,noa = T1a.shape
+    nt2,nvb,nob = T1b.shape
+    assert(nt1 == ng and nt2 == ng)
+
+    # integrate the new L-amplitudes
+    L1anew = quadrature.int_L1(ng,L1a,ti,D1a,g,G)
+    L1bnew = quadrature.int_L1(ng,L1b,ti,D1b,g,G)
+    L2aanew = quadrature.int_L2(ng,L2aa,ti,D2aa,g,G)
+    L2abnew = quadrature.int_L2(ng,L2ab,ti,D2ab,g,G)
+    L2bbnew = quadrature.int_L2(ng,L2bb,ti,D2bb,g,G)
+
+    # spin blocks of the response densities
+    Pcdab = numpy.zeros((nva,nva,nva,nva))
+    Pciab = numpy.zeros((nva,noa,nva,nva))
+    Pbcai = numpy.zeros((nva,nva,nva,noa))
+    Pijab = -einsum('sijab,s->ijab',L2aanew,g)
+    Pbjai = numpy.zeros((nva,noa,nva,noa))
+    Pabij = numpy.zeros((nva,nva,noa,noa))
+    Pjkai = numpy.zeros((noa,noa,nva,noa))
+    Pkaij = numpy.zeros((noa,nva,noa,noa))
+    Pklij = numpy.zeros((noa,noa,noa,noa))
+
+    PCDAB = numpy.zeros((nvb,nvb,nvb,nvb))
+    PCIAB = numpy.zeros((nvb,nob,nvb,nvb))
+    PBCAI = numpy.zeros((nvb,nvb,nvb,nob))
+    PIJAB = -einsum('sijab,s->ijab',L2bbnew,g)
+    PBJAI = numpy.zeros((nvb,nob,nvb,nob))
+    PABIJ = numpy.zeros((nvb,nvb,nob,nob))
+    PJKAI = numpy.zeros((nob,nob,nvb,nob))
+    PKAIJ = numpy.zeros((nob,nvb,nob,nob))
+    PKLIJ = numpy.zeros((nob,nob,nob,nob))
+
+    PcDaB = numpy.zeros((nva,nvb,nva,nvb))
+    PcIaB = numpy.zeros((nva,nob,nva,nvb))
+    PbCaI = numpy.zeros((nva,nvb,nva,nob))
+    PiJaB = -einsum('sijab,s->ijab',L2abnew,g)
+    PbJaI = numpy.zeros((nva,nob,nva,nob))
+    PaBiJ = numpy.zeros((nva,nvb,noa,nob))
+    PjKaI = numpy.zeros((noa,nob,nva,nob))
+    PkAiJ = numpy.zeros((noa,nvb,noa,nob))
+    PkLiJ = numpy.zeros((noa,nob,noa,nob))
+
+    PCiAb = numpy.zeros((nvb,noa,nvb,nva))
+    PBcAi = numpy.zeros((nvb,nva,nvb,noa))
+    PJkAi = numpy.zeros((nob,noa,nvb,noa))
+    PKaIj = numpy.zeros((nob,nva,nob,noa))
+    PKlIj = numpy.zeros((nob,noa,nob,noa))
+
+    PbJAi = numpy.zeros((nva,nob,nvb,noa))
+    PBjaI = numpy.zeros((nvb,noa,nva,nob))
+    PBjAi = numpy.zeros((nvb,noa,nvb,noa))
+
+    # compute response densities
+    for i in range(ng):
+        Pcdab_tot = cc_equations.uccsd_2rdm_cdab(T1a[i],T1b[i],T2aa[i],T2ab[i],T2bb[i],
+                L1anew[i],L1bnew[i],L2aanew[i],L2abnew[i],L2bbnew[i])
+        Pcdab -= g[i]*Pcdab_tot[0]
+        PCDAB -= g[i]*Pcdab_tot[1]
+        PcDaB -= g[i]*Pcdab_tot[2]
+
+        Pciab_tot = cc_equations.uccsd_2rdm_ciab(T1a[i],T1b[i],T2aa[i],T2ab[i],T2bb[i],
+                L1anew[i],L1bnew[i],L2aanew[i],L2abnew[i],L2bbnew[i])
+        Pciab -= g[i]*Pciab_tot[0]
+        PCIAB -= g[i]*Pciab_tot[1]
+        PcIaB -= g[i]*Pciab_tot[2]
+        PCiAb -= g[i]*Pciab_tot[3]
+
+        Pbcai_tot = cc_equations.uccsd_2rdm_bcai(T1a[i],T1b[i],T2aa[i],T2ab[i],T2bb[i],
+                L1anew[i],L1bnew[i],L2aanew[i],L2abnew[i],L2bbnew[i])
+        Pbcai -= g[i]*Pbcai_tot[0]
+        PBCAI -= g[i]*Pbcai_tot[1]
+        PbCaI -= g[i]*Pbcai_tot[2]
+        PBcAi -= g[i]*Pbcai_tot[3]
+
+        Pbjai_tot = cc_equations.uccsd_2rdm_bjai(T1a[i],T1b[i],T2aa[i],T2ab[i],T2bb[i],
+                L1anew[i],L1bnew[i],L2aanew[i],L2abnew[i],L2bbnew[i])
+        Pbjai -= g[i]*Pbjai_tot[0]
+        PBJAI -= g[i]*Pbjai_tot[1]
+        PbJaI -= g[i]*Pbjai_tot[2]
+        PbJAi -= g[i]*Pbjai_tot[3]
+        PBjaI -= g[i]*Pbjai_tot[4]
+        PBjAi -= g[i]*Pbjai_tot[5]
+
+        Pabij_tot = cc_equations.uccsd_2rdm_abij(T1a[i],T1b[i],T2aa[i],T2ab[i],T2bb[i],
+                L1anew[i],L1bnew[i],L2aanew[i],L2abnew[i],L2bbnew[i],tfac=-1.0)
+        Pabij -= g[i]*Pabij_tot[0]
+        PABIJ -= g[i]*Pabij_tot[1]
+        PaBiJ -= g[i]*Pabij_tot[2]
+
+        Pjkai_tot = cc_equations.uccsd_2rdm_jkai(T1a[i],T1b[i],T2aa[i],T2ab[i],T2bb[i],
+                L1anew[i],L1bnew[i],L2aanew[i],L2abnew[i],L2bbnew[i])
+        Pjkai -= g[i]*Pjkai_tot[0]
+        PJKAI -= g[i]*Pjkai_tot[1]
+        PjKaI -= g[i]*Pjkai_tot[2]
+        PJkAi -= g[i]*Pjkai_tot[3]
+
+        Pkaij_tot = cc_equations.uccsd_2rdm_kaij(T1a[i],T1b[i],T2aa[i],T2ab[i],T2bb[i],
+                L1anew[i],L1bnew[i],L2aanew[i],L2abnew[i],L2bbnew[i])
+        Pkaij -= g[i]*Pkaij_tot[0]
+        PKAIJ -= g[i]*Pkaij_tot[1]
+        PkAiJ -= g[i]*Pkaij_tot[2]
+        PKaIj -= g[i]*Pkaij_tot[3]
+
+        Pklij_tot = cc_equations.uccsd_2rdm_klij(T1a[i],T1b[i],T2aa[i],T2ab[i],T2bb[i],
+                L1anew[i],L1bnew[i],L2aanew[i],L2abnew[i],L2bbnew[i])
+        Pklij -= g[i]*Pklij_tot[0]
+        PKLIJ -= g[i]*Pklij_tot[1]
+        PkLiJ -= g[i]*Pklij_tot[2]
+
+    return ((Pcdab,PCDAB,PcDaB),
+            (Pciab,PCIAB,PcIaB,PCiAb),
+            (Pbcai,PBCAI,PbCaI,PBcAi),
+            (Pijab,PIJAB,PiJaB),
+            (Pbjai,PBJAI,PbJaI,PbJAi,PBjaI,PBjAi),
+            (Pabij,PABIJ,PaBiJ),
+            (Pjkai,PJKAI,PjKaI,PJkAi),
+            (Pkaij,PKAIJ,PkAiJ,PKaIj),
+            (Pklij,PKLIJ,PkLiJ))
+
 def neq_1rdm(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
         D1,D2,tir,tii,ngr,ngi,gr,gi,Gr,Gi):
 
