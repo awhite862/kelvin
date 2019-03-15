@@ -105,14 +105,18 @@ class ccsd(object):
             print('  N = {}'.format(N))
         else:
             if self.L1 is None:
-                #if self.athresh > 0.0:
-                #    raise Exception("Lambda equations for A-FT-CCSD aren't implemented")
                 if self.sys.has_u():
                     self._ft_uccsd_lambda(L1=L1,L2=L2)
+                    ti = time.time()
+                    self._u_ft_1rdm()
+                    self._u_ft_2rdm()
+                    tf = time.time()
+                    if self.iprint > 0:
+                        print("RDM construction time: {} s".format(tf - ti))
                 else:
                     self._ft_ccsd_lambda(L1=L1,L2=L2)
-                    self._ft_1rdm()
-                    self._ft_2rdm()
+                    self._g_ft_1rdm()
+                    self._g_ft_2rdm()
             if self.sys.has_u():
                 ti = time.time()
                 self._u_ft_ESN(L1,L2)
@@ -1155,29 +1159,81 @@ class ccsd(object):
             - eb[None,None,:,None] - eb[None,None,None,:]
 
         Fa,Fb,Ia,Ib,Iabab = cc_utils.u_ft_d_integrals(self.sys, ea, eb, foa, fva, fob, fvb, dveca, dvecb)
-        T1aold,T1bold = self.T1
-        T2aaold,T2abold,T2bbold = self.T2
-        L1aold,L1bold = self.L1
-        L2aaold,L2abold,L2bbold = self.L2
+        #T1aold,T1bold = self.T1
+        #T2aaold,T2abold,T2bbold = self.T2
+        #L1aold,L1bold = self.L1
+        #L2aaold,L2abold,L2bbold = self.L2
 
-        Eterm = ft_cc_energy.ft_ucc_energy(T1aold,T1bold,T2aaold,T2abold,T2bbold,
-            Fa.ov,Fb.ov,Ia.oovv,Ib.oovv,Iabab.oovv,g,beta)
+        #Eterm = ft_cc_energy.ft_ucc_energy(T1aold,T1bold,T2aaold,T2abold,T2bbold,
+        #    Fa.ov,Fb.ov,Ia.oovv,Ib.oovv,Iabab.oovv,g,beta)
 
-        T1t,T2t = ft_cc_equations.uccsd_stanton(Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,
-                T2aaold,T2abold,T2bbold,D1a,D1b,D2aa,D2ab,D2bb,ti,ng,G)
+        #T1t,T2t = ft_cc_equations.uccsd_stanton(Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,
+        #        T2aaold,T2abold,T2bbold,D1a,D1b,D2aa,D2ab,D2bb,ti,ng,G)
 
-        A1a = (1.0/beta)*einsum('via,vai->v',L1aold, T1t[0])
-        A1b = (1.0/beta)*einsum('via,vai->v',L1bold, T1t[1])
-        A2a = (1.0/beta)*0.25*einsum('vijab,vabij->v',L2aaold, T2t[0])
-        A2b = (1.0/beta)*0.25*einsum('vijab,vabij->v',L2bbold, T2t[2])
-        A2ab = (1.0/beta)*einsum('vijab,vabij->v',L2abold, T2t[1])
+        #A1a = (1.0/beta)*einsum('via,vai->v',L1aold, T1t[0])
+        #A1b = (1.0/beta)*einsum('via,vai->v',L1bold, T1t[1])
+        #A2a = (1.0/beta)*0.25*einsum('vijab,vabij->v',L2aaold, T2t[0])
+        #A2b = (1.0/beta)*0.25*einsum('vijab,vabij->v',L2bbold, T2t[2])
+        #A2ab = (1.0/beta)*einsum('vijab,vabij->v',L2abold, T2t[1])
 
-        A2g = einsum('v,v->',A2a,g)
-        A2g += einsum('v,v->',A2ab,g)
-        A2g += einsum('v,v->',A2b,g)
-        A1g = einsum('v,v->',A1a,g)
-        A1g += einsum('v,v->',A1b,g)
-        der_cc = Eterm + A1g + A2g
+        #A2g = einsum('v,v->',A2a,g)
+        #A2g += einsum('v,v->',A2ab,g)
+        #A2g += einsum('v,v->',A2b,g)
+        #A1g = einsum('v,v->',A1a,g)
+        #A1g += einsum('v,v->',A1b,g)
+        #der_cc = Eterm + A1g + A2g
+        A1 = (1.0/beta)*einsum('ia,ai->', self.dia[0], Fa.vo)
+        A1 += (1.0/beta)*einsum('ia,ai->', self.dia[1], Fb.vo)
+        A1 += (1.0/beta)*einsum('ba,ab->', self.dba[0], Fa.vv)
+        A1 += (1.0/beta)*einsum('ba,ab->', self.dba[1], Fb.vv)
+        A1 += (1.0/beta)*einsum('ji,ij->', self.dji[0], Fa.oo)
+        A1 += (1.0/beta)*einsum('ji,ij->', self.dji[1], Fb.oo)
+        A1 += (1.0/beta)*einsum('ai,ia->', self.dai[0], Fa.ov)
+        A1 += (1.0/beta)*einsum('ai,ia->', self.dai[1], Fb.ov)
+
+        A2 = (0.25/beta)*einsum('ijab,abij->', self.P2[3][0], Ia.vvoo)
+        A2 += (0.25/beta)*einsum('ijab,abij->', self.P2[3][1], Ib.vvoo)
+        A2 += (1.0/beta)*einsum('ijab,abij->', self.P2[3][2], Iabab.vvoo)
+
+        A2 += (0.5/beta)*einsum('ciab,abci->', self.P2[1][0], Ia.vvvo)
+        A2 += (0.5/beta)*einsum('ciab,abci->', self.P2[1][1], Ib.vvvo)
+        A2 += (1.0/beta)*einsum('ciab,abci->', self.P2[1][2], Iabab.vvvo)
+        A2 += (1.0/beta)*einsum('ciab,baic->', self.P2[1][3], Iabab.vvov)
+
+        A2 += (0.5/beta)*einsum('jkai,aijk->', self.P2[6][0], Ia.vooo)
+        A2 += (0.5/beta)*einsum('jkai,aijk->', self.P2[6][1], Ib.vooo)
+        A2 += (1.0/beta)*einsum('jKaI,aIjK->', self.P2[6][2], Iabab.vooo)
+        A2 += (1.0/beta)*einsum('JkAi,iAkJ->', self.P2[6][3], Iabab.ovoo)
+
+        A2 += (0.25/beta)*einsum('cdab,abcd->', self.P2[0][0], Ia.vvvv)
+        A2 += (0.25/beta)*einsum('cdab,abcd->', self.P2[0][1], Ib.vvvv)
+        A2 += (1.0/beta)*einsum('cdab,abcd->', self.P2[0][2], Iabab.vvvv)
+
+        A2 += (1.0/beta)*einsum('bjai,aibj->', self.P2[4][0], Ia.vovo)
+        A2 += (1.0/beta)*einsum('BJAI,AIBJ->', self.P2[4][1], Ib.vovo)
+        A2 += (1.0/beta)*einsum('bJaI,aIbJ->', self.P2[4][2], Iabab.vovo)
+        A2 -= (1.0/beta)*einsum('bJAi,iAbJ->', self.P2[4][3], Iabab.ovvo)
+        A2 -= (1.0/beta)*einsum('BjaI,aIjB->', self.P2[4][4], Iabab.voov)
+        A2 += (1.0/beta)*einsum('BjAi,iAjB->', self.P2[4][5], Iabab.ovov)
+
+        A2 += (0.25/beta)*einsum('klij,ijkl->', self.P2[8][0], Ia.oooo)
+        A2 += (0.25/beta)*einsum('klij,ijkl->', self.P2[8][1], Ib.oooo)
+        A2 += (1.0/beta)*einsum('kLiJ,iJkL->', self.P2[8][2], Iabab.oooo)
+
+        A2 += (0.5/beta)*einsum('bcai,aibc->', self.P2[2][0], Ia.vovv)
+        A2 += (0.5/beta)*einsum('bcai,aibc->', self.P2[2][1], Ib.vovv)
+        A2 += (1.0/beta)*einsum('bCaI,aIbC->', self.P2[2][2], Iabab.vovv)
+        A2 += (1.0/beta)*einsum('BcAi,iAcB->', self.P2[2][3], Iabab.ovvv)
+
+        A2 += (0.5/beta)*einsum('kaij,ijka->', self.P2[7][0], Ia.ooov)
+        A2 += (0.5/beta)*einsum('kaij,ijka->', self.P2[7][1], Ib.ooov)
+        A2 += (1.0/beta)*einsum('kaij,ijka->', self.P2[7][2], Iabab.ooov)
+        A2 += (1.0/beta)*einsum('KaIj,jIaK->', self.P2[7][3], Iabab.oovo)
+
+        A2 += (0.25/beta)*einsum('abij,ijab->', self.P2[5][0], Ia.oovv)
+        A2 += (0.25/beta)*einsum('abij,ijab->', self.P2[5][1], Ib.oovv)
+        A2 += (1.0/beta)*einsum('aBiJ,iJaB->', self.P2[5][2], Iabab.oovv)
+        der_cc = A1 + A2
 
         return der1,der_cc
 
@@ -1268,7 +1324,7 @@ class ccsd(object):
         g = self.g
         gd,Gd = quadrature.d_ft_quad(ng, beta, self.quad)
 
-        # get exponentials
+        # get energy differences
         D1a = ea[:,None] - ea[None,:]
         D1b = eb[:,None] - eb[None,:]
         D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
@@ -1340,7 +1396,7 @@ class ccsd(object):
 
         return dg,dG
 
-    def _ft_1rdm(self):
+    def _g_ft_1rdm(self):
         # temperature info
         T = self.T
         beta = 1.0 / (T + 1e-12)
@@ -1375,7 +1431,7 @@ class ccsd(object):
         self.dji = pji
         self.dai = pai
 
-    def _ft_2rdm(self):
+    def _g_ft_2rdm(self):
         # temperature info
         T = self.T
         beta = 1.0 / (T + 1e-12)
@@ -1405,4 +1461,92 @@ class ccsd(object):
 
         P2 = ft_cc_equations.ccsd_2rdm(
                 self.T1,self.T2,self.L1,self.L2,D1,D2,ti,ng,self.g,self.G)
+        self.P2 = P2
+
+    def _u_ft_1rdm(self):
+        # temperature info
+        T = self.T
+        beta = 1.0 / (T + 1e-12)
+        mu = self.mu
+
+        # get time-grid
+        ng = self.ngrid
+        ti = self.ti
+
+        # get energies and occupation numbers
+        ea,eb = self.sys.u_energies_tot()
+        na = ea.shape[0]
+        nb = eb.shape[0]
+
+        # get energy differences
+        D1a = ea[:,None] - ea[None,:]
+        D1b = eb[:,None] - eb[None,:]
+        D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
+            - ea[None,None,:,None] - ea[None,None,None,:]
+        D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
+            - ea[None,None,:,None] - eb[None,None,None,:]
+        D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
+            - eb[None,None,:,None] - eb[None,None,None,:]
+        #if self.athresh > 0.0:
+        #    athresh = self.athresh
+        #    focc = [x for x in fo if x > athresh]
+        #    fvir = [x for x in fv if x > athresh]
+        #    iocc = [i for i,x in enumerate(fo) if x > athresh]
+        #    ivir = [i for i,x in enumerate(fv) if x > athresh]
+        #    D1 = D1[numpy.ix_(ivir,iocc)]
+        #    D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
+
+        T1a,T1b = self.T1
+        T2aa,T2ab,T2bb = self.T2
+        L1a,L1b = self.L1
+        L2aa,L2ab,L2bb = self.L2
+        pia,pba,pji,pai = ft_cc_equations.uccsd_1rdm(
+                T1a,T1b,T2aa,T2ab,T2bb,L1a,L1b,L2aa,L2ab,L2bb,
+                D1a,D1b,D2aa,D2ab,D2bb,ti,ng,self.g,self.G)
+        self.dia = pia
+        self.dba = pba
+        self.dji = pji
+        self.dai = pai
+
+    def _u_ft_2rdm(self):
+        # temperature info
+        T = self.T
+        beta = 1.0 / (T + 1e-12)
+        mu = self.mu
+
+        # get time-grid
+        ng = self.ngrid
+        ti = self.ti
+
+        # get energies and occupation numbers
+        ea,eb = self.sys.u_energies_tot()
+        na = ea.shape[0]
+        nb = eb.shape[0]
+
+        # get energy differences
+        D1a = ea[:,None] - ea[None,:]
+        D1b = eb[:,None] - eb[None,:]
+        D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
+            - ea[None,None,:,None] - ea[None,None,None,:]
+        D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
+            - ea[None,None,:,None] - eb[None,None,None,:]
+        D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
+            - eb[None,None,:,None] - eb[None,None,None,:]
+        #if self.athresh > 0.0:
+        #    athresh = self.athresh
+        #    focc = [x for x in fo if x > athresh]
+        #    fvir = [x for x in fv if x > athresh]
+        #    iocc = [i for i,x in enumerate(fo) if x > athresh]
+        #    ivir = [i for i,x in enumerate(fv) if x > athresh]
+        #    D1 = D1[numpy.ix_(ivir,iocc)]
+        #    D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
+
+        T1a,T1b = self.T1
+        T2aa,T2ab,T2bb = self.T2
+        L1a,L1b = self.L1
+        L2aa,L2ab,L2bb = self.L2
+        P2 = ft_cc_equations.uccsd_2rdm(
+                T1a,T1b,T2aa,T2ab,T2bb,L1a,L1b,L2aa,L2ab,L2bb,
+                D1a,D1b,D2aa,D2ab,D2bb,ti,ng,self.g,self.G)
+
         self.P2 = P2
