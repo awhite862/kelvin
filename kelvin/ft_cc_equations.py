@@ -142,15 +142,14 @@ def uccsd_stanton(Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,T2aaold,T2abold,T2bbold,
     intermediates.
     """
     t1 = time.time()
-    na = D1a.shape[0]
-    nb = D1b.shape[0]
+    nva,noa = Fa.vo.shape
+    nvb,nob = Fb.vo.shape
 
-    #Id = numpy.ones((ng))
-    T1a = numpy.zeros((ng,na,na))
-    T1b = numpy.zeros((ng,nb,nb))
-    T2aa = numpy.zeros((ng,na,na,na,na))
-    T2ab = numpy.zeros((ng,na,nb,na,nb))
-    T2bb = numpy.zeros((ng,nb,nb,nb,nb))
+    T1a = numpy.zeros((ng,nva,noa))
+    T1b = numpy.zeros((ng,nvb,nob))
+    T2aa = numpy.zeros((ng,nva,nva,noa,noa))
+    T2ab = numpy.zeros((ng,nva,nvb,noa,nob))
+    T2bb = numpy.zeros((ng,nvb,nvb,nob,nob))
 
     for y in range(ng):
         T1a[y,:,:] = -Fa.vo.copy()
@@ -179,7 +178,6 @@ def uccsd_stanton_single(ig,Fa,Fb,Ia,Ib,Iabab,
         D1a,D1b,D2aa,D2ab,D2bb,ti,ng,G):
     t1 = time.time()
 
-    #Id = numpy.ones((ng))
     T1newa = -Fa.vo
     T1newb = -Fb.vo
     T2newaa = -Ia.vvoo

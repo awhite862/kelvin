@@ -119,6 +119,33 @@ class FTDerivTest(unittest.TestCase):
         self.assertTrue(dS < self.Bethresh,eS)
         self.assertTrue(dN < self.Bethresh,eN)
 
+    def test_Be_sto3g_active(self):
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+        m = scf.RHF(mol)
+        m.conv_tol = 1e-13
+        Escf = m.scf()
+        T = 0.5
+        mu = 0.0
+        ng = 20
+        athresh = 1e-20
+        sys = scf_system(m,T,mu,orbtype='u')
+        ccsdT = ccsd(sys,iprint=0,T=T,mu=mu,max_iter=35,damp=0.0,ngrid=ng,econv=1e-10,athresh=athresh,singles=True)
+        Ecctot,Ecc = ccsdT.run()
+        ccsdT.compute_ESN()
+        Ex,Nx,Sx = fd_ESN(m, T, mu, ng, Ecctot, athresh=athresh)
+        dE = abs((ccsdT.E - Ex)/Ex)
+        dS = abs((ccsdT.S - Sx)/Sx)
+        dN = abs((ccsdT.N - Nx)/Nx)
+        eE = "Expected: {}  Actual: {}".format(Ex,ccsdT.E)
+        eS = "Expected: {}  Actual: {}".format(Sx,ccsdT.S)
+        eN = "Expected: {}  Actual: {}".format(Nx,ccsdT.N)
+        self.assertTrue(dE < self.Bethresh,eE)
+        self.assertTrue(dS < self.Bethresh,eS)
+        self.assertTrue(dN < self.Bethresh,eN)
+
     def test_Be_sto3g_ln(self):
         mol = gto.M(
             verbose = 0,

@@ -85,7 +85,27 @@ class FTCCSDTest(unittest.TestCase):
         Escf = m.scf()
         T = 0.02
         mu = 0.0
-        sys = scf_system(m,T,mu,orbtype='g') # TODO change orbtype to u
+        sys = scf_system(m,T,mu,orbtype='g')
+        ccsdT = ccsd(
+                sys,iprint=0,singles=True,T=T,mu=mu,damp=0.1,
+                max_iter=80,ngrid=160,athresh=1e-30)
+        cc = ccsdT.run()
+        diff = abs(self.Be_ref_ac - cc[1])
+        error = "Expected: {}  Actual: {}".format(self.Be_ref_ac,cc[1])
+        self.assertTrue(diff < self.thresh,error)
+
+    def test_Be_uactive(self):
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+
+        m = scf.RHF(mol)
+        m.conv_tol = 1e-12
+        Escf = m.scf()
+        T = 0.02
+        mu = 0.0
+        sys = scf_system(m,T,mu,orbtype='u')
         ccsdT = ccsd(
                 sys,iprint=0,singles=True,T=T,mu=mu,damp=0.1,
                 max_iter=80,ngrid=160,athresh=1e-30)

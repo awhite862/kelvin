@@ -48,6 +48,7 @@ def full_suite():
     suite.addTest(test_ft_ccsd.FTCCSDTest("test_Be"))
     suite.addTest(test_ft_ccsd.FTCCSDTest("test_Be_rt"))
     suite.addTest(test_ft_ccsd.FTCCSDTest("test_Be_active"))
+    suite.addTest(test_ft_ccsd.FTCCSDTest("test_Be_uactive"))
     suite.addTest(test_ft_ccsd.FTCCSDTest("test_ueg_gen"))
     suite.addTest(test_ft_ccsd.FTCCSDTest("test_ueg"))
     suite.addTest(test_ft_ccsd.FTCCSDTest("test_pueg"))
@@ -71,6 +72,8 @@ def full_suite():
     suite.addTest(test_ft_ccsd_rdm.FTCCSD_RDMTest("test_u2rdm"))
 
     suite.addTest(test_ft_deriv.FTDerivTest("test_Be_sto3g_gen"))
+    suite.addTest(test_ft_deriv.FTDerivTest("test_Be_sto3g_gen_active"))
+    suite.addTest(test_ft_deriv.FTDerivTest("test_Be_sto3g_active"))
     suite.addTest(test_ft_deriv.FTDerivTest("test_Be_sto3g"))
     suite.addTest(test_ft_deriv.FTDerivTest("test_Be_sto3g_ln"))
     suite.addTest(test_ft_deriv.FTDerivTest("test_UEG"))
@@ -168,6 +171,7 @@ def default_suite():
     suite.addTest(test_ft_ccsd.FTCCSDTest("test_Be"))
     #suite.addTest(test_ft_ccsd.FTCCSDTest("test_Be_rt"))
     #suite.addTest(test_ft_ccsd.FTCCSDTest("test_Be_active"))
+    #suite.addTest(test_ft_ccsd.FTCCSDTest("test_Be_uactive"))
     suite.addTest(test_ft_ccsd.FTCCSDTest("test_ueg"))
     #suite.addTest(test_ft_ccsd.FTCCSDTest("test_ueg_gen"))
     suite.addTest(test_ft_ccsd.FTCCSDTest("test_pueg"))
@@ -191,6 +195,8 @@ def default_suite():
     suite.addTest(test_ft_ccsd_rdm.FTCCSD_RDMTest("test_u2rdm"))
 
     suite.addTest(test_ft_deriv.FTDerivTest("test_Be_sto3g_gen"))
+    suite.addTest(test_ft_deriv.FTDerivTest("test_Be_sto3g_gen_active"))
+    suite.addTest(test_ft_deriv.FTDerivTest("test_Be_sto3g_active"))
     suite.addTest(test_ft_deriv.FTDerivTest("test_Be_sto3g"))
     suite.addTest(test_ft_deriv.FTDerivTest("test_Be_sto3g_ln"))
     suite.addTest(test_ft_deriv.FTDerivTest("test_UEG"))

@@ -742,12 +742,12 @@ class ccsd(object):
         nb = eb.shape[0]
 
         # compute requisite memory
-        n = na + nb
-        mem1e = 6*n*n + 3*ng*n*n
-        mem2e = 3*n*n*n*n + 5*ng*n*n*n*n
-        mem_mb = (mem1e + mem2e)*8.0/1024.0/1024.0
-        if self.iprint > 0:
-            print('  FT-CCSD will use %f mb' % mem_mb)
+        #n = na + nb
+        #mem1e = 6*n*n + 3*ng*n*n
+        #mem2e = 3*n*n*n*n + 5*ng*n*n*n*n
+        #mem_mb = (mem1e + mem2e)*8.0/1024.0/1024.0
+        #if self.iprint > 0:
+        #    print('  FT-CCSD will use %f mb' % mem_mb)
 
         # get 0th and 1st order contributions
         En = self.sys.const_energy()
@@ -756,18 +756,72 @@ class ccsd(object):
         E1 = self.sys.get_mp1()
         E01 = E0 + E1
 
-        # get scaled integrals
-        Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
+        if self.athresh > 0.0:
+            athresh = self.athresh
+            foa = ft_utils.ff(beta, ea, mu)
+            fva = ft_utils.ffv(beta, ea, mu)
+            fob = ft_utils.ff(beta, eb, mu)
+            fvb = ft_utils.ffv(beta, eb, mu)
+            focca = [x for x in foa if x > athresh]
+            fvira = [x for x in fva if x > athresh]
+            iocca = [i for i,x in enumerate(foa) if x > athresh]
+            ivira = [i for i,x in enumerate(fva) if x > athresh]
+            foccb = [x for x in fob if x > athresh]
+            fvirb = [x for x in fvb if x > athresh]
+            ioccb = [i for i,x in enumerate(fob) if x > athresh]
+            ivirb = [i for i,x in enumerate(fvb) if x > athresh]
+            nocca = len(focca)
+            nvira = len(fvira)
+            noccb = len(foccb)
+            nvirb = len(fvirb)
+            nacta = nocca + nvira - na
+            nactb = noccb + nvirb - nb
+            if self.iprint > 0:
+                print("FT-UCCSD orbital info:")
+                print('  nocca: {:d}'.format(nocca))
+                print('  nvira: {:d}'.format(nvira))
+                print('  nacta: {:d}'.format(nacta))
+                print('  noccb: {:d}'.format(nocca))
+                print('  nvirb: {:d}'.format(nvira))
+                print('  nactb: {:d}'.format(nacta))
 
-        # get energy differences
-        D1a = ea[:,None] - ea[None,:]
-        D1b = eb[:,None] - eb[None,:]
-        D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
-                - ea[None,None,:,None] - ea[None,None,None,:]
-        D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
-                - ea[None,None,:,None] - eb[None,None,None,:]
-        D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
-                - eb[None,None,:,None] - eb[None,None,None,:]
+            # get energy differences
+            D1a = ea[:,None] - ea[None,:]
+            D1b = eb[:,None] - eb[None,:]
+            D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
+                    - ea[None,None,:,None] - ea[None,None,None,:]
+            D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
+                    - ea[None,None,:,None] - eb[None,None,None,:]
+            D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
+                    - eb[None,None,:,None] - eb[None,None,None,:]
+            D1a = D1a[numpy.ix_(ivira,iocca)]
+            D1b = D1b[numpy.ix_(ivirb,ioccb)]
+            D2aa = D2aa[numpy.ix_(ivira,ivira,iocca,iocca)]
+            D2ab = D2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)]
+            D2bb = D2bb[numpy.ix_(ivirb,ivirb,ioccb,ioccb)]
+
+            # get scaled integrals
+            Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
+                    self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
+
+            T1ashape = (ng,nvira,nocca)
+            T2bshape = (ng,nvirb,noccb)
+
+        else:
+            # get scaled integrals
+            Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
+
+            # get energy differences
+            D1a = ea[:,None] - ea[None,:]
+            D1b = eb[:,None] - eb[None,:]
+            D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
+                    - ea[None,None,:,None] - ea[None,None,None,:]
+            D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
+                    - ea[None,None,:,None] - eb[None,None,None,:]
+            D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
+                    - eb[None,None,:,None] - eb[None,None,None,:]
+            T1ashape = (ng,na,na)
+            T2bshape = (ng,nb,nb)
 
         method = "CCSD" if self.singles else "CCD"
         conv_options = {
@@ -780,8 +834,8 @@ class ccsd(object):
                 print("WARNING: Converngece scheme ({}) is being ignored.".format(self.rt_iter))
             # get MP2 T-amplitudes
             if T1in is not None and T2in is not None:
-                T1aold = T1in[0] if self.singles else numpy.zeros((ng, na, na))
-                T1bold = T1in[1] if self.singles else numpy.zeros((ng, na, na))
+                T1aold = T1in[0] if self.singles else numpy.zeros(T1ashape)
+                T1bold = T1in[1] if self.singles else numpy.zeros(T1bshape)
                 T2aaold = T2in[0]
                 T2abold = T2in[1]
                 T2bbold = T2in[2]
@@ -943,57 +997,79 @@ class ccsd(object):
         na = ea.shape[0]
         nb = eb.shape[0]
 
-        # compute requisite memory TODO: fix this 
-        #n = en.shape[0]
-        #mem1e = 6*n*n + 3*ng*n*n
-        #mem2e = 3*n*n*n*n + 5*ng*n*n*n*n
-        #mem_mb = (mem1e + mem2e)*8.0/1024.0/1024.0
-        #if self.iprint > 0:
-        #    print('  FT-CCSD will use %f mb' % mem_mb)
-
         En = self.sys.const_energy()
         g0 = ft_utils.uGP0(beta, ea, eb, mu)
         E0 = ft_mp.ump0(g0[0],g0[1]) + En
         E1 = self.sys.get_mp1()
         E01 = E0 + E1
 
-        # get scaled integrals
-        Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
+        if self.athresh > 0.0:
+            athresh = self.athresh
+            foa = ft_utils.ff(beta, ea, mu)
+            fva = ft_utils.ffv(beta, ea, mu)
+            fob = ft_utils.ff(beta, eb, mu)
+            fvb = ft_utils.ffv(beta, eb, mu)
+            focca = [x for x in foa if x > athresh]
+            fvira = [x for x in fva if x > athresh]
+            iocca = [i for i,x in enumerate(foa) if x > athresh]
+            ivira = [i for i,x in enumerate(fva) if x > athresh]
+            foccb = [x for x in fob if x > athresh]
+            fvirb = [x for x in fvb if x > athresh]
+            ioccb = [i for i,x in enumerate(fob) if x > athresh]
+            ivirb = [i for i,x in enumerate(fvb) if x > athresh]
+            nocca = len(focca)
+            nvira = len(fvira)
+            noccb = len(foccb)
+            nvirb = len(fvirb)
+            nacta = nocca + nvira - na
+            nactb = noccb + nvirb - nb
+            if self.iprint > 0:
+                print("FT-UCCSD orbital info:")
+                print('  nocca: {:d}'.format(nocca))
+                print('  nvira: {:d}'.format(nvira))
+                print('  nacta: {:d}'.format(nacta))
+                print('  noccb: {:d}'.format(nocca))
+                print('  nvirb: {:d}'.format(nvira))
+                print('  nactb: {:d}'.format(nacta))
 
-        # get energy differences
-        D1a = ea[:,None] - ea[None,:]
-        D1b = eb[:,None] - eb[None,:]
-        D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
-                - ea[None,None,:,None] - ea[None,None,None,:]
-        D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
-                - ea[None,None,:,None] - eb[None,None,None,:]
-        D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
-                - eb[None,None,:,None] - eb[None,None,None,:]
+            # get energy differences
+            D1a = ea[:,None] - ea[None,:]
+            D1b = eb[:,None] - eb[None,:]
+            D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
+                    - ea[None,None,:,None] - ea[None,None,None,:]
+            D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
+                    - ea[None,None,:,None] - eb[None,None,None,:]
+            D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
+                    - eb[None,None,:,None] - eb[None,None,None,:]
+            D1a = D1a[numpy.ix_(ivira,iocca)]
+            D1b = D1b[numpy.ix_(ivirb,ioccb)]
+            D2aa = D2aa[numpy.ix_(ivira,ivira,iocca,iocca)]
+            D2ab = D2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)]
+            D2bb = D2bb[numpy.ix_(ivirb,ivirb,ioccb,ioccb)]
+
+            # get scaled integrals
+            Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
+                    self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
+
+            T1ashape = (ng,nvira,nocca)
+            T2bshape = (ng,nvirb,noccb)
+
+        else:
+            # get scaled integrals
+            Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
+
+            # get energy differences
+            D1a = ea[:,None] - ea[None,:]
+            D1b = eb[:,None] - eb[None,:]
+            D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
+                    - ea[None,None,:,None] - ea[None,None,None,:]
+            D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
+                    - ea[None,None,:,None] - eb[None,None,None,:]
+            D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
+                    - eb[None,None,:,None] - eb[None,None,None,:]
 
         T1aold,T1bold = self.T1
         T2aaold,T2abold,T2bbold = self.T2
-
-        #if L2 is None:
-        #    # Use T^{\dagger} as a guess for Lambda
-        #    if self.singles:
-        #        L1aold = numpy.transpose(T1aold,(0,2,1))
-        #        L1bold = numpy.transpose(T1bold,(0,2,1))
-        #    else:
-        #        L1aold = numpy.zeros((ng,na,na))
-        #        L1bold = numpy.zeros((ng,nb,nb))
-        #    L2aaold = numpy.transpose(T2aaold,(0,3,4,1,2))
-        #    L2abold = numpy.transpose(T2abold,(0,3,4,1,2))
-        #    L2bbold = numpy.transpose(T2bbold,(0,3,4,1,2))
-        #else:
-        #    L2aaold = L2[0]
-        #    L2abold = L2[1]
-        #    L2bbold = L2[2]
-        #    if L1 is None:
-        #        L1aold = numpy.zeros((ng,na,na))
-        #        L1bold = numpy.zeros((ng,nb,nb))
-        #    else:
-        #        L1aold = L1[0]
-        #        L1bold = L1[1]
         if L2 is None and L1 is None:
             if self.singles:
                 L1aold,L1bold,L2aaold,L2abold,L2bbold = ft_cc_equations.uccsd_lambda_guess(
@@ -1126,8 +1202,29 @@ class ccsd(object):
             - ea[None,None,:,None] - eb[None,None,None,:]
         D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
             - eb[None,None,:,None] - eb[None,None,None,:]
-
-        Fa,Fb,Ia,Ib,Iabab = cc_utils.u_ft_d_integrals(self.sys, ea, eb, foa, fva, fob, fvb, dveca, dvecb)
+        if self.athresh > 0.0:
+            athresh = self.athresh
+            foa = ft_utils.ff(beta, ea, mu)
+            fva = ft_utils.ffv(beta, ea, mu)
+            fob = ft_utils.ff(beta, eb, mu)
+            fvb = ft_utils.ffv(beta, eb, mu)
+            focca = [x for x in foa if x > athresh]
+            fvira = [x for x in fva if x > athresh]
+            iocca = [i for i,x in enumerate(foa) if x > athresh]
+            ivira = [i for i,x in enumerate(fva) if x > athresh]
+            foccb = [x for x in fob if x > athresh]
+            fvirb = [x for x in fvb if x > athresh]
+            ioccb = [i for i,x in enumerate(fob) if x > athresh]
+            ivirb = [i for i,x in enumerate(fvb) if x > athresh]
+            D1a = D1a[numpy.ix_(ivira,iocca)]
+            D1b = D1b[numpy.ix_(ivirb,ioccb)]
+            D2aa = D2aa[numpy.ix_(ivira,ivira,iocca,iocca)]
+            D2ab = D2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)]
+            Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_d_active_integrals(
+                    self.sys, ea, eb, focca, fvira, foccb, fvirb, 
+                    iocca, ivira, ioccb, ivirb, dveca, dvecb)
+        else:
+            Fa,Fb,Ia,Ib,Iabab = cc_utils.u_ft_d_integrals(self.sys, ea, eb, foa, fva, fob, fvb, dveca, dvecb)
         A1 = (1.0/beta)*einsum('ia,ai->', self.dia[0], Fa.vo)
         A1 += (1.0/beta)*einsum('ia,ai->', self.dia[1], Fb.vo)
         A1 += (1.0/beta)*einsum('ba,ab->', self.dba[0], Fa.vv)
@@ -1194,6 +1291,8 @@ class ccsd(object):
 
         # get energies and occupation numbers
         en = self.sys.g_energies_tot()
+        fo = ft_utils.ff(beta, en, mu)
+        fv = ft_utils.ffv(beta, en, mu)
 
         # get time-grid
         ng = self.ngrid
@@ -1206,9 +1305,20 @@ class ccsd(object):
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
             - en[None,None,:,None] - en[None,None,None,:]
+        if self.athresh > 0.0:
+            athresh = self.athresh
+            focc = [x for x in fo if x > athresh]
+            fvir = [x for x in fv if x > athresh]
+            iocc = [i for i,x in enumerate(fo) if x > athresh]
+            ivir = [i for i,x in enumerate(fv) if x > athresh]
+            D1 = D1[numpy.ix_(ivir,iocc)]
+            D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
+            F,I = cc_utils.ft_active_integrals(
+                    self.sys, en, focc, fvir, iocc, ivir)
+        else:
+            F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
 
-        F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
-
+        A1 = (1.0/beta)*einsum('ia,ai->',self.dia,F.vo)
         # get derivative with respect to g
         Eterm = ft_cc_energy.ft_cc_energy(self.T1,self.T2,
             F.ov,I.oovv,gd,beta)
@@ -1279,8 +1389,28 @@ class ccsd(object):
             - ea[None,None,:,None] - eb[None,None,None,:]
         D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
             - eb[None,None,:,None] - eb[None,None,None,:]
-
-        Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
+        if self.athresh > 0.0:
+            athresh = self.athresh
+            foa = ft_utils.ff(beta, ea, mu)
+            fva = ft_utils.ffv(beta, ea, mu)
+            fob = ft_utils.ff(beta, eb, mu)
+            fvb = ft_utils.ffv(beta, eb, mu)
+            focca = [x for x in foa if x > athresh]
+            fvira = [x for x in fva if x > athresh]
+            iocca = [i for i,x in enumerate(foa) if x > athresh]
+            ivira = [i for i,x in enumerate(fva) if x > athresh]
+            foccb = [x for x in fob if x > athresh]
+            fvirb = [x for x in fvb if x > athresh]
+            ioccb = [i for i,x in enumerate(fob) if x > athresh]
+            ivirb = [i for i,x in enumerate(fvb) if x > athresh]
+            D1a = D1a[numpy.ix_(ivira,iocca)]
+            D1b = D1b[numpy.ix_(ivirb,ioccb)]
+            D2aa = D2aa[numpy.ix_(ivira,ivira,iocca,iocca)]
+            D2ab = D2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)]
+            Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
+                    self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
+        else:
+            Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
         T1aold,T1bold = self.T1
         T2aaold,T2abold,T2bbold = self.T2
         L1aold,L1bold = self.L1
@@ -1433,14 +1563,25 @@ class ccsd(object):
             - ea[None,None,:,None] - eb[None,None,None,:]
         D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
             - eb[None,None,:,None] - eb[None,None,None,:]
-        #if self.athresh > 0.0:
-        #    athresh = self.athresh
-        #    focc = [x for x in fo if x > athresh]
-        #    fvir = [x for x in fv if x > athresh]
-        #    iocc = [i for i,x in enumerate(fo) if x > athresh]
-        #    ivir = [i for i,x in enumerate(fv) if x > athresh]
-        #    D1 = D1[numpy.ix_(ivir,iocc)]
-        #    D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
+        if self.athresh > 0.0:
+            athresh = self.athresh
+            foa = ft_utils.ff(beta, ea, mu)
+            fva = ft_utils.ffv(beta, ea, mu)
+            fob = ft_utils.ff(beta, eb, mu)
+            fvb = ft_utils.ffv(beta, eb, mu)
+            focca = [x for x in foa if x > athresh]
+            fvira = [x for x in fva if x > athresh]
+            iocca = [i for i,x in enumerate(foa) if x > athresh]
+            ivira = [i for i,x in enumerate(fva) if x > athresh]
+            foccb = [x for x in fob if x > athresh]
+            fvirb = [x for x in fvb if x > athresh]
+            ioccb = [i for i,x in enumerate(fob) if x > athresh]
+            ivirb = [i for i,x in enumerate(fvb) if x > athresh]
+            D1a = D1a[numpy.ix_(ivira,iocca)]
+            D1b = D1b[numpy.ix_(ivirb,ioccb)]
+            D2aa = D2aa[numpy.ix_(ivira,ivira,iocca,iocca)]
+            D2ab = D2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)]
+            D2bb = D2bb[numpy.ix_(ivirb,ivirb,ioccb,ioccb)]
 
         T1a,T1b = self.T1
         T2aa,T2ab,T2bb = self.T2
@@ -1478,14 +1619,24 @@ class ccsd(object):
             - ea[None,None,:,None] - eb[None,None,None,:]
         D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
             - eb[None,None,:,None] - eb[None,None,None,:]
-        #if self.athresh > 0.0:
-        #    athresh = self.athresh
-        #    focc = [x for x in fo if x > athresh]
-        #    fvir = [x for x in fv if x > athresh]
-        #    iocc = [i for i,x in enumerate(fo) if x > athresh]
-        #    ivir = [i for i,x in enumerate(fv) if x > athresh]
-        #    D1 = D1[numpy.ix_(ivir,iocc)]
-        #    D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
+        if self.athresh > 0.0:
+            athresh = self.athresh
+            foa = ft_utils.ff(beta, ea, mu)
+            fva = ft_utils.ffv(beta, ea, mu)
+            fob = ft_utils.ff(beta, eb, mu)
+            fvb = ft_utils.ffv(beta, eb, mu)
+            focca = [x for x in foa if x > athresh]
+            fvira = [x for x in fva if x > athresh]
+            iocca = [i for i,x in enumerate(foa) if x > athresh]
+            ivira = [i for i,x in enumerate(fva) if x > athresh]
+            foccb = [x for x in fob if x > athresh]
+            fvirb = [x for x in fvb if x > athresh]
+            ioccb = [i for i,x in enumerate(fob) if x > athresh]
+            ivirb = [i for i,x in enumerate(fvb) if x > athresh]
+            D1a = D1a[numpy.ix_(ivira,iocca)]
+            D1b = D1b[numpy.ix_(ivirb,ioccb)]
+            D2aa = D2aa[numpy.ix_(ivira,ivira,iocca,iocca)]
+            D2ab = D2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)]
 
         T1a,T1b = self.T1
         T2aa,T2ab,T2bb = self.T2
