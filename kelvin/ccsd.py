@@ -95,7 +95,7 @@ class ccsd(object):
                 else:
                     return self._ccsd()
 
-    def compute_ESN(self,L1=None,L2=None):
+    def compute_ESN(self,L1=None,L2=None,gderiv=True):
         """Compute energy, entropy, particle number."""
         if not self.finite_T:
             N = self.sys.g_energies()[0].shape[0]
@@ -119,14 +119,14 @@ class ccsd(object):
                     self._g_ft_2rdm()
             if self.sys.has_u():
                 ti = time.time()
-                self._u_ft_ESN(L1,L2)
+                self._u_ft_ESN(L1,L2,gderiv=gderiv)
                 tf = time.time()
                 if self.iprint > 0:
                     print("Total derivative time: {} s".format(tf - ti))
             else:
-                self._g_ft_ESN(L1,L2)
+                self._g_ft_ESN(L1,L2,gderiv=gderiv)
 
-    def _g_ft_ESN(self,L1=None,L2=None):
+    def _g_ft_ESN(self,L1=None,L2=None,gderiv=True):
             # temperature info
             T = self.T
             beta = 1.0 / (T + 1e-12)
@@ -148,9 +148,12 @@ class ccsd(object):
             B1,Bcc = self._g_nocc_deriv(dvec)
 
             # compute other contributions to CC derivative
-            Bcc -= self.Gcc/(beta)
-            dg,dG = self._g_nocc_gderiv()
-            Bcc += dG + dg
+            Bcc -= self.Gcc/(beta) # derivative from factors of 1/beta
+            if gderiv:
+                dg,dG = self._g_nocc_gderiv()
+                Bcc += dG + dg
+            else:
+                Bcc += self._g_gderiv_approx()
 
             # E = beta*dG/dbeta + G + mu*N
             E1 = beta*B1 + mu*N1 + self.G1
@@ -169,7 +172,7 @@ class ccsd(object):
             self.S1 = -beta*(self.G1 - self.E1 + mu*self.N1)
             self.Scc = self.S - self.S0 - self.S1
 
-    def _u_ft_ESN(self,L1=None,L2=None):
+    def _u_ft_ESN(self,L1=None,L2=None,gderiv=True):
             # temperature info
             T = self.T
             beta = 1.0 / (T + 1e-12)
@@ -198,8 +201,11 @@ class ccsd(object):
 
             # compute other contributions to CC derivative
             Bcc -= self.Gcc/(beta)
-            dg,dG = self._u_nocc_gderiv()
-            Bcc += dG + dg
+            if gderiv:
+                dg,dG = self._u_nocc_gderiv()
+                Bcc += dG + dg
+            else:
+                Bcc += self._u_gderiv_approx()
 
             # E = beta*dG/dbeta + G + mu*N
             E1 = beta*B1 + mu*N1 + self.G1
@@ -740,14 +746,6 @@ class ccsd(object):
         ea,eb = self.sys.u_energies_tot()
         na = ea.shape[0]
         nb = eb.shape[0]
-
-        # compute requisite memory
-        #n = na + nb
-        #mem1e = 6*n*n + 3*ng*n*n
-        #mem2e = 3*n*n*n*n + 5*ng*n*n*n*n
-        #mem_mb = (mem1e + mem2e)*8.0/1024.0/1024.0
-        #if self.iprint > 0:
-        #    print('  FT-CCSD will use %f mb' % mem_mb)
 
         # get 0th and 1st order contributions
         En = self.sys.const_energy()
@@ -1471,6 +1469,80 @@ class ccsd(object):
         dG += A1g + A2g
 
         return dg,dG
+
+    def _g_gderiv_approx(self):
+        # temperature info
+        T = self.T
+        beta = 1.0 / (T + 1e-12)
+        mu = self.mu
+
+        # get energies and occupation numbers
+        en = self.sys.g_energies_tot()
+        fo = ft_utils.ff(beta, en, mu)
+        fv = ft_utils.ffv(beta, en, mu)
+
+        ng = self.ngrid
+        tf = ng - 1
+        if self.athresh > 0.0:
+            athresh = self.athresh
+            focc = [x for x in fo if x > athresh]
+            fvir = [x for x in fv if x > athresh]
+            iocc = [i for i,x in enumerate(fo) if x > athresh]
+            ivir = [i for i,x in enumerate(fv) if x > athresh]
+            F,I = cc_utils.ft_active_integrals(
+                    self.sys, en, focc, fvir, iocc, ivir)
+        else:
+            F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
+        t2_temp = 0.25*self.T2[tf] + 0.5*einsum('ai,bj->abij',self.T1[tf],self.T1[tf])
+        Es1 = einsum('ai,ia->',self.T1[tf],F.ov)
+        Es2 = einsum('abij,ijab->',t2_temp,I.oovv)
+        return (Es1 + Es2)/beta
+
+    def _u_gderiv_approx(self):
+        # temperature info
+        T = self.T
+        beta = 1.0 / (T + 1e-12)
+        mu = self.mu
+
+        # get energies and occupation numbers
+        en = self.sys.g_energies_tot()
+        ea,eb = self.sys.u_energies_tot()
+        na = ea.shape[0]
+        nb = eb.shape[0]
+
+        ng = self.ngrid
+        tf = ng - 1
+        if self.athresh > 0.0:
+            athresh = self.athresh
+            foa = ft_utils.ff(beta, ea, mu)
+            fva = ft_utils.ffv(beta, ea, mu)
+            fob = ft_utils.ff(beta, eb, mu)
+            fvb = ft_utils.ffv(beta, eb, mu)
+            focca = [x for x in foa if x > athresh]
+            fvira = [x for x in fva if x > athresh]
+            iocca = [i for i,x in enumerate(foa) if x > athresh]
+            ivira = [i for i,x in enumerate(fva) if x > athresh]
+            foccb = [x for x in fob if x > athresh]
+            fvirb = [x for x in fvb if x > athresh]
+            ioccb = [i for i,x in enumerate(fob) if x > athresh]
+            ivirb = [i for i,x in enumerate(fvb) if x > athresh]
+            Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
+                    self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
+        else:
+            Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
+        T1a,T1b = self.T1
+        T2aa,T2ab,T2bb = self.T2
+        t2aa_temp = 0.25*T2aa[tf] + 0.5*einsum('ai,bj->abij',T1a[tf],T1a[tf])
+        t2bb_temp = 0.25*T2bb[tf] + 0.5*einsum('ai,bj->abij',T1b[tf],T1b[tf])
+        t2ab_temp = T2ab[tf] + einsum('ai,bj->abij',T1a[tf],T1b[tf])
+
+        Es1 = einsum('ai,ia->',T1a[tf],Fa.ov)
+        Es1 += einsum('ai,ia->',T1b[tf],Fb.ov)
+        Es2 = einsum('abij,ijab->',t2aa_temp,Ia.oovv)
+        Es2 += einsum('abij,ijab->',t2ab_temp,Iabab.oovv)
+        Es2 += einsum('abij,ijab->',t2bb_temp,Ib.oovv)
+
+        return (Es1 + Es2) / beta
 
     def _g_ft_1rdm(self):
         # temperature info
