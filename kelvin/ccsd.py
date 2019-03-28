@@ -606,14 +606,6 @@ class ccsd(object):
         G = self.G
         g = self.g
 
-        # compute requisite memory
-        #n = en.shape[0]
-        #mem1e = 6*n*n + 3*ng*n*n
-        #mem2e = 3*n*n*n*n + 5*ng*n*n*n*n
-        #mem_mb = (mem1e + mem2e)*8.0/1024.0/1024.0
-        #if self.iprint > 0:
-        #    print('  FT-CCSD will use %f mb' % mem_mb)
-
         if not self.finite_T:
             # create energies in spin-orbital basis
             eo,ev = self.sys.g_energies()
@@ -855,14 +847,6 @@ class ccsd(object):
         fo = ft_utils.ff(beta, en, mu)
         fv = ft_utils.ffv(beta, en, mu)
 
-        # compute requisite memory
-        #n = en.shape[0]
-        #mem1e = 6*n*n + 3*ng*n*n
-        #mem2e = 3*n*n*n*n + 5*ng*n*n*n*n
-        #mem_mb = (mem1e + mem2e)*8.0/1024.0/1024.0
-        #if self.iprint > 0:
-        #    print('  FT-CCSD will use %f mb' % mem_mb)
-
         En = self.sys.const_energy()
         g0 = ft_utils.GP0(beta, en, mu)
         E0 = ft_mp.mp0(g0) + En
@@ -906,21 +890,6 @@ class ccsd(object):
             D2 = en[:,None,None,None] + en[None,:,None,None] \
                     - en[None,None,:,None] - en[None,None,None,:]
 
-        #if L2 is None:
-        #    # Use T^{\dagger} as a guess for Lambda
-        #    if self.singles:
-        #        #L1old = numpy.transpose(self.T1,(0,2,1))
-        #        L1old = numpy.zeros((ng,no,nv))
-        #    else:
-        #        L1old = numpy.zeros(self.T1.shape)
-        #    #L2old = numpy.transpose(self.T2,(0,3,4,1,2))
-        #    L2old = numpy.zeros((ng,no,no,nv,nv))
-        #else:
-        #    L2old = L2
-        #    if L1 is None:
-        #        L1old = numpy.zeros(self.T1.shape)
-        #    else:
-        #        L1old = L1
         if L2 is None and L1 is None:
             if self.singles:
                 L1old,L2old = ft_cc_equations.ccsd_lambda_guess(F,I,self.T1,beta,ng)
@@ -1159,29 +1128,6 @@ class ccsd(object):
             - eb[None,None,:,None] - eb[None,None,None,:]
 
         Fa,Fb,Ia,Ib,Iabab = cc_utils.u_ft_d_integrals(self.sys, ea, eb, foa, fva, fob, fvb, dveca, dvecb)
-        #T1aold,T1bold = self.T1
-        #T2aaold,T2abold,T2bbold = self.T2
-        #L1aold,L1bold = self.L1
-        #L2aaold,L2abold,L2bbold = self.L2
-
-        #Eterm = ft_cc_energy.ft_ucc_energy(T1aold,T1bold,T2aaold,T2abold,T2bbold,
-        #    Fa.ov,Fb.ov,Ia.oovv,Ib.oovv,Iabab.oovv,g,beta)
-
-        #T1t,T2t = ft_cc_equations.uccsd_stanton(Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,
-        #        T2aaold,T2abold,T2bbold,D1a,D1b,D2aa,D2ab,D2bb,ti,ng,G)
-
-        #A1a = (1.0/beta)*einsum('via,vai->v',L1aold, T1t[0])
-        #A1b = (1.0/beta)*einsum('via,vai->v',L1bold, T1t[1])
-        #A2a = (1.0/beta)*0.25*einsum('vijab,vabij->v',L2aaold, T2t[0])
-        #A2b = (1.0/beta)*0.25*einsum('vijab,vabij->v',L2bbold, T2t[2])
-        #A2ab = (1.0/beta)*einsum('vijab,vabij->v',L2abold, T2t[1])
-
-        #A2g = einsum('v,v->',A2a,g)
-        #A2g += einsum('v,v->',A2ab,g)
-        #A2g += einsum('v,v->',A2b,g)
-        #A1g = einsum('v,v->',A1a,g)
-        #A1g += einsum('v,v->',A1b,g)
-        #der_cc = Eterm + A1g + A2g
         A1 = (1.0/beta)*einsum('ia,ai->', self.dia[0], Fa.vo)
         A1 += (1.0/beta)*einsum('ia,ai->', self.dia[1], Fb.vo)
         A1 += (1.0/beta)*einsum('ba,ab->', self.dba[0], Fa.vv)
