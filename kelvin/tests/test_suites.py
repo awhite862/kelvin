@@ -3,6 +3,7 @@ import unittest
 from kelvin.tests import test_cc_utils
 from kelvin.tests import test_ccsd
 from kelvin.tests import test_ft_cc_ampl
+from kelvin.tests import test_ft_cc_relden
 from kelvin.tests import test_ft_ccsd
 from kelvin.tests import test_ft_ccsd_rdm
 from kelvin.tests import test_ft_deriv
@@ -43,6 +44,11 @@ def full_suite():
 
     suite.addTest(test_ft_cc_ampl.FTamplEquationsTest("test_ccsd_stanton"))
     suite.addTest(test_ft_cc_ampl.FTamplEquationsTest("test_uccsd"))
+
+    suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_Be_gen"))
+    suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_Be_gen_prop"))
+    suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_Be_gen_active"))
+    suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_Be_gen_prop_active"))
 
     suite.addTest(test_ft_ccsd.FTCCSDTest("test_2orb"))
     suite.addTest(test_ft_ccsd.FTCCSDTest("test_Be"))
@@ -166,6 +172,11 @@ def default_suite():
 
     suite.addTest(test_ft_cc_ampl.FTamplEquationsTest("test_ccsd_stanton"))
     suite.addTest(test_ft_cc_ampl.FTamplEquationsTest("test_uccsd"))
+
+    suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_Be_gen"))
+    suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_Be_gen_prop"))
+    #suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_Be_gen_active"))
+    #suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_Be_gen_prop_active"))
 
     suite.addTest(test_ft_ccsd.FTCCSDTest("test_2orb"))
     suite.addTest(test_ft_ccsd.FTCCSDTest("test_Be"))

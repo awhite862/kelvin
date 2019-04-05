@@ -78,6 +78,21 @@ class scf_system(system):
         d2 = -numpy.einsum('ijij,i,j->',eri,fov,fo)
         return (d1 + d2)
 
+    def g_mp1_den(self):
+        assert(self.T > 0.0)
+        beta = 1.0 / (self.T + 1e-12)
+        en = self.g_energies_tot()
+        fo = ft_utils.ff(beta, en, self.mu)
+        fv = ft_utils.ffv(beta, en, self.mu)
+        fov = fo*fv
+        hcore = self.mf.get_hcore(self.mf.mol)
+        hmo = scf_utils.mo_tran_1e(self.mf, hcore)
+        eri = self.g_aint_tot()
+
+        d1 = -numpy.einsum('ii,i->i',hmo - numpy.diag(en),fov)
+        d2 = -numpy.einsum('ijij,i,j->i',eri,fov,fo)
+        return beta*(d1 + d2)
+
     # TODO: Do this with Fock build
     def u_d_mp1(self,dveca,dvecb):
         assert(self.T > 0.0)
@@ -177,6 +192,14 @@ class scf_system(system):
         fo = ft_utils.ff(beta, en, self.mu)
         fv = ft_utils.ffv(beta, en, self.mu)
         return scf_utils.get_mo_d_ft_fock(self.mf, fo, fv, dvec)
+
+    def g_fock_d_den(self):
+        beta = 1.0 / (self.T + 1e-12)
+        en = self.g_energies_tot()
+        fo = ft_utils.ff(beta, en, self.mu)
+        fv = ft_utils.ffv(beta, en, self.mu)
+        I = self.g_aint_tot()
+        return numpy.einsum('piqi,i->pqi',I,fo*fv)
 
     def r_hcore(self):
         hcore = self.mf.get_hcore()
