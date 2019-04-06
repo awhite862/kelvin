@@ -4,6 +4,9 @@ from pyscf import gto, scf
 from cqcpy import utils
 from kelvin.ccsd import ccsd
 from kelvin.scf_system import scf_system
+from kelvin.ueg_system import ueg_system
+from kelvin.ueg_scf_system import ueg_scf_system
+from kelvin.pueg_system import pueg_system
 from kelvin import scf_utils
 
 class FTCCReldenTest(unittest.TestCase):
@@ -162,6 +165,62 @@ class FTCCReldenTest(unittest.TestCase):
         diff = abs(out - ref)
         error = "Expected: {}  Actual: {}".format(ref,out)
         self.assertTrue(diff < thresh,error)
+
+    def test_pueg(self):
+        T = 0.5
+        mu = 0.2
+        L = 2*numpy.pi/numpy.sqrt(1.0)
+        norb = 19
+        cut = 1.2
+        damp = 0.2
+        mi = 50
+        ueg = pueg_system(T,L,cut,mu=mu,norb=norb)
+        ccsdT = ccsd(ueg,T=T,mu=mu,iprint=0,max_iter=mi,damp=damp,ngrid=10)
+        ccsdT.run()
+        ccsdT.compute_ESN()
+        Nref = ccsdT.N
+        ccsdT._grel_ft_1rdm()
+        Nout = numpy.trace(ccsdT.r1rdm)
+        diff = abs(Nref - Nout)
+        error = "Expected: {}  Actual: {}".format(Nref,Nout)
+        self.assertTrue(diff < self.thresh,error)
+
+    def test_ueg_gen(self):
+        T = 0.5
+        mu = 0.1
+        L = 2*numpy.pi/numpy.sqrt(1.0)
+        norb = 7
+        cut = 1.2
+        damp = 0.2
+        mi = 50
+        ueg = ueg_system(T,L,cut,mu=mu,norb=norb,orbtype='g')
+        ccsdT = ccsd(ueg,T=T,mu=mu,iprint=0,max_iter=mi,damp=damp,ngrid=10)
+        ccsdT.run()
+        ccsdT.compute_ESN()
+        Nref = ccsdT.N
+        ccsdT._grel_ft_1rdm()
+        Nout = numpy.trace(ccsdT.r1rdm)
+        diff = abs(Nref - Nout)
+        error = "Expected: {}  Actual: {}".format(Nref,Nout)
+        self.assertTrue(diff < self.thresh,error)
+
+    def test_ueg_scf_gen(self):
+        T = 0.5
+        mu = 0.1
+        L = 2*numpy.pi/numpy.sqrt(1.0)
+        norb = 7
+        cut = 1.2
+        damp = 0.2
+        mi = 50
+        ueg = ueg_scf_system(T,L,cut,mu=mu,norb=norb,orbtype='g')
+        ccsdT = ccsd(ueg,T=T,mu=mu,iprint=0,max_iter=mi,damp=damp,ngrid=10)
+        ccsdT.run()
+        ccsdT.compute_ESN()
+        Nref = ccsdT.N
+        ccsdT._grel_ft_1rdm()
+        Nout = numpy.trace(ccsdT.r1rdm)
+        diff = abs(Nref - Nout)
+        error = "Expected: {}  Actual: {}".format(Nref,Nout)
 
 if __name__ == '__main__':
     unittest.main()

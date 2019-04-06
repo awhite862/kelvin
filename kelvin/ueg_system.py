@@ -155,6 +155,19 @@ class ueg_system(system):
             print("WARNING: Derivative of MP1 energy is zero at OK")
             return 0.0
 
+    def g_mp1_den(self):
+        if self.T > 0:
+            V = self.g_aint_tot()
+            beta = 1.0 / (self.T + 1e-12)
+            en = self.g_energies_tot()
+            fo = ft_utils.ff(beta, en, self.mu)
+            fv = ft_utils.ffv(beta, en, self.mu)
+            vec = fo*fv
+            return -beta*einsum('ijij,i,j->i',V,vec,fo)
+        else:
+            print("WARNING: Derivative of MP1 energy is zero at OK")
+            return numpy.zeros(self.g_energies_tot.shape)
+
     def r_energies(self):
         if self.T > 0.0:
             raise Exception("Undefined ov blocks at FT")
@@ -405,6 +418,22 @@ class ueg_system(system):
         V = self.g_aint_tot()
         JK = einsum('prqs,rs->pq',V,den)
         return -JK
+
+    def g_fock_d_den(self):
+        d = self.g_energies_tot()
+        n = d.shape[0]
+        if self.T == 0.0:
+            print("WARNING: Occupations derivatives are zero at 0K")
+            return numpy.zeros((n,n))
+        beta = 1.0 / (self.T + 1e-12)
+        fo = ft_utils.ff(beta, d, self.mu)
+        fv = ft_utils.ffv(beta, d, self.mu)
+        vec = fo*fv
+        #I = numpy.identity(n)
+        #den = einsum('pi,i,qi->pq',I,vec,I)
+        V = self.g_aint_tot()
+        JK = einsum('piqi,i->pqi',V,vec)
+        return JK
 
     def r_hcore(self):
         return numpy.diag(self.r_energies_tot())
