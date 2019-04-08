@@ -142,6 +142,26 @@ class ueg_system(system):
             print("WARNING: Derivative of MP1 energy is zero at OK")
             return 0.0
 
+    def u_mp1_den(self):
+        if self.T > 0:
+            Va,Vb,Vabab = self.u_aint_tot()
+            beta = 1.0 / (self.T + 1e-12)
+            ea,eb = self.u_energies_tot()
+            foa = ft_utils.ff(beta, ea, self.mu)
+            fva = ft_utils.ffv(beta, ea, self.mu)
+            veca = foa*fva
+            fob = ft_utils.ff(beta, eb, self.mu)
+            fvb = ft_utils.ffv(beta, eb, self.mu)
+            vecb = fob*fvb
+            Da = -beta*einsum('ijij,i,j->i',Va,veca,foa)
+            Db = -beta*einsum('ijij,i,j->i',Vb,vecb,fob)
+            Da -= beta*einsum('ijij,i,j->i',Vabab,veca,fob)
+            Db -= beta*einsum('ijij,i,j->j',Vabab,foa,vecb)
+            return Da,Db
+        else:
+            print("WARNING: Derivative of MP1 energy is zero at OK")
+            return numpy.zeros(ea.shape),numpy.zeros(eb.shape)
+
     def g_d_mp1(self,dvec):
         if self.T > 0:
             V = self.g_aint_tot()
@@ -400,8 +420,33 @@ class ueg_system(system):
         JKa = einsum('prqs,rs->pq',Va,dena)
         JKa += einsum('prqs,rs->pq',Vabab,denb)
         JKb = einsum('prqs,rs->pq',Vb,denb)
-        JKb += einsum('prqs,rs->pq',Vabab,dena)
+        JKb += einsum('prqs,pq->rs',Vabab,dena)
         return -JKa,-JKb
+
+    def u_fock_d_den(self):
+        da,db = self.u_energies_tot()
+        na = da.shape[0]
+        nb = db.shape[0]
+        if self.T == 0.0:
+            print("WARNING: Occupations derivatives are zero at 0K")
+            return numpy.zeros((na,na)),numpy.zeros((na,na))
+        beta = 1.0 / (self.T + 1e-12)
+        foa = ft_utils.ff(beta, da, self.mu)
+        fva = ft_utils.ffv(beta, da, self.mu)
+        veca = foa*fva
+        fob = ft_utils.ff(beta, db, self.mu)
+        fvb = ft_utils.ffv(beta, db, self.mu)
+        vecb = fob*fvb
+        #Ia = numpy.identity(na)
+        #Ib = numpy.identity(nb)
+        #dena = einsum('pi,i,qi->pq',Ia,veca,Ia)
+        #denb = einsum('pi,i,qi->pq',Ib,vecb,Ib)
+        Va,Vb,Vabab = self.u_aint_tot()
+        JKaa = einsum('piqi,i->pqi',Va,veca)
+        JKab = einsum('piqi,i->pqi',Vabab,vecb)
+        JKbb = einsum('piqi,i->pqi',Vb,vecb)
+        JKba = einsum('iris,i->rsi',Vabab,veca)
+        return JKaa,JKab,JKbb,JKba
 
     def g_fock_d_tot(self,dvec):
         d = self.g_energies_tot()

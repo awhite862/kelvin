@@ -221,6 +221,45 @@ class FTCCReldenTest(unittest.TestCase):
         Nout = numpy.trace(ccsdT.r1rdm)
         diff = abs(Nref - Nout)
         error = "Expected: {}  Actual: {}".format(Nref,Nout)
+        self.assertTrue(diff < self.thresh,error)
+
+    def test_ueg(self):
+        T = 0.5
+        mu = 0.1
+        L = 2*numpy.pi/numpy.sqrt(1.0)
+        norb = 7
+        cut = 1.2
+        damp = 0.2
+        mi = 50
+        econv = 1e-12
+        thresh = 1e-12
+        ueg = ueg_system(T,L,cut,mu=mu,norb=norb,orbtype='g')
+        ccsdT = ccsd(ueg,T=T,mu=mu,iprint=0,max_iter=mi,econv=econv,damp=damp,ngrid=10)
+        ccsdT.run()
+        ccsdT._grel_ft_1rdm()
+
+        ueg = ueg_system(T,L,cut,mu=mu,norb=norb,orbtype='u')
+        uccsdT = ccsd(ueg,T=T,mu=mu,iprint=0,max_iter=mi,econv=econv,damp=damp,ngrid=10)
+        uccsdT.run()
+        uccsdT._urel_ft_1rdm()
+
+        # compare relaxed 1rdm
+        daout,dbout = uccsdT.r1rdm
+        naout,nbout = uccsdT.n1rdm
+        dref = ccsdT.r1rdm
+        nref = ccsdT.n1rdm
+        daref = dref[:norb,:norb]
+        dbref = dref[norb:,norb:]
+        naref = nref[:norb,:norb]
+        nbref = nref[norb:,norb:]
+        diffa = numpy.linalg.norm(daref - daout)/numpy.sqrt(daref.size)
+        diffb = numpy.linalg.norm(dbref - dbout)/numpy.sqrt(dbref.size)
+        self.assertTrue(diffa < thresh, "Error in relaxed alpha rdm: {}".format(diffa))
+        self.assertTrue(diffb < thresh, "Error in relaxed beta rdm: {}".format(diffb))
+        diffa = numpy.linalg.norm(naref - naout)/numpy.sqrt(naref.size)
+        diffb = numpy.linalg.norm(nbref - nbout)/numpy.sqrt(nbref.size)
+        self.assertTrue(diffa < thresh, "Error in normal-ordered alpha rdm: {}".format(diffa))
+        self.assertTrue(diffb < thresh, "Error in normal-ordered beta rdm: {}".format(diffb))
 
 if __name__ == '__main__':
     unittest.main()
