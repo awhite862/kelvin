@@ -161,7 +161,7 @@ def ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G, beta, ng, ti,
     if iprint > 0:
         print("Total {} time: {:.4f} s".format(method,(tend - tbeg)))
 
-    return Eold,T1,T2
+    return Eold,T1old,T2old
 
 def ft_cc_iter_extrap(method, F, I, D1, D2, g, G, beta, ng, ti,
         iprint, conv_options):

@@ -91,6 +91,7 @@ class scf_system(system):
 
         d1 = -numpy.einsum('ii,i->i',hmo - numpy.diag(en),fov)
         d2 = -numpy.einsum('ijij,i,j->i',eri,fov,fo)
+        na = en.shape[0]//2
         return beta*(d1 + d2)
 
     # TODO: Do this with Fock build
@@ -101,8 +102,8 @@ class scf_system(system):
         hcore = self.mf.get_hcore(self.mf.mol)
         ha,hb = scf_utils.u_mo_tran_1e(self.mf, hcore)
         foa = ft_utils.ff(beta, ea, self.mu)
-        fva = ft_utils.ffv(beta, eb, self.mu)
-        fob = ft_utils.ff(beta, ea, self.mu)
+        fva = ft_utils.ffv(beta, ea, self.mu)
+        fob = ft_utils.ff(beta, eb, self.mu)
         fvb = ft_utils.ffv(beta, eb, self.mu)
         fova = dveca*foa*fva
         fovb = dvecb*fob*fvb
@@ -114,6 +115,27 @@ class scf_system(system):
         d2 -= numpy.einsum('ijij,i,j->',Iabab,fova,fob)
         d2 -= numpy.einsum('ijij,i,j->',Iabab,foa,fovb)
         return (d1 + d2)
+
+    def u_mp1_den(self):
+        assert(self.T > 0.0)
+        beta = 1.0 / (self.T + 1e-12)
+        ea,eb = self.u_energies_tot()
+        hcore = self.mf.get_hcore(self.mf.mol)
+        ha,hb = scf_utils.u_mo_tran_1e(self.mf, hcore)
+        foa = ft_utils.ff(beta, ea, self.mu)
+        fva = ft_utils.ffv(beta, ea, self.mu)
+        fob = ft_utils.ff(beta, eb, self.mu)
+        fvb = ft_utils.ffv(beta, eb, self.mu)
+        fova = foa*fva
+        fovb = fob*fvb
+        Ia,Ib,Iabab = self.u_aint_tot()
+        d1a = -numpy.einsum('ii,i->i',ha - numpy.diag(ea),fova)
+        d1b = -numpy.einsum('ii,i->i',hb - numpy.diag(eb),fovb)
+        d2a = -numpy.einsum('ijij,i,j->i',Ia,fova,foa)
+        d2b = -numpy.einsum('ijij,i,j->i',Ib,fovb,fob)
+        d2a -= numpy.einsum('ijij,i,j->i',Iabab,fova,fob)
+        d2b -= numpy.einsum('ijij,i,j->j',Iabab,foa,fovb)
+        return beta*(d1a + d2a),beta*(d1b + d2b)
 
     def r_energies(self):
         if self.T > 0.0:
@@ -185,6 +207,22 @@ class scf_system(system):
         fob = ft_utils.ff(beta, eb, self.mu)
         fvb = ft_utils.ffv(beta, eb, self.mu)
         return scf_utils.u_mo_d_ft_fock(self.mf, foa, fva, fob, fvb, dveca, dvecb)
+
+    def u_fock_d_den(self):
+        beta = 1.0 / (self.T + 1e-12)
+        ea,eb = self.u_energies_tot()
+        foa = ft_utils.ff(beta, ea, self.mu)
+        fva = ft_utils.ffv(beta, ea, self.mu)
+        fob = ft_utils.ff(beta, eb, self.mu)
+        fvb = ft_utils.ffv(beta, eb, self.mu)
+        veca = foa*fva
+        vecb = fob*fvb
+        Va,Vb,Vabab = self.u_aint_tot()
+        JKaa = numpy.einsum('piqi,i->pqi',Va,veca)
+        JKab = numpy.einsum('piqi,i->pqi',Vabab,vecb)
+        JKbb = numpy.einsum('piqi,i->pqi',Vb,vecb)
+        JKba = numpy.einsum('iris,i->rsi',Vabab,veca)
+        return JKaa,JKab,JKbb,JKba
 
     def g_fock_d_tot(self,dvec):
         beta = 1.0 / (self.T + 1e-12)

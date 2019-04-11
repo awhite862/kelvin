@@ -212,9 +212,9 @@ def get_ao_ft_fock(mf, fo):
         d = (pa,pb)
         h1 = mf.get_hcore(mf.mol)
         if pbc:
-            veff = mf.get_veff(mf.cell,p)
+            veff = mf.get_veff(mf.cell,[pa,pb])
         else:
-            veff = mf.get_veff(mf.mol,p)
+            veff = mf.get_veff(mf.mol,[pa,pb])
         #veff = mf.get_veff(mf.mol,d)
         fTa = h1 + veff[0]
         fTb = h1 + veff[1]
@@ -252,10 +252,10 @@ def get_u_ft_fock(mf, foa, fob):
         pbc = True
     except AttributeError:
         pbc = False
+    h1 = mf.get_hcore(mf.mol)
     if len(mf.mo_occ.shape) == 1:
         mo = mf.mo_coeff
         p = numpy.dot(numpy.dot(mo,numpy.diag(foa)),mo.T)
-        h1 = mf.get_hcore(mf.mol)
         if pbc:
             veff = mf.get_veff(mf.cell,p)
         else:
@@ -292,10 +292,10 @@ def get_mo_ft_fock(mf, fo):
         pbc = True
     except AttributeError:
         pbc = False
+    h1 = mf.get_hcore(mf.mol)
     if len(mf.mo_occ.shape) == 1:
         mo = mf.mo_coeff
         p = numpy.dot(numpy.dot(mo,numpy.diag(fo[:n])),mo.T)
-        h1 = mf.get_hcore(mf.mol)
         if pbc:
             veff = mf.get_veff(mf.cell,p)
         else:

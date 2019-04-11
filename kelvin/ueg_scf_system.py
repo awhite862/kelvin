@@ -130,9 +130,6 @@ class ueg_scf_system(system):
             else:
                 Va,Vb,Vabab = self.u_aint()
                 beta = 1.0 / (self.T + 1e-12)
-                #ea,eb = self.u_energies_tot()
-                #foa = ft_utils.ff(beta, ea, self.mu)
-                #fob = ft_utils.ff(beta, eb, self.mu)
                 E1 = -0.5*numpy.einsum('ijij->',Va.oooo)
                 E1 -= 0.5*numpy.einsum('ijij->',Vb.oooo)
                 E1 -= numpy.einsum('ijij->',Vabab.oooo)
@@ -169,6 +166,25 @@ class ueg_scf_system(system):
             print("WARNING: Derivative of MP1 energy is zero at OK")
             return 0.0
 
+    def u_mp1_den(self):
+        if self.T > 0:
+            Va,Vb,Vabab = self.u_aint_tot()
+            beta = 1.0 / (self.T + 1e-12)
+            ea,eb = self.u_energies_tot()
+            foa = ft_utils.ff(beta, ea, self.mu)
+            fva = ft_utils.ffv(beta, ea, self.mu)
+            veca = foa*fva
+            fob = ft_utils.ff(beta, eb, self.mu)
+            fvb = ft_utils.ffv(beta, eb, self.mu)
+            vecb = fob*fvb
+            Da = beta*einsum('ijij,i,j->i',Va,veca,foa)
+            Db = beta*einsum('ijij,i,j->i',Vb,vecb,fob)
+            Da += beta*einsum('ijij,i,j->i',Vabab,veca,fob)
+            Db += beta*einsum('ijij,i,j->j',Vabab,foa,vecb)
+            return Da,Db
+        else:
+            print("WARNING: Derivative of MP1 energy is zero at OK")
+
     def g_d_mp1(self,dvec):
         if self.T > 0:
             V = self.g_aint_tot()
@@ -200,7 +216,6 @@ class ueg_scf_system(system):
             raise Exception("Undefined ov blocks at FT")
         if self.Na != self.Nb:
             raise Exception("UEG system is not restricted")
-        #d = self.basis.Es
         F = self.r_fock()
         na = int(self.Na)
         assert(na == int(self.Nb))
@@ -211,18 +226,13 @@ class ueg_scf_system(system):
         return (eo,ev)
 
     def u_energies(self):
-        #d = self.basis.Es
         fa,fb = self.u_fock()
         na = int(self.Na)
         nb = int(self.Nb)
-        #eoa = numpy.asarray(d[:na])
-        #eva = numpy.asarray(d[na:])
-        #eob = numpy.asarray(d[:nb])
-        #evb = numpy.asarray(d[nb:])
-        eoa = fa.oo.diagonal()#numpy.asarray(d[:na])
-        eva = fa.vv.diagonal()#numpy.asarray(d[na:])
-        eob = fb.oo.diagonal()#numpy.asarray(d[:nb])
-        evb = fb.vv.diagonal()#numpy.asarray(d[nb:])
+        eoa = fa.oo.diagonal()
+        eva = fa.vv.diagonal()
+        eob = fb.oo.diagonal()
+        evb = fb.vv.diagonal()
         if self.madelung == "orb":
             eoa -= self._mconst
             eob -= self._mconst
@@ -246,7 +256,6 @@ class ueg_scf_system(system):
         return (eo,ev)
 
     def r_energies_tot(self):
-        #return numpy.asarray(self.basis.Es)
         e = numpy.asarray(self.basis.Es)
         n = e.shape[0]
         V = self.r_int_tot()
@@ -256,12 +265,10 @@ class ueg_scf_system(system):
         return e
 
     def u_energies_tot(self):
-        #return self.basis.u_build_diag()
         e = self.r_energies_tot()
         return e,e.copy()
 
     def g_energies_tot(self):
-        #return self.basis.g_build_diag()
         ea,eb = self.u_energies_tot()
         return numpy.hstack((ea,eb))
     
@@ -269,9 +276,6 @@ class ueg_scf_system(system):
         if self.T > 0.0:
             raise Exception("Undefined ov blocks at FT")
         F = self.r_hcore()
-        #d = self.r_energies_tot()
-        #mu = self.mu
-        #n = d.shape[0]
         V = self.r_int_tot()
         Vd = V[numpy.ix_(numpy.arange(n),self.oidx,numpy.arange(n),self.oidx)]
         Vx = V[numpy.ix_(numpy.arange(n),self.oidx,self.oidx,numpy.arange(n))]
@@ -287,18 +291,8 @@ class ueg_scf_system(system):
             raise Exception("Undefined ov blocks at FT")
         F = self.r_hcore()
         n = F.shape[0]
-        #d = self.r_energies_tot()
-        #mu = self.mu
-        #n = d.shape[0]
-        #occ = []
-        #vir = []
-        #for p in range(n):
-        #    if d[p] < self.mu:
-        #        occ.append(p)
-        #    if d[p] > self.mu:
-        #        vir.append(p)
-        oidx = self.oidx#numpy.r_[occ]
-        vidx = self.vidx#numpy.r_[vir]
+        oidx = self.oidx
+        vidx = self.vidx
         V = self.r_int_tot()
         Vd = V[numpy.ix_(numpy.arange(n),oidx,numpy.arange(n),oidx)]
         Vx = V[numpy.ix_(numpy.arange(n),oidx,oidx,numpy.arange(n))]
@@ -315,19 +309,10 @@ class ueg_scf_system(system):
         if self.T > 0.0:
             raise Exception("Undefined ov blocks at FT")
         mu = self.mu
-        #d = self.g_energies_tot()
         F = self.g_hcore()
         n = F.shape[0]
-        #n = d.shape[0]
-        #occ = []
-        #vir = []
-        #for p in range(n):
-        #    if d[p] < self.mu:
-        #        occ.append(p)
-        #    if d[p] > self.mu:
-        #        vir.append(p)
-        goidx = self.goidx#numpy.r_[occ]
-        gvidx = self.gvidx#numpy.r_[vir]
+        goidx = self.goidx
+        gvidx = self.gvidx
         V = self.g_aint_tot()
         V = V[numpy.ix_(numpy.arange(n),goidx,numpy.arange(n),goidx)]
         F = F + einsum('piri->pr',V)
@@ -427,8 +412,31 @@ class ueg_scf_system(system):
         JKa = einsum('prqs,rs->pq',Va,dena)
         JKa += einsum('prqs,rs->pq',Vabab,denb)
         JKb = einsum('prqs,rs->pq',Vb,denb)
-        JKb += einsum('prqs,rs->pq',Vabab,dena)
+        JKb += einsum('prqs,pq->rs',Vabab,dena)
         return -JKa,-JKb
+
+    def u_fock_d_den(self):
+        da,db = self.u_energies_tot()
+        na = da.shape[0]
+        nb = db.shape[0]
+        if self.T == 0.0:
+            print("WARNING: Occupations derivatives are zero at 0K")
+            return numpy.zeros((n,n)),numpy.zeros((n,n))
+        beta = 1.0 / (self.T + 1e-12)
+        foa = ft_utils.ff(beta, da, self.mu)
+        fva = ft_utils.ffv(beta, da, self.mu)
+        veca = foa*fva
+        fob = ft_utils.ff(beta, db, self.mu)
+        fvb = ft_utils.ffv(beta, db, self.mu)
+        vecb = fob*fvb
+        #Ia = numpy.identity(na)
+        #Ib = numpy.identity(nb)
+        Va,Vb,Vabab = self.u_aint_tot()
+        JKaa = einsum('piqi,i->pqi',Va,veca)
+        JKab = einsum('piqi,i->pqi',Vabab,vecb)
+        JKbb = einsum('piqi,i->pqi',Vb,vecb)
+        JKba = einsum('iris,i->rsi',Vabab,veca)
+        return JKaa,JKab,JKbb,JKba
 
     def g_fock_d_tot(self,dvec):
         d = self.g_energies_tot()
@@ -456,8 +464,6 @@ class ueg_scf_system(system):
         fo = ft_utils.ff(beta, d, self.mu)
         fv = ft_utils.ffv(beta, d, self.mu)
         vec = fo*fv
-        #I = numpy.identity(n)
-        #den = einsum('pi,i,qi->pq',I,vec,I)
         V = self.g_aint_tot()
         JK = einsum('piqi,i->pqi',V,vec)
         return JK
@@ -471,28 +477,11 @@ class ueg_scf_system(system):
     def u_aint(self):
         if self.T > 0.0:
             raise Exception("Undefined ov blocks at FT")
-        #da,db = self.u_energies_tot()
-        #na = da.shape[0]
-        #nb = db.shape[0]
-        #occa = []
-        #vira = []
-        #for p in range(na):
-        #    if da[p] < self.mu:
-        #        occa.append(p)
-        #    if da[p] > self.mu:
-        #        vira.append(p)
-        #occb = []
-        #virb = []
-        #for p in range(nb):
-        #    if db[p] < self.mu:
-        #        occb.append(p)
-        #    if db[p] > self.mu:
-        #        virb.append(p)
         Va,Vb,Vabab = self.u_aint_tot()
-        oaidx = self.oidx#numpy.r_[occa]
-        vaidx = self.vidx#numpy.r_[vira]
-        obidx = self.oidx#numpy.r_[occb]
-        vbidx = self.vidx#numpy.r_[virb]
+        oaidx = self.oidx
+        vaidx = self.vidx
+        obidx = self.oidx
+        vbidx = self.vidx
 
         Vvvvv = Va[numpy.ix_(vaidx,vaidx,vaidx,vaidx)]
         Vvvvo = Va[numpy.ix_(vaidx,vaidx,vaidx,oaidx)] 
@@ -557,13 +546,6 @@ class ueg_scf_system(system):
             raise Exception("Undefined ov blocks at FT")
         d = self.g_energies_tot()
         n = d.shape[0]
-        #occ = []
-        #vir = []
-        #for p in range(n):
-        #    if d[p] < self.mu:
-        #        occ.append(p)
-        #    if d[p] > self.mu:
-        #        vir.append(p)
         V = self.g_aint_tot()
         Vvvvv = None
         Vvvvo = None
@@ -574,8 +556,8 @@ class ueg_scf_system(system):
         Vvooo = None
         Vooov = None
         Voooo = None
-        goidx = self.goidx#numpy.r_[occ]
-        gvidx = self.gvidx#numpy.r_[vir]
+        goidx = self.goidx
+        gvidx = self.gvidx
         if code == 0 or code == 1:
             Vvvvv = V[numpy.ix_(gvidx,gvidx,gvidx,gvidx)]
         if code == 0 or code == 2:                 

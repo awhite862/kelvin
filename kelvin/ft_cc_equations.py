@@ -169,7 +169,6 @@ def uccsd_stanton(Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,T2aaold,T2abold,T2bbold,
     T2ab = quadrature.int_tbar2(ng,T2ab,ti,D2ab,G)
     T2bb = quadrature.int_tbar2(ng,T2bb,ti,D2bb,G)
     t2 = time.time()
-    #print(" time: {} s".format(t2 - t1))
 
     return (T1a,T1b),(T2aa,T2ab,T2bb)
 
@@ -423,7 +422,9 @@ def uccsd_lambda_opt(Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,T2aaold,T2abold,T2bbold,
     """
     na = D1a.shape[0]
     nb = D1b.shape[0]
-    n = na + nb
+    nt,nva,noa = T1aold.shape
+    nt,nvb,nob = T1bold.shape
+    assert(nt == ng)
 
     # integrate old lambda amplitudes
     L1aint = quadrature.int_L1(ng,L1aold,ti,D1a,g,G)
@@ -433,11 +434,11 @@ def uccsd_lambda_opt(Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,T2aaold,T2abold,T2bbold,
     L2bbint = quadrature.int_L2(ng,L2bbold,ti,D2bb,g,G)
 
     # initialize lambda amplitudes
-    L1a = numpy.zeros((ng,na,na))
-    L1b = numpy.zeros((ng,nb,nb))
-    L2aa = numpy.zeros((ng,na,na,na,na))
-    L2ab = numpy.zeros((ng,na,nb,na,nb))
-    L2bb = numpy.zeros((ng,nb,nb,nb,nb))
+    L1a = numpy.zeros((ng,noa,nva))
+    L1b = numpy.zeros((ng,nob,nvb))
+    L2aa = numpy.zeros((ng,noa,noa,nva,nva))
+    L2ab = numpy.zeros((ng,noa,nob,nva,nvb))
+    L2bb = numpy.zeros((ng,nob,nob,nvb,nvb))
 
     # amplitude term
     t1 = time.time()

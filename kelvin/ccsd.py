@@ -1854,14 +1854,14 @@ class ccsd(object):
         # get integrals
         if self.athresh > 0.0:
             athresh = self.athresh
-            focca = [x for x in fo if x > athresh]
-            fvira = [x for x in fv if x > athresh]
-            iocca = [i for i,x in enumerate(fo) if x > athresh]
-            ivira = [i for i,x in enumerate(fv) if x > athresh]
-            foccb = [x for x in fo if x > athresh]
-            fvirb = [x for x in fv if x > athresh]
-            ioccb = [i for i,x in enumerate(fo) if x > athresh]
-            ivirb = [i for i,x in enumerate(fv) if x > athresh]
+            focca = [x for x in foa if x > athresh]
+            fvira = [x for x in fva if x > athresh]
+            iocca = [i for i,x in enumerate(foa) if x > athresh]
+            ivira = [i for i,x in enumerate(fva) if x > athresh]
+            foccb = [x for x in fob if x > athresh]
+            fvirb = [x for x in fvb if x > athresh]
+            ioccb = [i for i,x in enumerate(fob) if x > athresh]
+            ivirb = [i for i,x in enumerate(fvb) if x > athresh]
             nocca = len(focca)
             nvira = len(fvira)
             noccb = len(foccb)
@@ -1879,10 +1879,10 @@ class ccsd(object):
         sfob = numpy.sqrt(foccb)
         sfvb = numpy.sqrt(fvirb)
         if self.athresh > 0.0:
-            dsoa = fv[numpy.ix_(iocca)]
-            dsva = fo[numpy.ix_(ivira)]
-            dsob = fv[numpy.ix_(ioccb)]
-            dsvb = fo[numpy.ix_(ivirb)]
+            dsoa = fva[numpy.ix_(iocca)]
+            dsva = foa[numpy.ix_(ivira)]
+            dsob = fvb[numpy.ix_(ioccb)]
+            dsvb = fob[numpy.ix_(ivirb)]
         else:
             dsoa = fva
             dsva = foa
@@ -1901,7 +1901,7 @@ class ccsd(object):
         self.ndai = (einsum('ai,a,i->ai',self.dai[0],sfva,sfoa),
                 einsum('ai,a,i->ai',self.dai[1],sfvb,sfob))
         if self.athresh > 0.0:
-            self.n1rdm = [numpy.zeros((na,na)),numpy.zeros(nb,nb)]
+            self.n1rdm = [numpy.zeros((na,na)),numpy.zeros((nb,nb))]
             self.n1rdm[0][numpy.ix_(iocca,ivira)] += self.ndia[0]/beta
             self.n1rdm[0][numpy.ix_(ivira,ivira)] += self.ndba[0]/beta
             self.n1rdm[0][numpy.ix_(iocca,iocca)] += self.ndji[0]/beta
@@ -1930,7 +1930,7 @@ class ccsd(object):
             FdAIK = Fdbb[numpy.ix_(ivirb,ioccb)]
             FdABK = Fdbb[numpy.ix_(ivirb,ivirb)]
             FdIJK = Fdbb[numpy.ix_(ioccb,ioccb)]
-            FdIAk = Fdba[numpy.ix_(ioccb,ivirb)]
+            FdIAK = Fdbb[numpy.ix_(ioccb,ivirb)]
             FdAIk = Fdba[numpy.ix_(ivirb,ioccb)]
             FdABk = Fdba[numpy.ix_(ivirb,ivirb)]
             FdIJk = Fdba[numpy.ix_(ioccb,ioccb)]
@@ -2296,6 +2296,7 @@ class ccsd(object):
             D1b = D1b[numpy.ix_(ivirb,ioccb)]
             D2aa = D2aa[numpy.ix_(ivira,ivira,iocca,iocca)]
             D2ab = D2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)]
+            D2bb = D2bb[numpy.ix_(ivirb,ivirb,ioccb,ioccb)]
 
         T1a,T1b = self.T1
         T2aa,T2ab,T2bb = self.T2
