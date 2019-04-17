@@ -97,7 +97,7 @@ class FTCCReldenTest(unittest.TestCase):
         m.conv_tol = 1e-12
         Escf = m.scf()
         sys = scf_system(m,T,mu,orbtype='g')
-        ccsdT = ccsd(sys,T=T,mu=mu,damp=0.1,ngrid=160,athresh=1e-30,iprint=0)
+        ccsdT = ccsd(sys,T=T,mu=mu,damp=0.1,ngrid=80,athresh=1e-30,iprint=0)
         cc = ccsdT.run()
         ccsdT.compute_ESN() 
         Nref = ccsdT.N
@@ -111,7 +111,7 @@ class FTCCReldenTest(unittest.TestCase):
         T = 0.02
         mu = 0.0
         thresh = 5e-7
-        ngrid = 160
+        ngrid = 80
         mi = 100
         mol = gto.M(
             verbose = 0,
@@ -313,12 +313,12 @@ class FTCCReldenTest(unittest.TestCase):
         m.conv_tol = 1e-12
         Escf = m.scf()
         sys = scf_system(m,T,mu,orbtype='g')
-        ccsdT = ccsd(sys,T=T,mu=mu,damp=0.1,ngrid=160,athresh=1e-30,iprint=0,econv=ethresh,max_iter=mi)
+        ccsdT = ccsd(sys,T=T,mu=mu,damp=0.1,ngrid=80,athresh=1e-30,iprint=0,econv=ethresh,max_iter=mi)
         cc = ccsdT.run()
         ccsdT._grel_ft_1rdm()
 
         sys = scf_system(m,T,mu,orbtype='u')
-        uccsdT = ccsd(sys,T=T,mu=mu,damp=0.1,ngrid=160,athresh=1e-30,iprint=0,econv=ethresh,max_iter=mi)
+        uccsdT = ccsd(sys,T=T,mu=mu,damp=0.1,ngrid=80,athresh=1e-30,iprint=0,econv=ethresh,max_iter=mi)
         ucc = uccsdT.run()
         uccsdT._urel_ft_1rdm()
 

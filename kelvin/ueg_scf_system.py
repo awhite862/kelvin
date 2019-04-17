@@ -123,13 +123,15 @@ class ueg_scf_system(system):
                 ea,eb = self.u_energies_tot()
                 foa = ft_utils.ff(beta, ea, self.mu)
                 fob = ft_utils.ff(beta, eb, self.mu)
-                E1 = -0.5*einsum('ijij,i,j->',Va,foa,foa)
-                E1 -= 0.5*einsum('ijij,i,j->',Vb,fob,fob)
-                E1 -= einsum('ijij,i,j->',Vabab,foa,fob)
-                return E1
+                tmat = self.r_hcore()
+                E1_1 = einsum('ii,i->',tmat - numpy.diag(ea),foa)
+                E1_1 += einsum('ii,i->',tmat - numpy.diag(eb),fob)
+                E1_2 = 0.5*einsum('ijij,i,j->',Va,foa,foa)
+                E1_2 += 0.5*einsum('ijij,i,j->',Vb,fob,fob)
+                E1_2 += einsum('ijij,i,j->',Vabab,foa,fob)
+                return E1_2 + E1_1
             else:
                 Va,Vb,Vabab = self.u_aint()
-                beta = 1.0 / (self.T + 1e-12)
                 E1 = -0.5*numpy.einsum('ijij->',Va.oooo)
                 E1 -= 0.5*numpy.einsum('ijij->',Vb.oooo)
                 E1 -= numpy.einsum('ijij->',Vabab.oooo)
@@ -139,9 +141,12 @@ class ueg_scf_system(system):
                 V = self.g_aint_tot()
                 beta = 1.0 / (self.T + 1e-12)
                 en = self.g_energies_tot()
+                tmat = self.g_hcore()
                 fo = ft_utils.ff(beta, en, self.mu)
-                return -0.5*einsum('ijij,i,j->',
+                E1_1 = einsum('ii,i->',tmat - numpy.diag(en),fo)
+                E1_2 = 0.5*einsum('ijij,i,j->',
                     V,fo,fo)
+                return E1_2 + E1_1
             else:
                 V = self.g_aint()
                 return -0.5*einsum('ijij->',V.oooo)
@@ -157,10 +162,13 @@ class ueg_scf_system(system):
             fob = ft_utils.ff(beta, eb, self.mu)
             fvb = ft_utils.ffv(beta, eb, self.mu)
             vecb = dvecb*fob*fvb
-            D = +einsum('ijij,i,j->',Va,veca,foa)
-            D += einsum('ijij,i,j->',Vb,vecb,fob)
-            D += einsum('ijij,i,j->',Vabab,veca,fob)
-            D += einsum('ijij,i,j->',Vabab,foa,vecb)
+            tmat = self.r_hcore()
+            D = -einsum('ii,i->',tmat - numpy.diag(ea),veca)
+            D += -einsum('ii,i->',tmat - numpy.diag(eb),vecb)
+            D += -einsum('ijij,i,j->',Va,veca,foa)
+            D += -einsum('ijij,i,j->',Vb,vecb,fob)
+            D += -einsum('ijij,i,j->',Vabab,veca,fob)
+            D += -einsum('ijij,i,j->',Vabab,foa,vecb)
             return D
         else:
             print("WARNING: Derivative of MP1 energy is zero at OK")
@@ -177,10 +185,13 @@ class ueg_scf_system(system):
             fob = ft_utils.ff(beta, eb, self.mu)
             fvb = ft_utils.ffv(beta, eb, self.mu)
             vecb = fob*fvb
-            Da = beta*einsum('ijij,i,j->i',Va,veca,foa)
-            Db = beta*einsum('ijij,i,j->i',Vb,vecb,fob)
-            Da += beta*einsum('ijij,i,j->i',Vabab,veca,fob)
-            Db += beta*einsum('ijij,i,j->j',Vabab,foa,vecb)
+            tmat = self.r_hcore()
+            Da = -beta*einsum('ii,i->i',tmat - numpy.diag(ea),veca)
+            Db = -beta*einsum('ii,i->i',tmat - numpy.diag(eb),vecb)
+            Da += -beta*einsum('ijij,i,j->i',Va,veca,foa)
+            Db += -beta*einsum('ijij,i,j->i',Vb,vecb,fob)
+            Da += -beta*einsum('ijij,i,j->i',Vabab,veca,fob)
+            Db += -beta*einsum('ijij,i,j->j',Vabab,foa,vecb)
             return Da,Db
         else:
             print("WARNING: Derivative of MP1 energy is zero at OK")
@@ -193,7 +204,10 @@ class ueg_scf_system(system):
             fo = ft_utils.ff(beta, en, self.mu)
             fv = ft_utils.ffv(beta, en, self.mu)
             vec = dvec*fo*fv
-            return einsum('ijij,i,j->',V,vec,fo)
+            tmat = self.g_hcore()
+            E1_2 = -einsum('ijij,i,j->',V,vec,fo)
+            E1_1 = -einsum('ii,i->',tmat - numpy.diag(en),vec)
+            return E1_2 + E1_1
         else:
             print("WARNING: Derivative of MP1 energy is zero at OK")
             return 0.0
@@ -206,7 +220,10 @@ class ueg_scf_system(system):
             fo = ft_utils.ff(beta, en, self.mu)
             fv = ft_utils.ffv(beta, en, self.mu)
             vec = fo*fv
-            return beta*einsum('ijij,i,j->i',V,vec,fo)
+            tmat = self.g_hcore()
+            E1_2 = -beta*einsum('ijij,i,j->i',V,vec,fo)
+            E1_1 = -beta*einsum('ii,i->i',tmat - numpy.diag(en),vec)
+            return E1_1 + E1_2
         else:
             print("WARNING: Derivative of MP1 energy is zero at OK")
             return numpy.zeros((self.g_energies_tot().shape))

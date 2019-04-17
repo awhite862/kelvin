@@ -6,12 +6,12 @@ import numpy
 import sys
 
 T = 0.1
-mu = 0.10957
+mu = 0.1182968
 L = 2*numpy.pi/numpy.sqrt(1.0)
 ng = 40
-norb = 19
+norb = 7
 cut = 1.2
-damp = 0.2
+damp = 0.1
 mi = 50
 ueg = ueg_system(T,L,cut,mu=mu,norb=norb,orbtype='u')
 print('Norb: {}'.format(len(ueg.basis.basis)))
@@ -33,11 +33,11 @@ print("S: {}".format(ccsdT.S))
 print("N: {}".format(ccsdT.N))
 
 T = 0.1
-mu = 0.1413
+mu = 0.1182817
 L = 2*numpy.pi/numpy.sqrt(1.0)
-norb = 19
+norb = 7
 cut = 1.2
-damp = 0.2
+damp = 0.1
 mi = 50
 ueg = ueg_scf_system(T,L,cut,mu=mu,norb=norb,orbtype='u')
 print('Norb: {}'.format(len(ueg.basis.basis)))
