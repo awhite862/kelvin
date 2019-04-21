@@ -8,7 +8,9 @@ from cqcpy import utils
 from . import zt_mp
 from .system import system
 
-class hubbard_system(system):
+einsum = numpy.einsum
+
+class HubbardSystem(system):
     """Hubbard model system in a mean-field basis
 
     Attributes:
@@ -100,13 +102,6 @@ class hubbard_system(system):
         if self.T == 0:
             # orbital energies
             ea,eb = self.u_energies_tot()
-            #E0 = eao.sum() + ebo.sum()
-            #hcore = self.r_hcore()
-            #oa,va,ob,vb = self._u_get_ov()
-            #uao = self.ua[:,:self.na]
-            #ubo = self.ub[:,:self.na]
-            #pa = numpy.einsum('pi,qi->pq',uao,uao)
-            #pb = numpy.einsum('pi,qi->pq',ubo,ubo)
             Va,Vb,Vabab = self.u_aint_tot()
             foa = numpy.zeros(ea.shape)
             fob = numpy.zeros(eb.shape)
@@ -118,12 +113,6 @@ class hubbard_system(system):
             E1 -= 0.5*numpy.einsum('ijij,i,j->',Vb,fob,fob)
             E1 -= numpy.einsum('ijij,i,j->',Vabab,foa,fob)
             Fa,Fb = self.u_fock()
-            #Ta = self.model.get_tmatS()
-            #Tb = Ta
-            #Ta = numpy.einsum('ij,ip,jq->pq',Ta,self.ua,self.ua)
-            #Tb = numpy.einsum('ij,ip,jq->pq',Tb,self.ub,self.ub)
-            #EHf = 0.5*(Ta[0,0] + Fa.oo[0,0])
-            #EHf += 0.5*(Tb[0,0] + Fb.oo[0,0])
             Fao = Fa.oo - numpy.diag(self.ea[:self.na])
             Fbo = Fb.oo - numpy.diag(self.eb[:self.nb])
             E1 += numpy.einsum('ii->',Fao)
@@ -144,6 +133,45 @@ class hubbard_system(system):
             E1 += numpy.einsum('ii,i->',Fao,foa)
             E1 += numpy.einsum('ii,i->',Fbo,fob)
             return E1
+
+    def u_d_mp1(self,dveca,dvecb):
+        if self.T > 0:
+            Va,Vb,Vabab = self.u_aint_tot()
+            beta = 1.0 / (self.T + 1e-12)
+            ea,eb = self.u_energies_tot()
+            foa = ft_utils.ff(beta, ea, self.mu)
+            fva = ft_utils.ffv(beta, ea, self.mu)
+            veca = dveca*foa*fva
+            fob = ft_utils.ff(beta, eb, self.mu)
+            fvb = ft_utils.ffv(beta, eb, self.mu)
+            vecb = dvecb*fob*fvb
+            Fa,Fb = self.u_fock_tot()
+            D = -einsum('ii,i->',Fa - numpy.diag(ea),veca)
+            D += -einsum('ii,i->',Fb - numpy.diag(eb),vecb)
+            D += einsum('ijij,i,j->',Va,veca,foa)
+            D += einsum('ijij,i,j->',Vb,vecb,fob)
+            D += einsum('ijij,i,j->',Vabab,veca,fob)
+            D += einsum('ijij,i,j->',Vabab,foa,vecb)
+            Fa,Fb = self.u_fock_d_tot(dveca,dvecb)
+            D += einsum('ii,i->',Fa,foa)
+            D += einsum('ii,i->',Fb,fob)
+            return D
+        else:
+            print("WARNING: Derivative of MP1 energy is zero at OK")
+            return 0.0
+
+    def g_d_mp1(self,dvec):
+        if self.T > 0:
+            V = self.g_aint_tot()
+            beta = 1.0 / (self.T + 1e-12)
+            en = self.g_energies_tot()
+            fo = ft_utils.ff(beta, en, self.mu)
+            fv = ft_utils.ffv(beta, en, self.mu)
+            vec = dvec*fo*fv
+            return -einsum('ijij,i,j->',V,vec,fo)
+        else:
+            print("WARNING: Derivative of MP1 energy is zero at OK")
+            return 0.0
 
     def r_energies(self):
         raise Exception("Restricted energies are not definted")
@@ -310,8 +338,52 @@ class hubbard_system(system):
         Fb += numpy.einsum('ij,ip,jq->pq',Tb,self.ub,self.ub)
         return Fa,Fb
 
-    #def u_fock_d_tot(self,dveca,dvecb):
-    #def g_fock_d_tot(self,dvec):
+    def u_fock_d_tot(self,dveca,dvecb):
+        Ta = self.model.get_tmatS()
+        Tb = Ta
+        da,db = self.u_energies_tot()
+        na = da.shape[0]
+        nb = db.shape[0]
+        if self.T == 0.0:
+            print("WARNING: Occupation derivatives are zero at 0K")
+            return numpy.zeros((na,na)),numpy.zeros((nb,nb))
+        beta = 1.0 / (self.T + 1e-12)
+        foa = ft_utils.ff(beta, da, self.mu)
+        fob = ft_utils.ff(beta, db, self.mu)
+        fva = ft_utils.ffv(beta, da, self.mu)
+        fvb = ft_utils.ffv(beta, db, self.mu)
+        veca = dveca*foa*fva
+        vecb = dvecb*fob*fvb
+        Ia = numpy.identity(na)
+        Ib = numpy.identity(nb)
+        dena = numpy.einsum('pi,i,qi->pq',Ia,veca,Ia)
+        denb = numpy.einsum('pi,i,qi->pq',Ib,vecb,Ib)
+        Va,Vb,Vabab = self.u_aint_tot()
+        JKa = numpy.einsum('prqs,rs->pq',Va,dena)
+        JKa += numpy.einsum('prqs,rs->pq',Vabab,denb)
+        JKb = numpy.einsum('prqs,rs->pq',Vb,denb)
+        JKb += numpy.einsum('prqs,pq->rs',Vabab,dena)
+        Fa = -JKa#.copy()
+        Fb = -JKb#.copy()
+        #Fa += numpy.einsum('ij,ip,jq->pq',Ta,self.ua,self.ua)
+        #Fb += numpy.einsum('ij,ip,jq->pq',Tb,self.ub,self.ub)
+        return Fa,Fb
+
+    def g_fock_d_tot(self,dvec):
+        d = self.g_energies_tot()
+        n = d.shape[0]
+        if self.T == 0.0:
+            print("WARNING: Occupations derivatives are zero at 0K")
+            return numpy.zeros((n,n))
+        beta = 1.0 / (self.T + 1e-12)
+        fo = ft_utils.ff(beta, d, self.mu)
+        fv = ft_utils.ffv(beta, d, self.mu)
+        vec = dvec*fo*fv
+        I = numpy.identity(n)
+        den = einsum('pi,i,qi->pq',I,vec,I)
+        V = self.g_aint_tot()
+        JK = einsum('prqs,rs->pq',V,den)
+        return -JK
 
     def r_hcore(self):
         return self.model.get_tmatS()

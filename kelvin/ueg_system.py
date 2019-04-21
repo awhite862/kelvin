@@ -404,7 +404,7 @@ class ueg_system(system):
         nb = db.shape[0]
         if self.T == 0.0:
             print("WARNING: Occupations derivatives are zero at 0K")
-            return numpy.zeros((n,n)),numpy.zeros((n,n))
+            return numpy.zeros((na,na)),numpy.zeros((nb,nb))
         beta = 1.0 / (self.T + 1e-12)
         foa = ft_utils.ff(beta, da, self.mu)
         fva = ft_utils.ffv(beta, da, self.mu)

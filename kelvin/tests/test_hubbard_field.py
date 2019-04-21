@@ -5,7 +5,7 @@ from kelvin.fci import fci
 from kelvin.ccsd import ccsd
 from kelvin.neq_ccsd import neq_ccsd
 from kelvin.hubbard_site_system import hubbard_site_system 
-from kelvin.hubbard_system import hubbard_system 
+from kelvin.hubbard_system import HubbardSystem
 from kelvin.hubbard_field_system import hubbard_field_system 
 from lattice.hubbard import Hubbard1D
 from lattice.fci import FCISimple
@@ -84,7 +84,7 @@ class HubbardFieldTest(unittest.TestCase):
         cc = neq_ccsd(sys,T,mu=mu,tmax=tmax,econv=1e-9,max_iter=40,damp=0.1,ngr=ng,ngi=ngi,iprint=0)
         E,Ecc = cc.run()
 
-        sys = hubbard_system(T,hub,Pa,Pb,mu=mu,orbtype='u')
+        sys = HubbardSystem(T,hub,Pa,Pb,mu=mu,orbtype='u')
         cc = ccsd(sys,iprint=0,max_iter=80,econv=1e-11,T=T,mu=mu,ngrid=ngi)
         Eoutr,Eccr = cc.run()
         diff = abs(Eoutr - E)

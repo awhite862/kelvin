@@ -3,7 +3,7 @@ import numpy
 from kelvin.fci import fci
 from kelvin.ccsd import ccsd
 from kelvin.hubbard_site_system import hubbard_site_system 
-from kelvin.hubbard_system import hubbard_system 
+from kelvin.hubbard_system import HubbardSystem
 from lattice.hubbard import Hubbard1D
 from lattice.fci import FCISimple
 
@@ -122,7 +122,7 @@ class HubbardTest(unittest.TestCase):
         Ob[1] = 1.0
         Pa = numpy.einsum('i,j->ij',Oa,Oa)
         Pb = numpy.einsum('i,j->ij',Ob,Ob)
-        sys = hubbard_system(0.0,hub,Pa,Pb,na=1,nb=1)
+        sys = HubbardSystem(0.0,hub,Pa,Pb,na=1,nb=1)
         cc = ccsd(sys,iprint=0,max_iter=80,econv=1e-11)
         Eout,Ecc = cc.run()
         diff = abs(Eout - Eref)
@@ -144,7 +144,7 @@ class HubbardTest(unittest.TestCase):
         Ob[1] = 1.0
         Pa = numpy.einsum('i,j->ij',Oa,Oa)
         Pb = numpy.einsum('i,j->ij',Ob,Ob)
-        sys = hubbard_system(T,hub,Pa,Pb,mu=mu)
+        sys = HubbardSystem(T,hub,Pa,Pb,mu=mu)
         cc = ccsd(sys,iprint=0,max_iter=80,econv=1e-11,T=T,mu=mu)
         Eout,Ecc = cc.run()
         diff = abs(Eout - Eref)
@@ -162,10 +162,10 @@ class HubbardTest(unittest.TestCase):
         Ob[1] = 1.0
         Pa = numpy.einsum('i,j->ij',Oa,Oa)
         Pb = numpy.einsum('i,j->ij',Ob,Ob)
-        sys = hubbard_system(0.0,hub,Pa,Pb,na=1,nb=1,orbtype='g')
+        sys = HubbardSystem(0.0,hub,Pa,Pb,na=1,nb=1,orbtype='g')
         cc = ccsd(sys,iprint=0,max_iter=80,econv=1e-11)
         Eoutg,Eccg = cc.run()
-        sys = hubbard_system(0.0,hub,Pa,Pb,na=1,nb=1,orbtype='u')
+        sys = HubbardSystem(0.0,hub,Pa,Pb,na=1,nb=1,orbtype='u')
         cc = ccsd(sys,iprint=0,max_iter=80,econv=1e-11)
         Eoutu,Eccu = cc.run()
         diff = abs(Eoutg - Eoutu)
@@ -187,11 +187,11 @@ class HubbardTest(unittest.TestCase):
         Ob[1] = 1.0
         Pa = numpy.einsum('i,j->ij',Oa,Oa)
         Pb = numpy.einsum('i,j->ij',Ob,Ob)
-        sys = hubbard_system(T,hub,Pa,Pb,mu=mu,orbtype='g')
+        sys = HubbardSystem(T,hub,Pa,Pb,mu=mu,orbtype='g')
         cc = ccsd(sys,iprint=0,max_iter=80,econv=1e-11,T=T,mu=mu)
         Eoutg,Eccg = cc.run()
-        sys = hubbard_system(T,hub,Pa,Pb,mu=mu,orbtype='u')
-        cc = ccsd(sys,iprint=1,max_iter=80,econv=1e-11,T=T,mu=mu)
+        sys = HubbardSystem(T,hub,Pa,Pb,mu=mu,orbtype='u')
+        cc = ccsd(sys,iprint=0,max_iter=80,econv=1e-11,T=T,mu=mu)
         Eoutu,Eccu = cc.run()
         diff = abs(Eoutg - Eoutu)
         msg = "General: {} Unrestricted: {}".format(Eoutg,Eoutu)

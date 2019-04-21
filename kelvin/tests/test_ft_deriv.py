@@ -1,12 +1,13 @@
 import unittest
 import numpy
 from pyscf import gto, scf, cc
-from kelvin.mp3 import mp3
+from lattice.hubbard import Hubbard1D
 from kelvin.ccsd import ccsd
 from kelvin.scf_system import scf_system
 from kelvin.ueg_system import ueg_system
 from kelvin.ueg_scf_system import ueg_scf_system
 from kelvin.pueg_system import pueg_system
+from kelvin.hubbard_system import HubbardSystem
 
 def fd_ESN(m, T, mu, ng, Ecctot, athresh = 0.0, quad = 'lin'):
     delta = 5e-4
@@ -39,6 +40,7 @@ class FTDerivTest(unittest.TestCase):
     def setUp(self):
         self.Bethresh = 1e-5
         self.uegthresh = 1e-5
+        self.hthresh = 1e-6
 
     def test_Be_sto3g_gen(self):
         mol = gto.M(
@@ -397,6 +399,62 @@ class FTDerivTest(unittest.TestCase):
         self.assertTrue(dE < self.uegthresh,eE)
         self.assertTrue(dS < self.uegthresh,eS)
         self.assertTrue(dN < self.uegthresh,eN)
+
+    def test_hubbard(self):
+        T = 0.7
+        mu = 0.0
+        U = 1.2
+        model = Hubbard1D(4, 1.0, U)
+        Pa = numpy.zeros((4,4))
+        Pb = numpy.zeros((4,4))
+        Pa[0,0] = 1.0
+        Pa[2,2] = 1.0
+        Pb[1,1] = 1.0
+        Pb[3,3] = 1.0
+        sys = HubbardSystem(T, model, Pa=Pa, Pb=Pb, mu=mu)
+
+        cc = ccsd(sys,T=T,mu=mu,iprint=0)
+        Ecctot,Ecc = cc.run()
+        cc.compute_ESN()
+        E = cc.E
+        S = cc.S
+        N = cc.N
+
+        delta = 1e-4
+        muf = mu + delta
+        mub = mu - delta
+        sys = HubbardSystem(T, model, Pa=Pa, Pb=Pb, mu=muf)
+        cc = ccsd(sys,T=T,mu=muf,iprint=0)
+        Ef,Ecf = cc.run()
+        E1f = cc.G1
+        E0f = cc.G0
+        sys = HubbardSystem(T, model, Pa=Pa, Pb=Pb, mu=mub)
+        cc = ccsd(sys,T=T,mu=mub,iprint=0)
+        Eb,Ecb = cc.run()
+        E1b = cc.G1
+        E0b = cc.G0
+        Nx = -(Ef - Eb)/(2*delta)
+
+        Tf = T + delta
+        Tb = T - delta
+        sys = HubbardSystem(Tf, model, Pa=Pa, Pb=Pb, mu=mu)
+        cc = ccsd(sys,T=Tf,mu=mu,iprint=0)
+        Ef,Ecf = cc.run()
+        sys = HubbardSystem(Tb, model, Pa=Pa, Pb=Pb, mu=mu)
+        cc = ccsd(sys,T=Tb,mu=mu,iprint=0)
+        Eb,Ecb = cc.run()
+        Sx = -(Ef - Eb)/(2*delta)
+        Ex = Ecctot + T*Sx + mu*Nx
+
+        dE = abs((E - Ex)/Ex)
+        dS = abs((S - Sx)/Sx)
+        dN = abs((N - Nx)/Nx)
+        eE = "Expected: {}  Actual: {}".format(Ex,E)
+        eS = "Expected: {}  Actual: {}".format(Sx,S)
+        eN = "Expected: {}  Actual: {}".format(Nx,N)
+        self.assertTrue(dE < self.hthresh,eE)
+        self.assertTrue(dS < self.hthresh,eS)
+        self.assertTrue(dN < self.hthresh,eN)
 
 if __name__ == '__main__':
     unittest.main()

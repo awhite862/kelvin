@@ -1,0 +1,147 @@
+Timer unit: 1e-06 s
+
+Total time: 545.41 s
+File: /home/alec/Codes/kelvin/ccsd.py
+Function: _ft_uccsd_lambda at line 1038
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+  1038                                               @profile
+  1039                                               def _ft_uccsd_lambda(self, L1=None, L2=None):
+  1040                                                   """Solve FT-CCSD Lambda equations."""
+  1041         1          3.0      3.0      0.0          T = self.T
+  1042         1          2.0      2.0      0.0          beta = 1.0 / (T + 1e-12)
+  1043         1          2.0      2.0      0.0          mu = self.mu
+  1044                                           
+  1045                                                   # get time-grid
+  1046         1          1.0      1.0      0.0          ng = self.ngrid
+  1047         1          1.0      1.0      0.0          ti = self.ti
+  1048         1          1.0      1.0      0.0          G = self.G
+  1049         1          1.0      1.0      0.0          g = self.g
+  1050                                           
+  1051                                                   # get energies and occupation numbers
+  1052         1         50.0     50.0      0.0          en = self.sys.g_energies_tot()
+  1053         1          9.0      9.0      0.0          ea,eb = self.sys.u_energies_tot()
+  1054         1          2.0      2.0      0.0          na = ea.shape[0]
+  1055         1          1.0      1.0      0.0          nb = eb.shape[0]
+  1056                                           
+  1057         1          3.0      3.0      0.0          En = self.sys.const_energy()
+  1058         1        314.0    314.0      0.0          g0 = ft_utils.uGP0(beta, ea, eb, mu)
+  1059         1         22.0     22.0      0.0          E0 = ft_mp.ump0(g0[0],g0[1]) + En
+  1060         1    1782212.0 1782212.0      0.3          E1 = self.sys.get_mp1()
+  1061         1          2.0      2.0      0.0          E01 = E0 + E1
+  1062                                           
+  1063         1          2.0      2.0      0.0          if self.athresh > 0.0:
+  1064                                                       athresh = self.athresh
+  1065                                                       foa = ft_utils.ff(beta, ea, mu)
+  1066                                                       fva = ft_utils.ffv(beta, ea, mu)
+  1067                                                       fob = ft_utils.ff(beta, eb, mu)
+  1068                                                       fvb = ft_utils.ffv(beta, eb, mu)
+  1069                                                       focca = [x for x in foa if x > athresh]
+  1070                                                       fvira = [x for x in fva if x > athresh]
+  1071                                                       iocca = [i for i,x in enumerate(foa) if x > athresh]
+  1072                                                       ivira = [i for i,x in enumerate(fva) if x > athresh]
+  1073                                                       foccb = [x for x in fob if x > athresh]
+  1074                                                       fvirb = [x for x in fvb if x > athresh]
+  1075                                                       ioccb = [i for i,x in enumerate(fob) if x > athresh]
+  1076                                                       ivirb = [i for i,x in enumerate(fvb) if x > athresh]
+  1077                                                       nocca = len(focca)
+  1078                                                       nvira = len(fvira)
+  1079                                                       noccb = len(foccb)
+  1080                                                       nvirb = len(fvirb)
+  1081                                                       nacta = nocca + nvira - na
+  1082                                                       nactb = noccb + nvirb - nb
+  1083                                                       if self.iprint > 0:
+  1084                                                           print("FT-UCCSD orbital info:")
+  1085                                                           print('  nocca: {:d}'.format(nocca))
+  1086                                                           print('  nvira: {:d}'.format(nvira))
+  1087                                                           print('  nacta: {:d}'.format(nacta))
+  1088                                                           print('  noccb: {:d}'.format(nocca))
+  1089                                                           print('  nvirb: {:d}'.format(nvira))
+  1090                                                           print('  nactb: {:d}'.format(nacta))
+  1091                                           
+  1092                                                       # get energy differences
+  1093                                                       D1a = ea[:,None] - ea[None,:]
+  1094                                                       D1b = eb[:,None] - eb[None,:]
+  1095                                                       D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
+  1096                                                               - ea[None,None,:,None] - ea[None,None,None,:]
+  1097                                                       D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
+  1098                                                               - ea[None,None,:,None] - eb[None,None,None,:]
+  1099                                                       D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
+  1100                                                               - eb[None,None,:,None] - eb[None,None,None,:]
+  1101                                                       D1a = D1a[numpy.ix_(ivira,iocca)]
+  1102                                                       D1b = D1b[numpy.ix_(ivirb,ioccb)]
+  1103                                                       D2aa = D2aa[numpy.ix_(ivira,ivira,iocca,iocca)]
+  1104                                                       D2ab = D2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)]
+  1105                                                       D2bb = D2bb[numpy.ix_(ivirb,ivirb,ioccb,ioccb)]
+  1106                                           
+  1107                                                       # get scaled integrals
+  1108                                                       Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
+  1109                                                               self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
+  1110                                           
+  1111                                                       T1ashape = (ng,nvira,nocca)
+  1112                                                       T2bshape = (ng,nvirb,noccb)
+  1113                                           
+  1114                                                   else:
+  1115                                                       # get scaled integrals
+  1116         1    3618076.0 3618076.0      0.7              Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
+  1117                                           
+  1118                                                       # get energy differences
+  1119         1         21.0     21.0      0.0              D1a = ea[:,None] - ea[None,:]
+  1120         1          6.0      6.0      0.0              D1b = eb[:,None] - eb[None,:]
+  1121                                                       D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
+  1122         1        241.0    241.0      0.0                      - ea[None,None,:,None] - ea[None,None,None,:]
+  1123                                                       D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
+  1124         1        277.0    277.0      0.0                      - ea[None,None,:,None] - eb[None,None,None,:]
+  1125                                                       D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
+  1126         1        279.0    279.0      0.0                      - eb[None,None,:,None] - eb[None,None,None,:]
+  1127                                           
+  1128         1          2.0      2.0      0.0          T1aold,T1bold = self.T1
+  1129         1          1.0      1.0      0.0          T2aaold,T2abold,T2bbold = self.T2
+  1130         1          1.0      1.0      0.0          if L2 is None and L1 is None:
+  1131         1          2.0      2.0      0.0              if self.singles:
+  1132         1          2.0      2.0      0.0                  L1aold,L1bold,L2aaold,L2abold,L2bbold = ft_cc_equations.uccsd_lambda_guess(
+  1133         1      18982.0  18982.0      0.0                      Fa,Fb,Ia,Ib,Iabab,self.T1[0],self.T1[1],beta,ng)
+  1134                                                       else:
+  1135                                                           L2aaold,L2abold,L2bbold = ft_cc_equations.uccd_lambda_guess(Ia,Ib,Iabab,beta,ng)
+  1136                                                   elif L2 is not None and L1 is None:
+  1137                                                       L2aaold = L2aa
+  1138                                                       L2abold = L2ab
+  1139                                                       L2bbold = L2bb
+  1140                                                       if self.singles:
+  1141                                                           ng,nv,no = self.T1.shape
+  1142                                                           L1aold = numpy.zeros((ng,no,nv))
+  1143                                                           L1bold = numpy.zeros((ng,no,nv))
+  1144                                                   elif L1 is not None and L2 is None:
+  1145                                                       ng,nv,no = self.T1.shape
+  1146                                                       L1aold = L1[0]
+  1147                                                       L1bold = L1[1]
+  1148                                                       L2aaold = numpy.zeros((ng,no,nv))
+  1149                                                       L2abold = numpy.zeros((ng,no,nv))
+  1150                                                       L2bbold = numpy.zeros((ng,no,nv))
+  1151                                                       if not self.singles:
+  1152                                                           raise Exception("Singles guess provided to FT-CCD Lambda equations")
+  1153                                                   else:
+  1154                                                       assert(L1 is not None and L2 is not None)
+  1155                                                       L1aold = L1[0]
+  1156                                                       L1bold = L1[1]
+  1157                                                       L2aaold = L2[0]
+  1158                                                       L2abold = L2[1]
+  1159                                                       L2bbold = L2[2]
+  1160                                           
+  1161                                                   # run lambda iterations
+  1162         1          2.0      2.0      0.0          conv_options = {
+  1163         1          2.0      2.0      0.0                  "econv":self.econv,
+  1164         1          2.0      2.0      0.0                  "tconv":self.tconv,
+  1165         1          2.0      2.0      0.0                  "max_iter":self.max_iter,
+  1166         1          2.0      2.0      0.0                  "damp":self.damp}
+  1167         1          1.0      1.0      0.0          method = "CCSD" if self.singles else "CCD"
+  1168         1          2.0      2.0      0.0          L1a,L1b,L2aa,L2ab,L2bb = cc_utils.ft_ulambda_iter(
+  1169         1          1.0      1.0      0.0                  method, L1aold, L1bold, L2aaold, L2abold, L2bbold, T1aold, T1bold, 
+  1170         1          1.0      1.0      0.0                  T2aaold, T2abold, T2bbold, Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb, 
+  1171         1  539989665.0 539989665.0     99.0                  g, G, beta, ng, ti, self.iprint, conv_options)
+  1172                                           
+  1173                                                   # save lambda amplitudes
+  1174         1          3.0      3.0      0.0          self.L1 = (L1a,L1b)
+  1175         1          2.0      2.0      0.0          self.L2 = (L2aa,L2ab,L2bb)
+

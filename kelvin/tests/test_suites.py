@@ -92,6 +92,7 @@ def full_suite():
     suite.addTest(test_ft_deriv.FTDerivTest("test_UEG2"))
     suite.addTest(test_ft_deriv.FTDerivTest("test_UEG_gen"))
     suite.addTest(test_ft_deriv.FTDerivTest("test_PUEG"))
+    suite.addTest(test_ft_deriv.FTDerivTest("test_hubbard"))
 
     suite.addTest(test_ft_lambda.FTLambdaTest("test_Be_sto3g_gen"))
     suite.addTest(test_ft_lambda.FTLambdaTest("test_Be_sto3g_gen_active"))
@@ -112,6 +113,7 @@ def full_suite():
     suite.addTest(test_hubbard.HubbardTest("test_ccsd_site"))
     suite.addTest(test_hubbard.HubbardTest("test_ccsd"))
     suite.addTest(test_hubbard.HubbardTest("test_ft_ccsd"))
+    suite.addTest(test_hubbard.HubbardTest("test_ft_ccsd_u_g"))
 
     suite.addTest(test_hubbard_field.HubbardFieldTest("test_null_cc"))
     suite.addTest(test_hubbard_field.HubbardFieldTest("test_cc_vs_fci"))
@@ -226,6 +228,7 @@ def default_suite():
     suite.addTest(test_ft_deriv.FTDerivTest("test_UEG2"))
     #suite.addTest(test_ft_deriv.FTDerivTest("test_UEG_gen"))
     suite.addTest(test_ft_deriv.FTDerivTest("test_PUEG"))
+    suite.addTest(test_ft_deriv.FTDerivTest("test_hubbard"))
 
     #suite.addTest(test_ft_lambda.FTLambdaTest("test_Be_sto3g_gen"))
     #suite.addTest(test_ft_lambda.FTLambdaTest("test_Be_sto3g_gen_active"))
@@ -245,6 +248,7 @@ def default_suite():
     suite.addTest(test_hubbard.HubbardTest("test_ccsd_site"))
     suite.addTest(test_hubbard.HubbardTest("test_ccsd"))
     suite.addTest(test_hubbard.HubbardTest("test_ft_ccsd"))
+    #suite.addTest(test_hubbard.HubbardTest("test_ft_ccsd_u_g"))
 
     suite.addTest(test_hubbard_field.HubbardFieldTest("test_null_cc"))
     #suite.addTest(test_hubbard_field.HubbardFieldTest("test_cc_vs_fci"))
