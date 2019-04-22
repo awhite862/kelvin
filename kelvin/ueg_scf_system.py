@@ -28,7 +28,7 @@ class ueg_scf_system(system):
         Ef (float): Fermi-energy (of non-interacting system).
         Tf (float): Redued temperature.
     """
-    def __init__(self,T,L,Emax,mu=None,na=None,nb=None,norb=None,orbtype='u',madelung=None):
+    def __init__(self,T,L,Emax,mu=None,na=None,nb=None,norb=None,orbtype='u',madelung=None,naref=None):
         self.T = T
         self.L = L
         self.basis = ueg_basis(L,Emax,norb=norb)
@@ -52,22 +52,28 @@ class ueg_scf_system(system):
         # store orbital occupations as numpy ranges 
         d0 = numpy.asarray(self.basis.Es)
         n = d0.shape[0]
-        occ = []
-        vir = []
-        for p,d in enumerate(d0):
-            if d < self.mu:
-                occ.append(p)
-            if d > self.mu:
-                vir.append(p)
-        self.oidx = numpy.r_[occ]
-        self.vidx = numpy.r_[vir]
-        for p,d in enumerate(d0):
-            if d < self.mu:
-                occ.append(p + n)
-            if d > self.mu:
-                vir.append(p + n)
-        self.goidx = numpy.r_[occ]
-        self.gvidx = numpy.r_[vir]
+        if naref is not None:
+            occ = [i for i in range(naref)]
+            vir = [i + n for i in range(n - naref)]
+            self.oidx = numpy.r_[occ]
+            self.vidx = numpy.r_[vir]
+        else:
+            occ = []
+            vir = []
+            for p,d in enumerate(d0):
+                if d < self.mu:
+                    occ.append(p)
+                if d > self.mu:
+                    vir.append(p)
+            self.oidx = numpy.r_[occ]
+            self.vidx = numpy.r_[vir]
+            for p,d in enumerate(d0):
+                if d < self.mu:
+                    occ.append(p + n)
+                if d > self.mu:
+                    vir.append(p + n)
+            self.goidx = numpy.r_[occ]
+            self.gvidx = numpy.r_[vir]
 
         # now get real occupations if necessary 
         if na is None:
