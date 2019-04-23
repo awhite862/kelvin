@@ -168,7 +168,57 @@ class HubbardSystem(system):
             fo = ft_utils.ff(beta, en, self.mu)
             fv = ft_utils.ffv(beta, en, self.mu)
             vec = dvec*fo*fv
-            return -einsum('ijij,i,j->',V,vec,fo)
+            F = self.g_fock_tot()
+            D = -einsum('ii,i->',F - numpy.diag(en),vec)
+            D += einsum('ijij,i,j->',V,vec,fo)
+            F = self.g_fock_d_tot(dvec)
+            D += einsum('ii->i',F,fo)
+            return D
+        else:
+            print("WARNING: Derivative of MP1 energy is zero at OK")
+            return 0.0
+
+    def u_mp1_den(self):
+        if self.T > 0:
+            Va,Vb,Vabab = self.u_aint_tot()
+            beta = 1.0 / (self.T + 1e-12)
+            ea,eb = self.u_energies_tot()
+            foa = ft_utils.ff(beta, ea, self.mu)
+            fva = ft_utils.ffv(beta, ea, self.mu)
+            veca = foa*fva
+            fob = ft_utils.ff(beta, eb, self.mu)
+            fvb = ft_utils.ffv(beta, eb, self.mu)
+            vecb = fob*fvb
+            tmat = self.r_hcore()
+            T = self.model.get_tmatS()
+            Ta = numpy.einsum('ij,ip,jq->pq',T,self.ua,self.ua)
+            Tb = numpy.einsum('ij,ip,jq->pq',T,self.ub,self.ub)
+            Da = -beta*einsum('ii,i->i',Ta - numpy.diag(ea),veca)
+            Db = -beta*einsum('ii,i->i',Tb - numpy.diag(eb),vecb)
+            Da += -beta*einsum('ijij,i,j->i',Va,veca,foa)
+            Db += -beta*einsum('ijij,i,j->i',Vb,vecb,fob)
+            Da += -beta*einsum('ijij,i,j->i',Vabab,veca,fob)
+            Db += -beta*einsum('ijij,i,j->j',Vabab,foa,vecb)
+            return Da,Db
+        else:
+            print("WARNING: Derivative of MP1 energy is zero at OK")
+            return 0.0
+
+    def g_mp1_den(self):
+        if self.T > 0:
+            V = self.g_aint_tot()
+            beta = 1.0 / (self.T + 1e-12)
+            en = self.g_energies_tot()
+            T = self.model.get_tmat()
+            Utot = utils.block_diag(self.ua,self.ub)
+            T = numpy.einsum('ij,ip,jq->pq',T,Utot,Utot)
+            fo = ft_utils.ff(beta, en, self.mu)
+            fv = ft_utils.ffv(beta, en, self.mu)
+            vec = fo*fv
+            D = -beta*numpy.einsum('ii,i->i',T - numpy.diag(en),vec)
+            D += -beta*numpy.einsum('ijij,i,j->i',V,vec,fo)
+            return D
+            #return -beta*einsum('ijij,i,j->',V,vec,fo)
         else:
             print("WARNING: Derivative of MP1 energy is zero at OK")
             return 0.0
@@ -363,10 +413,8 @@ class HubbardSystem(system):
         JKa += numpy.einsum('prqs,rs->pq',Vabab,denb)
         JKb = numpy.einsum('prqs,rs->pq',Vb,denb)
         JKb += numpy.einsum('prqs,pq->rs',Vabab,dena)
-        Fa = -JKa#.copy()
-        Fb = -JKb#.copy()
-        #Fa += numpy.einsum('ij,ip,jq->pq',Ta,self.ua,self.ua)
-        #Fb += numpy.einsum('ij,ip,jq->pq',Tb,self.ub,self.ub)
+        Fa = -JKa
+        Fb = -JKb
         return Fa,Fb
 
     def g_fock_d_tot(self,dvec):
@@ -384,6 +432,46 @@ class HubbardSystem(system):
         V = self.g_aint_tot()
         JK = einsum('prqs,rs->pq',V,den)
         return -JK
+
+    def u_fock_d_den(self):
+        da,db = self.u_energies_tot()
+        na = da.shape[0]
+        nb = db.shape[0]
+        if self.T == 0.0:
+            print("WARNING: Occupation derivatives are zero at 0K")
+            return (numpy.zeros((na,na,na)),
+                    numpy.zeros((na,na,nb)),
+                    numpy.zeros((nb,nb,na)),
+                    numpy.zeros((nb,nb,nb)))
+        beta = 1.0 / (self.T + 1e-12)
+        foa = ft_utils.ff(beta, da, self.mu)
+        fob = ft_utils.ff(beta, db, self.mu)
+        fva = ft_utils.ffv(beta, da, self.mu)
+        fvb = ft_utils.ffv(beta, db, self.mu)
+        veca = foa*fva
+        vecb = fob*fvb
+        Va,Vb,Vabab = self.u_aint_tot()
+        JKaa = numpy.einsum('piqi,i->pqi',Va,veca)
+        JKab = numpy.einsum('piqi,i->pqi',Vabab,vecb)
+        JKbb = numpy.einsum('piqi,i->pqi',Vb,vecb)
+        JKba = numpy.einsum('iris,i->rsi',Vabab,veca)
+        return JKaa,JKab,JKbb,JKba
+
+    def g_fock_d_den(self):
+        d = self.g_energies_tot()
+        n = d.shape[0]
+        if self.T == 0.0:
+            print("WARNING: Occupations derivatives are zero at 0K")
+            return numpy.zeros((n,n))
+        beta = 1.0 / (self.T + 1e-12)
+        fo = ft_utils.ff(beta, d, self.mu)
+        fv = ft_utils.ffv(beta, d, self.mu)
+        vec = fo*fv
+        #I = numpy.identity(n)
+        #den = einsum('pi,i,qi->pq',I,vec,I)
+        V = self.g_aint_tot()
+        JK = einsum('piqi,i->pqi',V,vec)
+        return JK
 
     def r_hcore(self):
         return self.model.get_tmatS()

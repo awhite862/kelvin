@@ -452,8 +452,6 @@ class ueg_scf_system(system):
         fob = ft_utils.ff(beta, db, self.mu)
         fvb = ft_utils.ffv(beta, db, self.mu)
         vecb = fob*fvb
-        #Ia = numpy.identity(na)
-        #Ib = numpy.identity(nb)
         Va,Vb,Vabab = self.u_aint_tot()
         JKaa = einsum('piqi,i->pqi',Va,veca)
         JKab = einsum('piqi,i->pqi',Vabab,vecb)

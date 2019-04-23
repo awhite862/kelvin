@@ -2,7 +2,9 @@ import unittest
 import numpy
 from pyscf import gto, scf
 from cqcpy import utils
+from lattice.hubbard import Hubbard1D
 from kelvin.ccsd import ccsd
+from kelvin.hubbard_system import HubbardSystem
 from kelvin.scf_system import scf_system
 from kelvin.ueg_system import ueg_system
 from kelvin.ueg_scf_system import ueg_scf_system
@@ -384,6 +386,78 @@ class FTCCReldenTest(unittest.TestCase):
         diffa = numpy.linalg.norm(naref - naout)/numpy.sqrt(naref.size)
         diffb = numpy.linalg.norm(nbref - nbout)/numpy.sqrt(nbref.size)
         self.assertTrue(diffa < thresh, "Error in normal-ordered alpha rdm: {}".format(diffa))
+        self.assertTrue(diffb < thresh, "Error in normal-ordered beta rdm: {}".format(diffb))
+
+    def test_hubbard(self):
+        T = 0.5
+        L = 2
+        U = 2.0
+        mu = 0.0
+        damp = 0.2
+        mi = 50
+        Oa = numpy.zeros((2))
+        Ob = numpy.zeros((2))
+        Oa[0] = 1.0
+        Ob[1] = 1.0
+        Pa = numpy.einsum('i,j->ij',Oa,Oa)
+        Pb = numpy.einsum('i,j->ij',Ob,Ob)
+        hub = Hubbard1D(L,1.0,U,boundary='c')
+        sys = HubbardSystem(T,hub,Pa,Pb,mu=mu,orbtype='u')
+        ccsdT = ccsd(sys,T=T,mu=mu,iprint=0,max_iter=mi,damp=damp,ngrid=10)
+        ccsdT.run()
+        ccsdT.compute_ESN()
+        Nref = ccsdT.N
+        ccsdT._urel_ft_1rdm()
+        Nout = numpy.trace(ccsdT.r1rdm[0])
+        Nout += numpy.trace(ccsdT.r1rdm[1])
+        diff = abs(Nref - Nout)
+        error = "Expected: {}  Actual: {}".format(Nref,Nout)
+        self.assertTrue(diff < self.thresh,error)
+
+    def test_Hubbard_gu(self):
+        T = 1.0
+        L = 2
+        U = 2.0
+        mu = 0.0
+        damp = 0.2
+        mi = 50
+        ethresh = 1e-11
+        thresh = 1e-11
+        Oa = numpy.zeros((2))
+        Ob = numpy.zeros((2))
+        Oa[0] = 1.0
+        Ob[1] = 1.0
+        Pa = numpy.einsum('i,j->ij',Oa,Oa)
+        Pb = numpy.einsum('i,j->ij',Ob,Ob)
+        hub = Hubbard1D(L,1.0,U,boundary='c')
+        sys = HubbardSystem(T,hub,Pa,Pb,mu=mu,orbtype='g')
+        ccsdT = ccsd(sys,T=T,mu=mu,iprint=0,damp=damp,ngrid=10,econv=ethresh,max_iter=mi)
+        cc = ccsdT.run()
+        ccsdT._grel_ft_1rdm()
+
+        sys = HubbardSystem(T,hub,Pa,Pb,mu=mu,orbtype='u')
+        uccsdT = ccsd(sys,T=T,mu=mu,damp=0.1,ngrid=10,iprint=0,econv=ethresh,max_iter=mi)
+        ucc = uccsdT.run()
+        uccsdT._urel_ft_1rdm()
+
+        # compare relaxed 1rdm
+        daout,dbout = uccsdT.r1rdm
+        naout,nbout = uccsdT.n1rdm
+        norb = daout.shape[0]
+        dref = ccsdT.r1rdm
+        nref = ccsdT.n1rdm
+        daref = dref[:norb,:norb]
+        dbref = dref[norb:,norb:]
+        naref = nref[:norb,:norb]
+        nbref = nref[norb:,norb:]
+        diffa = numpy.linalg.norm(daref - daout)/numpy.sqrt(daref.size)
+        diffb = numpy.linalg.norm(dbref - dbout)/numpy.sqrt(dbref.size)
+        self.assertTrue(diffa < thresh, "Error in relaxed alpha rdm: {}".format(diffa))
+        self.assertTrue(diffb < thresh, "Error in relaxed beta rdm: {}".format(diffb))
+        diffa = numpy.linalg.norm(naref - naout)/numpy.sqrt(naref.size)
+        diffb = numpy.linalg.norm(nbref - nbout)/numpy.sqrt(nbref.size)
+        self.assertTrue(diffa < thresh, "Error in normal-ordered alpha rdm: {}".format(diffa))
+        self.assertTrue(diffb < thresh, "Error in normal-ordered beta rdm: {}".format(diffb))
 
 if __name__ == '__main__':
     unittest.main()

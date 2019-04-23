@@ -55,6 +55,8 @@ def full_suite():
     suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_ueg"))
     suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_Be_active"))
     suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_Beplus"))
+    suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_hubbard"))
+    suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_Hubbard_gu"))
 
     suite.addTest(test_ft_ccsd.FTCCSDTest("test_2orb"))
     suite.addTest(test_ft_ccsd.FTCCSDTest("test_Be"))
@@ -191,6 +193,8 @@ def default_suite():
     #suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_ueg"))
     #suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_Be_active"))
     suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_Beplus"))
+    suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_hubbard"))
+    suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_Hubbard_gu"))
 
     suite.addTest(test_ft_ccsd.FTCCSDTest("test_2orb"))
     suite.addTest(test_ft_ccsd.FTCCSDTest("test_Be"))
