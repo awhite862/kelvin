@@ -1175,10 +1175,10 @@ def uft_d_active_integrals(
         sfva = numpy.sqrt(fva)
         sfob = numpy.sqrt(fob)
         sfvb = numpy.sqrt(fvb)
-        dsoa = -0.5*sfoa*fva*dveca[numpy.ix_(iocca)]
-        dsva = +0.5*sfva*foa*dveca[numpy.ix_(ivira)]
-        dsob = -0.5*sfob*fvb*dvecb[numpy.ix_(ioccb)]
-        dsvb = +0.5*sfvb*fob*dvecb[numpy.ix_(ivirb)]
+        dsoa = -0.5*(sfoa*fva*dveca)[numpy.ix_(iocca)]
+        dsva = +0.5*(sfva*foa*dveca)[numpy.ix_(ivira)]
+        dsob = -0.5*(sfob*fvb*dvecb)[numpy.ix_(ioccb)]
+        dsvb = +0.5*(sfvb*fob*dvecb)[numpy.ix_(ivirb)]
         sfoa = sfoa[numpy.ix_(iocca)]
         sfva = sfva[numpy.ix_(ivira)]
         sfob = sfob[numpy.ix_(ioccb)]

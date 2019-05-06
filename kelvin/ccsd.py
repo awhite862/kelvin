@@ -280,6 +280,7 @@ class ccsd(object):
             self.S0 = -beta*(self.G0 - self.E0 + mu*self.N0)
             self.S1 = -beta*(self.G1 - self.E1 + mu*self.N1)
             self.S = -beta*(self.Gtot - self.E + mu*self.N)
+            self.Scc = self.S - self.S0 - self.S1
 
     def _ccsd(self):
         """Simple CCSD implementation at zero temperature."""
@@ -1277,7 +1278,7 @@ class ccsd(object):
             D2aa = D2aa[numpy.ix_(ivira,ivira,iocca,iocca)]
             D2ab = D2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)]
             Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_d_active_integrals(
-                    self.sys, ea, eb, focca, fvira, foccb, fvirb, 
+                    self.sys, ea, eb, foa, fva, fob, fvb,
                     iocca, ivira, ioccb, ivirb, dveca, dvecb)
         else:
             Fa,Fb,Ia,Ib,Iabab = cc_utils.u_ft_d_integrals(self.sys, ea, eb, foa, fva, fob, fvb, dveca, dvecb)
@@ -1463,6 +1464,7 @@ class ccsd(object):
             D1b = D1b[numpy.ix_(ivirb,ioccb)]
             D2aa = D2aa[numpy.ix_(ivira,ivira,iocca,iocca)]
             D2ab = D2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)]
+            D2bb = D2bb[numpy.ix_(ivira,ivira,iocca,iocca)]
             Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
                     self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
         else:

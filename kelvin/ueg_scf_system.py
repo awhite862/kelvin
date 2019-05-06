@@ -54,7 +54,7 @@ class ueg_scf_system(system):
         n = d0.shape[0]
         if naref is not None:
             occ = [i for i in range(naref)]
-            vir = [i + n for i in range(n - naref)]
+            vir = [i + naref for i in range(n - naref)]
             self.oidx = numpy.r_[occ]
             self.vidx = numpy.r_[vir]
         else:
