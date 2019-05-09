@@ -509,8 +509,8 @@ def ft_ulambda_iter(method, L1ain, L1bin, L2aain, L2abin, L2bbin, T1aold, T1bold
     L2abold = L2abin
     L2bbold = L2bbin
 
-    nl1 = numpy.linalg.norm(L1aold) + numpy.linalg.norm(L1bold)
-    nl2 = numpy.linalg.norm(L2aaold)
+    nl1 = numpy.linalg.norm(L1aold) + numpy.linalg.norm(L1bold) + 0.1
+    nl2 = numpy.linalg.norm(L2aaold) + 0.1
     nl2 += numpy.linalg.norm(L2bbold)
     nl2 += 4*numpy.linalg.norm(L2abold)
     while i < max_iter and not converged:
@@ -539,8 +539,8 @@ def ft_ulambda_iter(method, L1ain, L1bin, L2aain, L2abin, L2bbin, T1aold, T1bold
         L2aaold = alpha*L2aaold + (1.0 - alpha)*L2aa
         L2abold = alpha*L2abold + (1.0 - alpha)*L2ab
         L2bbold = alpha*L2bbold + (1.0 - alpha)*L2bb
-        nl1 = numpy.linalg.norm(L1aold) + numpy.linalg.norm(L1bold)
-        nl2 = numpy.linalg.norm(L2aaold)
+        nl1 = numpy.linalg.norm(L1aold) + numpy.linalg.norm(L1bold) + 0.1
+        nl2 = numpy.linalg.norm(L2aaold) + 0.1
         nl2 += numpy.linalg.norm(L2bbold)
         nl2 += 4*numpy.linalg.norm(L2abold)
         L1a = None
