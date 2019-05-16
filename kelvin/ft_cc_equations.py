@@ -940,9 +940,8 @@ def neq_1rdm(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
 
     return piaf,pbaf,pjif,paif
 
-def neq_2rdm(T1,T2,L1,L2,D1,D2,ti,tir,tii,ngr,ngi,gr,gi,Gr,Gi,ng,t):
-    nt,nv,no = T1.shape
-    assert(nt == ng)
+def neq_2rdm(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
+        D1,D2,tir,tii,ngr,ngi,gr,gi,Gr,Gi,t):
 
     # integrate the new L-amplitudes
     L1intf,L1intb,L1inti = quadrature.int_L1_keldysh(ngr,ngi,L1f,L1b,L1i,
@@ -953,14 +952,14 @@ def neq_2rdm(T1,T2,L1,L2,D1,D2,ti,tir,tii,ngr,ngi,gr,gi,Gr,Gi,ng,t):
     assert(ntr == ngr)
 
     # compute response densities
-    Pijab = -L2new
-    Pcdab = -cc_equations.ccsd_2rdm_cdab(T1[t],T2[t],L1new[t],L2new[t])
-    Pciab = -cc_equations.ccsd_2rdm_ciab(T1[t],T2[t],L1new[t],L2new[t])
-    Pbcai = -cc_equations.ccsd_2rdm_bcai(T1[t],T2[t],L1new[t],L2new[t])
-    Pbjai = -cc_equations.ccsd_2rdm_bjai(T1[t],T2[t],L1new[t],L2new[t])
-    Pabij = -cc_equations.ccsd_2rdm_abij(T1[t],T2[t],L1new[t],L2new[t],tfac=-1.0)
-    Pjkai = -cc_equations.ccsd_2rdm_jkai(T1[t],T2[t],L1new[t],L2new[t])
-    Pkaij = -cc_equations.ccsd_2rdm_kaij(T1[t],T2[t],L1new[i],L2new[t])
-    Pklij = -cc_equations.ccsd_2rdm_klij(T1[t],T2[t],L1new[i],L2new[t])
+    Pijab = -L2intf[t]
+    Pcdab = -cc_equations.ccsd_2rdm_cdab(T1f[t],T2f[t],L1intf[t],L2intf[t])
+    Pciab = -cc_equations.ccsd_2rdm_ciab(T1f[t],T2f[t],L1intf[t],L2intf[t])
+    Pbcai = -cc_equations.ccsd_2rdm_bcai(T1f[t],T2f[t],L1intf[t],L2intf[t])
+    Pbjai = -cc_equations.ccsd_2rdm_bjai(T1f[t],T2f[t],L1intf[t],L2intf[t])
+    Pabij = -cc_equations.ccsd_2rdm_abij(T1f[t],T2f[t],L1intf[t],L2intf[t],tfac=-1.0)
+    Pjkai = -cc_equations.ccsd_2rdm_jkai(T1f[t],T2f[t],L1intf[t],L2intf[t])
+    Pkaij = -cc_equations.ccsd_2rdm_kaij(T1f[t],T2f[t],L1intf[t],L2intf[t])
+    Pklij = -cc_equations.ccsd_2rdm_klij(T1f[t],T2f[t],L1intf[t],L2intf[t])
 
     return (Pcdab, Pciab, Pbcai, Pijab, Pbjai, Pabij, Pjkai, Pkaij, Pklij)

@@ -2,6 +2,7 @@ import sys
 import unittest
 from kelvin.tests import test_cc_utils
 from kelvin.tests import test_ccsd
+from kelvin.tests import test_ft_cc_2rdm
 from kelvin.tests import test_ft_cc_ampl
 from kelvin.tests import test_ft_cc_relden
 from kelvin.tests import test_ft_ccsd
@@ -41,6 +42,8 @@ def full_suite():
     suite.addTest(test_ccsd.CCSDTest("test_N2p_631G_gen"))
     #suite.addTest(test_ccsd.CCSDTest("test_diamond"))
     #suite.addTest(test_ccsd.CCSDTest("test_diamond_u"))
+
+    suite.addTest(test_ft_cc_2rdm.FTCC2RDMTest("test_hubbard"))
 
     suite.addTest(test_ft_cc_ampl.FTamplEquationsTest("test_ccsd_stanton"))
     suite.addTest(test_ft_cc_ampl.FTamplEquationsTest("test_uccsd"))
@@ -179,6 +182,8 @@ def default_suite():
     suite.addTest(test_ccsd.CCSDTest("test_N2p_631G_gen"))
     #suite.addTest(test_ccsd.CCSDTest("test_diamond"))
     #suite.addTest(test_ccsd.CCSDTest("test_diamond_u"))
+
+    suite.addTest(test_ft_cc_2rdm.FTCC2RDMTest("test_hubbard"))
 
     suite.addTest(test_ft_cc_ampl.FTamplEquationsTest("test_ccsd_stanton"))
     suite.addTest(test_ft_cc_ampl.FTamplEquationsTest("test_uccsd"))

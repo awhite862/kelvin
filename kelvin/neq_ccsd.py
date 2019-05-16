@@ -306,6 +306,41 @@ class neq_ccsd(object):
         self.dji = pji
         self.dai = pai
 
+    def _neq_2rdm(self, t):
+        if self.L2f is None or self.T2f is None:
+            raise Exception("Cannot compute density without Lambda!")
+
+        T = self.T
+        beta = 1.0 / (T + 1e-12)
+        mu = self.mu
+
+        # get time-grid
+        ngr = self.ngr
+        ngi = self.ngi
+        tir = self.tir
+        tii = self.tii
+        Gi = self.Gi
+        gi = self.gi
+        Gr = self.Gr
+        gr = self.gr
+
+
+        # get energies and occupation numbers
+        en = self.sys.g_energies_tot()
+
+        # get energy differences
+        D1 = en[:,None] - en[None,:]
+        D2 = en[:,None,None,None] + en[None,:,None,None] \
+                - en[None,None,:,None] - en[None,None,None,:]
+
+        P2 = ft_cc_equations.neq_2rdm(
+                self.T1f,self.T1b,self.T1i,
+                self.T2f,self.T2b,self.T2i,
+                self.L1f,self.L1b,self.L1i,
+                self.L2f,self.L2b,self.L2i,
+                D1,D2,tir,tii,ngr,ngi,gr,gi,Gr,Gi,t)
+        return P2
+
     def compute_prop(self, A, t):
         pia = self.dia[t]
         pba = self.dba[t]
@@ -318,13 +353,6 @@ class neq_ccsd(object):
         en = self.sys.g_energies_tot()
         fo = ft_utils.ff(beta, en, mu)
         fv = ft_utils.ffv(beta, en, mu)
-        ngr = self.ngr
-        tir = self.tir
-        tii = self.tii
-        Gi = self.Gi
-        gi = self.gi
-        Gr = self.Gr
-        gr = self.gr
 
         # compute first order part
         prop = numpy.einsum('ii,i->',A,fo)
@@ -349,28 +377,21 @@ class neq_ccsd(object):
         en = self.sys.g_energies_tot()
         fo = ft_utils.ff(beta, en, mu)
         fv = ft_utils.ffv(beta, en, mu)
-        ngr = self.ngr
-        tir = self.tir
-        tii = self.tii
-        Gi = self.Gi
-        gi = self.gi
-        Gr = self.Gr
-        gr = self.gr
 
         # compute first order part
-        prop = numpy.einsum('ijij,i,j->',A,fo,fo)
-        prop -= numpy.einsum('ijji,i,j->',A,fo,fo)
+        prop = 0.5*numpy.einsum('ijij,i,j->',A,fo,fo)
+        P2 = self._neq_2rdm(t)
 
         # compute higher order contribution
-        A1 = 0.25*einsum('cdab,abcd,a,b,c,d->',self.P2[0],A,fv,fv,fv,fv)
-        A2 = 0.5*einsum('ciab,abci,i,a,b,c->',self.P2[1],A,fo,fv,fv,fv)
-        A3 = 0.5*einsum('bcai,aibc,i,a,b,c->',self.P2[2],A,fo,fv,fv,fv)
-        A4 = 0.25*einsum('ijab,abij,i,j,a,b->',self.P2[3],A,fo,fo,fv,fv)
-        A5 = 1.0*einsum('bjai,aibj,i,j,a,b->',self.P2[4],A,fo,fo,fv,fv)
-        A6 = 0.25*einsum('abij,ijab,i,j,a,b->',self.P2[5],A,fo,fo,fv,fv)
-        A7 = 0.5*einsum('jkai,aijk,i,j,k,a->',self.P2[6],A,fo,fo,fo,fv)
-        A8 = 0.5*einsum('kaij,ijka,i,j,k,a->',self.P2[7],A,fo,fo,fo,fv)
-        A9 = 0.25*einsum('klij,ijkl,i,j,k,l->',self.P2[8],A,fo,fo,fo,fo)
+        A1 = 0.25*numpy.einsum('cdab,abcd,a,b->',P2[0],A,fv,fv)
+        A2 = 0.5*numpy.einsum('ciab,abci,i,a,b->',P2[1],A,fo,fv,fv)
+        A3 = 0.5*numpy.einsum('bcai,aibc,a->',P2[2],A,fv)
+        A4 = 0.25*numpy.einsum('ijab,abij,i,j,a,b->',P2[3],A,fo,fo,fv,fv)
+        A5 = 1.0*numpy.einsum('bjai,aibj,j,a->',P2[4],A,fo,fv)
+        A6 = 0.25*numpy.einsum('abij,ijab->',P2[5],A)
+        A7 = 0.5*numpy.einsum('jkai,aijk,j,k,a->',P2[6],A,fo,fo,fv)
+        A8 = 0.5*numpy.einsum('kaij,ijka,k->',P2[7],A,fo)
+        A9 = 0.25*numpy.einsum('klij,ijkl,k,l->',P2[8],A,fo,fo)
         E2 = A1 + A2 + A3 + A4 + A5 + A6 + A7 + A8 + A9
         prop += E2
         return prop
