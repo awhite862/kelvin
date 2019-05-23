@@ -1,5 +1,6 @@
 import numpy
 from cqcpy import ft_utils
+from pyscf.lib import einsum
 from . import cc_utils
 from . import ft_cc_energy
 from . import ft_cc_equations
@@ -355,14 +356,13 @@ class neq_ccsd(object):
         fv = ft_utils.ffv(beta, en, mu)
 
         # compute first order part
-        prop = numpy.einsum('ii,i->',A,fo)
+        prop = einsum('ii,i->',A,fo)
 
         # compute higher order contribution
-        E21 = numpy.einsum('ai,ia,i,a->',A,pia,fo,fv)
-        E22 = numpy.einsum('ab,ba,a->',A,pba,fv)
-        E23 = numpy.einsum('ij,ji,j->',A,pji,fo)
-        E24 = numpy.einsum('ia,ai->',A,pai)
-        #print(E21,E22,E23,E24)
+        E21 = einsum('ai,ia,i,a->',A,pia,fo,fv)
+        E22 = einsum('ab,ba,a->',A,pba,fv)
+        E23 = einsum('ij,ji,j->',A,pji,fo)
+        E24 = einsum('ia,ai->',A,pai)
         E2 = E21 + E22 + E23 + E24
         prop += E2
 
@@ -379,19 +379,19 @@ class neq_ccsd(object):
         fv = ft_utils.ffv(beta, en, mu)
 
         # compute first order part
-        prop = 0.5*numpy.einsum('ijij,i,j->',A,fo,fo)
+        prop = 0.5*einsum('ijij,i,j->',A,fo,fo)
         P2 = self._neq_2rdm(t)
 
         # compute higher order contribution
-        A1 = 0.25*numpy.einsum('cdab,abcd,a,b->',P2[0],A,fv,fv)
-        A2 = 0.5*numpy.einsum('ciab,abci,i,a,b->',P2[1],A,fo,fv,fv)
-        A3 = 0.5*numpy.einsum('bcai,aibc,a->',P2[2],A,fv)
-        A4 = 0.25*numpy.einsum('ijab,abij,i,j,a,b->',P2[3],A,fo,fo,fv,fv)
-        A5 = 1.0*numpy.einsum('bjai,aibj,j,a->',P2[4],A,fo,fv)
-        A6 = 0.25*numpy.einsum('abij,ijab->',P2[5],A)
-        A7 = 0.5*numpy.einsum('jkai,aijk,j,k,a->',P2[6],A,fo,fo,fv)
-        A8 = 0.5*numpy.einsum('kaij,ijka,k->',P2[7],A,fo)
-        A9 = 0.25*numpy.einsum('klij,ijkl,k,l->',P2[8],A,fo,fo)
+        A1 = 0.25*einsum('cdab,abcd,a,b->',P2[0],A,fv,fv)
+        A2 = 0.5*einsum('ciab,abci,i,a,b->',P2[1],A,fo,fv,fv)
+        A3 = 0.5*einsum('bcai,aibc,a->',P2[2],A,fv)
+        A4 = 0.25*einsum('ijab,abij,i,j,a,b->',P2[3],A,fo,fo,fv,fv)
+        A5 = 1.0*einsum('bjai,aibj,j,a->',P2[4],A,fo,fv)
+        A6 = 0.25*einsum('abij,ijab->',P2[5],A)
+        A7 = 0.5*einsum('jkai,aijk,j,k,a->',P2[6],A,fo,fo,fv)
+        A8 = 0.5*einsum('kaij,ijka,k->',P2[7],A,fo)
+        A9 = 0.25*einsum('klij,ijkl,k,l->',P2[8],A,fo,fo)
         E2 = A1 + A2 + A3 + A4 + A5 + A6 + A7 + A8 + A9
         prop += E2
         return prop
