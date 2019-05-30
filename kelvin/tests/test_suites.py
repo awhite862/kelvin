@@ -44,6 +44,8 @@ def full_suite():
     #suite.addTest(test_ccsd.CCSDTest("test_diamond_u"))
 
     suite.addTest(test_ft_cc_2rdm.FTCC2RDMTest("test_hubbard"))
+    suite.addTest(test_ft_cc_2rdm.FTCC2RDMTest("test_Be_gen"))
+    suite.addTest(test_ft_cc_2rdm.FTCC2RDMTest("test_Be"))
 
     suite.addTest(test_ft_cc_ampl.FTamplEquationsTest("test_ccsd_stanton"))
     suite.addTest(test_ft_cc_ampl.FTamplEquationsTest("test_uccsd"))
@@ -184,6 +186,8 @@ def default_suite():
     #suite.addTest(test_ccsd.CCSDTest("test_diamond_u"))
 
     suite.addTest(test_ft_cc_2rdm.FTCC2RDMTest("test_hubbard"))
+    suite.addTest(test_ft_cc_2rdm.FTCC2RDMTest("test_Be_gen"))
+    suite.addTest(test_ft_cc_2rdm.FTCC2RDMTest("test_Be"))
 
     suite.addTest(test_ft_cc_ampl.FTamplEquationsTest("test_ccsd_stanton"))
     suite.addTest(test_ft_cc_ampl.FTamplEquationsTest("test_uccsd"))

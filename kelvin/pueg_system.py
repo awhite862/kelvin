@@ -63,7 +63,7 @@ class pueg_system(system):
             return True
 
     def const_energy(self):
-        return 2.837297479 / self.L
+        return 0.0
 
     def get_mp1(self):
         if self.T > 0:

@@ -1,5 +1,6 @@
 import unittest
 import numpy
+from pyscf import gto, scf
 
 from lattice.hubbard import Hubbard1D
 from cqcpy import ft_utils
@@ -7,6 +8,9 @@ from cqcpy import utils
 
 from kelvin.hubbard_system import HubbardSystem
 from kelvin.ccsd import ccsd
+from kelvin.scf_system import scf_system
+from kelvin import cc_utils
+from numpy import einsum
 
 class FakeHubbardSystem(object):
     def __init__(self,sys,M=None):
@@ -50,7 +54,7 @@ class FakeHubbardSystem(object):
 
 class FTCC2RDMTest(unittest.TestCase):
     def setUp(self):
-        pass
+        self.thresh = 1e-14
 
     def test_hubbard(self):
         U = 1.0
@@ -104,6 +108,80 @@ class FTCC2RDMTest(unittest.TestCase):
         Eb,Eccb = ccb.run()
         ref = (Ef - Eb)/(2*d)
         self.assertTrue(abs(ref - out) < 1e-6)
+
+    def test_Be_gen(self):
+        T = 0.8
+        beta = 1.0/(T + 1e-12)
+        mu = 0.04
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+
+        m = scf.RHF(mol)
+        m.conv_tol = 1e-12
+        Escf = m.scf()
+        sys = scf_system(m,T,mu,orbtype='g')
+        ccsdT = ccsd(sys,T=T,mu=mu,iprint=0)
+        cc = ccsdT.run()
+        ccsdT._ft_ccsd_lambda()
+        ccsdT._g_ft_2rdm()
+        F,I = cc_utils.ft_integrals(sys, sys.g_energies_tot(), beta, mu)
+        ref = (0.25/beta)*einsum('cdab,abcd->',ccsdT.P2[0],I.vvvv)
+        ref += (0.5/beta)*einsum('ciab,abci->',ccsdT.P2[1],I.vvvo)
+        ref += (0.5/beta)*einsum('bcai,aibc->',ccsdT.P2[2],I.vovv)
+        ref += (0.25/beta)*einsum('ijab,abij->',ccsdT.P2[3],I.vvoo)
+        ref += (1.0/beta)*einsum('bjai,aibj->',ccsdT.P2[4],I.vovo)
+        ref += (0.25/beta)*einsum('abij,ijab->',ccsdT.P2[5],I.oovv)
+        ref += (0.5/beta)*einsum('jkai,aijk->',ccsdT.P2[6],I.vooo)
+        ref += (0.5/beta)*einsum('kaij,ijka->',ccsdT.P2[7],I.ooov)
+        ref += (0.25/beta)*einsum('klij,ijkl->',ccsdT.P2[8],I.oooo)
+        P2 = ccsdT.compute_g2rdm()
+        Inew = sys.g_aint_tot()
+        out = einsum('pqrs,rspq->',P2,Inew)
+        diff = abs(ref - out)
+        self.assertTrue(diff < self.thresh,"Error in 2rdm: {}".format(diff))
+
+    def test_Be(self):
+        T = 0.8
+        beta = 1.0/(T + 1e-12)
+        mu = 0.04
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+
+        m = scf.RHF(mol)
+        m.conv_tol = 1e-12
+        Escf = m.scf()
+        sys = scf_system(m,T,mu,orbtype='g')
+        ccsdT = ccsd(sys,T=T,mu=mu,iprint=0,tconv=1e-11)
+        cc = ccsdT.run()
+        ccsdT._ft_ccsd_lambda()
+        ccsdT._g_ft_2rdm()
+        P2g = ccsdT.compute_g2rdm()
+
+        sys = scf_system(m,T,mu,orbtype='u')
+        na = sys.u_energies_tot()[0].shape[0]
+        ccsdT = ccsd(sys,T=T,mu=mu,iprint=0,tconv=1e-11)
+        cc = ccsdT.run()
+        ccsdT._ft_uccsd_lambda()
+        ccsdT._u_ft_2rdm()
+        P2u = ccsdT.compute_u2rdm()
+
+        # aaaa block
+        diff = numpy.linalg.norm(P2u[0] - P2g[:na,:na,:na,:na])/numpy.linalg.norm(P2u[0])
+        self.assertTrue(diff < self.thresh,"Error in 2rdm(aaaa): {}".format(diff))
+
+        # bbbb block
+        diff = numpy.linalg.norm(P2u[1] - P2g[na:,na:,na:,na:])/numpy.linalg.norm(P2u[1])
+        self.assertTrue(diff < self.thresh,"Error in 2rdm(bbbb): {}".format(diff))
+
+        # abab block
+        P2gab = P2g[:na,na:,:na,na:] - P2g[:na,na:,na:,:na].transpose((0,1,3,2)) \
+                - P2g[na:,:na,:na,na:].transpose((1,0,2,3)) + P2g[na:,:na,na:,:na].transpose((1,0,3,2))
+        diff = numpy.linalg.norm(P2u[2] - P2gab)/numpy.linalg.norm(P2u[2])
+        self.assertTrue(diff < self.thresh,"Error in 2rdm(abab): {}".format(diff))
 
 if __name__ == '__main__':
     unittest.main()

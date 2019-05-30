@@ -393,5 +393,25 @@ class neq_ccsd(object):
         A8 = 0.5*einsum('kaij,ijka,k->',P2[7],A,fo)
         A9 = 0.25*einsum('klij,ijkl,k,l->',P2[8],A,fo,fo)
         E2 = A1 + A2 + A3 + A4 + A5 + A6 + A7 + A8 + A9
+        print(A1,A4,A6,A9)
+        print(A2,A3,A7,A8)
+        print(A5)
+        print("")
         prop += E2
         return prop
+
+    def compute_1rdm(self):
+        T = self.T
+        beta = 1.0 / (T + 1e-12)
+        mu = self.mu
+        en = self.sys.g_energies_tot()
+        fo = ft_utils.ff(beta, en, mu)
+        fv = ft_utils.ffv(beta, en, mu)
+
+        p = numpy.zeros(self.dai.shape, dtype=complex)
+        p += numpy.diag(fo)[None,:,:]
+        p += einsum('xia,i,a->xai',self.dia,fo,fv)
+        p += einsum('xba,a->xba',self.dba,fv)
+        p += einsum('xji,j->xji',self.dji,fo)
+        p += self.dai
+        return p
