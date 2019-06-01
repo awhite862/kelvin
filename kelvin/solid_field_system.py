@@ -97,9 +97,9 @@ class solid_field_system(system):
         assert(na == nb)
         beta = 1.0 / (self.T + 1e-12)
         px,py,pz = self.mf.cell.pbc_intor('int1e_ovlp', hermi=1, comp=3)
-        px = px.conj().transpose((1,0))
-        py = py.conj().transpose((1,0))
-        pz = pz.conj().transpose((1,0))
+        px = -1.j*px.conj().transpose((1,0))
+        py = -1.j*py.conj().transpose((1,0))
+        pz = -1.j*pz.conj().transpose((1,0))
         pax,pbx = scf_utils.u_mo_tran_1e(self.mf, px)
         pay,pby = scf_utils.u_mo_tran_1e(self.mf, py)
         paz,pbz = scf_utils.u_mo_tran_1e(self.mf, pz)
@@ -109,8 +109,8 @@ class solid_field_system(system):
             dt = t - self.t0
             ex = dt*dt/(2*self.sigma*self.sigma)
             phase = self.A0*numpy.exp(-ex)*numpy.cos(self.omega*dt)
-            Tta[i] = phase*paz
-            Ttb[i] = phase*pbz
+            Tta[i] = 2.0*phase*paz
+            Ttb[i] = 2.0*phase*pbz
         beta = 1.0 / (self.T + 1e-12)
         Fa = Tta.copy()
         Fb = Ttb.copy()
