@@ -89,18 +89,13 @@ def get_orbital_energies_gen(mf):
 
 
 def get_ao_den(mf):
+    print("ao_den")
     if len(mf.mo_occ.shape) == 1:
-        o = mf.mo_coeff[:,mf.mo_occ>0]
-        p = numpy.dot(o,o.T)
+        p = 0.5*mf.make_rdm1()
         return utils.block_diag(p,p)
 
     elif len(mf.mo_occ.shape) == 2:
-        mo_occa = mf.mo_occ[0]
-        mo_occb = mf.mo_occ[1]
-        oa = (mf.mo_coeff[0])[:,mo_occa>0]
-        ob = (mf.mo_coeff[1])[:,mo_occb>0]
-        pa = numpy.dot(oa, oa.T)
-        pb = numpy.dot(ob, ob.T)
+        pa,pb = mf.make_rdm1()
         return utils.block_diag(pa,pb)
 
     else:
@@ -130,12 +125,7 @@ def get_ao_fock(mf):
         return utils.block_diag(f,f)
 
     elif len(mf.mo_occ.shape) == 2:
-        mo_occa = mf.mo_occ[0]
-        mo_occb = mf.mo_occ[1]
-        oa = (mf.mo_coeff[0])[:,mo_occa>0]
-        ob = (mf.mo_coeff[1])[:,mo_occb>0]
-        pa = numpy.dot(oa, oa.T)
-        pb = numpy.dot(ob, ob.T)
+        pa,pb = mf.make_rdm1()
         dm = numpy.array((pa,pb))
         h1 = mf.get_hcore(mf.mol)
         pbc = False
