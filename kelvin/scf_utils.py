@@ -89,7 +89,6 @@ def get_orbital_energies_gen(mf):
 
 
 def get_ao_den(mf):
-    print("ao_den")
     if len(mf.mo_occ.shape) == 1:
         p = 0.5*mf.make_rdm1()
         return utils.block_diag(p,p)
@@ -175,7 +174,7 @@ def u_mo_tran_1e(mf, h):
         return ha,hb
 
 def get_ao_ft_fock(mf, fo):
-    f0 = get_ao_fock(mf)
+    #f0 = get_ao_fock(mf)
     n = fo.shape[0]/2
     pbc = False
     try:

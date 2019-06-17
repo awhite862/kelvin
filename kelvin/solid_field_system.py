@@ -96,7 +96,7 @@ class solid_field_system(system):
         nb = eb.shape[0]
         assert(na == nb)
         beta = 1.0 / (self.T + 1e-12)
-        px,py,pz = self.mf.cell.pbc_intor('int1e_ovlp', hermi=1, comp=3)
+        px,py,pz = self.mf.cell.pbc_intor('int1e_ipovlp', hermi=0, comp=3)
         px = -1.j*px.conj().transpose((1,0))
         py = -1.j*py.conj().transpose((1,0))
         pz = -1.j*pz.conj().transpose((1,0))
