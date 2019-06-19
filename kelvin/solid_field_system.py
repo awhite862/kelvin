@@ -109,13 +109,13 @@ class solid_field_system(system):
             dt = t - self.t0
             ex = dt*dt/(2*self.sigma*self.sigma)
             phase = self.A0*numpy.exp(-ex)*numpy.cos(self.omega*dt)
-            Tta[i] = 2.0*phase*paz
-            Ttb[i] = 2.0*phase*pbz
+            Tta[i] = phase*paz
+            Ttb[i] = phase*pbz
         beta = 1.0 / (self.T + 1e-12)
         Fa = Tta.copy()
         Fb = Ttb.copy()
-        Fa += fa 
-        Fb += fb
+        Fa += fa[None,:,:]
+        Fb += fb[None,:,:]
         if direc == 'b':
             tempa = Fa.copy()
             tempb = Fb.copy()
