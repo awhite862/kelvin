@@ -54,6 +54,33 @@ def get_gint(ng, delta):
             g[y] += delta / 3.0
     return g
 
+def get_gL(ng, delta):
+    g = numpy.zeros(ng)
+    for i in range(ng - 1):
+        g[i] = delta
+    return g
+
+def get_GL(ng, delta):
+    G = numpy.zeros((ng,ng))
+    for i in range(ng):
+        for j in range(i - 1):
+            G[i,j] = delta
+    return G
+
+def left(ng, beta):
+    delta = beta/(ng - 1.)
+    ti = numpy.asarray([float(i)*delta for i in range(ng)])
+    g = get_gL(ng,delta)
+    G = get_GL(ng,delta)
+    return ti,g,G
+
+def d_left(ng, beta):
+    delta = beta/(ng - 1.0)
+    ddelta = delta/beta
+    Gd = get_GL(ng, ddelta)
+    gd = get_gL(ng, ddelta)
+    return gd,Gd
+
 def midpoint(ng, beta):
     delta = beta/ng
     ti = numpy.asarray([float(i)*delta + delta/2 for i in range(ng)])
@@ -179,6 +206,8 @@ def ft_quad(ng, beta, quad):
         return simpsons_p(ng, beta, 3)
     elif quad == 'quar':
         return simpsons_p(ng, beta, 4)
+    elif quad == 'L':
+        return left(ng, beta)
     else:
         raise Exception("Unrecognized quadrature rule: {}".format(quad))
 
@@ -197,6 +226,8 @@ def d_ft_quad(ng, beta, quad):
         return d_simpsons_p(ng, beta, 3)
     elif quad == 'quar':
         return d_simpsons_p(ng, beta, 4)
+    elif quad == 'L':
+        return d_left(ng, beta)
     else:
         raise Exception("Unrecognized quadrature rule: {}".format(quad))
 
