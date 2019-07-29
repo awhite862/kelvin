@@ -17,7 +17,7 @@ def compute_ref(T1,T2,L1,L2,F,I,D1,D2,ti,ng,g,G,beta):
     A2 = (1.0/beta)*0.25*einsum('vijab,vabij->v',L2, T2temp)
     A1g = einsum('v,v->',A1,g)
     A2g = einsum('v,v->',A2,g)
-    return A1g + A2g + Eterm
+    return Eterm - A1g - A2g
 
 class FTCCSD_RDMTest(unittest.TestCase):
     def setUp(self):
@@ -89,7 +89,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
         out = (1.0/beta)*numpy.einsum('ba,ab->',pba,F.vv)
 
         diff = abs(out - ref)/abs(ref)
-        error = "Error in pia: {}".format(diff)
+        error = "Error in pba: {}".format(diff)
         self.assertTrue(diff < self.thresh, error)
 
     def test_dji(self):
@@ -122,7 +122,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
         out = (1.0/beta)*numpy.einsum('ji,ij->',pji,F.oo)
 
         diff = abs(out - ref)/abs(ref)
-        error = "Error in pia: {}".format(diff)
+        error = "Error in pji: {}".format(diff)
         self.assertTrue(diff < self.thresh, error)
 
     def test_dai(self):
@@ -155,7 +155,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
         out = (1.0/beta)*numpy.einsum('ai,ia->',pai,F.ov)
 
         diff = abs(out - ref)/abs(ref)
-        error = "Error in pia: {}".format(diff)
+        error = "Error in pai: {}".format(diff)
         self.assertTrue(diff < self.thresh, error)
 
     def test_dcdab(self):

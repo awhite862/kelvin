@@ -421,7 +421,7 @@ class FTCCReldenTest(unittest.TestCase):
         mu = 0.0
         damp = 0.2
         mi = 50
-        ethresh = 1e-11
+        ethresh = 1e-12
         thresh = 1e-11
         Oa = numpy.zeros((2))
         Ob = numpy.zeros((2))

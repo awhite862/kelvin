@@ -311,7 +311,7 @@ def lccd_lambda_simple(F,I,T2old,L2old,D2,ti,ng,g,G,beta):
 
     # energy term
     Id = numpy.ones((ng))
-    L2 += (1.0/beta)*einsum('v,ijab->vijab',Id,I.oovv)
+    L2 -= (1.0/beta)*einsum('v,ijab->vijab',Id,I.oovv)
     t2 = time.time()
 
     return L2
@@ -339,10 +339,10 @@ def lccsd_lambda_simple(F,I,T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G,beta):
 
     # energy term
     Id = numpy.ones((ng))
-    L1 += einsum('v,ia->via',Id,F.ov)
-    L2 += einsum('v,ijab->vijab',Id,I.oovv)
+    L1 -= einsum('v,ia->via',Id,F.ov)
+    L2 -= einsum('v,ijab->vijab',Id,I.oovv)
     for y in range(ng):
-        cc_equations._LS_TS(L1[y,:,:],I,T1old[y,:,:],fac=1.0)
+        cc_equations._LS_TS(L1[y,:,:],I,T1old[y,:,:],fac=-1.0)
     t2 = time.time()
 
     return L1,L2
@@ -381,10 +381,10 @@ def ccsd_lambda_simple(F,I,T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G,beta):
 
     # energy term
     Id = numpy.ones((ng))
-    L1 += einsum('v,ia->via',Id,F.ov)
-    L2 += einsum('v,ijab->vijab',Id,I.oovv)
+    L1 -= einsum('v,ia->via',Id,F.ov)
+    L2 -= einsum('v,ijab->vijab',Id,I.oovv)
     for y in range(ng):
-        cc_equations._LS_TS(L1[y,:,:],I,T1old[y,:,:],fac=1.0)
+        cc_equations._LS_TS(L1[y,:,:],I,T1old[y,:,:],fac=-1.0)
 
     return L1,L2
 
@@ -408,10 +408,10 @@ def ccsd_lambda_opt(F,I,T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G,beta):
 
     # energy term
     Id = numpy.ones((ng))
-    L1 += einsum('v,ia->via',Id,F.ov)
-    L2 += einsum('v,ijab->vijab',Id,I.oovv)
+    L1 -= einsum('v,ia->via',Id,F.ov)
+    L2 -= einsum('v,ijab->vijab',Id,I.oovv)
     for y in range(ng):
-        cc_equations._LS_TS(L1[y,:,:],I,T1old[y,:,:],fac=1.0)
+        cc_equations._LS_TS(L1[y,:,:],I,T1old[y,:,:],fac=-1.0)
 
     return L1,L2
 
@@ -453,14 +453,14 @@ def uccsd_lambda_opt(Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,T2aaold,T2abold,T2bbold,
 
     # energy term
     Id = numpy.ones((ng))
-    L1a += einsum('v,ia->via',Id,Fa.ov)
-    L1b += einsum('v,ia->via',Id,Fb.ov)
-    L2aa += einsum('v,ijab->vijab',Id,Ia.oovv)
-    L2ab += einsum('v,ijab->vijab',Id,Iabab.oovv)
-    L2bb += einsum('v,ijab->vijab',Id,Ib.oovv)
+    L1a -= einsum('v,ia->via',Id,Fa.ov)
+    L1b -= einsum('v,ia->via',Id,Fb.ov)
+    L2aa -= einsum('v,ijab->vijab',Id,Ia.oovv)
+    L2ab -= einsum('v,ijab->vijab',Id,Iabab.oovv)
+    L2bb -= einsum('v,ijab->vijab',Id,Ib.oovv)
     for y in range(ng):
         T1olds = (T1aold[y,:,:],T1bold[y,:,:])
-        cc_equations._u_LS_TS(L1a[y,:,:],L1b[y,:,:],Ia,Ib,Iabab,T1olds[0],T1olds[1])
+        cc_equations._u_LS_TS(L1a[y,:,:],L1b[y,:,:],Ia,Ib,Iabab,T1olds[0],T1olds[1],fac=-1.0)
 
     return L1a,L1b,L2aa,L2ab,L2bb
 
@@ -491,10 +491,10 @@ def ccsd_lambda_opt_int(F,I,T1old,T2old,L1old,L2old,intor,D1,D2,ti,ng,g,G,beta):
 
     # energy term
     Id = numpy.ones((ng))
-    L1 += einsum('v,ia->via',Id,F.ov)
-    L2 += einsum('v,ijab->vijab',Id,I.oovv)
+    L1 -= einsum('v,ia->via',Id,F.ov)
+    L2 -= einsum('v,ijab->vijab',Id,I.oovv)
     for y in range(ng):
-        cc_equations._LS_TS(L1[y,:,:],I,T1old[y,:,:],fac=1.0)
+        cc_equations._LS_TS(L1[y,:,:],I,T1old[y,:,:],fac=-1.0)
 
 
     return L1,L2
@@ -699,7 +699,7 @@ def ccd_lambda_simple(F,I,T2old,L2old,D2,ti,ng,g,G,beta):
 
     # energy term
     Id = numpy.ones((ng))
-    L2 += einsum('v,ijab->vijab',Id,I.oovv)
+    L2 -= einsum('v,ijab->vijab',Id,I.oovv)
     #L2 += (1.0/beta)*numpy.einsum('v,ijab->vijab',Id,I.oovv)
     t2 = time.time()
 
@@ -714,14 +714,14 @@ def ccsd_1rdm(T1,T2,L1,L2,D1,D2,ti,ng,g,G):
     assert(nt == ng)
 
     # compute response densities
-    pia = -numpy.einsum('sia,s->ia',L1new,g)
+    pia = numpy.einsum('sia,s->ia',L1new,g)
     pba = numpy.zeros((nv,nv))
     pji = numpy.zeros((no,no))
     pai = numpy.zeros((nv,no))
     for i in range(nt):
-        pba -= g[i]*cc_equations.ccsd_1rdm_ba_opt(T1[i],T2[i],L1new[i],L2new[i])
-        pji -= g[i]*cc_equations.ccsd_1rdm_ji_opt(T1[i],T2[i],L1new[i],L2new[i])
-        pai -= g[i]*cc_equations.ccsd_1rdm_ai_opt(T1[i],T2[i],L1new[i],L2new[i],tfac=-1.0)
+        pba += g[i]*cc_equations.ccsd_1rdm_ba_opt(T1[i],T2[i],L1new[i],L2new[i])
+        pji += g[i]*cc_equations.ccsd_1rdm_ji_opt(T1[i],T2[i],L1new[i],L2new[i])
+        pai += g[i]*cc_equations.ccsd_1rdm_ai_opt(T1[i],T2[i],L1new[i],L2new[i])
 
     return pia,pba,pji,pai
 
@@ -737,21 +737,21 @@ def ccsd_2rdm(T1,T2,L1,L2,D1,D2,ti,ng,g,G):
     Pcdab = numpy.zeros((nv,nv,nv,nv))
     Pciab = numpy.zeros((nv,no,nv,nv))
     Pbcai = numpy.zeros((nv,nv,nv,no))
-    Pijab = -einsum('sijab,s->ijab',L2new,g)
+    Pijab = einsum('sijab,s->ijab',L2new,g)
     Pbjai = numpy.zeros((nv,no,nv,no))
     Pabij = numpy.zeros((nv,nv,no,no))
     Pjkai = numpy.zeros((no,no,nv,no))
     Pkaij = numpy.zeros((no,nv,no,no))
     Pklij = numpy.zeros((no,no,no,no))
     for i in range(nt):
-        Pcdab -= g[i]*cc_equations.ccsd_2rdm_cdab_opt(T1[i],T2[i],L1new[i],L2new[i])
-        Pciab -= g[i]*cc_equations.ccsd_2rdm_ciab_opt(T1[i],T2[i],L1new[i],L2new[i])
-        Pbcai -= g[i]*cc_equations.ccsd_2rdm_bcai_opt(T1[i],T2[i],L1new[i],L2new[i])
-        Pbjai -= g[i]*cc_equations.ccsd_2rdm_bjai_opt(T1[i],T2[i],L1new[i],L2new[i])
-        Pabij -= g[i]*cc_equations.ccsd_2rdm_abij_opt(T1[i],T2[i],L1new[i],L2new[i],tfac=-1.0)
-        Pjkai -= g[i]*cc_equations.ccsd_2rdm_jkai_opt(T1[i],T2[i],L1new[i],L2new[i])
-        Pkaij -= g[i]*cc_equations.ccsd_2rdm_kaij_opt(T1[i],T2[i],L1new[i],L2new[i])
-        Pklij -= g[i]*cc_equations.ccsd_2rdm_klij_opt(T1[i],T2[i],L1new[i],L2new[i])
+        Pcdab += g[i]*cc_equations.ccsd_2rdm_cdab_opt(T1[i],T2[i],L1new[i],L2new[i])
+        Pciab += g[i]*cc_equations.ccsd_2rdm_ciab_opt(T1[i],T2[i],L1new[i],L2new[i])
+        Pbcai += g[i]*cc_equations.ccsd_2rdm_bcai_opt(T1[i],T2[i],L1new[i],L2new[i])
+        Pbjai += g[i]*cc_equations.ccsd_2rdm_bjai_opt(T1[i],T2[i],L1new[i],L2new[i])
+        Pabij += g[i]*cc_equations.ccsd_2rdm_abij_opt(T1[i],T2[i],L1new[i],L2new[i])
+        Pjkai += g[i]*cc_equations.ccsd_2rdm_jkai_opt(T1[i],T2[i],L1new[i],L2new[i])
+        Pkaij += g[i]*cc_equations.ccsd_2rdm_kaij_opt(T1[i],T2[i],L1new[i],L2new[i])
+        Pklij += g[i]*cc_equations.ccsd_2rdm_klij_opt(T1[i],T2[i],L1new[i],L2new[i])
 
     return (Pcdab, Pciab, Pbcai, Pijab, Pbjai, Pabij, Pjkai, Pkaij, Pklij)
 
@@ -770,8 +770,8 @@ def uccsd_1rdm(T1a,T1b,T2aa,T2ab,T2bb,L1a,L1b,L2aa,L2ab,L2bb,
     L2bbnew = quadrature.int_L2(ng,L2bb,ti,D2bb,g,G)
 
     # spin blocks of the response densities
-    pia = -numpy.einsum('sia,s->ia',L1anew,g)
-    pIA = -numpy.einsum('sia,s->ia',L1bnew,g)
+    pia = numpy.einsum('sia,s->ia',L1anew,g)
+    pIA = numpy.einsum('sia,s->ia',L1bnew,g)
     pba = numpy.zeros((nva,nva))
     pBA = numpy.zeros((nvb,nvb))
     pji = numpy.zeros((noa,noa))
@@ -781,18 +781,18 @@ def uccsd_1rdm(T1a,T1b,T2aa,T2ab,T2bb,L1a,L1b,L2aa,L2ab,L2bb,
     for i in range(ng):
         pba_tot = cc_equations.uccsd_1rdm_ba(T1a[i],T1b[i],T2aa[i],T2ab[i],T2bb[i],
                 L1anew[i],L1bnew[i],L2aanew[i],L2abnew[i],L2bbnew[i])
-        pba -= g[i]*pba_tot[0]
-        pBA -= g[i]*pba_tot[1]
+        pba += g[i]*pba_tot[0]
+        pBA += g[i]*pba_tot[1]
 
         pji_tot = cc_equations.uccsd_1rdm_ji(T1a[i],T1b[i],T2aa[i],T2ab[i],T2bb[i],
                 L1anew[i],L1bnew[i],L2aanew[i],L2abnew[i],L2bbnew[i])
-        pji -= g[i]*pji_tot[0]
-        pJI -= g[i]*pji_tot[1]
+        pji += g[i]*pji_tot[0]
+        pJI += g[i]*pji_tot[1]
 
         pai_tot = cc_equations.uccsd_1rdm_ai(T1a[i],T1b[i],T2aa[i],T2ab[i],T2bb[i],
-                L1anew[i],L1bnew[i],L2aanew[i],L2abnew[i],L2bbnew[i],tfac=-1.0)
-        pai -= g[i]*pai_tot[0]
-        pAI -= g[i]*pai_tot[1]
+                L1anew[i],L1bnew[i],L2aanew[i],L2abnew[i],L2bbnew[i])
+        pai += g[i]*pai_tot[0]
+        pAI += g[i]*pai_tot[1]
 
     return (pia,pIA),(pba,pBA),(pji,pJI),(pai,pAI)
 
@@ -813,7 +813,7 @@ def uccsd_2rdm(T1a,T1b,T2aa,T2ab,T2bb,L1a,L1b,L2aa,L2ab,L2bb,
     Pcdab = numpy.zeros((nva,nva,nva,nva))
     Pciab = numpy.zeros((nva,noa,nva,nva))
     Pbcai = numpy.zeros((nva,nva,nva,noa))
-    Pijab = -einsum('sijab,s->ijab',L2aanew,g)
+    Pijab = einsum('sijab,s->ijab',L2aanew,g)
     Pbjai = numpy.zeros((nva,noa,nva,noa))
     Pabij = numpy.zeros((nva,nva,noa,noa))
     Pjkai = numpy.zeros((noa,noa,nva,noa))
@@ -823,7 +823,7 @@ def uccsd_2rdm(T1a,T1b,T2aa,T2ab,T2bb,L1a,L1b,L2aa,L2ab,L2bb,
     PCDAB = numpy.zeros((nvb,nvb,nvb,nvb))
     PCIAB = numpy.zeros((nvb,nob,nvb,nvb))
     PBCAI = numpy.zeros((nvb,nvb,nvb,nob))
-    PIJAB = -einsum('sijab,s->ijab',L2bbnew,g)
+    PIJAB = einsum('sijab,s->ijab',L2bbnew,g)
     PBJAI = numpy.zeros((nvb,nob,nvb,nob))
     PABIJ = numpy.zeros((nvb,nvb,nob,nob))
     PJKAI = numpy.zeros((nob,nob,nvb,nob))
@@ -833,7 +833,7 @@ def uccsd_2rdm(T1a,T1b,T2aa,T2ab,T2bb,L1a,L1b,L2aa,L2ab,L2bb,
     PcDaB = numpy.zeros((nva,nvb,nva,nvb))
     PcIaB = numpy.zeros((nva,nob,nva,nvb))
     PbCaI = numpy.zeros((nva,nvb,nva,nob))
-    PiJaB = -einsum('sijab,s->ijab',L2abnew,g)
+    PiJaB = einsum('sijab,s->ijab',L2abnew,g)
     PbJaI = numpy.zeros((nva,nob,nva,nob))
     PaBiJ = numpy.zeros((nva,nvb,noa,nob))
     PjKaI = numpy.zeros((noa,nob,nva,nob))
@@ -854,58 +854,58 @@ def uccsd_2rdm(T1a,T1b,T2aa,T2ab,T2bb,L1a,L1b,L2aa,L2ab,L2bb,
     for i in range(ng):
         Pcdab_tot = cc_equations.uccsd_2rdm_cdab(T1a[i],T1b[i],T2aa[i],T2ab[i],T2bb[i],
                 L1anew[i],L1bnew[i],L2aanew[i],L2abnew[i],L2bbnew[i])
-        Pcdab -= g[i]*Pcdab_tot[0]
-        PCDAB -= g[i]*Pcdab_tot[1]
-        PcDaB -= g[i]*Pcdab_tot[2]
+        Pcdab += g[i]*Pcdab_tot[0]
+        PCDAB += g[i]*Pcdab_tot[1]
+        PcDaB += g[i]*Pcdab_tot[2]
 
         Pciab_tot = cc_equations.uccsd_2rdm_ciab(T1a[i],T1b[i],T2aa[i],T2ab[i],T2bb[i],
                 L1anew[i],L1bnew[i],L2aanew[i],L2abnew[i],L2bbnew[i])
-        Pciab -= g[i]*Pciab_tot[0]
-        PCIAB -= g[i]*Pciab_tot[1]
-        PcIaB -= g[i]*Pciab_tot[2]
-        PCiAb -= g[i]*Pciab_tot[3]
+        Pciab += g[i]*Pciab_tot[0]
+        PCIAB += g[i]*Pciab_tot[1]
+        PcIaB += g[i]*Pciab_tot[2]
+        PCiAb += g[i]*Pciab_tot[3]
 
         Pbcai_tot = cc_equations.uccsd_2rdm_bcai(T1a[i],T1b[i],T2aa[i],T2ab[i],T2bb[i],
                 L1anew[i],L1bnew[i],L2aanew[i],L2abnew[i],L2bbnew[i])
-        Pbcai -= g[i]*Pbcai_tot[0]
-        PBCAI -= g[i]*Pbcai_tot[1]
-        PbCaI -= g[i]*Pbcai_tot[2]
-        PBcAi -= g[i]*Pbcai_tot[3]
+        Pbcai += g[i]*Pbcai_tot[0]
+        PBCAI += g[i]*Pbcai_tot[1]
+        PbCaI += g[i]*Pbcai_tot[2]
+        PBcAi += g[i]*Pbcai_tot[3]
 
         Pbjai_tot = cc_equations.uccsd_2rdm_bjai(T1a[i],T1b[i],T2aa[i],T2ab[i],T2bb[i],
                 L1anew[i],L1bnew[i],L2aanew[i],L2abnew[i],L2bbnew[i])
-        Pbjai -= g[i]*Pbjai_tot[0]
-        PBJAI -= g[i]*Pbjai_tot[1]
-        PbJaI -= g[i]*Pbjai_tot[2]
-        PbJAi -= g[i]*Pbjai_tot[3]
-        PBjaI -= g[i]*Pbjai_tot[4]
-        PBjAi -= g[i]*Pbjai_tot[5]
+        Pbjai += g[i]*Pbjai_tot[0]
+        PBJAI += g[i]*Pbjai_tot[1]
+        PbJaI += g[i]*Pbjai_tot[2]
+        PbJAi += g[i]*Pbjai_tot[3]
+        PBjaI += g[i]*Pbjai_tot[4]
+        PBjAi += g[i]*Pbjai_tot[5]
 
         Pabij_tot = cc_equations.uccsd_2rdm_abij(T1a[i],T1b[i],T2aa[i],T2ab[i],T2bb[i],
-                L1anew[i],L1bnew[i],L2aanew[i],L2abnew[i],L2bbnew[i],tfac=-1.0)
-        Pabij -= g[i]*Pabij_tot[0]
-        PABIJ -= g[i]*Pabij_tot[1]
-        PaBiJ -= g[i]*Pabij_tot[2]
+                L1anew[i],L1bnew[i],L2aanew[i],L2abnew[i],L2bbnew[i])
+        Pabij += g[i]*Pabij_tot[0]
+        PABIJ += g[i]*Pabij_tot[1]
+        PaBiJ += g[i]*Pabij_tot[2]
 
         Pjkai_tot = cc_equations.uccsd_2rdm_jkai(T1a[i],T1b[i],T2aa[i],T2ab[i],T2bb[i],
                 L1anew[i],L1bnew[i],L2aanew[i],L2abnew[i],L2bbnew[i])
-        Pjkai -= g[i]*Pjkai_tot[0]
-        PJKAI -= g[i]*Pjkai_tot[1]
-        PjKaI -= g[i]*Pjkai_tot[2]
-        PJkAi -= g[i]*Pjkai_tot[3]
+        Pjkai += g[i]*Pjkai_tot[0]
+        PJKAI += g[i]*Pjkai_tot[1]
+        PjKaI += g[i]*Pjkai_tot[2]
+        PJkAi += g[i]*Pjkai_tot[3]
 
         Pkaij_tot = cc_equations.uccsd_2rdm_kaij(T1a[i],T1b[i],T2aa[i],T2ab[i],T2bb[i],
                 L1anew[i],L1bnew[i],L2aanew[i],L2abnew[i],L2bbnew[i])
-        Pkaij -= g[i]*Pkaij_tot[0]
-        PKAIJ -= g[i]*Pkaij_tot[1]
-        PkAiJ -= g[i]*Pkaij_tot[2]
-        PKaIj -= g[i]*Pkaij_tot[3]
+        Pkaij += g[i]*Pkaij_tot[0]
+        PKAIJ += g[i]*Pkaij_tot[1]
+        PkAiJ += g[i]*Pkaij_tot[2]
+        PKaIj += g[i]*Pkaij_tot[3]
 
         Pklij_tot = cc_equations.uccsd_2rdm_klij(T1a[i],T1b[i],T2aa[i],T2ab[i],T2bb[i],
                 L1anew[i],L1bnew[i],L2aanew[i],L2abnew[i],L2bbnew[i])
-        Pklij -= g[i]*Pklij_tot[0]
-        PKLIJ -= g[i]*Pklij_tot[1]
-        PkLiJ -= g[i]*Pklij_tot[2]
+        Pklij += g[i]*Pklij_tot[0]
+        PKLIJ += g[i]*Pklij_tot[1]
+        PkLiJ += g[i]*Pklij_tot[2]
 
     return ((Pcdab,PCDAB,PcDaB),
             (Pciab,PCIAB,PcIaB,PCiAb),

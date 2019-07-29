@@ -1389,8 +1389,8 @@ class ccsd(object):
         A1 = (1.0/beta)*einsum('via,vai->v',self.L1, T1temp)
         A2 = (1.0/beta)*0.25*einsum('vijab,vabij->v',self.L2, T2temp)
 
-        A1g = einsum('v,v->',A1,g)
-        A2g = einsum('v,v->',A2,g)
+        A1g = -einsum('v,v->',A1,g)
+        A2g = -einsum('v,v->',A2,g)
         dG = A1g + A2g
 
         # append derivative with respect to ti points
@@ -1406,8 +1406,8 @@ class ccsd(object):
         T1temp *= D1
         T2temp *= D2
 
-        A1 = (1.0/beta)*einsum('via,vai->v',self.L1, T1temp)
-        A2 = (1.0/beta)*0.25*einsum('vijab,vabij->v',self.L2, T2temp)
+        A1 = -(1.0/beta)*einsum('via,vai->v',self.L1, T1temp)
+        A2 = -(1.0/beta)*0.25*einsum('vijab,vabij->v',self.L2, T2temp)
 
         A1g = einsum('v,v->',A1,g)
         A2g = einsum('v,v->',A2,g)
@@ -1484,11 +1484,11 @@ class ccsd(object):
         T1t,T2t = ft_cc_equations.uccsd_stanton(Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,
                 T2aaold,T2abold,T2bbold,D1a,D1b,D2aa,D2ab,D2bb,ti,ng,Gd)
 
-        A1a = (1.0/beta)*einsum('via,vai->v',L1aold, T1t[0])
-        A1b = (1.0/beta)*einsum('via,vai->v',L1bold, T1t[1])
-        A2a = (1.0/beta)*0.25*einsum('vijab,vabij->v',L2aaold, T2t[0])
-        A2b = (1.0/beta)*0.25*einsum('vijab,vabij->v',L2bbold, T2t[2])
-        A2ab = (1.0/beta)*einsum('vijab,vabij->v',L2abold, T2t[1])
+        A1a = -(1.0/beta)*einsum('via,vai->v',L1aold, T1t[0])
+        A1b = -(1.0/beta)*einsum('via,vai->v',L1bold, T1t[1])
+        A2a = -(1.0/beta)*0.25*einsum('vijab,vabij->v',L2aaold, T2t[0])
+        A2b = -(1.0/beta)*0.25*einsum('vijab,vabij->v',L2bbold, T2t[2])
+        A2ab = -(1.0/beta)*einsum('vijab,vabij->v',L2abold, T2t[1])
 
         A2g = einsum('v,v->',A2a,g)
         A2g += einsum('v,v->',A2ab,g)
@@ -1515,11 +1515,11 @@ class ccsd(object):
         T2ab *= D2ab
         T2bb *= D2bb
 
-        A1a = (1.0/beta)*einsum('via,vai->v',L1aold, T1a)
-        A1b = (1.0/beta)*einsum('via,vai->v',L1bold, T1b)
-        A2a = (1.0/beta)*0.25*einsum('vijab,vabij->v',L2aaold, T2aa)
-        A2b = (1.0/beta)*0.25*einsum('vijab,vabij->v',L2bbold, T2bb)
-        A2ab = (1.0/beta)*einsum('vijab,vabij->v',L2abold, T2ab)
+        A1a = -(1.0/beta)*einsum('via,vai->v',L1aold, T1a)
+        A1b = -(1.0/beta)*einsum('via,vai->v',L1bold, T1b)
+        A2a = -(1.0/beta)*0.25*einsum('vijab,vabij->v',L2aaold, T2aa)
+        A2b = -(1.0/beta)*0.25*einsum('vijab,vabij->v',L2bbold, T2bb)
+        A2ab = -(1.0/beta)*einsum('vijab,vabij->v',L2abold, T2ab)
 
         A2g = einsum('v,v->',A2a,g)
         A2g += einsum('v,v->',A2ab,g)
@@ -1819,12 +1819,12 @@ class ccsd(object):
             D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
         T1temp,T2temp = ft_cc_equations.ccsd_stanton(F,I,self.T1,self.T2,
                 D1,D2,self.ti,ng,Gnew)
-        At1i = (1.0/beta)*einsum('via,vai->vi',self.L1, T1temp)
-        At1a = (1.0/beta)*einsum('via,vai->va',self.L1, T1temp)
-        At2i = (1.0/beta)*0.25*einsum('vijab,vabij->vi',self.L2, T2temp)
-        At2j = (1.0/beta)*0.25*einsum('vijab,vabij->vj',self.L2, T2temp)
-        At2a = (1.0/beta)*0.25*einsum('vijab,vabij->va',self.L2, T2temp)
-        At2b = (1.0/beta)*0.25*einsum('vijab,vabij->vb',self.L2, T2temp)
+        At1i = -(1.0/beta)*einsum('via,vai->vi',self.L1, T1temp)
+        At1a = -(1.0/beta)*einsum('via,vai->va',self.L1, T1temp)
+        At2i = -(1.0/beta)*0.25*einsum('vijab,vabij->vi',self.L2, T2temp)
+        At2j = -(1.0/beta)*0.25*einsum('vijab,vabij->vj',self.L2, T2temp)
+        At2a = -(1.0/beta)*0.25*einsum('vijab,vabij->va',self.L2, T2temp)
+        At2b = -(1.0/beta)*0.25*einsum('vijab,vabij->vb',self.L2, T2temp)
         if self.athresh > 0.0:
             self.rdji[numpy.ix_(iocc,iocc)] -= numpy.diag(einsum('vi,v->i',At1i+At2i+At2j,self.g))
             self.rdba[numpy.ix_(ivir,ivir)] += numpy.diag(einsum('va,v->a',At1a+At2a+At2b,self.g))
@@ -2169,22 +2169,22 @@ class ccsd(object):
             D2bb = D2bb[numpy.ix_(ivirb,ivirb,ioccb,ioccb)]
         T1t,T2t = ft_cc_equations.uccsd_stanton(Fa,Fb,Ia,Ib,Iabab,self.T1[0],self.T1[1],
                 self.T2[0],self.T2[1],self.T2[2],D1a,D1b,D2aa,D2ab,D2bb,self.ti,ng,Gnew)
-        At1i = (1.0/beta)*einsum('via,vai->vi',self.L1[0], T1t[0])
-        At1I = (1.0/beta)*einsum('via,vai->vi',self.L1[1], T1t[1])
-        At1a = (1.0/beta)*einsum('via,vai->va',self.L1[0], T1t[0])
-        At1A = (1.0/beta)*einsum('via,vai->va',self.L1[1], T1t[1])
-        At2i = (1.0/beta)*0.25*einsum('vijab,vabij->vi',self.L2[0], T2t[0])
-        At2I = (1.0/beta)*0.25*einsum('vijab,vabij->vi',self.L2[2], T2t[2])
-        At2j = (1.0/beta)*0.25*einsum('vijab,vabij->vj',self.L2[0], T2t[0])
-        At2J = (1.0/beta)*0.25*einsum('vijab,vabij->vj',self.L2[2], T2t[2])
-        At2a = (1.0/beta)*0.25*einsum('vijab,vabij->va',self.L2[0], T2t[0])
-        At2A = (1.0/beta)*0.25*einsum('vijab,vabij->va',self.L2[2], T2t[2])
-        At2b = (1.0/beta)*0.25*einsum('vijab,vabij->vb',self.L2[0], T2t[0])
-        At2B = (1.0/beta)*0.25*einsum('vijab,vabij->vb',self.L2[2], T2t[2])
-        At2i += (1.0/beta)*einsum('viJaB,vaBiJ->vi',self.L2[1], T2t[1])
-        At2J += (1.0/beta)*einsum('viJaB,vaBiJ->vJ',self.L2[1], T2t[1])
-        At2a += (1.0/beta)*einsum('viJaB,vaBiJ->va',self.L2[1], T2t[1])
-        At2B += (1.0/beta)*einsum('viJaB,vaBiJ->vB',self.L2[1], T2t[1])
+        At1i = -(1.0/beta)*einsum('via,vai->vi',self.L1[0], T1t[0])
+        At1I = -(1.0/beta)*einsum('via,vai->vi',self.L1[1], T1t[1])
+        At1a = -(1.0/beta)*einsum('via,vai->va',self.L1[0], T1t[0])
+        At1A = -(1.0/beta)*einsum('via,vai->va',self.L1[1], T1t[1])
+        At2i = -(1.0/beta)*0.25*einsum('vijab,vabij->vi',self.L2[0], T2t[0])
+        At2I = -(1.0/beta)*0.25*einsum('vijab,vabij->vi',self.L2[2], T2t[2])
+        At2j = -(1.0/beta)*0.25*einsum('vijab,vabij->vj',self.L2[0], T2t[0])
+        At2J = -(1.0/beta)*0.25*einsum('vijab,vabij->vj',self.L2[2], T2t[2])
+        At2a = -(1.0/beta)*0.25*einsum('vijab,vabij->va',self.L2[0], T2t[0])
+        At2A = -(1.0/beta)*0.25*einsum('vijab,vabij->va',self.L2[2], T2t[2])
+        At2b = -(1.0/beta)*0.25*einsum('vijab,vabij->vb',self.L2[0], T2t[0])
+        At2B = -(1.0/beta)*0.25*einsum('vijab,vabij->vb',self.L2[2], T2t[2])
+        At2i -= (1.0/beta)*einsum('viJaB,vaBiJ->vi',self.L2[1], T2t[1])
+        At2J -= (1.0/beta)*einsum('viJaB,vaBiJ->vJ',self.L2[1], T2t[1])
+        At2a -= (1.0/beta)*einsum('viJaB,vaBiJ->va',self.L2[1], T2t[1])
+        At2B -= (1.0/beta)*einsum('viJaB,vaBiJ->vB',self.L2[1], T2t[1])
         if self.athresh > 0.0:
             self.rdji[0][numpy.ix_(iocca,iocca)] -= numpy.diag(einsum('vi,v->i',At1i+At2i+At2j,self.g))
             self.rdji[1][numpy.ix_(ioccb,ioccb)] -= numpy.diag(einsum('vi,v->i',At1I+At2I+At2J,self.g))

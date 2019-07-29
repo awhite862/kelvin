@@ -62,8 +62,8 @@ def test_L1(cc,thresh):
                 TEb += numpy.einsum('yia,yai->y',cc.L1,TB1)
                 Tef = (1.0/beta)*numpy.einsum('y,y->',TEf,g)
                 Teb = (1.0/beta)*numpy.einsum('y,y->',TEb,g)
-                fw = EF + Tef
-                bw = EB + Teb
+                fw = EF - Tef
+                bw = EB - Teb
                 diff = (fw - bw)/(2*d)
                 if numpy.abs(diff) > thresh:
                     return ('{} {} {}: {}'.format(y,i,a,diff),False)
@@ -112,8 +112,8 @@ def test_L2(cc,thresh):
                         TEb += numpy.einsum('yia,yai->y',cc.L1,TB1)
                         Tef = (1.0/beta)*numpy.einsum('y,y->',TEf,g)
                         Teb = (1.0/beta)*numpy.einsum('y,y->',TEb,g)
-                        fw = EF + Tef
-                        bw = EB + Teb
+                        fw = EF - Tef
+                        bw = EB - Teb
                         diff = (fw - bw)/(2*d)
                         if numpy.abs(diff) > 1e-7:
                             return ('{} {} {} {} {}: {}'.format(y,i,j,a,b,diff),False)
@@ -247,14 +247,14 @@ class FTLambdaTest(unittest.TestCase):
                     TEb += numpy.einsum('yia,yai->y',L1,TB1)
                     Tef = (1.0/beta)*numpy.einsum('y,y->',TEf,g)
                     Teb = (1.0/beta)*numpy.einsum('y,y->',TEb,g)
-                    fw = EF + Tef
-                    bw = EB + Teb
+                    fw = EF - Tef
+                    bw = EB - Teb
                     dT1[y,a,i] = (fw - bw)/(2*d)
 
         # compute derivative from Lambda equations
         dT1L = numpy.zeros((ng,n,n))
         dT1L,L2n = ft_cc_equations.ccsd_lambda_simple(F,I,cc.T1,cc.T2,L1,L2,D1,D2,ti,ng,g,G,beta)
-        dT1L -= L1
+        dT1L = -(dT1L - L1)
         dT1L = dT1L.transpose((0,2,1))
         for y in range(ng):
             dT1L[y] *= g[y]/beta
