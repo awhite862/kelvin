@@ -21,6 +21,7 @@ from kelvin.tests import test_neq_lambda
 from kelvin.tests import test_neq_lambda_equation
 from kelvin.tests import test_neq_prop
 from kelvin.tests import test_quadrature
+from kelvin.tests import test_rt_ccsd
 from kelvin.tests import test_scf
 from kelvin.tests import test_test
 from kelvin.tests import test_ueg
@@ -151,6 +152,10 @@ def full_suite():
     suite.addTest(test_quadrature.QuadTest("test_d_simpson_sin"))
     suite.addTest(test_quadrature.QuadTest("test_d_simpson_exp"))
     suite.addTest(test_quadrature.QuadTest("test_d_simpson_p"))
+
+    suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_rk1"))
+    suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_rk2"))
+    suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_rk4"))
 
     suite.addTest(test_scf.SCFTest("test_Be_sto3g_energy"))
     suite.addTest(test_scf.SCFTest("test_diamond_energy"))

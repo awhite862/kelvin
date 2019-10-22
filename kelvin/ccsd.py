@@ -862,7 +862,7 @@ class ccsd(object):
                     self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
 
             T1ashape = (ng,nvira,nocca)
-            T2bshape = (ng,nvirb,noccb)
+            T1bshape = (ng,nvirb,noccb)
 
         else:
             # get scaled integrals
@@ -878,7 +878,7 @@ class ccsd(object):
             D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
                     - eb[None,None,:,None] - eb[None,None,None,:]
             T1ashape = (ng,na,na)
-            T2bshape = (ng,nb,nb)
+            T1bshape = (ng,nb,nb)
 
         method = "CCSD" if self.singles else "CCD"
         conv_options = {
