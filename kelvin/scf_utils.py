@@ -102,13 +102,13 @@ def get_ao_den(mf):
 
 def get_ao_ft_den(mf, fo):
     if len(mf.mo_occ.shape) == 1:
-        n = fo.shape[0]/2
+        n = fo.shape[0]//2
         mo = mf.mo_coeff
         p = numpy.dot(numpy.dot(mo,numpy.diag(fo[:n])),mo.T)
         return utils.block_diag(p,p)
 
     elif len(mf.mo_occ.shape) == 2:
-        n = fo.shape[0]/2
+        n = fo.shape[0]//2
         moa = mf.mo_coeff[0]
         mob = mf.mo_coeff[1]
         pa = numpy.dot(numpy.dot(moa,numpy.diag(fo[:n])),moa.T)
@@ -175,7 +175,7 @@ def u_mo_tran_1e(mf, h):
 
 def get_ao_ft_fock(mf, fo):
     #f0 = get_ao_fock(mf)
-    n = fo.shape[0]/2
+    n = fo.shape[0]//2
     pbc = False
     try:
         ktemp = mf.kpt
@@ -274,7 +274,7 @@ def get_u_ft_fock(mf, foa, fob):
 
 
 def get_mo_ft_fock(mf, fo):
-    n = fo.shape[0]/2
+    n = fo.shape[0]//2
     pbc = False
     try:
         ktemp = mf.kpt
@@ -313,7 +313,7 @@ def get_mo_ft_fock(mf, fo):
         raise Exception("unrecognized SCF type")
 
 def get_mo_d_ft_fock(mf, fo, fv, dvec):
-    n = fo.shape[0]/2
+    n = fo.shape[0]//2
     fov = dvec*fo*fv
     pbc = False
     try:

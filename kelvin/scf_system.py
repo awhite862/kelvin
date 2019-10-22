@@ -1,4 +1,5 @@
 import numpy
+import functools
 from pyscf import gto, scf
 from cqcpy import ft_utils
 from cqcpy import integrals
@@ -241,7 +242,7 @@ class scf_system(system):
 
     def r_hcore(self):
         hcore = self.mf.get_hcore()
-        h1e = reduce(numpy.dot, (self.mf.mo_coeff.T, hcore, self.mf.mo_coeff))
+        h1e = list(functools.reduce(numpy.dot, (self.mf.mo_coeff.T, hcore, self.mf.mo_coeff)))
         return h1e
 
     #def g_hcore(self):
