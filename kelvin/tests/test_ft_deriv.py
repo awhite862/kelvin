@@ -1,13 +1,18 @@
 import unittest
 import numpy
 from pyscf import gto, scf, cc
-from lattice.hubbard import Hubbard1D
 from kelvin.ccsd import ccsd
 from kelvin.scf_system import scf_system
 from kelvin.ueg_system import ueg_system
 from kelvin.ueg_scf_system import ueg_scf_system
 from kelvin.pueg_system import pueg_system
-from kelvin.hubbard_system import HubbardSystem
+
+try:
+    from lattice.hubbard import Hubbard1D
+    from kelvin.hubbard_system import HubbardSystem
+    has_lattice = True
+except:
+    has_lattice = False
 
 def fd_ESN(m, T, mu, ng, Ecctot, athresh = 0.0, quad = 'lin'):
     delta = 5e-4
@@ -400,6 +405,7 @@ class FTDerivTest(unittest.TestCase):
         self.assertTrue(dS < self.uegthresh,eS)
         self.assertTrue(dN < self.uegthresh,eN)
 
+    @unittest.skipUnless(has_lattice, "Lattice module cannot be found")
     def test_hubbard(self):
         T = 0.7
         mu = 0.0

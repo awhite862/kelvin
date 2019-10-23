@@ -2,14 +2,19 @@ import unittest
 import numpy
 from pyscf import gto, scf
 from cqcpy import utils
-from lattice.hubbard import Hubbard1D
 from kelvin.ccsd import ccsd
-from kelvin.hubbard_system import HubbardSystem
 from kelvin.scf_system import scf_system
 from kelvin.ueg_system import ueg_system
 from kelvin.ueg_scf_system import ueg_scf_system
 from kelvin.pueg_system import pueg_system
 from kelvin import scf_utils
+
+try:
+    from lattice.hubbard import Hubbard1D
+    from kelvin.hubbard_system import HubbardSystem
+    has_lattice = True
+except:
+    has_lattice = False
 
 class FTCCReldenTest(unittest.TestCase):
     def setUp(self):
@@ -388,6 +393,7 @@ class FTCCReldenTest(unittest.TestCase):
         self.assertTrue(diffa < thresh, "Error in normal-ordered alpha rdm: {}".format(diffa))
         self.assertTrue(diffb < thresh, "Error in normal-ordered beta rdm: {}".format(diffb))
 
+    @unittest.skipUnless(has_lattice, "Lattice module cannot be found")
     def test_hubbard(self):
         T = 0.5
         L = 2
@@ -414,6 +420,7 @@ class FTCCReldenTest(unittest.TestCase):
         error = "Expected: {}  Actual: {}".format(Nref,Nout)
         self.assertTrue(diff < self.thresh,error)
 
+    @unittest.skipUnless(has_lattice, "Lattice module cannot be found")
     def test_Hubbard_gu(self):
         T = 1.0
         L = 2

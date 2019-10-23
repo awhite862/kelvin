@@ -4,11 +4,16 @@ from cqcpy.utils import block_diag
 from kelvin.fci import fci
 from kelvin.ccsd import ccsd
 from kelvin.neq_ccsd import neq_ccsd
-from kelvin.hubbard_site_system import hubbard_site_system 
-from kelvin.hubbard_system import HubbardSystem
-from kelvin.hubbard_field_system import hubbard_field_system 
-from lattice.hubbard import Hubbard1D
-from lattice.fci import FCISimple
+try:
+    from lattice.hubbard import Hubbard1D
+    from lattice.fci import FCISimple
+    from kelvin.hubbard_site_system import hubbard_site_system
+    from kelvin.hubbard_system import HubbardSystem
+    from kelvin.hubbard_field_system import hubbard_field_system
+    has_lattice = True
+except:
+    has_lattice = False
+
 
 def buildH(hub, phase=None):
     dim = 16
@@ -52,6 +57,7 @@ def matrix_exp(M):
 
     return U
 
+@unittest.skipUnless(has_lattice, "Lattice module cannot be found")
 class HubbardFieldTest(unittest.TestCase):
     def setUp(self):
         pass

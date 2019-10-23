@@ -2,15 +2,20 @@ import unittest
 import numpy
 from pyscf import gto, scf
 
-from lattice.hubbard import Hubbard1D
 from cqcpy import ft_utils
 from cqcpy import utils
 
-from kelvin.hubbard_system import HubbardSystem
 from kelvin.ccsd import ccsd
 from kelvin.scf_system import scf_system
 from kelvin import cc_utils
 from numpy import einsum
+
+try:
+    from lattice.hubbard import Hubbard1D
+    from kelvin.hubbard_system import HubbardSystem
+    has_lattice = True
+except:
+    has_lattice = False
 
 class FakeHubbardSystem(object):
     def __init__(self,sys,M=None):
@@ -56,6 +61,7 @@ class FTCC2RDMTest(unittest.TestCase):
     def setUp(self):
         self.thresh = 1e-14
 
+    @unittest.skipUnless(has_lattice, "Lattice module cannot be found")
     def test_hubbard(self):
         U = 1.0
         T = 1.0

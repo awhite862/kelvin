@@ -2,10 +2,14 @@ import unittest
 import numpy
 from kelvin.fci import fci
 from kelvin.ccsd import ccsd
-from kelvin.hubbard_site_system import hubbard_site_system 
-from kelvin.hubbard_system import HubbardSystem
-from lattice.hubbard import Hubbard1D
-from lattice.fci import FCISimple
+try:
+    from kelvin.hubbard_site_system import hubbard_site_system
+    from kelvin.hubbard_system import HubbardSystem
+    from lattice.hubbard import Hubbard1D
+    from lattice.fci import FCISimple
+    has_lattice = True
+except:
+    has_lattice = False
 
 def compute_FCISimple(hub, nelec):
     myfci = FCISimple(hub,nelec,m_s=0)
@@ -28,6 +32,7 @@ def compute_fci_kelvinT(hub, T, mu):
     myfci = fci(sys,T=T,mu=mu)
     return myfci.run()[0]
 
+@unittest.skipUnless(has_lattice, "Lattice module cannot be found")
 class HubbardTest(unittest.TestCase):
     def setUp(self):
         self.thresh = 1e-10
