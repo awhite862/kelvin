@@ -67,10 +67,7 @@ class ueg_system(system):
         return True
 
     def has_u(self):
-        if self.orbtype == 'g':
-            return False
-        else:
-            return True
+        return (False if self.orbtype == 'g' else True)
 
     def verify(self,T,mu):
         if T > 0.0:
