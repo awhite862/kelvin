@@ -69,15 +69,27 @@ class ccsd(object):
             ng = self.ngrid
             self.ti,self.g,self.G = quadrature.ft_quad(self.ngrid,beta_max,self.quad)
         self.sys = sys
+        # amplitudes
         self.T1 = None
         self.T2 = None
         self.L1 = None
         self.L2 = None
+        # pieces of 1-rdm
         self.dia = None
         self.dba = None
         self.dji = None
         self.dai = None
+        # pieces of 1-rdm with ONs
+        self.ndia = None
+        self.ndba = None
+        self.ndji = None
+        self.ndai = None
+        # 2-rdm
         self.P2 = None
+        # full 1-rdm with ONs
+        self.n1rdm = None
+        # ON- and OE-relaxation contribution to 1-rdm
+        self.r1rdm = None
 
     def run(self,T1=None,T2=None):
         """Run CCSD calculation."""
@@ -1620,6 +1632,7 @@ class ccsd(object):
         en = self.sys.g_energies_tot()
         fo = ft_utils.ff(beta, en, mu)
         fv = ft_utils.ffv(beta, en, mu)
+        n = en.shape[0]
 
         # get energy differences
         D1 = en[:,None] - en[None,:]
@@ -1633,6 +1646,11 @@ class ccsd(object):
             ivir = [i for i,x in enumerate(fv) if x > athresh]
             D1 = D1[numpy.ix_(ivir,iocc)]
             D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
+        else:
+            focc = fo
+            fvir = fv
+        sfo = numpy.sqrt(focc)
+        sfv = numpy.sqrt(fvir)
 
         pia,pba,pji,pai = ft_cc_equations.ccsd_1rdm(
                 self.T1,self.T2,self.L1,self.L2,D1,D2,ti,ng,self.g,self.G)
@@ -1640,6 +1658,20 @@ class ccsd(object):
         self.dba = pba
         self.dji = pji
         self.dai = pai
+
+        # multiply unrelaxed RDMs by occupation numbers to form unrelaxed (normal-ordered) RDM
+        self.ndia = einsum('ia,i,a->ia',self.dia,sfo,sfv)
+        self.ndba = einsum('ba,b,a->ba',self.dba,sfv,sfv)
+        self.ndji = einsum('ji,j,i->ji',self.dji,sfo,sfo)
+        self.ndai = einsum('ai,a,i->ai',self.dai,sfv,sfo)
+        if self.athresh > 0.0:
+            self.n1rdm = numpy.zeros((n,n))
+            self.n1rdm[numpy.ix_(iocc,ivir)] += self.ndia/beta
+            self.n1rdm[numpy.ix_(ivir,ivir)] += self.ndba/beta
+            self.n1rdm[numpy.ix_(iocc,iocc)] += self.ndji/beta
+            self.n1rdm[numpy.ix_(ivir,iocc)] += self.ndai/beta
+        else:
+            self.n1rdm = (self.ndia + self.ndba + self.ndji + self.ndai)/beta
 
     def _g_ft_2rdm(self):
         # temperature info
@@ -1705,8 +1737,6 @@ class ccsd(object):
             focc = fo
             fvir = fv
             F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
-        sfo = numpy.sqrt(focc)
-        sfv = numpy.sqrt(fvir)
         if self.athresh > 0.0:
             dso = fv[numpy.ix_(iocc)]
             dsv = fo[numpy.ix_(ivir)]
@@ -1715,44 +1745,30 @@ class ccsd(object):
             dsv = fo
         n = fo.shape[0]
 
-        # multiply unrelaxed RDMs by occupation numbers to form unrelaxed (normal-ordered) RDM
-        self.ndia = einsum('ia,i,a->ia',self.dia,sfo,sfv)
-        self.ndba = einsum('ba,b,a->ba',self.dba,sfv,sfv)
-        self.ndji = einsum('ji,j,i->ji',self.dji,sfo,sfo)
-        self.ndai = einsum('ai,a,i->ai',self.dai,sfv,sfo)
-        if self.athresh > 0.0:
-            self.n1rdm = numpy.zeros((n,n))
-            self.n1rdm[numpy.ix_(iocc,ivir)] += self.ndia/beta
-            self.n1rdm[numpy.ix_(ivir,ivir)] += self.ndba/beta
-            self.n1rdm[numpy.ix_(iocc,iocc)] += self.ndji/beta
-            self.n1rdm[numpy.ix_(ivir,iocc)] += self.ndai/beta
-        else:
-            self.n1rdm = (self.ndia + self.ndba + self.ndji + self.ndai)/beta
-
         # perturbed ON contribution to Fock matrix
         Fd = self.sys.g_fock_d_den()
-        self.rdba = numpy.zeros((n,n))
-        self.rdji = numpy.zeros((n,n))
+        rdba = numpy.zeros((n,n))
+        rdji = numpy.zeros((n,n))
         if self.athresh > 0.0:
             Fdai = Fd[numpy.ix_(ivir,iocc)]
             Fdab = Fd[numpy.ix_(ivir,ivir)]
             Fdij = Fd[numpy.ix_(iocc,iocc)]
             Fdia = Fd[numpy.ix_(iocc,ivir)]
-            self.rdji -= numpy.diag(einsum('ia,aik->k',self.ndia,Fdai))
-            self.rdji -= numpy.diag(einsum('ba,abk->k',self.ndba,Fdab))
-            self.rdji -= numpy.diag(einsum('ji,ijk->k',self.ndji,Fdij))
-            self.rdji -= numpy.diag(einsum('ai,iak->k',self.ndai,Fdia))
+            rdji -= numpy.diag(einsum('ia,aik->k',self.ndia,Fdai))
+            rdji -= numpy.diag(einsum('ba,abk->k',self.ndba,Fdab))
+            rdji -= numpy.diag(einsum('ji,ijk->k',self.ndji,Fdij))
+            rdji -= numpy.diag(einsum('ai,iak->k',self.ndai,Fdia))
         else:
-            self.rdji -= numpy.diag(einsum('ia,aik->k',self.ndia,Fd))
-            self.rdji -= numpy.diag(einsum('ba,abk->k',self.ndba,Fd))
-            self.rdji -= numpy.diag(einsum('ji,ijk->k',self.ndji,Fd))
-            self.rdji -= numpy.diag(einsum('ai,iak->k',self.ndai,Fd))
+            rdji -= numpy.diag(einsum('ia,aik->k',self.ndia,Fd))
+            rdji -= numpy.diag(einsum('ba,abk->k',self.ndba,Fd))
+            rdji -= numpy.diag(einsum('ji,ijk->k',self.ndji,Fd))
+            rdji -= numpy.diag(einsum('ai,iak->k',self.ndai,Fd))
 
         # append HF density matrix
-        self.rdji += numpy.diag(fo)
+        rdji += numpy.diag(fo)
 
         # append ON correction to HF density
-        self.rdji += numpy.diag(self.sys.g_mp1_den())
+        rdji += numpy.diag(self.sys.g_mp1_den())
 
         jitemp = numpy.zeros((nocc,nocc)) if self.athresh > 0.0 else numpy.zeros((n,n))
         batemp = numpy.zeros((nvir,nvir)) if self.athresh > 0.0 else numpy.zeros((n,n))
@@ -1796,11 +1812,11 @@ class ccsd(object):
         batemp += numpy.diag((0.5*0.50*einsum('kaij,ijka->a',self.P2[7],I.ooov)*dsv))
 
         if self.athresh > 0.0:
-            self.rdji[numpy.ix_(iocc,iocc)] += jitemp
-            self.rdba[numpy.ix_(ivir,ivir)] += batemp
+            rdji[numpy.ix_(iocc,iocc)] += jitemp
+            rdba[numpy.ix_(ivir,ivir)] += batemp
         else:
-            self.rdji += jitemp
-            self.rdba += batemp
+            rdji += jitemp
+            rdba += batemp
 
         # orbital energy derivatives
         Gnew = self.G.copy()
@@ -1826,13 +1842,13 @@ class ccsd(object):
         At2a = -(1.0/beta)*0.25*einsum('vijab,vabij->va',self.L2, T2temp)
         At2b = -(1.0/beta)*0.25*einsum('vijab,vabij->vb',self.L2, T2temp)
         if self.athresh > 0.0:
-            self.rdji[numpy.ix_(iocc,iocc)] -= numpy.diag(einsum('vi,v->i',At1i+At2i+At2j,self.g))
-            self.rdba[numpy.ix_(ivir,ivir)] += numpy.diag(einsum('va,v->a',At1a+At2a+At2b,self.g))
+            rdji[numpy.ix_(iocc,iocc)] -= numpy.diag(einsum('vi,v->i',At1i+At2i+At2j,self.g))
+            rdba[numpy.ix_(ivir,ivir)] += numpy.diag(einsum('va,v->a',At1a+At2a+At2b,self.g))
         else:
-            self.rdji -= numpy.diag(einsum('vi,v->i',At1i+At2i+At2j,self.g))
-            self.rdba += numpy.diag(einsum('va,v->a',At1a+At2a+At2b,self.g))
+            rdji -= numpy.diag(einsum('vi,v->i',At1i+At2i+At2j,self.g))
+            rdba += numpy.diag(einsum('va,v->a',At1a+At2a+At2b,self.g))
 
-        self.r1rdm = self.rdji + self.rdba
+        self.r1rdm = rdji + rdba
 
     def _urel_ft_1rdm(self):
         # build unrelaxed 1RDM and 2RDM if it doesn't exist
@@ -1848,6 +1864,8 @@ class ccsd(object):
 
         # get energies and occupation numbers
         ea,eb = self.sys.u_energies_tot()
+        na = ea.shape[0]
+        nb = eb.shape[0]
         foa = ft_utils.ff(beta, ea, mu)
         fva = ft_utils.ffv(beta, ea, mu)
         fob = ft_utils.ff(beta, eb, mu)
@@ -1876,10 +1894,6 @@ class ccsd(object):
             foccb = fob
             fvirb = fvb
             Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
-        sfoa = numpy.sqrt(focca)
-        sfva = numpy.sqrt(fvira)
-        sfob = numpy.sqrt(foccb)
-        sfvb = numpy.sqrt(fvirb)
         if self.athresh > 0.0:
             dsoa = fva[numpy.ix_(iocca)]
             dsva = foa[numpy.ix_(ivira)]
@@ -1890,36 +1904,11 @@ class ccsd(object):
             dsva = foa
             dsob = fvb
             dsvb = fob
-        na = foa.shape[0]
-        nb = fob.shape[0]
-
-        # multiply unrelaxed RDMs by occupation numbers to form unrelaxed (normal-ordered) RDM
-        self.ndia = (einsum('ia,i,a->ia',self.dia[0],sfoa,sfva),
-                einsum('ia,i,a->ia',self.dia[1],sfob,sfvb))
-        self.ndba = (einsum('ba,b,a->ba',self.dba[0],sfva,sfva),
-                einsum('ba,b,a->ba',self.dba[1],sfvb,sfvb))
-        self.ndji = (einsum('ji,j,i->ji',self.dji[0],sfoa,sfoa),
-                einsum('ji,j,i->ji',self.dji[1],sfob,sfob))
-        self.ndai = (einsum('ai,a,i->ai',self.dai[0],sfva,sfoa),
-                einsum('ai,a,i->ai',self.dai[1],sfvb,sfob))
-        if self.athresh > 0.0:
-            self.n1rdm = [numpy.zeros((na,na)),numpy.zeros((nb,nb))]
-            self.n1rdm[0][numpy.ix_(iocca,ivira)] += self.ndia[0]/beta
-            self.n1rdm[0][numpy.ix_(ivira,ivira)] += self.ndba[0]/beta
-            self.n1rdm[0][numpy.ix_(iocca,iocca)] += self.ndji[0]/beta
-            self.n1rdm[0][numpy.ix_(ivira,iocca)] += self.ndai[0]/beta
-            self.n1rdm[1][numpy.ix_(ioccb,ivirb)] += self.ndia[1]/beta
-            self.n1rdm[1][numpy.ix_(ivirb,ivirb)] += self.ndba[1]/beta
-            self.n1rdm[1][numpy.ix_(ioccb,ioccb)] += self.ndji[1]/beta
-            self.n1rdm[1][numpy.ix_(ivirb,ioccb)] += self.ndai[1]/beta
-        else:
-            self.n1rdm = [(self.ndia[0] + self.ndba[0] + self.ndji[0] + self.ndai[0])/beta,
-                    (self.ndia[1] + self.ndba[1] + self.ndji[1] + self.ndai[1])/beta]
 
         # perturbed ON contribution to Fock matrix
         Fdaa,Fdab,Fdbb,Fdba = self.sys.u_fock_d_den()
-        self.rdba = [numpy.zeros((na,na)),numpy.zeros((nb,nb))]
-        self.rdji = [numpy.zeros((na,na)),numpy.zeros((nb,nb))]
+        rdba = [numpy.zeros((na,na)),numpy.zeros((nb,nb))]
+        rdji = [numpy.zeros((na,na)),numpy.zeros((nb,nb))]
         if self.athresh > 0.0:
             Fdaik = Fdaa[numpy.ix_(ivira,iocca)]
             Fdabk = Fdaa[numpy.ix_(ivira,ivira)]
@@ -1937,48 +1926,48 @@ class ccsd(object):
             FdABk = Fdba[numpy.ix_(ivirb,ivirb)]
             FdIJk = Fdba[numpy.ix_(ioccb,ioccb)]
             FdIAk = Fdba[numpy.ix_(ioccb,ivirb)]
-            self.rdji[0] -= numpy.diag(einsum('ia,aik->k',self.ndia[0],Fdaik))
-            self.rdji[0] -= numpy.diag(einsum('ba,abk->k',self.ndba[0],Fdabk))
-            self.rdji[0] -= numpy.diag(einsum('ji,ijk->k',self.ndji[0],Fdijk))
-            self.rdji[0] -= numpy.diag(einsum('ai,iak->k',self.ndai[0],Fdiak))
-            self.rdji[0] -= numpy.diag(einsum('ia,aik->k',self.ndia[1],FdAIk))
-            self.rdji[0] -= numpy.diag(einsum('ba,abk->k',self.ndba[1],FdABk))
-            self.rdji[0] -= numpy.diag(einsum('ji,ijk->k',self.ndji[1],FdIJk))
-            self.rdji[0] -= numpy.diag(einsum('ai,iak->k',self.ndai[1],FdIAk))
-            self.rdji[1] -= numpy.diag(einsum('ia,aik->k',self.ndia[1],FdAIK))
-            self.rdji[1] -= numpy.diag(einsum('ba,abk->k',self.ndba[1],FdABK))
-            self.rdji[1] -= numpy.diag(einsum('ji,ijk->k',self.ndji[1],FdIJK))
-            self.rdji[1] -= numpy.diag(einsum('ai,iak->k',self.ndai[1],FdIAK))
-            self.rdji[1] -= numpy.diag(einsum('ia,aik->k',self.ndia[0],FdaiK))
-            self.rdji[1] -= numpy.diag(einsum('ba,abk->k',self.ndba[0],FdabK))
-            self.rdji[1] -= numpy.diag(einsum('ji,ijk->k',self.ndji[0],FdijK))
-            self.rdji[1] -= numpy.diag(einsum('ai,iak->k',self.ndai[0],FdiaK))
+            rdji[0] -= numpy.diag(einsum('ia,aik->k',self.ndia[0],Fdaik))
+            rdji[0] -= numpy.diag(einsum('ba,abk->k',self.ndba[0],Fdabk))
+            rdji[0] -= numpy.diag(einsum('ji,ijk->k',self.ndji[0],Fdijk))
+            rdji[0] -= numpy.diag(einsum('ai,iak->k',self.ndai[0],Fdiak))
+            rdji[0] -= numpy.diag(einsum('ia,aik->k',self.ndia[1],FdAIk))
+            rdji[0] -= numpy.diag(einsum('ba,abk->k',self.ndba[1],FdABk))
+            rdji[0] -= numpy.diag(einsum('ji,ijk->k',self.ndji[1],FdIJk))
+            rdji[0] -= numpy.diag(einsum('ai,iak->k',self.ndai[1],FdIAk))
+            rdji[1] -= numpy.diag(einsum('ia,aik->k',self.ndia[1],FdAIK))
+            rdji[1] -= numpy.diag(einsum('ba,abk->k',self.ndba[1],FdABK))
+            rdji[1] -= numpy.diag(einsum('ji,ijk->k',self.ndji[1],FdIJK))
+            rdji[1] -= numpy.diag(einsum('ai,iak->k',self.ndai[1],FdIAK))
+            rdji[1] -= numpy.diag(einsum('ia,aik->k',self.ndia[0],FdaiK))
+            rdji[1] -= numpy.diag(einsum('ba,abk->k',self.ndba[0],FdabK))
+            rdji[1] -= numpy.diag(einsum('ji,ijk->k',self.ndji[0],FdijK))
+            rdji[1] -= numpy.diag(einsum('ai,iak->k',self.ndai[0],FdiaK))
         else:
-            self.rdji[0] -= numpy.diag(einsum('ia,aik->k',self.ndia[0],Fdaa))
-            self.rdji[0] -= numpy.diag(einsum('ba,abk->k',self.ndba[0],Fdaa))
-            self.rdji[0] -= numpy.diag(einsum('ji,ijk->k',self.ndji[0],Fdaa))
-            self.rdji[0] -= numpy.diag(einsum('ai,iak->k',self.ndai[0],Fdaa))
-            self.rdji[0] -= numpy.diag(einsum('ia,aik->k',self.ndia[1],Fdba))
-            self.rdji[0] -= numpy.diag(einsum('ba,abk->k',self.ndba[1],Fdba))
-            self.rdji[0] -= numpy.diag(einsum('ji,ijk->k',self.ndji[1],Fdba))
-            self.rdji[0] -= numpy.diag(einsum('ai,iak->k',self.ndai[1],Fdba))
-            self.rdji[1] -= numpy.diag(einsum('ia,aik->k',self.ndia[1],Fdbb))
-            self.rdji[1] -= numpy.diag(einsum('ba,abk->k',self.ndba[1],Fdbb))
-            self.rdji[1] -= numpy.diag(einsum('ji,ijk->k',self.ndji[1],Fdbb))
-            self.rdji[1] -= numpy.diag(einsum('ai,iak->k',self.ndai[1],Fdbb))
-            self.rdji[1] -= numpy.diag(einsum('ia,aik->k',self.ndia[0],Fdab))
-            self.rdji[1] -= numpy.diag(einsum('ba,abk->k',self.ndba[0],Fdab))
-            self.rdji[1] -= numpy.diag(einsum('ji,ijk->k',self.ndji[0],Fdab))
-            self.rdji[1] -= numpy.diag(einsum('ai,iak->k',self.ndai[0],Fdab))
+            rdji[0] -= numpy.diag(einsum('ia,aik->k',self.ndia[0],Fdaa))
+            rdji[0] -= numpy.diag(einsum('ba,abk->k',self.ndba[0],Fdaa))
+            rdji[0] -= numpy.diag(einsum('ji,ijk->k',self.ndji[0],Fdaa))
+            rdji[0] -= numpy.diag(einsum('ai,iak->k',self.ndai[0],Fdaa))
+            rdji[0] -= numpy.diag(einsum('ia,aik->k',self.ndia[1],Fdba))
+            rdji[0] -= numpy.diag(einsum('ba,abk->k',self.ndba[1],Fdba))
+            rdji[0] -= numpy.diag(einsum('ji,ijk->k',self.ndji[1],Fdba))
+            rdji[0] -= numpy.diag(einsum('ai,iak->k',self.ndai[1],Fdba))
+            rdji[1] -= numpy.diag(einsum('ia,aik->k',self.ndia[1],Fdbb))
+            rdji[1] -= numpy.diag(einsum('ba,abk->k',self.ndba[1],Fdbb))
+            rdji[1] -= numpy.diag(einsum('ji,ijk->k',self.ndji[1],Fdbb))
+            rdji[1] -= numpy.diag(einsum('ai,iak->k',self.ndai[1],Fdbb))
+            rdji[1] -= numpy.diag(einsum('ia,aik->k',self.ndia[0],Fdab))
+            rdji[1] -= numpy.diag(einsum('ba,abk->k',self.ndba[0],Fdab))
+            rdji[1] -= numpy.diag(einsum('ji,ijk->k',self.ndji[0],Fdab))
+            rdji[1] -= numpy.diag(einsum('ai,iak->k',self.ndai[0],Fdab))
 
         # append HF density matrix
-        self.rdji[0] += numpy.diag(foa)
-        self.rdji[1] += numpy.diag(fob)
+        rdji[0] += numpy.diag(foa)
+        rdji[1] += numpy.diag(fob)
 
         # append ON correction to HF density
         mp1da,mp1db = self.sys.u_mp1_den()
-        self.rdji[0] += numpy.diag(mp1da)
-        self.rdji[1] += numpy.diag(mp1db)
+        rdji[0] += numpy.diag(mp1da)
+        rdji[1] += numpy.diag(mp1db)
 
         jitempa = numpy.zeros((nocca,nocca)) if self.athresh > 0.0 else numpy.zeros((na,na))
         batempa = numpy.zeros((nvira,nvira)) if self.athresh > 0.0 else numpy.zeros((na,na))
@@ -2134,15 +2123,15 @@ class ccsd(object):
         batempb += numpy.diag(0.5*1.0*einsum('aBiJ,iJaB->B', self.P2[5][2], Iabab.oovv)*dsvb)
 
         if self.athresh > 0.0:
-            self.rdji[0][numpy.ix_(iocca,iocca)] += jitempa
-            self.rdji[1][numpy.ix_(ioccb,ioccb)] += jitempb
-            self.rdba[0][numpy.ix_(ivira,ivira)] += batempa
-            self.rdba[1][numpy.ix_(ivirb,ivirb)] += batempb
+            rdji[0][numpy.ix_(iocca,iocca)] += jitempa
+            rdji[1][numpy.ix_(ioccb,ioccb)] += jitempb
+            rdba[0][numpy.ix_(ivira,ivira)] += batempa
+            rdba[1][numpy.ix_(ivirb,ivirb)] += batempb
         else:
-            self.rdji[0] += jitempa
-            self.rdji[1] += jitempb
-            self.rdba[0] += batempa
-            self.rdba[1] += batempb
+            rdji[0] += jitempa
+            rdji[1] += jitempb
+            rdba[0] += batempa
+            rdba[1] += batempb
 
         # orbital energy derivatives
         Gnew = self.G.copy()
@@ -2186,17 +2175,17 @@ class ccsd(object):
         At2a -= (1.0/beta)*einsum('viJaB,vaBiJ->va',self.L2[1], T2t[1])
         At2B -= (1.0/beta)*einsum('viJaB,vaBiJ->vB',self.L2[1], T2t[1])
         if self.athresh > 0.0:
-            self.rdji[0][numpy.ix_(iocca,iocca)] -= numpy.diag(einsum('vi,v->i',At1i+At2i+At2j,self.g))
-            self.rdji[1][numpy.ix_(ioccb,ioccb)] -= numpy.diag(einsum('vi,v->i',At1I+At2I+At2J,self.g))
-            self.rdba[0][numpy.ix_(ivira,ivira)] += numpy.diag(einsum('va,v->a',At1a+At2a+At2b,self.g))
-            self.rdba[1][numpy.ix_(ivirb,ivirb)] += numpy.diag(einsum('va,v->a',At1A+At2A+At2B,self.g))
+            rdji[0][numpy.ix_(iocca,iocca)] -= numpy.diag(einsum('vi,v->i',At1i+At2i+At2j,self.g))
+            rdji[1][numpy.ix_(ioccb,ioccb)] -= numpy.diag(einsum('vi,v->i',At1I+At2I+At2J,self.g))
+            rdba[0][numpy.ix_(ivira,ivira)] += numpy.diag(einsum('va,v->a',At1a+At2a+At2b,self.g))
+            rdba[1][numpy.ix_(ivirb,ivirb)] += numpy.diag(einsum('va,v->a',At1A+At2A+At2B,self.g))
         else:
-            self.rdji[0] -= numpy.diag(einsum('vi,v->i',At1i+At2i+At2j,self.g))
-            self.rdji[1] -= numpy.diag(einsum('vi,v->i',At1I+At2I+At2J,self.g))
-            self.rdba[0] += numpy.diag(einsum('va,v->a',At1a+At2a+At2b,self.g))
-            self.rdba[1] += numpy.diag(einsum('va,v->a',At1A+At2A+At2B,self.g))
+            rdji[0] -= numpy.diag(einsum('vi,v->i',At1i+At2i+At2j,self.g))
+            rdji[1] -= numpy.diag(einsum('vi,v->i',At1I+At2I+At2J,self.g))
+            rdba[0] += numpy.diag(einsum('va,v->a',At1a+At2a+At2b,self.g))
+            rdba[1] += numpy.diag(einsum('va,v->a',At1A+At2A+At2B,self.g))
 
-        self.r1rdm = [self.rdji[0] + self.rdba[0],self.rdji[1] + self.rdba[1]]
+        self.r1rdm = [rdji[0] + rdba[0],rdji[1] + rdba[1]]
 
     def _u_ft_1rdm(self):
         if self.L2 is None:
@@ -2214,6 +2203,10 @@ class ccsd(object):
         ea,eb = self.sys.u_energies_tot()
         na = ea.shape[0]
         nb = eb.shape[0]
+        foa = ft_utils.ff(beta, ea, mu)
+        fva = ft_utils.ffv(beta, ea, mu)
+        fob = ft_utils.ff(beta, eb, mu)
+        fvb = ft_utils.ffv(beta, eb, mu)
 
         # get energy differences
         D1a = ea[:,None] - ea[None,:]
@@ -2226,10 +2219,6 @@ class ccsd(object):
             - eb[None,None,:,None] - eb[None,None,None,:]
         if self.athresh > 0.0:
             athresh = self.athresh
-            foa = ft_utils.ff(beta, ea, mu)
-            fva = ft_utils.ffv(beta, ea, mu)
-            fob = ft_utils.ff(beta, eb, mu)
-            fvb = ft_utils.ffv(beta, eb, mu)
             focca = [x for x in foa if x > athresh]
             fvira = [x for x in fva if x > athresh]
             iocca = [i for i,x in enumerate(foa) if x > athresh]
@@ -2243,6 +2232,17 @@ class ccsd(object):
             D2aa = D2aa[numpy.ix_(ivira,ivira,iocca,iocca)]
             D2ab = D2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)]
             D2bb = D2bb[numpy.ix_(ivirb,ivirb,ioccb,ioccb)]
+        else:
+            focca = foa
+            fvira = fva
+            foccb = fob
+            fvirb = fvb
+        sfoa = numpy.sqrt(focca)
+        sfva = numpy.sqrt(fvira)
+        sfob = numpy.sqrt(foccb)
+        sfvb = numpy.sqrt(fvirb)
+        na = foa.shape[0]
+        nb = fob.shape[0]
 
         T1a,T1b = self.T1
         T2aa,T2ab,T2bb = self.T2
@@ -2255,6 +2255,29 @@ class ccsd(object):
         self.dba = pba
         self.dji = pji
         self.dai = pai
+
+        # multiply unrelaxed RDMs by occupation numbers to form unrelaxed (normal-ordered) RDM
+        self.ndia = (einsum('ia,i,a->ia',self.dia[0],sfoa,sfva),
+                einsum('ia,i,a->ia',self.dia[1],sfob,sfvb))
+        self.ndba = (einsum('ba,b,a->ba',self.dba[0],sfva,sfva),
+                einsum('ba,b,a->ba',self.dba[1],sfvb,sfvb))
+        self.ndji = (einsum('ji,j,i->ji',self.dji[0],sfoa,sfoa),
+                einsum('ji,j,i->ji',self.dji[1],sfob,sfob))
+        self.ndai = (einsum('ai,a,i->ai',self.dai[0],sfva,sfoa),
+                einsum('ai,a,i->ai',self.dai[1],sfvb,sfob))
+        if self.athresh > 0.0:
+            self.n1rdm = [numpy.zeros((na,na)),numpy.zeros((nb,nb))]
+            self.n1rdm[0][numpy.ix_(iocca,ivira)] += self.ndia[0]/beta
+            self.n1rdm[0][numpy.ix_(ivira,ivira)] += self.ndba[0]/beta
+            self.n1rdm[0][numpy.ix_(iocca,iocca)] += self.ndji[0]/beta
+            self.n1rdm[0][numpy.ix_(ivira,iocca)] += self.ndai[0]/beta
+            self.n1rdm[1][numpy.ix_(ioccb,ivirb)] += self.ndia[1]/beta
+            self.n1rdm[1][numpy.ix_(ivirb,ivirb)] += self.ndba[1]/beta
+            self.n1rdm[1][numpy.ix_(ioccb,ioccb)] += self.ndji[1]/beta
+            self.n1rdm[1][numpy.ix_(ivirb,ioccb)] += self.ndai[1]/beta
+        else:
+            self.n1rdm = [(self.ndia[0] + self.ndba[0] + self.ndji[0] + self.ndai[0])/beta,
+                    (self.ndia[1] + self.ndba[1] + self.ndji[1] + self.ndai[1])/beta]
 
     def _u_ft_2rdm(self):
         # temperature info
