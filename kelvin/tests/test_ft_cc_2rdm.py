@@ -20,7 +20,7 @@ except:
 class FakeHubbardSystem(object):
     def __init__(self,sys,M=None):
         self.M = M
-        self.sys = sys 
+        self.sys = sys
 
     def has_g(self):
         return self.sys.has_g()
@@ -51,7 +51,11 @@ class FakeHubbardSystem(object):
         return self.sys.g_energies_tot()
 
     def g_fock_tot(self):
-        return self.sys.g_fock_tot()
+        beta = 1.0/self.sys.T
+        mu = self.sys.mu
+        en = self.sys.g_energies_tot()
+        fo = ft_utils.ff(beta, en, mu)
+        return self.sys.g_fock_tot() + 0.5*einsum('piqi,i->pq', self.M, fo)
 
     def g_aint_tot(self):
         U = self.sys.g_aint_tot()
@@ -89,20 +93,17 @@ class FTCC2RDMTest(unittest.TestCase):
         sfo = numpy.sqrt(fo)
         sfv = numpy.sqrt(fv)
         cc._ft_ccsd_lambda()
+        cc._g_ft_1rdm()
         cc._g_ft_2rdm()
-        P2 = cc.P2
-        prop = 0.5*numpy.einsum('ijij,i,j->',Mg,fo,fo)
-        A1 = 0.25*numpy.einsum('cdab,abcd,a,b,c,d->',P2[0],Mg,sfv,sfv,sfv,sfv)
-        A2 = 0.5*numpy.einsum('ciab,abci,c,i,a,b->',P2[1],Mg,sfv,sfo,sfv,sfv)
-        A3 = 0.5*numpy.einsum('bcai,aibc,b,c,a,i->',P2[2],Mg,sfv,sfv,sfv,sfo)
-        A4 = 0.25*numpy.einsum('ijab,abij,i,j,a,b->',P2[3],Mg,sfo,sfo,sfv,sfv)
-        A5 = 1.0*numpy.einsum('bjai,aibj,b,j,a,i->',P2[4],Mg,sfv,sfo,sfv,sfo)
-        A6 = 0.25*numpy.einsum('abij,ijab,a,b,i,j->',P2[5],Mg,sfv,sfv,sfo,sfo)
-        A7 = 0.5*numpy.einsum('jkai,aijk,j,k,a,i->',P2[6],Mg,sfo,sfo,sfv,sfo)
-        A8 = 0.5*numpy.einsum('kaij,ijka,k,a,i,j->',P2[7],Mg,sfo,sfv,sfo,sfo)
-        A9 = 0.25*numpy.einsum('klij,ijkl,k,l,i,j->',P2[8],Mg,sfo,sfo,sfo,sfo)
-        E2 = A1 + A2 + A3 + A4 + A5 + A6 + A7 + A8 + A9
-        out = prop + E2
+        P2tot = cc.n2rdm.copy()
+        n = sfo.shape[0]
+        # add disconnected pieces
+        P2tot += numpy.einsum('pr,qs->pqrs',numpy.diag(fo),numpy.diag(fo))
+        P2tot -= numpy.einsum('pr,qs->pqsr',numpy.diag(fo),numpy.diag(fo))
+        P2tot += numpy.einsum('pr,qs->pqrs',numpy.diag(fo),cc.n1rdm)
+        P2tot -= numpy.einsum('pr,qs->pqsr',numpy.diag(fo),cc.n1rdm)
+        E2 = 0.25*numpy.einsum('pqrs,rspq->',P2tot, Mg)
+        out = E2
 
         d = 5e-4
         sysf = FakeHubbardSystem(sys,M=d*Mg)
@@ -113,7 +114,8 @@ class FTCC2RDMTest(unittest.TestCase):
         ccb = ccsd(sysb,T=T,mu=mu,iprint=0,max_iter=80,econv=1e-11)
         Eb,Eccb = ccb.run()
         ref = (Ef - Eb)/(2*d)
-        self.assertTrue(abs(ref - out) < 1e-6)
+        error = abs(ref - out) / abs(ref)
+        self.assertTrue(error < 1e-6,"Error: {}".format(error))
 
     def test_Be_gen(self):
         T = 0.8
@@ -142,11 +144,58 @@ class FTCC2RDMTest(unittest.TestCase):
         ref += (0.5/beta)*einsum('jkai,aijk->',ccsdT.P2[6],I.vooo)
         ref += (0.5/beta)*einsum('kaij,ijka->',ccsdT.P2[7],I.ooov)
         ref += (0.25/beta)*einsum('klij,ijkl->',ccsdT.P2[8],I.oooo)
-        P2 = ccsdT.compute_g2rdm()
         Inew = sys.g_aint_tot()
-        out = einsum('pqrs,rspq->',P2,Inew)
-        diff = abs(ref - out)
-        self.assertTrue(diff < self.thresh,"Error in 2rdm: {}".format(diff))
+        out1 = (0.25)*einsum('pqrs,rspq->',ccsdT.n2rdm,Inew)
+        Inew = sys.g_int_tot()
+        out2 = (0.5)*einsum('pqrs,rspq->',ccsdT.n2rdm,Inew)
+        diff1 = abs(ref - out1)
+        diff2 = abs(ref - out2)
+        self.assertTrue(diff1 < self.thresh,"Error in 2rdm: {}".format(diff1))
+        self.assertTrue(diff2 < self.thresh,"Error in 2rdm: {}".format(diff2))
+
+    def test_Be_gen_active(self):
+        T = 0.05
+        beta = 1.0/(T + 1e-12)
+        mu = 0.04
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+
+        m = scf.RHF(mol)
+        m.conv_tol = 1e-12
+        Escf = m.scf()
+        sys = scf_system(m,T,mu,orbtype='g')
+        athresh = 1e-20
+        ccsdT = ccsd(sys,T=T,mu=mu,iprint=0,damp=0.2,tconv=1e-11,athresh=athresh,ngrid=40,max_iter=80)
+        cc = ccsdT.run()
+        ccsdT._ft_ccsd_lambda()
+        ccsdT._g_ft_2rdm()
+        en = sys.g_energies_tot()
+        fo = ft_utils.ff(beta, en, mu)
+        fv = ft_utils.ffv(beta, en, mu)
+        focc = [x for x in fo if x > athresh]
+        fvir = [x for x in fv if x > athresh]
+        iocc = [i for i,x in enumerate(fo) if x > athresh]
+        ivir = [i for i,x in enumerate(fv) if x > athresh]
+        F,I = cc_utils.ft_active_integrals(sys, en, focc, fvir, iocc, ivir)
+        ref = (0.25/beta)*einsum('cdab,abcd->',ccsdT.P2[0],I.vvvv)
+        ref += (0.5/beta)*einsum('ciab,abci->',ccsdT.P2[1],I.vvvo)
+        ref += (0.5/beta)*einsum('bcai,aibc->',ccsdT.P2[2],I.vovv)
+        ref += (0.25/beta)*einsum('ijab,abij->',ccsdT.P2[3],I.vvoo)
+        ref += (1.0/beta)*einsum('bjai,aibj->',ccsdT.P2[4],I.vovo)
+        ref += (0.25/beta)*einsum('abij,ijab->',ccsdT.P2[5],I.oovv)
+        ref += (0.5/beta)*einsum('jkai,aijk->',ccsdT.P2[6],I.vooo)
+        ref += (0.5/beta)*einsum('kaij,ijka->',ccsdT.P2[7],I.ooov)
+        ref += (0.25/beta)*einsum('klij,ijkl->',ccsdT.P2[8],I.oooo)
+        Inew = sys.g_aint_tot()
+        out1 = (0.25)*einsum('pqrs,rspq->',ccsdT.n2rdm,Inew)
+        Inew = sys.g_int_tot()
+        out2 = (0.5)*einsum('pqrs,rspq->',ccsdT.n2rdm,Inew)
+        diff1 = abs(ref - out1)/abs(ref)
+        diff2 = abs(ref - out2)/abs(ref)
+        self.assertTrue(diff1 < self.thresh,"Error in 2rdm: {}".format(diff1))
+        self.assertTrue(diff2 < self.thresh,"Error in 2rdm: {}".format(diff2))
 
     def test_Be(self):
         T = 0.8
@@ -165,7 +214,7 @@ class FTCC2RDMTest(unittest.TestCase):
         cc = ccsdT.run()
         ccsdT._ft_ccsd_lambda()
         ccsdT._g_ft_2rdm()
-        P2g = ccsdT.compute_g2rdm()
+        P2g = ccsdT.n2rdm
 
         sys = scf_system(m,T,mu,orbtype='u')
         na = sys.u_energies_tot()[0].shape[0]
@@ -173,7 +222,7 @@ class FTCC2RDMTest(unittest.TestCase):
         cc = ccsdT.run()
         ccsdT._ft_uccsd_lambda()
         ccsdT._u_ft_2rdm()
-        P2u = ccsdT.compute_u2rdm()
+        P2u = ccsdT.n2rdm
 
         # aaaa block
         diff = numpy.linalg.norm(P2u[0] - P2g[:na,:na,:na,:na])/numpy.linalg.norm(P2u[0])
@@ -184,10 +233,51 @@ class FTCC2RDMTest(unittest.TestCase):
         self.assertTrue(diff < self.thresh,"Error in 2rdm(bbbb): {}".format(diff))
 
         # abab block
-        P2gab = P2g[:na,na:,:na,na:] - P2g[:na,na:,na:,:na].transpose((0,1,3,2)) \
-                - P2g[na:,:na,:na,na:].transpose((1,0,2,3)) + P2g[na:,:na,na:,:na].transpose((1,0,3,2))
+        P2gab = P2g[:na,na:,:na,na:]
         diff = numpy.linalg.norm(P2u[2] - P2gab)/numpy.linalg.norm(P2u[2])
         self.assertTrue(diff < self.thresh,"Error in 2rdm(abab): {}".format(diff))
+
+    def test_Be_active(self):
+        T = 0.05
+        beta = 1.0/(T + 1e-12)
+        mu = 0.04
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+
+        m = scf.RHF(mol)
+        athresh = 1e-20
+        ng = 40
+        m.conv_tol = 1e-12
+        Escf = m.scf()
+        sys = scf_system(m,T,mu,orbtype='g')
+        ccsdT = ccsd(sys,T=T,mu=mu,iprint=0,tconv=1e-11,athresh=athresh,ngrid=ng,damp=0.25,max_iter=80)
+        cc = ccsdT.run()
+        ccsdT._ft_ccsd_lambda()
+        ccsdT._g_ft_2rdm()
+        P2g = ccsdT.n2rdm
+
+        sys = scf_system(m,T,mu,orbtype='u')
+        na = sys.u_energies_tot()[0].shape[0]
+        ccsdT = ccsd(sys,T=T,mu=mu,iprint=0,tconv=1e-11,athresh=athresh,ngrid=ng,damp=0.25,max_iter=80)
+        cc = ccsdT.run()
+        ccsdT._ft_uccsd_lambda()
+        ccsdT._u_ft_2rdm()
+        P2u = ccsdT.n2rdm
+
+        # aaaa block
+        diff = numpy.linalg.norm(P2u[0] - P2g[:na,:na,:na,:na])/numpy.linalg.norm(P2u[0])
+        self.assertTrue(diff < 1e-12,"Error in 2rdm(aaaa): {}".format(diff))
+
+        # bbbb block
+        diff = numpy.linalg.norm(P2u[1] - P2g[na:,na:,na:,na:])/numpy.linalg.norm(P2u[1])
+        self.assertTrue(diff < 1e-12,"Error in 2rdm(bbbb): {}".format(diff))
+
+        # abab block
+        P2gab = P2g[:na,na:,:na,na:]
+        diff = numpy.linalg.norm(P2u[2] - P2gab)/numpy.linalg.norm(P2u[2])
+        self.assertTrue(diff < 1e-12,"Error in 2rdm(abab): {}".format(diff))
 
 if __name__ == '__main__':
     unittest.main()
