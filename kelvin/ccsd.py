@@ -1911,6 +1911,278 @@ class ccsd(object):
 
         self.r1rdm = rdji + rdba
 
+
+    def _u_ft_1rdm(self):
+        if self.L2 is None:
+            self._ft_uccsd_lambda()
+        # temperature info
+        T = self.T
+        beta = 1.0 / (T + 1e-12)
+        mu = self.mu
+
+        # get time-grid
+        ng = self.ngrid
+        ti = self.ti
+
+        # get energies and occupation numbers
+        ea,eb = self.sys.u_energies_tot()
+        na = ea.shape[0]
+        nb = eb.shape[0]
+        foa = ft_utils.ff(beta, ea, mu)
+        fva = ft_utils.ffv(beta, ea, mu)
+        fob = ft_utils.ff(beta, eb, mu)
+        fvb = ft_utils.ffv(beta, eb, mu)
+
+        # get energy differences
+        D1a = ea[:,None] - ea[None,:]
+        D1b = eb[:,None] - eb[None,:]
+        D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
+            - ea[None,None,:,None] - ea[None,None,None,:]
+        D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
+            - ea[None,None,:,None] - eb[None,None,None,:]
+        D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
+            - eb[None,None,:,None] - eb[None,None,None,:]
+        if self.athresh > 0.0:
+            athresh = self.athresh
+            focca = [x for x in foa if x > athresh]
+            fvira = [x for x in fva if x > athresh]
+            iocca = [i for i,x in enumerate(foa) if x > athresh]
+            ivira = [i for i,x in enumerate(fva) if x > athresh]
+            foccb = [x for x in fob if x > athresh]
+            fvirb = [x for x in fvb if x > athresh]
+            ioccb = [i for i,x in enumerate(fob) if x > athresh]
+            ivirb = [i for i,x in enumerate(fvb) if x > athresh]
+            D1a = D1a[numpy.ix_(ivira,iocca)]
+            D1b = D1b[numpy.ix_(ivirb,ioccb)]
+            D2aa = D2aa[numpy.ix_(ivira,ivira,iocca,iocca)]
+            D2ab = D2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)]
+            D2bb = D2bb[numpy.ix_(ivirb,ivirb,ioccb,ioccb)]
+        else:
+            focca = foa
+            fvira = fva
+            foccb = fob
+            fvirb = fvb
+        sfoa = numpy.sqrt(focca)
+        sfva = numpy.sqrt(fvira)
+        sfob = numpy.sqrt(foccb)
+        sfvb = numpy.sqrt(fvirb)
+        na = foa.shape[0]
+        nb = fob.shape[0]
+
+        T1a,T1b = self.T1
+        T2aa,T2ab,T2bb = self.T2
+        L1a,L1b = self.L1
+        L2aa,L2ab,L2bb = self.L2
+        pia,pba,pji,pai = ft_cc_equations.uccsd_1rdm(
+                T1a,T1b,T2aa,T2ab,T2bb,L1a,L1b,L2aa,L2ab,L2bb,
+                D1a,D1b,D2aa,D2ab,D2bb,ti,ng,self.g,self.G)
+        self.dia = pia
+        self.dba = pba
+        self.dji = pji
+        self.dai = pai
+
+        # multiply unrelaxed RDMs by occupation numbers to form unrelaxed (normal-ordered) RDM
+        self.ndia = (einsum('ia,i,a->ia',self.dia[0],sfoa,sfva),
+                einsum('ia,i,a->ia',self.dia[1],sfob,sfvb))
+        self.ndba = (einsum('ba,b,a->ba',self.dba[0],sfva,sfva),
+                einsum('ba,b,a->ba',self.dba[1],sfvb,sfvb))
+        self.ndji = (einsum('ji,j,i->ji',self.dji[0],sfoa,sfoa),
+                einsum('ji,j,i->ji',self.dji[1],sfob,sfob))
+        self.ndai = (einsum('ai,a,i->ai',self.dai[0],sfva,sfoa),
+                einsum('ai,a,i->ai',self.dai[1],sfvb,sfob))
+        if self.athresh > 0.0:
+            self.n1rdm = [numpy.zeros((na,na)),numpy.zeros((nb,nb))]
+            self.n1rdm[0][numpy.ix_(iocca,ivira)] += self.ndia[0]/beta
+            self.n1rdm[0][numpy.ix_(ivira,ivira)] += self.ndba[0]/beta
+            self.n1rdm[0][numpy.ix_(iocca,iocca)] += self.ndji[0]/beta
+            self.n1rdm[0][numpy.ix_(ivira,iocca)] += self.ndai[0]/beta
+            self.n1rdm[1][numpy.ix_(ioccb,ivirb)] += self.ndia[1]/beta
+            self.n1rdm[1][numpy.ix_(ivirb,ivirb)] += self.ndba[1]/beta
+            self.n1rdm[1][numpy.ix_(ioccb,ioccb)] += self.ndji[1]/beta
+            self.n1rdm[1][numpy.ix_(ivirb,ioccb)] += self.ndai[1]/beta
+        else:
+            self.n1rdm = [(self.ndia[0] + self.ndba[0] + self.ndji[0] + self.ndai[0])/beta,
+                    (self.ndia[1] + self.ndba[1] + self.ndji[1] + self.ndai[1])/beta]
+
+    def _u_ft_2rdm(self):
+        # temperature info
+        T = self.T
+        beta = 1.0 / (T + 1e-12)
+        mu = self.mu
+
+        # get time-grid
+        ng = self.ngrid
+        ti = self.ti
+
+        # get energies and occupation numbers
+        ea,eb = self.sys.u_energies_tot()
+        na = ea.shape[0]
+        nb = eb.shape[0]
+
+        # get energy differences
+        D1a = ea[:,None] - ea[None,:]
+        D1b = eb[:,None] - eb[None,:]
+        D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
+            - ea[None,None,:,None] - ea[None,None,None,:]
+        D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
+            - ea[None,None,:,None] - eb[None,None,None,:]
+        D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
+            - eb[None,None,:,None] - eb[None,None,None,:]
+        foa = ft_utils.ff(beta, ea, mu)
+        fva = ft_utils.ffv(beta, ea, mu)
+        fob = ft_utils.ff(beta, eb, mu)
+        fvb = ft_utils.ffv(beta, eb, mu)
+        if self.athresh > 0.0:
+            athresh = self.athresh
+            focca = [x for x in foa if x > athresh]
+            fvira = [x for x in fva if x > athresh]
+            iocca = [i for i,x in enumerate(foa) if x > athresh]
+            ivira = [i for i,x in enumerate(fva) if x > athresh]
+            foccb = [x for x in fob if x > athresh]
+            fvirb = [x for x in fvb if x > athresh]
+            ioccb = [i for i,x in enumerate(fob) if x > athresh]
+            ivirb = [i for i,x in enumerate(fvb) if x > athresh]
+            D1a = D1a[numpy.ix_(ivira,iocca)]
+            D1b = D1b[numpy.ix_(ivirb,ioccb)]
+            D2aa = D2aa[numpy.ix_(ivira,ivira,iocca,iocca)]
+            D2ab = D2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)]
+            D2bb = D2bb[numpy.ix_(ivirb,ivirb,ioccb,ioccb)]
+        else:
+            focca = foa
+            fvira = fva
+            foccb = fob
+            fvirb = fvb
+        sfoa = numpy.sqrt(focca)
+        sfva = numpy.sqrt(fvira)
+        sfob = numpy.sqrt(foccb)
+        sfvb = numpy.sqrt(fvirb)
+
+        T1a,T1b = self.T1
+        T2aa,T2ab,T2bb = self.T2
+        L1a,L1b = self.L1
+        L2aa,L2ab,L2bb = self.L2
+        P2 = ft_cc_equations.uccsd_2rdm(
+                T1a,T1b,T2aa,T2ab,T2bb,L1a,L1b,L2aa,L2ab,L2bb,
+                D1a,D1b,D2aa,D2ab,D2bb,ti,ng,self.g,self.G)
+
+        self.P2 = P2
+        if self.athresh > 0.0:
+            P2aa = numpy.zeros((na,na,na,na))
+            P2aa[numpy.ix_(ivira,ivira,ivira,ivira)] += (1.0/beta)*einsum('cdab,c,d,a,b->cdab',self.P2[0][0],sfva,sfva,sfva,sfva)
+            P2aa[numpy.ix_(ivira,iocca,ivira,ivira)] += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',self.P2[1][0],sfva,sfoa,sfva,sfva)
+            P2aa[numpy.ix_(iocca,ivira,ivira,ivira)] -= (1.0/beta)*einsum('ciab,c,i,a,b->icab',self.P2[1][0],sfva,sfoa,sfva,sfva)
+            P2aa[numpy.ix_(ivira,ivira,ivira,iocca)] += (1.0/beta)*einsum('bcai,b,c,a,i->bcai',self.P2[2][0],sfva,sfva,sfva,sfoa)
+            P2aa[numpy.ix_(ivira,ivira,iocca,ivira)] -= (1.0/beta)*einsum('bcai,b,c,a,i->bcia',self.P2[2][0],sfva,sfva,sfva,sfoa)
+            P2aa[numpy.ix_(iocca,iocca,ivira,ivira)] += (1.0/beta)*einsum('ijab,i,j,a,b->ijab',self.P2[3][0],sfoa,sfoa,sfva,sfva)
+            P2aa[numpy.ix_(ivira,iocca,ivira,iocca)] += (1.0/beta)*einsum('bjai,b,j,a,i->bjai',self.P2[4][0],sfva,sfoa,sfva,sfoa)
+            P2aa[numpy.ix_(ivira,iocca,iocca,ivira)] -= (1.0/beta)*einsum('bjai,b,j,a,i->bjia',self.P2[4][0],sfva,sfoa,sfva,sfoa)
+            P2aa[numpy.ix_(iocca,ivira,ivira,iocca)] -= (1.0/beta)*einsum('bjai,b,j,a,i->jbai',self.P2[4][0],sfva,sfoa,sfva,sfoa)
+            P2aa[numpy.ix_(iocca,ivira,iocca,ivira)] += (1.0/beta)*einsum('bjai,b,j,a,i->jbia',self.P2[4][0],sfva,sfoa,sfva,sfoa)
+            P2aa[numpy.ix_(ivira,ivira,iocca,iocca)] += (1.0/beta)*einsum('abij,a,b,i,j->abij',self.P2[5][0],sfva,sfva,sfoa,sfoa)
+            P2aa[numpy.ix_(iocca,iocca,ivira,iocca)] += (1.0/beta)*einsum('jkai,j,k,a,i->jkai',self.P2[6][0],sfoa,sfoa,sfva,sfoa)
+            P2aa[numpy.ix_(iocca,iocca,iocca,ivira)] -= (1.0/beta)*einsum('jkai,j,k,a,i->jkia',self.P2[6][0],sfoa,sfoa,sfva,sfoa)
+            P2aa[numpy.ix_(iocca,ivira,iocca,iocca)] += (1.0/beta)*einsum('kaij,k,a,i,j->kaij',self.P2[7][0],sfoa,sfva,sfoa,sfoa)
+            P2aa[numpy.ix_(ivira,iocca,iocca,iocca)] -= (1.0/beta)*einsum('kaij,k,a,i,j->akij',self.P2[7][0],sfoa,sfva,sfoa,sfoa)
+            P2aa[numpy.ix_(iocca,iocca,iocca,iocca)] += (1.0/beta)*einsum('klij,k,l,i,j->klij',self.P2[8][0],sfoa,sfoa,sfoa,sfoa)
+
+            P2bb = numpy.zeros((nb,nb,nb,nb))
+            P2bb[numpy.ix_(ivirb,ivirb,ivirb,ivirb)] += (1.0/beta)*einsum('cdab,c,d,a,b->cdab',self.P2[0][1],sfvb,sfvb,sfvb,sfvb)
+            P2bb[numpy.ix_(ivirb,ioccb,ivirb,ivirb)] += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',self.P2[1][1],sfvb,sfob,sfvb,sfvb)
+            P2bb[numpy.ix_(ioccb,ivirb,ivirb,ivirb)] -= (1.0/beta)*einsum('ciab,c,i,a,b->icab',self.P2[1][1],sfvb,sfob,sfvb,sfvb)
+            P2bb[numpy.ix_(ivirb,ivirb,ivirb,ioccb)] += (1.0/beta)*einsum('bcai,b,c,a,i->bcai',self.P2[2][1],sfvb,sfvb,sfvb,sfob)
+            P2bb[numpy.ix_(ivirb,ivirb,ioccb,ivirb)] -= (1.0/beta)*einsum('bcai,b,c,a,i->bcia',self.P2[2][1],sfvb,sfvb,sfvb,sfob)
+            P2bb[numpy.ix_(ioccb,ioccb,ivirb,ivirb)] += (1.0/beta)*einsum('ijab,i,j,a,b->ijab',self.P2[3][1],sfob,sfob,sfvb,sfvb)
+            P2bb[numpy.ix_(ivirb,ioccb,ivirb,ioccb)] += (1.0/beta)*einsum('bjai,b,j,a,i->bjai',self.P2[4][1],sfvb,sfob,sfvb,sfob)
+            P2bb[numpy.ix_(ivirb,ioccb,ioccb,ivirb)] -= (1.0/beta)*einsum('bjai,b,j,a,i->bjia',self.P2[4][1],sfvb,sfob,sfvb,sfob)
+            P2bb[numpy.ix_(ioccb,ivirb,ivirb,ioccb)] -= (1.0/beta)*einsum('bjai,b,j,a,i->jbai',self.P2[4][1],sfvb,sfob,sfvb,sfob)
+            P2bb[numpy.ix_(ioccb,ivirb,ioccb,ivirb)] += (1.0/beta)*einsum('bjai,b,j,a,i->jbia',self.P2[4][1],sfvb,sfob,sfvb,sfob)
+            P2bb[numpy.ix_(ivirb,ivirb,ioccb,ioccb)] += (1.0/beta)*einsum('abij,a,b,i,j->abij',self.P2[5][1],sfvb,sfvb,sfob,sfob)
+            P2bb[numpy.ix_(ioccb,ioccb,ivirb,ioccb)] += (1.0/beta)*einsum('jkai,j,k,a,i->jkai',self.P2[6][1],sfob,sfob,sfvb,sfob)
+            P2bb[numpy.ix_(ioccb,ioccb,ioccb,ivirb)] -= (1.0/beta)*einsum('jkai,j,k,a,i->jkia',self.P2[6][1],sfob,sfob,sfvb,sfob)
+            P2bb[numpy.ix_(ioccb,ivirb,ioccb,ioccb)] += (1.0/beta)*einsum('kaij,k,a,i,j->kaij',self.P2[7][1],sfob,sfvb,sfob,sfob)
+            P2bb[numpy.ix_(ivirb,ioccb,ioccb,ioccb)] -= (1.0/beta)*einsum('kaij,k,a,i,j->akij',self.P2[7][1],sfob,sfvb,sfob,sfob)
+            P2bb[numpy.ix_(ioccb,ioccb,ioccb,ioccb)] += (1.0/beta)*einsum('klij,k,l,i,j->klij',self.P2[8][1],sfob,sfob,sfob,sfob)
+
+            P2ab = numpy.zeros((na,nb,na,nb))
+            P2ab[numpy.ix_(ivira,ivirb,ivira,ivirb)] += (1.0/beta)*einsum('cdab,c,d,a,b->cdab',self.P2[0][2],sfva,sfvb,sfva,sfvb)
+            P2ab[numpy.ix_(ivira,ioccb,ivira,ivirb)] += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',self.P2[1][2],sfva,sfob,sfva,sfvb)
+            P2ab[numpy.ix_(ivira,ivirb,ivira,ioccb)] += (1.0/beta)*einsum('bcai,b,c,a,i->bcai',self.P2[2][2],sfva,sfvb,sfva,sfob)
+            P2ab[numpy.ix_(iocca,ioccb,ivira,ivirb)] += (1.0/beta)*einsum('ijab,i,j,a,b->ijab',self.P2[3][2],sfoa,sfob,sfva,sfvb)
+            P2ab[numpy.ix_(ivira,ioccb,ivira,ioccb)] += (1.0/beta)*einsum('bjai,b,j,a,i->bjai',self.P2[4][2],sfva,sfob,sfva,sfob)
+            P2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)] += (1.0/beta)*einsum('abij,a,b,i,j->abij',self.P2[5][2],sfva,sfvb,sfoa,sfob)
+            P2ab[numpy.ix_(iocca,ioccb,ivira,ioccb)] += (1.0/beta)*einsum('jkai,j,k,a,i->jkai',self.P2[6][2],sfoa,sfob,sfva,sfob)
+            P2ab[numpy.ix_(iocca,ivirb,iocca,ioccb)] += (1.0/beta)*einsum('kaij,k,a,i,j->kaij',self.P2[7][2],sfoa,sfvb,sfoa,sfob)
+            P2ab[numpy.ix_(iocca,ioccb,iocca,ioccb)] += (1.0/beta)*einsum('klij,k,l,i,j->klij',self.P2[8][2],sfoa,sfob,sfoa,sfob)
+
+            P2ab[numpy.ix_(iocca,ivirb,ivira,ivirb)] += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',self.P2[1][3],sfvb,sfoa,sfvb,sfva).transpose((1,0,3,2))
+            P2ab[numpy.ix_(ivira,ivirb,iocca,ivirb)] += (1.0/beta)*einsum('bcai,b,c,a,i->bcai',self.P2[2][3],sfvb,sfva,sfvb,sfoa).transpose((1,0,3,2))
+
+            P2ab[numpy.ix_(iocca,ioccb,iocca,ivirb)] += (1.0/beta)*einsum('jkai,j,k,a,i->jkai',self.P2[6][3],sfob,sfoa,sfvb,sfoa).transpose((1,0,3,2))
+            P2ab[numpy.ix_(ivira,ioccb,iocca,iocca)] += (1.0/beta)*einsum('kaij,k,a,i,j->kaij',self.P2[7][3],sfob,sfva,sfob,sfoa).transpose((1,0,3,2))
+
+            P2ab[numpy.ix_(ivira,ioccb,iocca,ivirb)] -= (1.0/beta)*einsum('bjai,b,j,a,i->bjai',self.P2[4][3],sfva,sfob,sfvb,sfoa).transpose((0,1,3,2))
+            P2ab[numpy.ix_(iocca,ivirb,ivira,ioccb)] -= (1.0/beta)*einsum('bjai,b,j,a,i->bjai',self.P2[4][4],sfvb,sfoa,sfva,sfob).transpose((1,0,2,3))
+            P2ab[numpy.ix_(iocca,ivirb,iocca,ivirb)] += (1.0/beta)*einsum('bjai,b,j,a,i->bjai',self.P2[4][5],sfvb,sfoa,sfvb,sfoa).transpose((1,0,3,2))
+        else:
+            P2aa = numpy.zeros((na,na,na,na))
+            P2aa += (1.0/beta)*einsum('cdab,c,d,a,b->cdab',self.P2[0][0],sfva,sfva,sfva,sfva)
+            P2aa += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',self.P2[1][0],sfva,sfoa,sfva,sfva)
+            P2aa -= (1.0/beta)*einsum('ciab,c,i,a,b->icab',self.P2[1][0],sfva,sfoa,sfva,sfva)
+            P2aa += (1.0/beta)*einsum('bcai,b,c,a,i->bcai',self.P2[2][0],sfva,sfva,sfva,sfoa)
+            P2aa -= (1.0/beta)*einsum('bcai,b,c,a,i->bcia',self.P2[2][0],sfva,sfva,sfva,sfoa)
+            P2aa += (1.0/beta)*einsum('ijab,i,j,a,b->ijab',self.P2[3][0],sfoa,sfoa,sfva,sfva)
+            P2aa += (1.0/beta)*einsum('bjai,b,j,a,i->bjai',self.P2[4][0],sfva,sfoa,sfva,sfoa)
+            P2aa -= (1.0/beta)*einsum('bjai,b,j,a,i->bjia',self.P2[4][0],sfva,sfoa,sfva,sfoa)
+            P2aa -= (1.0/beta)*einsum('bjai,b,j,a,i->jbai',self.P2[4][0],sfva,sfoa,sfva,sfoa)
+            P2aa += (1.0/beta)*einsum('bjai,b,j,a,i->jbia',self.P2[4][0],sfva,sfoa,sfva,sfoa)
+            P2aa += (1.0/beta)*einsum('abij,a,b,i,j->abij',self.P2[5][0],sfva,sfva,sfoa,sfoa)
+            P2aa += (1.0/beta)*einsum('jkai,j,k,a,i->jkai',self.P2[6][0],sfoa,sfoa,sfva,sfoa)
+            P2aa -= (1.0/beta)*einsum('jkai,j,k,a,i->jkia',self.P2[6][0],sfoa,sfoa,sfva,sfoa)
+            P2aa += (1.0/beta)*einsum('kaij,k,a,i,j->kaij',self.P2[7][0],sfoa,sfva,sfoa,sfoa)
+            P2aa -= (1.0/beta)*einsum('kaij,k,a,i,j->akij',self.P2[7][0],sfoa,sfva,sfoa,sfoa)
+            P2aa += (1.0/beta)*einsum('klij,k,l,i,j->klij',self.P2[8][0],sfoa,sfoa,sfoa,sfoa)
+
+            P2bb = numpy.zeros((nb,nb,nb,nb))
+            P2bb += (1.0/beta)*einsum('cdab,c,d,a,b->cdab',self.P2[0][1],sfvb,sfvb,sfvb,sfvb)
+            P2bb += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',self.P2[1][1],sfvb,sfob,sfvb,sfvb)
+            P2bb -= (1.0/beta)*einsum('ciab,c,i,a,b->icab',self.P2[1][1],sfvb,sfob,sfvb,sfvb)
+            P2bb += (1.0/beta)*einsum('bcai,b,c,a,i->bcai',self.P2[2][1],sfvb,sfvb,sfvb,sfob)
+            P2bb -= (1.0/beta)*einsum('bcai,b,c,a,i->bcia',self.P2[2][1],sfvb,sfvb,sfvb,sfob)
+            P2bb += (1.0/beta)*einsum('ijab,i,j,a,b->ijab',self.P2[3][1],sfob,sfob,sfvb,sfvb)
+            P2bb += (1.0/beta)*einsum('bjai,b,j,a,i->bjai',self.P2[4][1],sfvb,sfob,sfvb,sfob)
+            P2bb -= (1.0/beta)*einsum('bjai,b,j,a,i->bjia',self.P2[4][1],sfvb,sfob,sfvb,sfob)
+            P2bb -= (1.0/beta)*einsum('bjai,b,j,a,i->jbai',self.P2[4][1],sfvb,sfob,sfvb,sfob)
+            P2bb += (1.0/beta)*einsum('bjai,b,j,a,i->jbia',self.P2[4][1],sfvb,sfob,sfvb,sfob)
+            P2bb += (1.0/beta)*einsum('abij,a,b,i,j->abij',self.P2[5][1],sfvb,sfvb,sfob,sfob)
+            P2bb += (1.0/beta)*einsum('jkai,j,k,a,i->jkai',self.P2[6][1],sfob,sfob,sfvb,sfob)
+            P2bb -= (1.0/beta)*einsum('jkai,j,k,a,i->jkia',self.P2[6][1],sfob,sfob,sfvb,sfob)
+            P2bb += (1.0/beta)*einsum('kaij,k,a,i,j->kaij',self.P2[7][1],sfob,sfvb,sfob,sfob)
+            P2bb -= (1.0/beta)*einsum('kaij,k,a,i,j->akij',self.P2[7][1],sfob,sfvb,sfob,sfob)
+            P2bb += (1.0/beta)*einsum('klij,k,l,i,j->klij',self.P2[8][1],sfob,sfob,sfob,sfob)
+
+            P2ab = numpy.zeros((na,nb,na,nb))
+            P2ab += (1.0/beta)*einsum('cdab,c,d,a,b->cdab',self.P2[0][2],sfva,sfvb,sfva,sfvb)
+            P2ab += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',self.P2[1][2],sfva,sfob,sfva,sfvb)
+            P2ab += (1.0/beta)*einsum('bcai,b,c,a,i->bcai',self.P2[2][2],sfva,sfvb,sfva,sfob)
+            P2ab += (1.0/beta)*einsum('ijab,i,j,a,b->ijab',self.P2[3][2],sfoa,sfob,sfva,sfvb)
+            P2ab += (1.0/beta)*einsum('bjai,b,j,a,i->bjai',self.P2[4][2],sfva,sfob,sfva,sfob)
+            P2ab += (1.0/beta)*einsum('abij,a,b,i,j->abij',self.P2[5][2],sfva,sfvb,sfoa,sfob)
+            P2ab += (1.0/beta)*einsum('jkai,j,k,a,i->jkai',self.P2[6][2],sfoa,sfob,sfva,sfob)
+            P2ab += (1.0/beta)*einsum('kaij,k,a,i,j->kaij',self.P2[7][2],sfoa,sfvb,sfoa,sfob)
+            P2ab += (1.0/beta)*einsum('klij,k,l,i,j->klij',self.P2[8][2],sfoa,sfob,sfoa,sfob)
+
+            P2ab += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',self.P2[1][3],sfvb,sfoa,sfvb,sfva).transpose((1,0,3,2))
+            P2ab += (1.0/beta)*einsum('bcai,b,c,a,i->bcai',self.P2[2][3],sfvb,sfva,sfvb,sfoa).transpose((1,0,3,2))
+
+            P2ab += (1.0/beta)*einsum('jkai,j,k,a,i->jkai',self.P2[6][3],sfob,sfoa,sfvb,sfoa).transpose((1,0,3,2))
+            P2ab += (1.0/beta)*einsum('kaij,k,a,i,j->kaij',self.P2[7][3],sfob,sfva,sfob,sfoa).transpose((1,0,3,2))
+
+            P2ab -= (1.0/beta)*einsum('bjai,b,j,a,i->bjai',self.P2[4][3],sfva,sfob,sfvb,sfoa).transpose((0,1,3,2))
+            P2ab -= (1.0/beta)*einsum('bjai,b,j,a,i->bjai',self.P2[4][4],sfvb,sfoa,sfva,sfob).transpose((1,0,2,3))
+            P2ab += (1.0/beta)*einsum('bjai,b,j,a,i->bjai',self.P2[4][5],sfvb,sfoa,sfvb,sfoa).transpose((1,0,3,2))
+
+        self.n2rdm = (P2aa,P2bb,P2ab)
+
     def _urel_ft_1rdm(self):
         # build unrelaxed 1RDM and 2RDM if it doesn't exist
         if self.dia is None:
@@ -2247,274 +2519,3 @@ class ccsd(object):
             rdba[1] += numpy.diag(einsum('va,v->a',At1A+At2A+At2B,self.g))
 
         self.r1rdm = [rdji[0] + rdba[0],rdji[1] + rdba[1]]
-
-    def _u_ft_1rdm(self):
-        if self.L2 is None:
-            self._ft_uccsd_lambda()
-        # temperature info
-        T = self.T
-        beta = 1.0 / (T + 1e-12)
-        mu = self.mu
-
-        # get time-grid
-        ng = self.ngrid
-        ti = self.ti
-
-        # get energies and occupation numbers
-        ea,eb = self.sys.u_energies_tot()
-        na = ea.shape[0]
-        nb = eb.shape[0]
-        foa = ft_utils.ff(beta, ea, mu)
-        fva = ft_utils.ffv(beta, ea, mu)
-        fob = ft_utils.ff(beta, eb, mu)
-        fvb = ft_utils.ffv(beta, eb, mu)
-
-        # get energy differences
-        D1a = ea[:,None] - ea[None,:]
-        D1b = eb[:,None] - eb[None,:]
-        D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
-            - ea[None,None,:,None] - ea[None,None,None,:]
-        D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
-            - ea[None,None,:,None] - eb[None,None,None,:]
-        D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
-            - eb[None,None,:,None] - eb[None,None,None,:]
-        if self.athresh > 0.0:
-            athresh = self.athresh
-            focca = [x for x in foa if x > athresh]
-            fvira = [x for x in fva if x > athresh]
-            iocca = [i for i,x in enumerate(foa) if x > athresh]
-            ivira = [i for i,x in enumerate(fva) if x > athresh]
-            foccb = [x for x in fob if x > athresh]
-            fvirb = [x for x in fvb if x > athresh]
-            ioccb = [i for i,x in enumerate(fob) if x > athresh]
-            ivirb = [i for i,x in enumerate(fvb) if x > athresh]
-            D1a = D1a[numpy.ix_(ivira,iocca)]
-            D1b = D1b[numpy.ix_(ivirb,ioccb)]
-            D2aa = D2aa[numpy.ix_(ivira,ivira,iocca,iocca)]
-            D2ab = D2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)]
-            D2bb = D2bb[numpy.ix_(ivirb,ivirb,ioccb,ioccb)]
-        else:
-            focca = foa
-            fvira = fva
-            foccb = fob
-            fvirb = fvb
-        sfoa = numpy.sqrt(focca)
-        sfva = numpy.sqrt(fvira)
-        sfob = numpy.sqrt(foccb)
-        sfvb = numpy.sqrt(fvirb)
-        na = foa.shape[0]
-        nb = fob.shape[0]
-
-        T1a,T1b = self.T1
-        T2aa,T2ab,T2bb = self.T2
-        L1a,L1b = self.L1
-        L2aa,L2ab,L2bb = self.L2
-        pia,pba,pji,pai = ft_cc_equations.uccsd_1rdm(
-                T1a,T1b,T2aa,T2ab,T2bb,L1a,L1b,L2aa,L2ab,L2bb,
-                D1a,D1b,D2aa,D2ab,D2bb,ti,ng,self.g,self.G)
-        self.dia = pia
-        self.dba = pba
-        self.dji = pji
-        self.dai = pai
-
-        # multiply unrelaxed RDMs by occupation numbers to form unrelaxed (normal-ordered) RDM
-        self.ndia = (einsum('ia,i,a->ia',self.dia[0],sfoa,sfva),
-                einsum('ia,i,a->ia',self.dia[1],sfob,sfvb))
-        self.ndba = (einsum('ba,b,a->ba',self.dba[0],sfva,sfva),
-                einsum('ba,b,a->ba',self.dba[1],sfvb,sfvb))
-        self.ndji = (einsum('ji,j,i->ji',self.dji[0],sfoa,sfoa),
-                einsum('ji,j,i->ji',self.dji[1],sfob,sfob))
-        self.ndai = (einsum('ai,a,i->ai',self.dai[0],sfva,sfoa),
-                einsum('ai,a,i->ai',self.dai[1],sfvb,sfob))
-        if self.athresh > 0.0:
-            self.n1rdm = [numpy.zeros((na,na)),numpy.zeros((nb,nb))]
-            self.n1rdm[0][numpy.ix_(iocca,ivira)] += self.ndia[0]/beta
-            self.n1rdm[0][numpy.ix_(ivira,ivira)] += self.ndba[0]/beta
-            self.n1rdm[0][numpy.ix_(iocca,iocca)] += self.ndji[0]/beta
-            self.n1rdm[0][numpy.ix_(ivira,iocca)] += self.ndai[0]/beta
-            self.n1rdm[1][numpy.ix_(ioccb,ivirb)] += self.ndia[1]/beta
-            self.n1rdm[1][numpy.ix_(ivirb,ivirb)] += self.ndba[1]/beta
-            self.n1rdm[1][numpy.ix_(ioccb,ioccb)] += self.ndji[1]/beta
-            self.n1rdm[1][numpy.ix_(ivirb,ioccb)] += self.ndai[1]/beta
-        else:
-            self.n1rdm = [(self.ndia[0] + self.ndba[0] + self.ndji[0] + self.ndai[0])/beta,
-                    (self.ndia[1] + self.ndba[1] + self.ndji[1] + self.ndai[1])/beta]
-
-    def _u_ft_2rdm(self):
-        # temperature info
-        T = self.T
-        beta = 1.0 / (T + 1e-12)
-        mu = self.mu
-
-        # get time-grid
-        ng = self.ngrid
-        ti = self.ti
-
-        # get energies and occupation numbers
-        ea,eb = self.sys.u_energies_tot()
-        na = ea.shape[0]
-        nb = eb.shape[0]
-
-        # get energy differences
-        D1a = ea[:,None] - ea[None,:]
-        D1b = eb[:,None] - eb[None,:]
-        D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
-            - ea[None,None,:,None] - ea[None,None,None,:]
-        D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
-            - ea[None,None,:,None] - eb[None,None,None,:]
-        D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
-            - eb[None,None,:,None] - eb[None,None,None,:]
-        foa = ft_utils.ff(beta, ea, mu)
-        fva = ft_utils.ffv(beta, ea, mu)
-        fob = ft_utils.ff(beta, eb, mu)
-        fvb = ft_utils.ffv(beta, eb, mu)
-        if self.athresh > 0.0:
-            athresh = self.athresh
-            focca = [x for x in foa if x > athresh]
-            fvira = [x for x in fva if x > athresh]
-            iocca = [i for i,x in enumerate(foa) if x > athresh]
-            ivira = [i for i,x in enumerate(fva) if x > athresh]
-            foccb = [x for x in fob if x > athresh]
-            fvirb = [x for x in fvb if x > athresh]
-            ioccb = [i for i,x in enumerate(fob) if x > athresh]
-            ivirb = [i for i,x in enumerate(fvb) if x > athresh]
-            D1a = D1a[numpy.ix_(ivira,iocca)]
-            D1b = D1b[numpy.ix_(ivirb,ioccb)]
-            D2aa = D2aa[numpy.ix_(ivira,ivira,iocca,iocca)]
-            D2ab = D2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)]
-            D2bb = D2bb[numpy.ix_(ivirb,ivirb,ioccb,ioccb)]
-        else:
-            focca = foa
-            fvira = fva
-            foccb = fob
-            fvirb = fvb
-        sfoa = numpy.sqrt(focca)
-        sfva = numpy.sqrt(fvira)
-        sfob = numpy.sqrt(foccb)
-        sfvb = numpy.sqrt(fvirb)
-
-        T1a,T1b = self.T1
-        T2aa,T2ab,T2bb = self.T2
-        L1a,L1b = self.L1
-        L2aa,L2ab,L2bb = self.L2
-        P2 = ft_cc_equations.uccsd_2rdm(
-                T1a,T1b,T2aa,T2ab,T2bb,L1a,L1b,L2aa,L2ab,L2bb,
-                D1a,D1b,D2aa,D2ab,D2bb,ti,ng,self.g,self.G)
-
-        self.P2 = P2
-        if self.athresh > 0.0:
-            P2aa = numpy.zeros((na,na,na,na))
-            P2aa[numpy.ix_(ivira,ivira,ivira,ivira)] += (1.0/beta)*einsum('cdab,c,d,a,b->cdab',self.P2[0][0],sfva,sfva,sfva,sfva)
-            P2aa[numpy.ix_(ivira,iocca,ivira,ivira)] += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',self.P2[1][0],sfva,sfoa,sfva,sfva)
-            P2aa[numpy.ix_(iocca,ivira,ivira,ivira)] -= (1.0/beta)*einsum('ciab,c,i,a,b->icab',self.P2[1][0],sfva,sfoa,sfva,sfva)
-            P2aa[numpy.ix_(ivira,ivira,ivira,iocca)] += (1.0/beta)*einsum('bcai,b,c,a,i->bcai',self.P2[2][0],sfva,sfva,sfva,sfoa)
-            P2aa[numpy.ix_(ivira,ivira,iocca,ivira)] -= (1.0/beta)*einsum('bcai,b,c,a,i->bcia',self.P2[2][0],sfva,sfva,sfva,sfoa)
-            P2aa[numpy.ix_(iocca,iocca,ivira,ivira)] += (1.0/beta)*einsum('ijab,i,j,a,b->ijab',self.P2[3][0],sfoa,sfoa,sfva,sfva)
-            P2aa[numpy.ix_(ivira,iocca,ivira,iocca)] += (1.0/beta)*einsum('bjai,b,j,a,i->bjai',self.P2[4][0],sfva,sfoa,sfva,sfoa)
-            P2aa[numpy.ix_(ivira,iocca,iocca,ivira)] -= (1.0/beta)*einsum('bjai,b,j,a,i->bjia',self.P2[4][0],sfva,sfoa,sfva,sfoa)
-            P2aa[numpy.ix_(iocca,ivira,ivira,iocca)] -= (1.0/beta)*einsum('bjai,b,j,a,i->jbai',self.P2[4][0],sfva,sfoa,sfva,sfoa)
-            P2aa[numpy.ix_(iocca,ivira,iocca,ivira)] += (1.0/beta)*einsum('bjai,b,j,a,i->jbia',self.P2[4][0],sfva,sfoa,sfva,sfoa)
-            P2aa[numpy.ix_(ivira,ivira,iocca,iocca)] += (1.0/beta)*einsum('abij,a,b,i,j->abij',self.P2[5][0],sfva,sfva,sfoa,sfoa)
-            P2aa[numpy.ix_(iocca,iocca,ivira,iocca)] += (1.0/beta)*einsum('jkai,j,k,a,i->jkai',self.P2[6][0],sfoa,sfoa,sfva,sfoa)
-            P2aa[numpy.ix_(iocca,iocca,iocca,ivira)] -= (1.0/beta)*einsum('jkai,j,k,a,i->jkia',self.P2[6][0],sfoa,sfoa,sfva,sfoa)
-            P2aa[numpy.ix_(iocca,ivira,iocca,iocca)] += (1.0/beta)*einsum('kaij,k,a,i,j->kaij',self.P2[7][0],sfoa,sfva,sfoa,sfoa)
-            P2aa[numpy.ix_(ivira,iocca,iocca,iocca)] -= (1.0/beta)*einsum('kaij,k,a,i,j->akij',self.P2[7][0],sfoa,sfva,sfoa,sfoa)
-            P2aa[numpy.ix_(iocca,iocca,iocca,iocca)] += (1.0/beta)*einsum('klij,k,l,i,j->klij',self.P2[8][0],sfoa,sfoa,sfoa,sfoa)
-
-            P2bb = numpy.zeros((nb,nb,nb,nb))
-            P2bb[numpy.ix_(ivirb,ivirb,ivirb,ivirb)] += (1.0/beta)*einsum('cdab,c,d,a,b->cdab',self.P2[0][1],sfvb,sfvb,sfvb,sfvb)
-            P2bb[numpy.ix_(ivirb,ioccb,ivirb,ivirb)] += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',self.P2[1][1],sfvb,sfob,sfvb,sfvb)
-            P2bb[numpy.ix_(ioccb,ivirb,ivirb,ivirb)] -= (1.0/beta)*einsum('ciab,c,i,a,b->icab',self.P2[1][1],sfvb,sfob,sfvb,sfvb)
-            P2bb[numpy.ix_(ivirb,ivirb,ivirb,ioccb)] += (1.0/beta)*einsum('bcai,b,c,a,i->bcai',self.P2[2][1],sfvb,sfvb,sfvb,sfob)
-            P2bb[numpy.ix_(ivirb,ivirb,ioccb,ivirb)] -= (1.0/beta)*einsum('bcai,b,c,a,i->bcia',self.P2[2][1],sfvb,sfvb,sfvb,sfob)
-            P2bb[numpy.ix_(ioccb,ioccb,ivirb,ivirb)] += (1.0/beta)*einsum('ijab,i,j,a,b->ijab',self.P2[3][1],sfob,sfob,sfvb,sfvb)
-            P2bb[numpy.ix_(ivirb,ioccb,ivirb,ioccb)] += (1.0/beta)*einsum('bjai,b,j,a,i->bjai',self.P2[4][1],sfvb,sfob,sfvb,sfob)
-            P2bb[numpy.ix_(ivirb,ioccb,ioccb,ivirb)] -= (1.0/beta)*einsum('bjai,b,j,a,i->bjia',self.P2[4][1],sfvb,sfob,sfvb,sfob)
-            P2bb[numpy.ix_(ioccb,ivirb,ivirb,ioccb)] -= (1.0/beta)*einsum('bjai,b,j,a,i->jbai',self.P2[4][1],sfvb,sfob,sfvb,sfob)
-            P2bb[numpy.ix_(ioccb,ivirb,ioccb,ivirb)] += (1.0/beta)*einsum('bjai,b,j,a,i->jbia',self.P2[4][1],sfvb,sfob,sfvb,sfob)
-            P2bb[numpy.ix_(ivirb,ivirb,ioccb,ioccb)] += (1.0/beta)*einsum('abij,a,b,i,j->abij',self.P2[5][1],sfvb,sfvb,sfob,sfob)
-            P2bb[numpy.ix_(ioccb,ioccb,ivirb,ioccb)] += (1.0/beta)*einsum('jkai,j,k,a,i->jkai',self.P2[6][1],sfob,sfob,sfvb,sfob)
-            P2bb[numpy.ix_(ioccb,ioccb,ioccb,ivirb)] -= (1.0/beta)*einsum('jkai,j,k,a,i->jkia',self.P2[6][1],sfob,sfob,sfvb,sfob)
-            P2bb[numpy.ix_(ioccb,ivirb,ioccb,ioccb)] += (1.0/beta)*einsum('kaij,k,a,i,j->kaij',self.P2[7][1],sfob,sfvb,sfob,sfob)
-            P2bb[numpy.ix_(ivirb,ioccb,ioccb,ioccb)] -= (1.0/beta)*einsum('kaij,k,a,i,j->akij',self.P2[7][1],sfob,sfvb,sfob,sfob)
-            P2bb[numpy.ix_(ioccb,ioccb,ioccb,ioccb)] += (1.0/beta)*einsum('klij,k,l,i,j->klij',self.P2[8][1],sfob,sfob,sfob,sfob)
-
-            P2ab = numpy.zeros((na,nb,na,nb))
-            P2ab[numpy.ix_(ivira,ivirb,ivira,ivirb)] += (1.0/beta)*einsum('cdab,c,d,a,b->cdab',self.P2[0][2],sfva,sfvb,sfva,sfvb)
-            P2ab[numpy.ix_(ivira,ioccb,ivira,ivirb)] += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',self.P2[1][2],sfva,sfob,sfva,sfvb)
-            P2ab[numpy.ix_(ivira,ivirb,ivira,ioccb)] += (1.0/beta)*einsum('bcai,b,c,a,i->bcai',self.P2[2][2],sfva,sfvb,sfva,sfob)
-            P2ab[numpy.ix_(iocca,ioccb,ivira,ivirb)] += (1.0/beta)*einsum('ijab,i,j,a,b->ijab',self.P2[3][2],sfoa,sfob,sfva,sfvb)
-            P2ab[numpy.ix_(ivira,ioccb,ivira,ioccb)] += (1.0/beta)*einsum('bjai,b,j,a,i->bjai',self.P2[4][2],sfva,sfob,sfva,sfob)
-            P2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)] += (1.0/beta)*einsum('abij,a,b,i,j->abij',self.P2[5][2],sfva,sfvb,sfoa,sfob)
-            P2ab[numpy.ix_(iocca,ioccb,ivira,ioccb)] += (1.0/beta)*einsum('jkai,j,k,a,i->jkai',self.P2[6][2],sfoa,sfob,sfva,sfob)
-            P2ab[numpy.ix_(iocca,ivirb,iocca,ioccb)] += (1.0/beta)*einsum('kaij,k,a,i,j->kaij',self.P2[7][2],sfoa,sfvb,sfoa,sfob)
-            P2ab[numpy.ix_(iocca,ioccb,iocca,ioccb)] += (1.0/beta)*einsum('klij,k,l,i,j->klij',self.P2[8][2],sfoa,sfob,sfoa,sfob)
-
-            P2ab[numpy.ix_(iocca,ivirb,ivira,ivirb)] += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',self.P2[1][3],sfvb,sfoa,sfvb,sfva).transpose((1,0,3,2))
-            P2ab[numpy.ix_(ivira,ivirb,iocca,ivirb)] += (1.0/beta)*einsum('bcai,b,c,a,i->bcai',self.P2[2][3],sfvb,sfva,sfvb,sfoa).transpose((1,0,3,2))
-
-            P2ab[numpy.ix_(iocca,ioccb,iocca,ivirb)] += (1.0/beta)*einsum('jkai,j,k,a,i->jkai',self.P2[6][3],sfob,sfoa,sfvb,sfoa).transpose((1,0,3,2))
-            P2ab[numpy.ix_(ivira,ioccb,iocca,iocca)] += (1.0/beta)*einsum('kaij,k,a,i,j->kaij',self.P2[7][3],sfob,sfva,sfob,sfoa).transpose((1,0,3,2))
-
-            P2ab[numpy.ix_(ivira,ioccb,iocca,ivirb)] -= (1.0/beta)*einsum('bjai,b,j,a,i->bjai',self.P2[4][3],sfva,sfob,sfvb,sfoa).transpose((0,1,3,2))
-            P2ab[numpy.ix_(iocca,ivirb,ivira,ioccb)] -= (1.0/beta)*einsum('bjai,b,j,a,i->bjai',self.P2[4][4],sfvb,sfoa,sfva,sfob).transpose((1,0,2,3))
-            P2ab[numpy.ix_(iocca,ivirb,iocca,ivirb)] += (1.0/beta)*einsum('bjai,b,j,a,i->bjai',self.P2[4][5],sfvb,sfoa,sfvb,sfoa).transpose((1,0,3,2))
-        else:
-            P2aa = numpy.zeros((na,na,na,na))
-            P2aa += (1.0/beta)*einsum('cdab,c,d,a,b->cdab',self.P2[0][0],sfva,sfva,sfva,sfva)
-            P2aa += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',self.P2[1][0],sfva,sfoa,sfva,sfva)
-            P2aa -= (1.0/beta)*einsum('ciab,c,i,a,b->icab',self.P2[1][0],sfva,sfoa,sfva,sfva)
-            P2aa += (1.0/beta)*einsum('bcai,b,c,a,i->bcai',self.P2[2][0],sfva,sfva,sfva,sfoa)
-            P2aa -= (1.0/beta)*einsum('bcai,b,c,a,i->bcia',self.P2[2][0],sfva,sfva,sfva,sfoa)
-            P2aa += (1.0/beta)*einsum('ijab,i,j,a,b->ijab',self.P2[3][0],sfoa,sfoa,sfva,sfva)
-            P2aa += (1.0/beta)*einsum('bjai,b,j,a,i->bjai',self.P2[4][0],sfva,sfoa,sfva,sfoa)
-            P2aa -= (1.0/beta)*einsum('bjai,b,j,a,i->bjia',self.P2[4][0],sfva,sfoa,sfva,sfoa)
-            P2aa -= (1.0/beta)*einsum('bjai,b,j,a,i->jbai',self.P2[4][0],sfva,sfoa,sfva,sfoa)
-            P2aa += (1.0/beta)*einsum('bjai,b,j,a,i->jbia',self.P2[4][0],sfva,sfoa,sfva,sfoa)
-            P2aa += (1.0/beta)*einsum('abij,a,b,i,j->abij',self.P2[5][0],sfva,sfva,sfoa,sfoa)
-            P2aa += (1.0/beta)*einsum('jkai,j,k,a,i->jkai',self.P2[6][0],sfoa,sfoa,sfva,sfoa)
-            P2aa -= (1.0/beta)*einsum('jkai,j,k,a,i->jkia',self.P2[6][0],sfoa,sfoa,sfva,sfoa)
-            P2aa += (1.0/beta)*einsum('kaij,k,a,i,j->kaij',self.P2[7][0],sfoa,sfva,sfoa,sfoa)
-            P2aa -= (1.0/beta)*einsum('kaij,k,a,i,j->akij',self.P2[7][0],sfoa,sfva,sfoa,sfoa)
-            P2aa += (1.0/beta)*einsum('klij,k,l,i,j->klij',self.P2[8][0],sfoa,sfoa,sfoa,sfoa)
-
-            P2bb = numpy.zeros((nb,nb,nb,nb))
-            P2bb += (1.0/beta)*einsum('cdab,c,d,a,b->cdab',self.P2[0][1],sfvb,sfvb,sfvb,sfvb)
-            P2bb += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',self.P2[1][1],sfvb,sfob,sfvb,sfvb)
-            P2bb -= (1.0/beta)*einsum('ciab,c,i,a,b->icab',self.P2[1][1],sfvb,sfob,sfvb,sfvb)
-            P2bb += (1.0/beta)*einsum('bcai,b,c,a,i->bcai',self.P2[2][1],sfvb,sfvb,sfvb,sfob)
-            P2bb -= (1.0/beta)*einsum('bcai,b,c,a,i->bcia',self.P2[2][1],sfvb,sfvb,sfvb,sfob)
-            P2bb += (1.0/beta)*einsum('ijab,i,j,a,b->ijab',self.P2[3][1],sfob,sfob,sfvb,sfvb)
-            P2bb += (1.0/beta)*einsum('bjai,b,j,a,i->bjai',self.P2[4][1],sfvb,sfob,sfvb,sfob)
-            P2bb -= (1.0/beta)*einsum('bjai,b,j,a,i->bjia',self.P2[4][1],sfvb,sfob,sfvb,sfob)
-            P2bb -= (1.0/beta)*einsum('bjai,b,j,a,i->jbai',self.P2[4][1],sfvb,sfob,sfvb,sfob)
-            P2bb += (1.0/beta)*einsum('bjai,b,j,a,i->jbia',self.P2[4][1],sfvb,sfob,sfvb,sfob)
-            P2bb += (1.0/beta)*einsum('abij,a,b,i,j->abij',self.P2[5][1],sfvb,sfvb,sfob,sfob)
-            P2bb += (1.0/beta)*einsum('jkai,j,k,a,i->jkai',self.P2[6][1],sfob,sfob,sfvb,sfob)
-            P2bb -= (1.0/beta)*einsum('jkai,j,k,a,i->jkia',self.P2[6][1],sfob,sfob,sfvb,sfob)
-            P2bb += (1.0/beta)*einsum('kaij,k,a,i,j->kaij',self.P2[7][1],sfob,sfvb,sfob,sfob)
-            P2bb -= (1.0/beta)*einsum('kaij,k,a,i,j->akij',self.P2[7][1],sfob,sfvb,sfob,sfob)
-            P2bb += (1.0/beta)*einsum('klij,k,l,i,j->klij',self.P2[8][1],sfob,sfob,sfob,sfob)
-
-            P2ab = numpy.zeros((na,nb,na,nb))
-            P2ab += (1.0/beta)*einsum('cdab,c,d,a,b->cdab',self.P2[0][2],sfva,sfvb,sfva,sfvb)
-            P2ab += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',self.P2[1][2],sfva,sfob,sfva,sfvb)
-            P2ab += (1.0/beta)*einsum('bcai,b,c,a,i->bcai',self.P2[2][2],sfva,sfvb,sfva,sfob)
-            P2ab += (1.0/beta)*einsum('ijab,i,j,a,b->ijab',self.P2[3][2],sfoa,sfob,sfva,sfvb)
-            P2ab += (1.0/beta)*einsum('bjai,b,j,a,i->bjai',self.P2[4][2],sfva,sfob,sfva,sfob)
-            P2ab += (1.0/beta)*einsum('abij,a,b,i,j->abij',self.P2[5][2],sfva,sfvb,sfoa,sfob)
-            P2ab += (1.0/beta)*einsum('jkai,j,k,a,i->jkai',self.P2[6][2],sfoa,sfob,sfva,sfob)
-            P2ab += (1.0/beta)*einsum('kaij,k,a,i,j->kaij',self.P2[7][2],sfoa,sfvb,sfoa,sfob)
-            P2ab += (1.0/beta)*einsum('klij,k,l,i,j->klij',self.P2[8][2],sfoa,sfob,sfoa,sfob)
-
-            P2ab += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',self.P2[1][3],sfvb,sfoa,sfvb,sfva).transpose((1,0,3,2))
-            P2ab += (1.0/beta)*einsum('bcai,b,c,a,i->bcai',self.P2[2][3],sfvb,sfva,sfvb,sfoa).transpose((1,0,3,2))
-
-            P2ab += (1.0/beta)*einsum('jkai,j,k,a,i->jkai',self.P2[6][3],sfob,sfoa,sfvb,sfoa).transpose((1,0,3,2))
-            P2ab += (1.0/beta)*einsum('kaij,k,a,i,j->kaij',self.P2[7][3],sfob,sfva,sfob,sfoa).transpose((1,0,3,2))
-
-            P2ab -= (1.0/beta)*einsum('bjai,b,j,a,i->bjai',self.P2[4][3],sfva,sfob,sfvb,sfoa).transpose((0,1,3,2))
-            P2ab -= (1.0/beta)*einsum('bjai,b,j,a,i->bjai',self.P2[4][4],sfvb,sfoa,sfva,sfob).transpose((1,0,2,3))
-            P2ab += (1.0/beta)*einsum('bjai,b,j,a,i->bjai',self.P2[4][5],sfvb,sfoa,sfvb,sfoa).transpose((1,0,3,2))
-
-        self.n2rdm = (P2aa,P2bb,P2ab)
