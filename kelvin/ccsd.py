@@ -1911,7 +1911,6 @@ class ccsd(object):
 
         self.r1rdm = rdji + rdba
 
-
     def _u_ft_1rdm(self):
         if self.L2 is None:
             self._ft_uccsd_lambda()
@@ -2519,3 +2518,161 @@ class ccsd(object):
             rdba[1] += numpy.diag(einsum('va,v->a',At1A+At2A+At2B,self.g))
 
         self.r1rdm = [rdji[0] + rdba[0],rdji[1] + rdba[1]]
+
+    def full_1rdm(self, relax=False):
+        T = self.T
+        beta = 1.0 / (T + 1e-12)
+        mu = self.mu
+        if self.sys.orbtype == 'u':
+            if relax:
+                if self.r1rdm is None:
+                    self._urel_ft_1rdm()
+                return [self.r1rdm[0] + (self.n1rdm[0] - numpy.diag(self.n1rdm[0].diagonal())),
+                        self.r1rdm[1] + (self.n1rdm[1] - numpy.diag(self.n1rdm[1].diagonal()))]
+            if self.n1rdm is None:
+                self._u_ft_1rdm()
+            ea,eb = self.sys.u_energies_tot()
+            foa = ft_utils.ff(beta, ea, mu)
+            fva = ft_utils.ffv(beta, ea, mu)
+            fob = ft_utils.ff(beta, eb, mu)
+            fvb = ft_utils.ffv(beta, eb, mu)
+            rdm1 = [self.n1rdm[0].copy(), self.n1rdm[1].copy()]
+            if self.athresh > 0.0:
+                athresh = self.athresh
+                focca = [x for x in foa if x > athresh]
+                fvira = [x for x in fva if x > athresh]
+                iocca = [i for i,x in enumerate(foa) if x > athresh]
+                ivira = [i for i,x in enumerate(fva) if x > athresh]
+                foccb = [x for x in fob if x > athresh]
+                fvirb = [x for x in fvb if x > athresh]
+                ioccb = [i for i,x in enumerate(fob) if x > athresh]
+                ivirb = [i for i,x in enumerate(fvb) if x > athresh]
+                nocca = len(focca)
+                rdm1[0][numpy.ix_(iocca,iocca)] += numpy.diag(focca)
+                rdm1[1][numpy.ix_(ioccb,ioccb)] += numpy.diag(foccb)
+            else:
+                rdm1[0] += numpy.diag(foa)
+                rdm1[1] += numpy.diag(fob)
+            return rdm1
+        elif self.sys.orbtype == 'g':
+            if relax:
+                if self.r1rdm is None:
+                    self._grel_ft_1rdm()
+                return self.r1rdm + (self.n1rdm - numpy.diag(self.n1rdm.diagonal()))
+            if self.n1rdm is None:
+                self._g_ft_1rdm()
+            en = self.sys.g_energies_tot()
+            fo = ft_utils.ff(beta, en, mu)
+            fv = ft_utils.ffv(beta, en, mu)
+            rdm1 = self.n1rdm.copy()
+            if self.athresh > 0.0:
+                athresh = self.athresh
+                focc = [x for x in fo if x > athresh]
+                fvir = [x for x in fv if x > athresh]
+                iocc = [i for i,x in enumerate(fo) if x > athresh]
+                ivir = [i for i,x in enumerate(fv) if x > athresh]
+                rdm1[numpy.ix_(iocc,iocc)] += numpy.diag(fo)
+            else:
+                rem1 += numpy.diag(fo)
+            return rdm1
+        else:
+            raise Exception("orbital type " + self.sys.orbtype + " is not implemented for 1rdm")
+
+    def full_2rdm(self, relax=False):
+        if relax:
+            raise Exception("Rexalex 2-RDM is not implemented")
+        T = self.T
+        beta = 1.0 / (T + 1e-12)
+        mu = self.mu
+        if self.sys.orbtype == 'u':
+            if self.n1rdm is None:
+                self._u_ft_1rdm()
+            if self.n2rdm is None:
+                self._u_ft_2rdm()
+            ea,eb = self.sys.u_energies_tot()
+            foa = ft_utils.ff(beta, ea, mu)
+            fva = ft_utils.ffv(beta, ea, mu)
+            fob = ft_utils.ff(beta, eb, mu)
+            fvb = ft_utils.ffv(beta, eb, mu)
+            rdm2 = [self.n2rdm[0].copy(), self.n2rdm[1].copy(), self.n2rdm[2].copy()]
+            if self.athresh > 0.0:
+                athresh = self.athresh
+                focca = [x for x in foa if x > athresh]
+                fvira = [x for x in fva if x > athresh]
+                iocca = [i for i,x in enumerate(foa) if x > athresh]
+                ivira = [i for i,x in enumerate(fva) if x > athresh]
+                ialla = [i for i in range(len(foa))]
+                foccb = [x for x in fob if x > athresh]
+                fvirb = [x for x in fvb if x > athresh]
+                ioccb = [i for i,x in enumerate(fob) if x > athresh]
+                ivirb = [i for i,x in enumerate(fvb) if x > athresh]
+                iallb = [i for i in range(len(fob))]
+                nocca = len(focca)
+                rdm2[0][numpy.ix_(iocca,iocca,iocca,iocca)] += numpy.einsum('pr,qs->pqrs',numpy.diag(foa),numpy.diag(foa))
+                rdm2[0][numpy.ix_(iocca,iocca,iocca,iocca)] -= numpy.einsum('pr,qs->pqsr',numpy.diag(foa),numpy.diag(foa))
+                rdm2[0][numpy.ix_(iocca,ialla,iocca,ialla)] += 0.5*numpy.einsum('pr,qs->pqrs',numpy.diag(foa),self.n1rdm[0])
+                rdm2[0][numpy.ix_(iocca,ialla,ialla,iocca)] -= 0.5*numpy.einsum('pr,qs->pqsr',numpy.diag(foa),self.n1rdm[0])
+                rdm2[0][numpy.ix_(ialla,iocca,ialla,iocca)] += 0.5*numpy.einsum('pr,qs->pqrs',self.n1rdm[0],numpy.diag(foa))
+                rdm2[0][numpy.ix_(ialla,iocca,iocca,ialla)] -= 0.5*numpy.einsum('pr,qs->pqsr',self.n1rdm[0],numpy.diag(foa))
+
+                rdm2[1][numpy.ix_(ioccb,ioccb,ioccb,ioccb)] += numpy.einsum('pr,qs->pqrs',numpy.diag(fob),numpy.diag(fob))
+                rdm2[1][numpy.ix_(ioccb,ioccb,ioccb,ioccb)] -= numpy.einsum('pr,qs->pqsr',numpy.diag(fob),numpy.diag(fob))
+                rdm2[1][numpy.ix_(ioccb,iallb,ioccb,iallb)] += 0.5*numpy.einsum('pr,qs->pqrs',numpy.diag(fob),self.n1rdm[1])
+                rdm2[1][numpy.ix_(ioccb,iallb,iallb,ioccb)] -= 0.5*numpy.einsum('pr,qs->pqsr',numpy.diag(fob),self.n1rdm[1])
+                rdm2[1][numpy.ix_(iallb,ioccb,iallb,ioccb)] += 0.5*numpy.einsum('pr,qs->pqrs',self.n1rdm[1],numpy.diag(fob))
+                rdm2[1][numpy.ix_(iallb,ioccb,ioccb,iallb)] -= 0.5*numpy.einsum('pr,qs->pqsr',self.n1rdm[1],numpy.diag(fob))
+
+                rdm2[2][numpy.ix_(iocca,ioccb,iocca,ioccb)] += numpy.einsum('pr,qs->pqrs',numpy.diag(foa),numpy.diag(fob))
+                rdm2[2][numpy.ix_(iocca,iallb,iocca,iallb)] += 0.5*numpy.einsum('pr,qs->pqrs',numpy.diag(foa),self.n1rdm[1])
+                rdm2[2][numpy.ix_(ialla,ioccb,ialla,ioccb)] += 0.5*numpy.einsum('pr,qs->pqrs',self.n1rdm[0],numpy.diag(fob))
+            else:
+                rdm2[0] += numpy.einsum('pr,qs->pqrs',numpy.diag(foa),numpy.diag(foa))
+                rdm2[0] -= numpy.einsum('pr,qs->pqsr',numpy.diag(foa),numpy.diag(foa))
+                rdm2[0] += 0.5*numpy.einsum('pr,qs->pqrs',numpy.diag(foa),self.n1rdm[0])
+                rdm2[0] -= 0.5*numpy.einsum('pr,qs->pqsr',numpy.diag(foa),self.n1rdm[0])
+                rdm2[0] += 0.5*numpy.einsum('pr,qs->pqrs',self.n1rdm[0],numpy.diag(foa))
+                rdm2[0] -= 0.5*numpy.einsum('pr,qs->pqsr',self.n1rdm[0],numpy.diag(foa))
+
+                rdm2[1] += numpy.einsum('pr,qs->pqrs',numpy.diag(fob),numpy.diag(fob))
+                rdm2[1] -= numpy.einsum('pr,qs->pqsr',numpy.diag(fob),numpy.diag(foa))
+                rdm2[1] += 0.5*numpy.einsum('pr,qs->pqrs',numpy.diag(fob),self.n1rdm[1])
+                rdm2[1] -= 0.5*numpy.einsum('pr,qs->pqsr',numpy.diag(fob),self.n1rdm[1])
+                rdm2[1] += 0.5*numpy.einsum('pr,qs->pqrs',self.n1rdm[1],numpy.diag(fob))
+                rdm2[1] -= 0.5*numpy.einsum('pr,qs->pqsr',self.n1rdm[1],numpy.diag(fob))
+
+                rdm2[2] += numpy.einsum('pr,qs->pqrs',numpy.diag(foa),numpy.diag(fob))
+                rdm2[2] += 0.5*numpy.einsum('pr,qs->pqrs',numpy.diag(foa),self.n1rdm[1])
+                rdm2[2] += 0.5*numpy.einsum('pr,qs->pqrs',self.n1rdm[0],numpy.diag(fob))
+            return rdm2
+        elif self.sys.orbtype == 'g':
+            if self.n1rdm is None:
+                self._g_ft_1rdm()
+            if self.n2rdm is None:
+                self._g_ft_2rdm()
+            en = self.sys.g_energies_tot()
+            fo = ft_utils.ff(beta, en, mu)
+            fv = ft_utils.ffv(beta, en, mu)
+            rdm2 = self.n2rdm.copy()
+            if self.athresh > 0.0:
+                athresh = self.athresh
+                focc = [x for x in fo if x > athresh]
+                fvir = [x for x in fv if x > athresh]
+                iocc = [i for i,x in enumerate(fo) if x > athresh]
+                ivir = [i for i,x in enumerate(fv) if x > athresh]
+                iall = [i for i in range(len(fo))]
+                rdm2[numpy.ix_(iocc,iocc,iocc,iocc)] += numpy.einsum('pr,qs->pqrs',numpy.diag(fo),numpy.diag(fo))
+                rdm2[numpy.ix_(iocc,iocc,iocc,iocc)] -= numpy.einsum('pr,qs->pqsr',numpy.diag(fo),numpy.diag(fo))
+                rdm2[numpy.ix_(iocc,iall,iocc,iall)] += 0.5*numpy.einsum('pr,qs->pqrs',numpy.diag(fo),self.n1rdm)
+                rdm2[numpy.ix_(iocc,iall,iall,iocc)] -= 0.5*numpy.einsum('pr,qs->pqsr',numpy.diag(fo),self.n1rdm)
+                rdm2[numpy.ix_(iall,iocc,iall,iocc)] += 0.5*numpy.einsum('pr,qs->pqrs',self.n1rdm,numpy.diag(fo))
+                rdm2[numpy.ix_(iall,iocc,iocc,iall)] -= 0.5*numpy.einsum('pr,qs->pqsr',self.n1rdm,numpy.diag(fo))
+            else:
+                rdm2 += numpy.einsum('pr,qs->pqrs',numpy.diag(fo),numpy.diag(fo))
+                rdm2 -= numpy.einsum('pr,qs->pqsr',numpy.diag(fo),numpy.diag(fo))
+                rdm2 += 0.5*numpy.einsum('pr,qs->pqrs',numpy.diag(fo),self.n1rdm)
+                rdm2 -= 0.5*numpy.einsum('pr,qs->pqsr',numpy.diag(fo),self.n1rdm)
+                rdm2 += 0.5*numpy.einsum('pr,qs->pqrs',self.n1rdm,numpy.diag(fo))
+                rdm2 -= 0.5*numpy.einsum('pr,qs->pqsr',self.n1rdm,numpy.diag(fo))
+            return rdm2
+        else:
+            raise Exception("orbital type " + self.sys.orbtype + " is not implemented for 1rdm")

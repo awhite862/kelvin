@@ -84,8 +84,7 @@ class FTCCReldenTest(unittest.TestCase):
         sys = scf_system(m,T,mu,orbtype='g')
         ccsdT = ccsd(sys,T=T,mu=mu,iprint=0,econv=1e-9,ngrid=ngrid,damp=damp,max_iter=mi)
         cc = ccsdT.run()
-        ccsdT._grel_ft_1rdm()
-        Dm = ccsdT.r1rdm + (ccsdT.n1rdm - numpy.diag(ccsdT.n1rdm.diagonal()))
+        Dm = ccsdT.full_1rdm(relax=True)
         out = numpy.einsum('ij,ji->',Dm,fmo)
         diff = abs(out - ref)
 
@@ -166,8 +165,7 @@ class FTCCReldenTest(unittest.TestCase):
         ccsdT = ccsd(sys,T=T,mu=mu,iprint=0,
                 damp=0.1,ngrid=ngrid,athresh=1e-30,econv=1e-10,max_iter=mi)
         cc = ccsdT.run()
-        ccsdT._grel_ft_1rdm()
-        Dm = ccsdT.r1rdm + (ccsdT.n1rdm - numpy.diag(ccsdT.n1rdm.diagonal()))
+        Dm = ccsdT.full_1rdm(relax=True)
         out = numpy.einsum('ij,ji->',Dm,fmo)
         diff = abs(out - ref)
         error = "Expected: {}  Actual: {}".format(ref,out)

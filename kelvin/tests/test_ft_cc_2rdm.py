@@ -95,13 +95,8 @@ class FTCC2RDMTest(unittest.TestCase):
         cc._ft_ccsd_lambda()
         cc._g_ft_1rdm()
         cc._g_ft_2rdm()
-        P2tot = cc.n2rdm.copy()
+        P2tot = cc.full_2rdm()
         n = sfo.shape[0]
-        # add disconnected pieces
-        P2tot += numpy.einsum('pr,qs->pqrs',numpy.diag(fo),numpy.diag(fo))
-        P2tot -= numpy.einsum('pr,qs->pqsr',numpy.diag(fo),numpy.diag(fo))
-        P2tot += numpy.einsum('pr,qs->pqrs',numpy.diag(fo),cc.n1rdm)
-        P2tot -= numpy.einsum('pr,qs->pqsr',numpy.diag(fo),cc.n1rdm)
         E2 = 0.25*numpy.einsum('pqrs,rspq->',P2tot, Mg)
         out = E2
 
@@ -265,6 +260,44 @@ class FTCC2RDMTest(unittest.TestCase):
         ccsdT._ft_uccsd_lambda()
         ccsdT._u_ft_2rdm()
         P2u = ccsdT.n2rdm
+
+        # aaaa block
+        diff = numpy.linalg.norm(P2u[0] - P2g[:na,:na,:na,:na])/numpy.linalg.norm(P2u[0])
+        self.assertTrue(diff < 1e-12,"Error in 2rdm(aaaa): {}".format(diff))
+
+        # bbbb block
+        diff = numpy.linalg.norm(P2u[1] - P2g[na:,na:,na:,na:])/numpy.linalg.norm(P2u[1])
+        self.assertTrue(diff < 1e-12,"Error in 2rdm(bbbb): {}".format(diff))
+
+        # abab block
+        P2gab = P2g[:na,na:,:na,na:]
+        diff = numpy.linalg.norm(P2u[2] - P2gab)/numpy.linalg.norm(P2u[2])
+        self.assertTrue(diff < 1e-12,"Error in 2rdm(abab): {}".format(diff))
+
+    def test_Be_active_full(self):
+        T = 0.05
+        beta = 1.0/(T + 1e-12)
+        mu = 0.04
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+
+        m = scf.RHF(mol)
+        athresh = 1e-20
+        ng = 40
+        m.conv_tol = 1e-12
+        Escf = m.scf()
+        sys = scf_system(m,T,mu,orbtype='g')
+        ccsdT = ccsd(sys,T=T,mu=mu,iprint=0,tconv=1e-11,athresh=athresh,ngrid=ng,damp=0.25,max_iter=80)
+        cc = ccsdT.run()
+        P2g = ccsdT.full_2rdm()
+
+        sys = scf_system(m,T,mu,orbtype='u')
+        na = sys.u_energies_tot()[0].shape[0]
+        ccsdT = ccsd(sys,T=T,mu=mu,iprint=0,tconv=1e-11,athresh=athresh,ngrid=ng,damp=0.25,max_iter=80)
+        cc = ccsdT.run()
+        P2u = ccsdT.full_2rdm()
 
         # aaaa block
         diff = numpy.linalg.norm(P2u[0] - P2g[:na,:na,:na,:na])/numpy.linalg.norm(P2u[0])
