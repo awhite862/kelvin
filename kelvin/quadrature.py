@@ -206,6 +206,8 @@ def ft_quad(ng, beta, quad):
         return simpsons_p(ng, beta, 3)
     elif quad == 'quar':
         return simpsons_p(ng, beta, 4)
+    elif quad == 'mid':
+        return midpoint(ng, beta)
     elif quad == 'L':
         return left(ng, beta)
     else:
