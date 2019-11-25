@@ -70,5 +70,25 @@ class RTCCSDTest(unittest.TestCase):
         error = "Expected: {}  Actual: {}".format(Eccref,Eccout)
         self.assertTrue(diff < 1e-6,error)
 
+    def test_Be_active(self):
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+
+        m = scf.RHF(mol)
+        m.conv_tol = 1e-12
+        Escf = m.scf()
+        T = 0.05
+        mu = 0.0
+        sys = scf_system(m,T,mu,orbtype='g')
+        ccsdT = ccsd(sys,T=T,mu=mu,ngrid=100,iprint=0,athresh=1e-20)
+        Eref,Eccref = ccsdT.run()
+        rtccsdT = RTCCSD(sys, T=T, mu=mu, ngrid=160, prop="rk4", athresh=1e-20)
+        Eout,Eccout = rtccsdT.run()
+        diff = abs(Eccref - Eccout)
+        error = "Expected: {}  Actual: {}".format(Eccref,Eccout)
+        self.assertTrue(diff < 1e-5,error)
+
 if __name__ == '__main__':
     unittest.main()

@@ -131,7 +131,7 @@ class RTCCSD(object):
                 D1 = D1[numpy.ix_(ivir,iocc)]
                 D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
                 t1shape = (nvir,nocc)
-                t1shape = (nvir,nvir,nocc,nocc)
+                t2shape = (nvir,nvir,nocc,nocc)
 
             else:
                 # get scaled integrals
@@ -149,8 +149,8 @@ class RTCCSD(object):
         Eccn = 0.0
 
         def fRHS(t1,t2):
-            k1s = D1.transpose((1,0))*t1 - F.vo.copy()
-            k1d = D2.transpose((2,3,0,1))*t2 - I.vvoo.copy()
+            k1s = -D1*t1 - F.vo.copy()
+            k1d = -D2*t2 - I.vvoo.copy()
             cc_equations._Stanton(k1s,k1d,F,I,t1,t2,fac=-1.0)
             return k1s,k1d
 
@@ -286,14 +286,14 @@ class RTCCSD(object):
                 t2shape = (n,n,n,n)
 
         def fRHS(t1,t2):
-            k1s = D1.transpose((1,0))*t1 - F.vo.copy()
-            k1d = D2.transpose((2,3,0,1))*t2 - I.vvoo.copy()
+            k1s = -D1*t1 - F.vo.copy()
+            k1d = -D2*t2 - I.vvoo.copy()
             cc_equations._Stanton(k1s,k1d,F,I,t1,t2,fac=-1.0)
             return (-1.0)*k1s,(-1.0)*k1d
 
         def fLRHS(t1,t2,l1,l2):
-            l1s = D1*l1 - F.ov.copy()
-            l1d = D2*l2 - I.oovv.copy()
+            l1s = -D1.transpose((1,0))*l1 - F.ov.copy()
+            l1d = -D2.transpose((2,3,0,1))*l2 - I.oovv.copy()
             cc_equations._Lambda_opt(l1s, l1d, F, I,
                     l1, l2, t1, t2, fac=-1.0)
             cc_equations._LS_TS(l1s,I,t1,fac=-1.0)
@@ -304,6 +304,10 @@ class RTCCSD(object):
         nv, no = t1.shape
         l1 = numpy.zeros((no,nv))
         l2 = numpy.zeros((no,no,nv,nv))
+        pia = numpy.zeros((no,nv))
+        pji = g[ng - 1]*cc_equations.ccsd_1rdm_ji_opt(t1,t2,l1,l2)
+        pba = g[ng - 1]*cc_equations.ccsd_1rdm_ba_opt(t1,t2,l1,l2)
+        pai = g[ng - 1]*cc_equations.ccsd_1rdm_ai_opt(t1,t2,l1,l2)
 
         Eccn = g[ng - 1]*cc_energy(t1, t2, F.ov, I.oovv)/beta
         for i in range(1,ng):
@@ -359,6 +363,10 @@ class RTCCSD(object):
             Eccn += g[ng - i - 1]*cc_energy(t1, t2, F.ov, I.oovv)/beta
 
             # increment the RDMs
+            pia += g[ng - i - 1]*l1
+            pji += g[ng - i - 1]*cc_equations.ccsd_1rdm_ji_opt(t1,t2,l1,l2)
+            pba += g[ng - i - 1]*cc_equations.ccsd_1rdm_ba_opt(t1,t2,l1,l2)
+            pai += g[ng - i - 1]*cc_equations.ccsd_1rdm_ai_opt(t1,t2,l1,l2)
 
         G0 = E0
         G1 = E1
@@ -366,5 +374,9 @@ class RTCCSD(object):
         Gtot = E0 + E1 + Eccn
         self.L1 = l1
         self.L2 = l2
+        self.dia = pia
+        self.dji = pji
+        self.dba = pba
+        self.dai = pai
 
         return (Eccn+E01,Eccn)

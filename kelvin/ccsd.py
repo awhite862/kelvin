@@ -1204,11 +1204,11 @@ class ccsd(object):
         # first order contributions
         der1 = self.sys.g_d_mp1(dvec)
 
-        # get time-grid
-        ng = self.ngrid
-        ti = self.ti
-        G = self.G
-        g = self.g
+        ## get time-grid
+        #ng = self.ngrid
+        #ti = self.ti
+        #G = self.G
+        #g = self.g
 
         if self.athresh > 0.0:
             athresh = self.athresh
@@ -1258,11 +1258,11 @@ class ccsd(object):
         # first order contributions
         der1 = self.sys.u_d_mp1(dveca,dvecb)
 
-        # get time-grid
-        ng = self.ngrid
-        ti = self.ti
-        G = self.G
-        g = self.g
+        ## get time-grid
+        #ng = self.ngrid
+        #ti = self.ti
+        #G = self.G
+        #g = self.g
 
         # get exponentials
         D1a = ea[:,None] - ea[None,:]

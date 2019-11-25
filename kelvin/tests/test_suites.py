@@ -23,6 +23,7 @@ from kelvin.tests import test_neq_prop
 from kelvin.tests import test_quadrature
 from kelvin.tests import test_rt_ccsd
 from kelvin.tests import test_rt_ccsd_lambda
+from kelvin.tests import test_rt_ccsd_1rdm
 from kelvin.tests import test_scf
 from kelvin.tests import test_test
 from kelvin.tests import test_ueg
@@ -160,11 +161,16 @@ def full_suite():
     suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_rk1"))
     suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_rk2"))
     suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_rk4"))
+    suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_active"))
 
     suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_rk4_omega"))
     suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_rk1"))
     suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_rk4"))
     suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_rk124"))
+
+    suite.addTest(test_rt_ccsd_1rdm.RTCCSD1RDMTest("test_Be_rk1"))
+    suite.addTest(test_rt_ccsd_1rdm.RTCCSD1RDMTest("test_Be_rk2"))
+    suite.addTest(test_rt_ccsd_1rdm.RTCCSD1RDMTest("test_Be_rk4"))
 
     suite.addTest(test_scf.SCFTest("test_Be_sto3g_energy"))
     suite.addTest(test_scf.SCFTest("test_diamond_energy"))
@@ -313,11 +319,16 @@ def default_suite():
     #suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_rk1"))
     #suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_rk2"))
     suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_rk4"))
+    #suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_active"))
 
     suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_rk4_omega"))
     #suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_rk1"))
     suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_rk4"))
     #suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_rk124"))
+
+    suite.addTest(test_rt_ccsd_1rdm.RTCCSD1RDMTest("test_Be_rk1"))
+    #suite.addTest(test_rt_ccsd_1rdm.RTCCSD1RDMTest("test_Be_rk2"))
+    suite.addTest(test_rt_ccsd_1rdm.RTCCSD1RDMTest("test_Be_rk4"))
 
     suite.addTest(test_scf.SCFTest("test_Be_sto3g_energy"))
     suite.addTest(test_scf.SCFTest("test_diamond_energy"))
