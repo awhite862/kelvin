@@ -9,6 +9,7 @@ from . import ft_cc_energy
 from . import ft_cc_equations
 from . import ft_mp
 from . import quadrature
+from . import propagation
 
 class RTCCSD(object):
     """Real-time coupled cluster singles and doubles (CCSD) driver.
@@ -157,30 +158,34 @@ class RTCCSD(object):
         for i in range(1,ng):
             # propagate
             h = self.ti[i] - self.ti[i - 1]
-            k1s,k1d = fRHS(t1,t2)
-            k1s *= h
-            k1d *= h
-            if self.prop == "rk1":
-                t1 += k1s 
-                t2 += k1d
+            if self.prop == "rk1" or self.prop == "ab1":
+                propagation.trk1(h, t1, t2, fRHS)
             elif self.prop == "rk2":
-                k2s,k2d = fRHS(t1 + k1s, t2 + k1d)
-                k2s *= h
-                k2d *= h
-                t1 += 0.5*(k1s + k2s)
-                t2 += 0.5*(k1d + k2d)
+                propagation.trk2(h, t1, t2, fRHS)
             elif self.prop == "rk4":
-                k2s,k2d = fRHS(t1 + 0.5*k1s, t2 + 0.5*k1d)
-                k2s *= h
-                k2d *= h
-                k3s,k3d = fRHS(t1 + 0.5*k2s, t2 + 0.5*k2d)
-                k3s *= h
-                k3d *= h
-                k4s,k4d = fRHS(t1 + k3s, t2 + k3d)
-                k4s *= h
-                k4d *= h
-                t1 += 1.0/6.0*(k1s + 2.0*k2s + 2.0*k3s + k4s)
-                t2 += 1.0/6.0*(k1d + 2.0*k2d + 2.0*k3d + k4d)
+                propagation.trk4(h, t1, t2, fRHS)
+            elif self.prop == "ab2":
+                if i == 1:
+                    k2s = None
+                    k2d = None
+                    k2s,k2d = propagation.tab2(h, t1, t2, k2s, k2d, fRHS)
+                else:
+                    k2s,k2d = propagation.tab2(h, t1, t2, k2s, k2d, fRHS)
+            elif self.prop == "be":
+                mi = 100
+                alpha = 0.4
+                thresh = 1e-5
+                propagation.tbe(h, t1, t2, mi, alpha, thresh, fRHS, self.iprint)
+            elif self.prop == "cn":
+                mi = 100
+                alpha = 0.6
+                thresh = 1e-5
+                propagation.tcn(h, t1, t2, mi, alpha, thresh, fRHS, self.iprint)
+            elif self.prop == "am2":
+                mi = 100
+                alpha = 0.6
+                thresh = 1e-5
+                propagation.tam2(h, t1, t2, mi, alpha, thresh, fRHS, self.iprint)
             else:
                 raise Exception("Unrecognized propagation scheme: " + self.prop)
 
@@ -326,38 +331,84 @@ class RTCCSD(object):
                 l2 += l1d
             elif self.prop == "rk2":
                 k2s,k2d = fRHS(t1 + k1s, t2 + k1d)
-                l2s,l2d = fLRHS(t1 + k1s, t2 + k1d, l1 + l1s, l2 + l1d)
                 k2s *= h
                 k2d *= h
+                t1d = 0.5*(k1s + k2s)
+                t2d = 0.5*(k1d + k2d)
+                l2s,l2d = fLRHS(t1 + t1d, t2 + t2d, l1 + l1s, l2 + l1d)
                 l2s *= h
                 l2d *= h
-                t1 += 0.5*(k1s + k2s)
-                t2 += 0.5*(k1d + k2d)
+                t1 += t1d
+                t2 += td2
                 l1 += 0.5*(l1s + l2s)
                 l2 += 0.5*(l1d + l2d)
             elif self.prop == "rk4":
                 k2s,k2d = fRHS(t1 + 0.5*k1s, t2 + 0.5*k1d)
-                l2s,l2d = fLRHS(t1 + 0.5*k1s, t2 + 0.5*k1d, l1 + 0.5*l1s, l2 + 0.5*l1d)
                 k2s *= h
                 k2d *= h
-                l2s *= h
-                l2d *= h
                 k3s,k3d = fRHS(t1 + 0.5*k2s, t2 + 0.5*k2d)
-                l3s,l3d = fLRHS(t1 + 0.5*k2s, t2 + 0.5*k2d, l1 + 0.5*l2s, l2 + 0.5*l2d)
                 k3s *= h
                 k3d *= h
-                l3s *= h
-                l3d *= h
                 k4s,k4d = fRHS(t1 + k3s, t2 + k3d)
-                l4s,l4d = fLRHS(t1 + k3s, t2 + k3d, l1 + l3s, l2 + l3d)
                 k4s *= h
                 k4d *= h
+                t1d = 1.0/6.0*(k1s + 2.0*k2s + 2.0*k3s + k4s)
+                t2d = 1.0/6.0*(k1d + 2.0*k2d + 2.0*k3d + k4d)
+
+                l2s,l2d = fLRHS(t1 + 0.5*t1d, t2 + 0.5*t2d, l1 + 0.5*l1s, l2 + 0.5*l1d)
+                l2s *= h
+                l2d *= h
+                l3s,l3d = fLRHS(t1 + 0.5*t1d, t2 + 0.5*t2d, l1 + 0.5*l2s, l2 + 0.5*l2d)
+                l3s *= h
+                l3d *= h
+                l4s,l4d = fLRHS(t1 + t1d, t2 + t2d, l1 + l3s, l2 + l3d)
                 l4s *= h
                 l4d *= h
-                t1 += 1.0/6.0*(k1s + 2.0*k2s + 2.0*k3s + k4s)
-                t2 += 1.0/6.0*(k1d + 2.0*k2d + 2.0*k3d + k4d)
+                t1 += t1d#1.0/6.0*(k1s + 2.0*k2s + 2.0*k3s + k4s)
+                t2 += t2d#1.0/6.0*(k1d + 2.0*k2d + 2.0*k3d + k4d)
                 l1 += 1.0/6.0*(l1s + 2.0*l2s + 2.0*l3s + l4s)
                 l2 += 1.0/6.0*(l1d + 2.0*l2d + 2.0*l3d + l4d)
+            #elif self.prop == "cn":
+            #    dsold = k1s.copy()
+            #    ddold = k1d.copy()
+            #    mi = 200
+            #    alpha = 0.8
+            #    thresh = 1e-5
+            #    if self.iprint > 0:
+            #        print("Time step {}:".format(ng - i - 1))
+            #    converged = False
+            #    for k in range(mi):
+            #        ds,dd = fRHS(t1 + dsold, t2 + ddold)
+            #        ds *= h
+            #        dd *= h
+            #        error = numpy.linalg.norm(ds - dsold)/(numpy.linalg.norm(dsold) + 0.01)
+            #        error += numpy.linalg.norm(dd - ddold)/(numpy.linalg.norm(ddold) + 0.01)
+            #        if self.iprint > 0:
+            #            print(' %2d  %.4E' % (k+1,error))
+            #        dsold = (1.0 - alpha)*ds + alpha*dsold
+            #        ddold = (1.0 - alpha)*dd + alpha*ddold
+            #        if error < thresh: 
+            #            converged = True
+            #            break
+            #    if not converged:
+            #        raise Exception("Implicit step not converged at {}".format(ng - i - 1))
+            #    t1 += 0.5*(dsold + k1s)
+            #    t2 += 0.5*(ddold + k1d)
+            #    lsold = l1s.copy()
+            #    ldold = l1d.copy()
+            #    for k in range(mi):
+            #        ls,ld = fLRHS(t1, t2, l1 + lsold, l2 + ldold)
+            #        ls *= h
+            #        ld *= h
+            #        error = numpy.linalg.norm(ls - lsold)/(numpy.linalg.norm(lsold) + 0.01)
+            #        error += numpy.linalg.norm(ld - ldold)/(numpy.linalg.norm(ldold) + 0.01)
+            #        if self.iprint > 0:
+            #            print(' %2d  %.4E' % (k+1,error))
+            #        lsold = (1.0 - alpha)*ls + alpha*lsold
+            #        ldold = (1.0 - alpha)*ld + alpha*ldold
+            #        if error < thresh: break
+            #    l1 += 0.5*(lsold + l1s)
+            #    l2 += 0.5*(ldold + l1d)
             else:
                 raise Exception("Unrecognized propagation scheme: " + self.prop)
             Eccn += g[ng - i - 1]*cc_energy(t1, t2, F.ov, I.oovv)/beta

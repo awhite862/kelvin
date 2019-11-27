@@ -29,7 +29,7 @@ class RTCCSDLambdaTest(unittest.TestCase):
         error = "Expected: {}  Actual: {}".format(Eccref,Eccout)
         self.assertTrue(diff < 1e-6,error)
 
-    #def test_Be_rk4_omega_active(self):
+    #def test_Be_cn_omega_active(self):
     #    mol = gto.M(
     #        verbose = 0,
     #        atom = 'Be 0 0 0',
@@ -41,7 +41,7 @@ class RTCCSDLambdaTest(unittest.TestCase):
     #    T = 0.05
     #    mu = 0.0
     #    sys = scf_system(m,T,mu,orbtype='g')
-    #    rtccsdT = RTCCSD(sys, T=T, mu=mu, ngrid=80, prop="rk1", athresh=1e-20)
+    #    rtccsdT = RTCCSD(sys, T=T, mu=mu, ngrid=5120, prop="rk4", athresh=1e-20, iprint=0)
     #    Eref,Eccref = rtccsdT.run()
     #    Eout,Eccout = rtccsdT._ccsd_lambda()
     #    diff = abs(Eccref - Eccout)

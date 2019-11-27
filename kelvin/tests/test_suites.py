@@ -161,7 +161,10 @@ def full_suite():
     suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_rk1"))
     suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_rk2"))
     suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_rk4"))
-    suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_active"))
+    suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_ab2"))
+    suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_cn"))
+    suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_am2"))
+    #suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_active"))
 
     suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_rk4_omega"))
     suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_rk1"))
@@ -319,6 +322,9 @@ def default_suite():
     #suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_rk1"))
     #suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_rk2"))
     suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_rk4"))
+    #suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_ab2"))
+    #suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_cn"))
+    #suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_am2"))
     #suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_active"))
 
     suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_rk4_omega"))

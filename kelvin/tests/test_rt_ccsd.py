@@ -14,7 +14,7 @@ class RTCCSDTest(unittest.TestCase):
             verbose = 0,
             atom = 'Be 0 0 0',
             basis = 'sto-3G')
-        
+ 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
         Escf = m.scf()
@@ -34,7 +34,7 @@ class RTCCSDTest(unittest.TestCase):
             verbose = 0,
             atom = 'Be 0 0 0',
             basis = 'sto-3G')
-        
+
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
         Escf = m.scf()
@@ -55,7 +55,7 @@ class RTCCSDTest(unittest.TestCase):
             verbose = 0,
             atom = 'Be 0 0 0',
             basis = 'sto-3G')
-        
+
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
         Escf = m.scf()
@@ -70,7 +70,7 @@ class RTCCSDTest(unittest.TestCase):
         error = "Expected: {}  Actual: {}".format(Eccref,Eccout)
         self.assertTrue(diff < 1e-6,error)
 
-    def test_Be_active(self):
+    def test_Be_ab2(self):
         mol = gto.M(
             verbose = 0,
             atom = 'Be 0 0 0',
@@ -79,16 +79,76 @@ class RTCCSDTest(unittest.TestCase):
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
         Escf = m.scf()
-        T = 0.05
+        T = 0.5
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
-        ccsdT = ccsd(sys,T=T,mu=mu,ngrid=100,iprint=0,athresh=1e-20)
-        Eref,Eccref = ccsdT.run()
-        rtccsdT = RTCCSD(sys, T=T, mu=mu, ngrid=160, prop="rk4", athresh=1e-20)
+        rtccsdT = RTCCSD(sys, T=T, mu=mu, ngrid=320, prop="rk4")
+        Eref,Eccref = rtccsdT.run()
+        rtccsdT = RTCCSD(sys, T=T, mu=mu, ngrid=320, prop="ab2")
         Eout,Eccout = rtccsdT.run()
         diff = abs(Eccref - Eccout)
         error = "Expected: {}  Actual: {}".format(Eccref,Eccout)
         self.assertTrue(diff < 1e-5,error)
+
+    def test_Be_cn(self):
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+
+        m = scf.RHF(mol)
+        m.conv_tol = 1e-12
+        Escf = m.scf()
+        T = 0.5
+        mu = 0.0
+        sys = scf_system(m,T,mu,orbtype='g')
+        rtccsdT = RTCCSD(sys, T=T, mu=mu, ngrid=160, prop="rk4")
+        Eref,Eccref = rtccsdT.run()
+        rtccsdT = RTCCSD(sys, T=T, mu=mu, ngrid=80, prop="cn",iprint=0)
+        Eout,Eccout = rtccsdT.run()
+        diff = abs(Eccref - Eccout)
+        error = "Expected: {}  Actual: {}".format(Eccref,Eccout)
+        self.assertTrue(diff < 1e-4,error)
+
+    def test_Be_am2(self):
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+
+        m = scf.RHF(mol)
+        m.conv_tol = 1e-12
+        Escf = m.scf()
+        T = 0.5
+        mu = 0.0
+        sys = scf_system(m,T,mu,orbtype='g')
+        rtccsdT = RTCCSD(sys, T=T, mu=mu, ngrid=160, prop="rk4")
+        Eref,Eccref = rtccsdT.run()
+        rtccsdT = RTCCSD(sys, T=T, mu=mu, ngrid=80, prop="am2",iprint=0)
+        Eout,Eccout = rtccsdT.run()
+        diff = abs(Eccref - Eccout)
+        error = "Expected: {}  Actual: {}".format(Eccref,Eccout)
+        self.assertTrue(diff < 1e-4,error)
+
+    #def test_Be_active(self):
+    #    mol = gto.M(
+    #        verbose = 0,
+    #        atom = 'Be 0 0 0',
+    #        basis = 'sto-3G')
+
+    #    m = scf.RHF(mol)
+    #    m.conv_tol = 1e-12
+    #    Escf = m.scf()
+    #    T = 0.05
+    #    mu = 0.0
+    #    sys = scf_system(m,T,mu,orbtype='g')
+    #    ccsdT = ccsd(sys,T=T,mu=mu,ngrid=100,iprint=0,athresh=1e-20)
+    #    Eref,Eccref = ccsdT.run()
+    #    rtccsdT = RTCCSD(sys, T=T, mu=mu, ngrid=80, prop="rk4", athresh=1e-20, iprint=1)
+    #    Eout,Eccout = rtccsdT.run()
+    #    diff = abs(Eccref - Eccout)
+    #    error = "Expected: {}  Actual: {}".format(Eccref,Eccout)
+    #    self.assertTrue(diff < 1e-9,error)
 
 if __name__ == '__main__':
     unittest.main()
