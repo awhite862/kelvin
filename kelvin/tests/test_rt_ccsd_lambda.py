@@ -130,6 +130,46 @@ class RTCCSDLambdaTest(unittest.TestCase):
         self.assertTrue(d1 < 5e-5,error1)
         self.assertTrue(d2 < 5e-5,error2)
 
+    def test_Be_cn(self):
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+
+        m = scf.RHF(mol)
+        m.conv_tol = 1e-12
+        Escf = m.scf()
+        T = 2.0
+        mu = 0.0
+        sys = scf_system(m,T,mu,orbtype='g')
+
+        # compute \bar{Lambda} at \tau = 0
+        ccsdT = ccsd(sys,T=T,mu=mu,ngrid=320,iprint=0,quad="mid")
+        Eref,Eccref = ccsdT.run()
+        ccsdT._ft_ccsd_lambda()
+        ng = ccsdT.ngrid
+        L1 = ccsdT.L1
+        L2 = ccsdT.L2
+        ti = ccsdT.ti
+        g = ccsdT.g
+        G = ccsdT.G
+        en = sys.g_energies_tot()
+        D1 = en[:,None] - en[None,:]
+        D2 = en[:,None,None,None] + en[None,:,None,None] \
+                - en[None,None,:,None] - en[None,None,None,:]
+        L1new = quadrature.int_L1(ng,L1,ti,D1,g,G)
+        L2new = quadrature.int_L2(ng,L2,ti,D2,g,G)
+
+        # compute \bar{Lambda} from propagation using rk1
+        rtccsdT = RTCCSD(sys, T=T, mu=mu, ngrid=80, prop="cn")
+        Eout,Eccout = rtccsdT.run()
+        Etmp,Ecctmp = rtccsdT._ccsd_lambda()
+        d1 = numpy.linalg.norm(rtccsdT.L1 - L1new[0])/numpy.sqrt(L1new[0].size)
+        d2 = numpy.linalg.norm(rtccsdT.L2 - L2new[0])/numpy.sqrt(L2new[0].size)
+        error1 = "Difference in L1: {}".format(d1)
+        error2 = "Difference in L2: {}".format(d2)
+        self.assertTrue(d1 < 5e-5,error1)
+
     def test_Be_rk124(self):
         mol = gto.M(
             verbose = 0,
