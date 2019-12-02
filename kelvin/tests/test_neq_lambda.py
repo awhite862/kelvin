@@ -42,7 +42,7 @@ def evalL(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
 
 def test_L1(cc,thresh):
     T = cc.T
-    beta = 1.0 / (T + 1e-12)
+    beta = 1.0/T
     mu = cc.mu
     ngr = cc.ngr
     ngi = cc.ngi
@@ -122,7 +122,7 @@ class NEQLambdaTest(unittest.TestCase):
         ccsdT._neq_ccsd_lambda()
         
         # Check that L is zero
-        beta = 1.0 / (T + 1e-12)
+        beta = 1.0/T
         tii,gi,Gi = quadrature.simpsons(ngi, beta)
         tir,gr,Gr = quadrature.midpoint(ngr, tmax)
         en = ccsdT.sys.g_energies_tot()
@@ -148,7 +148,7 @@ class NEQLambdaTest(unittest.TestCase):
 
         deltat = 0.04
         tmax = (ngr)*deltat
-        beta = 1.0 / (T + 1e-12)
+        beta = 1.0/T
         tii,gi,Gi = quadrature.simpsons(ngi, beta)
         tir,gr,Gr = quadrature.midpoint(ngr, tmax)
         sys = h2_field_system(T,mu,omega,tir,O=None,ot=None)

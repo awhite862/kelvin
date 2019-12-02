@@ -201,7 +201,7 @@ class ccsd(object):
     def _g_ft_ESN(self,L1=None,L2=None,gderiv=True):
             # temperature info
             T = self.T
-            beta = 1.0 / (T + 1e-12)
+            beta = 1.0 / T
             mu = self.mu
 
             # zero order contributions
@@ -247,7 +247,7 @@ class ccsd(object):
     def _u_ft_ESN(self,L1=None,L2=None,gderiv=True):
             # temperature info
             T = self.T
-            beta = 1.0 / (T + 1e-12)
+            beta = 1.0 / T
             mu = self.mu
 
             # zero order contributions
@@ -676,7 +676,7 @@ class ccsd(object):
     def _ft_ccsd(self,T1in=None,T2in=None):
         """Solve finite temperature coupled cluster equations."""
         #T = self.T if not self.realtime else 1.0e-5
-        beta = 1.0 / (self.T + 1e-12) if self.finite_T else self._beta_max
+        beta = 1.0 / self.T if self.finite_T else self._beta_max
         mu = self.mu if self.finite_T else None
 
         # get time-grid
@@ -806,7 +806,7 @@ class ccsd(object):
     def _ft_uccsd(self,T1in=None,T2in=None):
         """Solve finite temperature coupled cluster equations."""
         T = self.T
-        beta = 1.0 / (T + 1e-12)
+        beta = 1.0 / T
         mu = self.mu
 
         # get time-grid
@@ -957,7 +957,7 @@ class ccsd(object):
     def _ft_ccsd_lambda(self, L1=None, L2=None):
         """Solve FT-CCSD Lambda equations."""
         #T = self.T
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T
         mu = self.mu
 
         # get time-grid
@@ -1053,7 +1053,7 @@ class ccsd(object):
     def _ft_uccsd_lambda(self, L1=None, L2=None):
         """Solve FT-CCSD Lambda equations."""
         T = self.T
-        beta = 1.0 / (T + 1e-12)
+        beta = 1.0 / T
         mu = self.mu
 
         # get time-grid
@@ -1192,7 +1192,7 @@ class ccsd(object):
         """Evaluate the Lagrangian with scaled occupation number derivatives."""
         # temperature info
         T = self.T
-        beta = 1.0 / (T + 1e-12)
+        beta = 1.0 / T
         mu = self.mu
 
         # get energies and occupation numbers
@@ -1236,7 +1236,7 @@ class ccsd(object):
         dvec = numpy.concatenate((dveca,dvecb))
         # temperature info
         T = self.T
-        beta = 1.0 / (T + 1e-12)
+        beta = 1.0 / T
         mu = self.mu
 
         # get energies and occupation numbers
@@ -1345,7 +1345,7 @@ class ccsd(object):
         """
         # temperature info
         T = self.T
-        beta = 1.0 / (T + 1e-12)
+        beta = 1.0 / T
         mu = self.mu
 
         # get energies and occupation numbers
@@ -1423,7 +1423,7 @@ class ccsd(object):
         """
         # temperature info
         T = self.T
-        beta = 1.0 / (T + 1e-12)
+        beta = 1.0 / T
         mu = self.mu
 
         # get energies and occupation numbers
@@ -1535,7 +1535,7 @@ class ccsd(object):
     def _g_gderiv_approx(self):
         # temperature info
         T = self.T
-        beta = 1.0 / (T + 1e-12)
+        beta = 1.0 / T
         mu = self.mu
 
         # get energies and occupation numbers
@@ -1563,7 +1563,7 @@ class ccsd(object):
     def _u_gderiv_approx(self):
         # temperature info
         T = self.T
-        beta = 1.0 / (T + 1e-12)
+        beta = 1.0 / T
         mu = self.mu
 
         # get energies and occupation numbers
@@ -1611,7 +1611,7 @@ class ccsd(object):
             self._ft_ccsd_lambda()
         # temperature info
         T = self.T
-        beta = 1.0 / (T + 1e-12)
+        beta = 1.0 / T
         mu = self.mu
 
         # get time-grid
@@ -1666,7 +1666,7 @@ class ccsd(object):
     def _g_ft_2rdm(self):
         # temperature info
         T = self.T
-        beta = 1.0 / (T + 1e-12)
+        beta = 1.0 / T
         mu = self.mu
 
         # get time-grid
@@ -1763,7 +1763,7 @@ class ccsd(object):
 
         # temperature info
         T = self.T
-        beta = 1.0 / (T + 1e-12)
+        beta = 1.0 / T
         mu = self.mu
 
         # get energies and occupation numbers
@@ -1904,7 +1904,7 @@ class ccsd(object):
             self._ft_uccsd_lambda()
         # temperature info
         T = self.T
-        beta = 1.0 / (T + 1e-12)
+        beta = 1.0 / T
         mu = self.mu
 
         # get time-grid
@@ -1994,7 +1994,7 @@ class ccsd(object):
     def _u_ft_2rdm(self):
         # temperature info
         T = self.T
-        beta = 1.0 / (T + 1e-12)
+        beta = 1.0 / T
         mu = self.mu
 
         # get time-grid
@@ -2179,7 +2179,7 @@ class ccsd(object):
 
         # temperature info
         T = self.T
-        beta = 1.0 / (T + 1e-12)
+        beta = 1.0 / T
         mu = self.mu
 
         # get energies and occupation numbers
@@ -2509,7 +2509,7 @@ class ccsd(object):
 
     def full_1rdm(self, relax=False):
         T = self.T
-        beta = 1.0 / (T + 1e-12)
+        beta = 1.0 / T
         mu = self.mu
         if self.sys.orbtype == 'u':
             if relax:
@@ -2570,7 +2570,7 @@ class ccsd(object):
         if relax:
             raise Exception("Rexalex 2-RDM is not implemented")
         T = self.T
-        beta = 1.0 / (T + 1e-12)
+        beta = 1.0 / T
         mu = self.mu
         if self.sys.orbtype == 'u':
             if self.n1rdm is None:

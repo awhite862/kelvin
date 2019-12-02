@@ -40,7 +40,7 @@ class h2_pol_system(system):
         return self.m.mol.energy_nuc()
 
     def get_mp1(self):
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T if self.T > 0.0 else 1.0e20
         en = self.g_energies_tot()
         fo = ft_utils.ff(beta, en, self.mu)
         E1 = numpy.einsum('ii,i->',self.hcore,fo) - (self.g_energies_tot()*fo).sum()

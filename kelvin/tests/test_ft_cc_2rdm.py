@@ -114,7 +114,7 @@ class FTCC2RDMTest(unittest.TestCase):
 
     def test_Be_gen(self):
         T = 0.8
-        beta = 1.0/(T + 1e-12)
+        beta = 1.0/T
         mu = 0.04
         mol = gto.M(
             verbose = 0,
@@ -150,7 +150,7 @@ class FTCC2RDMTest(unittest.TestCase):
 
     def test_Be_gen_active(self):
         T = 0.05
-        beta = 1.0/(T + 1e-12)
+        beta = 1.0/T
         mu = 0.04
         mol = gto.M(
             verbose = 0,
@@ -194,7 +194,7 @@ class FTCC2RDMTest(unittest.TestCase):
 
     def test_Be(self):
         T = 0.8
-        beta = 1.0/(T + 1e-12)
+        beta = 1.0/T
         mu = 0.04
         mol = gto.M(
             verbose = 0,
@@ -234,7 +234,7 @@ class FTCC2RDMTest(unittest.TestCase):
 
     def test_Be_active(self):
         T = 0.05
-        beta = 1.0/(T + 1e-12)
+        beta = 1.0/T
         mu = 0.04
         mol = gto.M(
             verbose = 0,
@@ -276,7 +276,7 @@ class FTCC2RDMTest(unittest.TestCase):
 
     def test_Be_active_full(self):
         T = 0.05
-        beta = 1.0/(T + 1e-12)
+        beta = 1.0/T
         mu = 0.04
         mol = gto.M(
             verbose = 0,

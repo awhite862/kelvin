@@ -52,7 +52,7 @@ class scf_system(system):
             pao = scf_utils.get_ao_den(self.mf)
             return zt_mp.mp1(pao, fao, h)
         else:
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T
             en = self.g_energies_tot()
             fo = ft_utils.ff(beta, en, self.mu)
             p = scf_utils.get_ao_ft_den(self.mf, fo)
@@ -63,7 +63,7 @@ class scf_system(system):
     # TODO: Do this with Fock build
     def g_d_mp1(self,dvec):
         assert(self.T > 0.0)
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T
         en = self.g_energies_tot()
         fo = ft_utils.ff(beta, en, self.mu)
         fv = ft_utils.ffv(beta, en, self.mu)
@@ -78,7 +78,7 @@ class scf_system(system):
 
     def g_mp1_den(self):
         assert(self.T > 0.0)
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T
         en = self.g_energies_tot()
         fo = ft_utils.ff(beta, en, self.mu)
         fv = ft_utils.ffv(beta, en, self.mu)
@@ -95,7 +95,7 @@ class scf_system(system):
     # TODO: Do this with Fock build
     def u_d_mp1(self,dveca,dvecb):
         assert(self.T > 0.0)
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T
         ea,eb = self.u_energies_tot()
         hcore = self.mf.get_hcore(self.mf.mol)
         ha,hb = scf_utils.u_mo_tran_1e(self.mf, hcore)
@@ -116,7 +116,7 @@ class scf_system(system):
 
     def u_mp1_den(self):
         assert(self.T > 0.0)
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T
         ea,eb = self.u_energies_tot()
         hcore = self.mf.get_hcore(self.mf.mol)
         ha,hb = scf_utils.u_mo_tran_1e(self.mf, hcore)
@@ -179,26 +179,26 @@ class scf_system(system):
         return one_e_blocks(F.oo,F.ov,F.vo,F.vv)
 
     def r_fock_tot(self):
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T
         en = self.r_energies_tot()
         fo = ft_utils.ff(beta, en, self.mu)
         return scf_utils.get_r_ft_fock(self.mf, fo)
 
     def u_fock_tot(self):
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T if self.T > 0 else 1.0e20
         ea,eb = self.u_energies_tot()
         foa = ft_utils.ff(beta, ea, self.mu)
         fob = ft_utils.ff(beta, eb, self.mu)
         return scf_utils.get_u_ft_fock(self.mf, foa, fob)
 
     def g_fock_tot(self):
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T if self.T > 0 else 1.0e20
         en = self.g_energies_tot()
         fo = ft_utils.ff(beta, en, self.mu)
         return scf_utils.get_mo_ft_fock(self.mf, fo)
 
     def u_fock_d_tot(self,dveca,dvecb):
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T if self.T > 0 else 1.0e20
         ea,eb = self.u_energies_tot()
         foa = ft_utils.ff(beta, ea, self.mu)
         fva = ft_utils.ffv(beta, ea, self.mu)
@@ -207,7 +207,7 @@ class scf_system(system):
         return scf_utils.u_mo_d_ft_fock(self.mf, foa, fva, fob, fvb, dveca, dvecb)
 
     def u_fock_d_den(self):
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T if self.T > 0 else 1.0e20
         ea,eb = self.u_energies_tot()
         foa = ft_utils.ff(beta, ea, self.mu)
         fva = ft_utils.ffv(beta, ea, self.mu)
@@ -223,14 +223,14 @@ class scf_system(system):
         return JKaa,JKab,JKbb,JKba
 
     def g_fock_d_tot(self,dvec):
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T if self.T > 0 else 1.0e20
         en = self.g_energies_tot()
         fo = ft_utils.ff(beta, en, self.mu)
         fv = ft_utils.ffv(beta, en, self.mu)
         return scf_utils.get_mo_d_ft_fock(self.mf, fo, fv, dvec)
 
     def g_fock_d_den(self):
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T if self.T > 0 else 1.0e20
         en = self.g_energies_tot()
         fo = ft_utils.ff(beta, en, self.mu)
         fv = ft_utils.ffv(beta, en, self.mu)

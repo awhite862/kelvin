@@ -28,7 +28,7 @@ class pueg_system(system):
         if n is None:
             assert(mu is not None)
             self.mu = mu
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T if self.T > 0.0 else 1.0e20
             en = self.g_energies_tot()
             fo = ft_utils.ff(beta, en, self.mu)
             N = fo.sum()
@@ -68,7 +68,7 @@ class pueg_system(system):
     def get_mp1(self):
         if self.T > 0:
             V = self.g_aint_tot()
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T
             en = self.g_energies_tot()
             fo = ft_utils.ff(beta, en, self.mu)
             return 0.5*numpy.einsum('ijij,i,j->',
@@ -80,7 +80,7 @@ class pueg_system(system):
     def g_d_mp1(self,dvec):
         if self.T > 0:
             V = self.g_aint_tot()
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T
             en = self.g_energies_tot()
             fo = ft_utils.ff(beta, en, self.mu)
             fv = ft_utils.ffv(beta, en, self.mu)
@@ -93,7 +93,7 @@ class pueg_system(system):
     def g_mp1_den(self):
         assert(self.T > 0.0)
         V = self.g_aint_tot()
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T
         en = self.g_energies_tot()
         fo = ft_utils.ff(beta, en, self.mu)
         fv = ft_utils.ffv(beta, en, self.mu)
@@ -143,7 +143,7 @@ class pueg_system(system):
         d = self.g_energies_tot()
         n = d.shape[0]
         if self.T > 0.0:
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T
             fo = ft_utils.ff(beta, d, self.mu)
             I = numpy.identity(n)
             den = numpy.einsum('pi,i,qi->pq',I,fo,I)
@@ -165,7 +165,7 @@ class pueg_system(system):
         if self.T == 0.0:
             print("WARNING: Occupation derivatives are zero at 0K")
             return numpy.zeros((n,n))
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T
         fo = ft_utils.ff(beta, d, self.mu)
         fv = ft_utils.ffv(beta, d, self.mu)
         vec = dvec*fo*fv
@@ -181,7 +181,7 @@ class pueg_system(system):
         if self.T == 0.0:
             print("WARNING: Occupation derivatives are zero at 0K")
             return numpy.zeros((n,n))
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T
         fo = ft_utils.ff(beta, d, self.mu)
         fv = ft_utils.ffv(beta, d, self.mu)
         vec = fo*fv

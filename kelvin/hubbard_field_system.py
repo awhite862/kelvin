@@ -38,7 +38,7 @@ class hubbard_field_system(system):
             self.mu = mu
             self.na = na
             self.nb = nb
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T
         else:
             self.na = na
             self.nb = nb
@@ -105,7 +105,7 @@ class hubbard_field_system(system):
             return E1
         else:
             Va,Vb,Vabab = self.u_aint_tot()
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T
             ea,eb = self.u_energies_tot()
             na = ea.shape[0]
             nb = eb.shape[0]
@@ -150,14 +150,14 @@ class hubbard_field_system(system):
         na = da.shape[0]
         nb = db.shape[0]
         assert(na == nb)
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T
         Tt = numpy.zeros((nt,na,na),dtype=complex)
         for i,t in enumerate(self.ti):
             dt = t - self.t0
             ex = dt*dt/(2*self.sigma*self.sigma)
             phase = self.A0*numpy.exp(-ex)*numpy.cos(self.omega*dt + self.phi)
             Tt[i] = self.model.get_tmatS(phase=phase)
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T
         foa = ft_utils.ff(beta, da, self.mu)
         fob = ft_utils.ff(beta, db, self.mu)
         Ia = numpy.identity(na)
@@ -192,7 +192,7 @@ class hubbard_field_system(system):
             ex = dt*dt/(2*self.sigma*self.sigma)
             phase = self.A0*numpy.exp(-ex)*numpy.cos(self.omega*dt + self.phi)
             Tt[i] = self.model.get_tmat(phase=phase)
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T
         fo = ft_utils.ff(beta, d, self.mu)
         I = numpy.identity(n)
         den = numpy.einsum('pi,i,qi->pq',I,fo,I)

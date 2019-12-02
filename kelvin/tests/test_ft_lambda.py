@@ -14,7 +14,7 @@ from kelvin import quadrature
 def test_L1(cc,thresh):
     # test lambdas
     T = cc.T
-    beta = 1.0 / (T + 1e-12)
+    beta = 1.0/T
     mu = cc.mu
     ng = cc.ngrid
     ti,g,G = quadrature.simpsons(ng, beta)
@@ -72,7 +72,7 @@ def test_L1(cc,thresh):
 def test_L2(cc,thresh):
     # test lambdas
     T = cc.T
-    beta = 1.0 / (T + 1e-12)
+    beta = 1.0/T
     mu = cc.mu
     ng = cc.ngrid
     ti,g,G = quadrature.simpsons(ng, beta)
@@ -218,7 +218,7 @@ class FTLambdaTest(unittest.TestCase):
 
         # compute derivative from L
         T = cc.T
-        beta = 1.0 / (T + 1e-12)
+        beta = 1.0/T
         en = cc.sys.g_energies_tot()
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \

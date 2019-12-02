@@ -36,7 +36,7 @@ class ueg_system(system):
             assert(nb is None)
             assert(mu is not None)
             self.mu = mu
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T if self.T > 0.0 else 1.0e20
             en = self.g_energies_tot()
             fo = ft_utils.ff(beta, en, self.mu)
             N = fo.sum()
@@ -89,7 +89,7 @@ class ueg_system(system):
         if self.has_u():
             if self.T > 0:
                 Va,Vb,Vabab = self.u_aint_tot()
-                beta = 1.0 / (self.T + 1e-12)
+                beta = 1.0 / self.T
                 ea,eb = self.u_energies_tot()
                 foa = ft_utils.ff(beta, ea, self.mu)
                 fob = ft_utils.ff(beta, eb, self.mu)
@@ -99,10 +99,6 @@ class ueg_system(system):
                 return E1
             else:
                 Va,Vb,Vabab = self.u_aint()
-                beta = 1.0 / (self.T + 1e-12)
-                #ea,eb = self.u_energies_tot()
-                #foa = ft_utils.ff(beta, ea, self.mu)
-                #fob = ft_utils.ff(beta, eb, self.mu)
                 E1 = 0.5*numpy.einsum('ijij->',Va.oooo)
                 E1 += 0.5*numpy.einsum('ijij->',Vb.oooo)
                 E1 += numpy.einsum('ijij->',Vabab.oooo)
@@ -110,7 +106,7 @@ class ueg_system(system):
         else:
             if self.T > 0:
                 V = self.g_aint_tot()
-                beta = 1.0 / (self.T + 1e-12)
+                beta = 1.0 / self.T
                 en = self.g_energies_tot()
                 fo = ft_utils.ff(beta, en, self.mu)
                 return 0.5*einsum('ijij,i,j->',
@@ -122,7 +118,7 @@ class ueg_system(system):
     def u_d_mp1(self,dveca,dvecb):
         if self.T > 0:
             Va,Vb,Vabab = self.u_aint_tot()
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T
             ea,eb = self.u_energies_tot()
             foa = ft_utils.ff(beta, ea, self.mu)
             fva = ft_utils.ffv(beta, ea, self.mu)
@@ -142,7 +138,7 @@ class ueg_system(system):
     def u_mp1_den(self):
         if self.T > 0:
             Va,Vb,Vabab = self.u_aint_tot()
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T
             ea,eb = self.u_energies_tot()
             foa = ft_utils.ff(beta, ea, self.mu)
             fva = ft_utils.ffv(beta, ea, self.mu)
@@ -162,7 +158,7 @@ class ueg_system(system):
     def g_d_mp1(self,dvec):
         if self.T > 0:
             V = self.g_aint_tot()
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T
             en = self.g_energies_tot()
             fo = ft_utils.ff(beta, en, self.mu)
             fv = ft_utils.ffv(beta, en, self.mu)
@@ -175,7 +171,7 @@ class ueg_system(system):
     def g_mp1_den(self):
         if self.T > 0:
             V = self.g_aint_tot()
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T
             en = self.g_energies_tot()
             fo = ft_utils.ff(beta, en, self.mu)
             fv = ft_utils.ffv(beta, en, self.mu)
@@ -309,10 +305,7 @@ class ueg_system(system):
         vidx = numpy.r_[vir]
         V = self.g_aint_tot()
         V = V[numpy.ix_(numpy.arange(n),oidx,numpy.arange(n),oidx)]
-        #Vd = Vb[numpy.ix_(numpy.arange(n),oidx,numpy.arange(n),oidx)]
-        #Vx = Vb[numpy.ix_(numpy.arange(n),oidx,oidx,numpy.arange(n))]
-        #Vb = Vd - Vx.transpose((0,1,3,2))
-        F = F + einsum('piri->pr',V)# - einsum('piir->pr',V.transpose((0,1,3,2)))
+        F = F + einsum('piri->pr',V)
         Foo = F[numpy.ix_(oidx,oidx)]
         Fvv = F[numpy.ix_(vidx,vidx)]
         Fov = F[numpy.ix_(oidx,vidx)]
@@ -324,7 +317,7 @@ class ueg_system(system):
         d = self.r_energies_tot()
         n = d.shape[0]
         if self.T > 0.0:
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T
             fo = ft_utils.ff(beta, d, self.mu)
             I = numpy.identity(n)
             den = einsum('pi,i,qi->pq',I,fo,I)
@@ -346,7 +339,7 @@ class ueg_system(system):
         na = da.shape[0]
         nb = db.shape[0]
         if self.T > 0.0:
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T
             foa = ft_utils.ff(beta, da, self.mu)
             fob = ft_utils.ff(beta, db, self.mu)
             Ia = numpy.identity(na)
@@ -379,7 +372,7 @@ class ueg_system(system):
         d = self.g_energies_tot()
         n = d.shape[0]
         if self.T > 0.0:
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T
             fo = ft_utils.ff(beta, d, self.mu)
             I = numpy.identity(n)
             den = einsum('pi,i,qi->pq',I,fo,I)
@@ -402,7 +395,7 @@ class ueg_system(system):
         if self.T == 0.0:
             print("WARNING: Occupations derivatives are zero at 0K")
             return numpy.zeros((na,na)),numpy.zeros((nb,nb))
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T
         foa = ft_utils.ff(beta, da, self.mu)
         fva = ft_utils.ffv(beta, da, self.mu)
         veca = dveca*foa*fva
@@ -427,17 +420,13 @@ class ueg_system(system):
         if self.T == 0.0:
             print("WARNING: Occupations derivatives are zero at 0K")
             return numpy.zeros((na,na)),numpy.zeros((na,na))
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T
         foa = ft_utils.ff(beta, da, self.mu)
         fva = ft_utils.ffv(beta, da, self.mu)
         veca = foa*fva
         fob = ft_utils.ff(beta, db, self.mu)
         fvb = ft_utils.ffv(beta, db, self.mu)
         vecb = fob*fvb
-        #Ia = numpy.identity(na)
-        #Ib = numpy.identity(nb)
-        #dena = einsum('pi,i,qi->pq',Ia,veca,Ia)
-        #denb = einsum('pi,i,qi->pq',Ib,vecb,Ib)
         Va,Vb,Vabab = self.u_aint_tot()
         JKaa = einsum('piqi,i->pqi',Va,veca)
         JKab = einsum('piqi,i->pqi',Vabab,vecb)
@@ -451,7 +440,7 @@ class ueg_system(system):
         if self.T == 0.0:
             print("WARNING: Occupations derivatives are zero at 0K")
             return numpy.zeros((n,n))
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T
         fo = ft_utils.ff(beta, d, self.mu)
         fv = ft_utils.ffv(beta, d, self.mu)
         vec = dvec*fo*fv
@@ -467,12 +456,10 @@ class ueg_system(system):
         if self.T == 0.0:
             print("WARNING: Occupations derivatives are zero at 0K")
             return numpy.zeros((n,n))
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T
         fo = ft_utils.ff(beta, d, self.mu)
         fv = ft_utils.ffv(beta, d, self.mu)
         vec = fo*fv
-        #I = numpy.identity(n)
-        #den = einsum('pi,i,qi->pq',I,vec,I)
         V = self.g_aint_tot()
         JK = einsum('piqi,i->pqi',V,vec)
         return JK

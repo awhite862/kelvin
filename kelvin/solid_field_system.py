@@ -50,7 +50,7 @@ class solid_field_system(system):
             return E1
         else:
             Va,Vb,Vabab = self.u_aint_tot()
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T
             ea,eb = self.u_energies_tot()
             na = ea.shape[0]
             nb = eb.shape[0]
@@ -86,7 +86,7 @@ class solid_field_system(system):
         return scf_utils.get_orbital_energies_gen(self.mf)
 
     def u_fock_tot(self,direc='f'):
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T if self.T > 0 else 1.0e20
         ea,eb = self.u_energies_tot()
         foa = ft_utils.ff(beta, ea, self.mu)
         fob = ft_utils.ff(beta, eb, self.mu)
@@ -95,7 +95,6 @@ class solid_field_system(system):
         na = ea.shape[0]
         nb = eb.shape[0]
         assert(na == nb)
-        beta = 1.0 / (self.T + 1e-12)
         px,py,pz = self.mf.cell.pbc_intor('int1e_ipovlp', hermi=0, comp=3)
         px = -1.j*px.conj().transpose((1,0))
         py = -1.j*py.conj().transpose((1,0))
@@ -111,7 +110,6 @@ class solid_field_system(system):
             phase = self.A0*numpy.exp(-ex)*numpy.cos(self.omega*dt)
             Tta[i] = phase*paz
             Ttb[i] = phase*pbz
-        beta = 1.0 / (self.T + 1e-12)
         Fa = Tta.copy()
         Fb = Ttb.copy()
         Fa += fa[None,:,:]
@@ -144,7 +142,6 @@ class solid_field_system(system):
             moa = self.mf.mo_coeff[0]
             mob = self.mf.mo_coeff[1]
 
-        #mol = self.mf.mol
         mf = self.mf
         Ia = integrals.get_phys_gen(mf,moa,moa,moa,moa,anti=True)
         Ib = integrals.get_phys_gen(mf,mob,mob,mob,mob,anti=True)

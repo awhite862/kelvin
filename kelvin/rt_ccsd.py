@@ -59,7 +59,7 @@ class RTCCSD(object):
         return self._ccsd()
 
     def _ccsd(self):
-        beta = 1.0 / (self.T + 1e-12) if self.finite_T else self._beta_max
+        beta = 1.0 / self.T if self.finite_T else self._beta_max
         mu = self.mu if self.finite_T else None
 
         # get time-grid
@@ -220,7 +220,7 @@ class RTCCSD(object):
         if self.T1 is None or self.T2 is None:
             raise Exception("No saved T-amplitudes")
 
-        beta = 1.0 / (self.T + 1e-12) if self.finite_T else self._beta_max
+        beta = 1.0 / self.T if self.finite_T else self._beta_max
         mu = self.mu if self.finite_T else None
 
         # get time-grid

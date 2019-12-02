@@ -193,7 +193,7 @@ class lccsd(object):
     def _ft_lccsd(self,T1in=None,T2in=None):
         # get T and mu variables
         T = self.T
-        beta = 1.0 / (T + 1e-12)
+        beta = 1.0 / T
         mu = self.mu
 
         # get time-grid
@@ -264,7 +264,7 @@ class lccsd(object):
     def _ft_lccsd_active(self,T1in=None,T2in=None):
         # get T and mu variables
         T = self.T
-        beta = 1.0 / (T + 1e-12)
+        beta = 1.0 / T
         mu = self.mu
 
         # get time-grid
@@ -351,7 +351,7 @@ class lccsd(object):
     def _ft_lccsd_lambda(self):
         # get T and mu variables
         T = self.T
-        beta = 1.0 / (T + 1e-12)
+        beta = 1.0 / T
         mu = self.mu
 
         # get time-grid

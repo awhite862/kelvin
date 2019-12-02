@@ -47,7 +47,7 @@ class fci(object):
             if self.iprint > 0:
                 print("Running FCI at finite T")
                 print('   T = {}'.format(T))
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T
             en = self.sys.g_energies_tot()
             g0 = ft_utils.GP0(beta, en, self.mu)
             E0 = ft_mp.mp0(g0) + En

@@ -78,7 +78,7 @@ class mp2(object):
 
     def _ft_mp2(self):
         T = self.T
-        beta = 1.0 / (T + 1e-12)
+        beta = 1.0 / T
         mu = self.mu
 
         # get energies and occupation numbers

@@ -29,7 +29,7 @@ class hubbard_site_system(system):
             assert(nb is None)
             assert(mu is not None)
             self.mu = mu
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T if self.T > 0.0 else 1.0e20
         else:
             self.na = na
             self.nb = nb
@@ -97,7 +97,7 @@ class hubbard_site_system(system):
             return EHF - E0
         else:
             Va,Vb,Vabab = self.u_aint_tot()
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T
             ea,eb = self.u_energies_tot()
             foa = ft_utils.ff(beta, ea, self.mu)
             fob = ft_utils.ff(beta, eb, self.mu)
@@ -206,7 +206,7 @@ class hubbard_site_system(system):
         d = self.g_energies_tot()
         n = d.shape[0]
         if self.T > 0.0:
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T
             fo = ft_utils.ff(beta, d, self.mu)
             I = numpy.identity(n)
             den = einsum('pi,i,qi->pq',I,fo,I)
@@ -227,7 +227,7 @@ class hubbard_site_system(system):
         na = da.shape[0]
         nb = db.shape[0]
         if self.T > 0.0:
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T
             foa = ft_utils.ff(beta, da, self.mu)
             fob = ft_utils.ff(beta, db, self.mu)
             Ia = numpy.identity(na)

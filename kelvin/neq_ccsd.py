@@ -32,7 +32,8 @@ class neq_ccsd(object):
     def _neq_ccsd(self,T1in=None,T2in=None):
 
         T = self.T
-        beta = 1.0 / (T + 1e-12)
+        assert(self.T > 0.0)
+        beta = 1.0 / T
         tmax = self.tmax
         mu = self.mu
 
@@ -162,7 +163,8 @@ class neq_ccsd(object):
     def _neq_ccsd_lambda(self, L1=None, L2=None):
         """Solve FT-CCSD Lambda equations."""
         T = self.T
-        beta = 1.0 / (T + 1e-12)
+        assert(self.T > 0.0)
+        beta = 1.0 / T
         mu = self.mu
 
         # get time-grid
@@ -273,7 +275,8 @@ class neq_ccsd(object):
             raise Exception("Cannot compute density without Lambda!")
 
         T = self.T
-        beta = 1.0 / (T + 1e-12)
+        assert(self.T > 0.0)
+        beta = 1.0 / T
         mu = self.mu
 
         # get time-grid
@@ -312,7 +315,8 @@ class neq_ccsd(object):
             raise Exception("Cannot compute density without Lambda!")
 
         T = self.T
-        beta = 1.0 / (T + 1e-12)
+        assert(self.T > 0.0)
+        beta = 1.0 / T
         mu = self.mu
 
         # get time-grid
@@ -349,7 +353,7 @@ class neq_ccsd(object):
         pai = self.dai[t]
 
         T = self.T
-        beta = 1.0 / (T + 1e-12)
+        beta = 1.0 / T
         mu = self.mu
         en = self.sys.g_energies_tot()
         fo = ft_utils.ff(beta, en, mu)
@@ -372,7 +376,7 @@ class neq_ccsd(object):
 
         # compute 2-rdm on the fly
         T = self.T
-        beta = 1.0 / (T + 1e-12)
+        beta = 1.0 / T
         mu = self.mu
         en = self.sys.g_energies_tot()
         fo = ft_utils.ff(beta, en, mu)
@@ -402,7 +406,7 @@ class neq_ccsd(object):
 
     def compute_1rdm(self):
         T = self.T
-        beta = 1.0 / (T + 1e-12)
+        beta = 1.0 / T
         mu = self.mu
         en = self.sys.g_energies_tot()
         fo = ft_utils.ff(beta, en, mu)

@@ -77,7 +77,8 @@ class mp3(object):
 
     def _ft_mp3(self):
         T = self.T
-        beta = 1.0 / (T + 1e-12)
+        assert(T > 0.0)
+        beta = 1.0 / T
         mu = self.mu
 
         # get energies and occupation numbers

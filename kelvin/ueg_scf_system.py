@@ -79,7 +79,7 @@ class ueg_scf_system(system):
         if na is None:
             assert(nb is None)
             en = self.g_energies_tot()
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T if self.T > 0.0 else 1.0e20
             fo = ft_utils.ff(beta, en, self.mu)
             N = fo.sum()
             self.Na = N/2.0
@@ -122,7 +122,7 @@ class ueg_scf_system(system):
         if self.has_u():
             if self.T > 0:
                 Va,Vb,Vabab = self.u_aint_tot()
-                beta = 1.0 / (self.T + 1e-12)
+                beta = 1.0 / self.T
                 ea,eb = self.u_energies_tot()
                 foa = ft_utils.ff(beta, ea, self.mu)
                 fob = ft_utils.ff(beta, eb, self.mu)
@@ -142,7 +142,7 @@ class ueg_scf_system(system):
         else:
             if self.T > 0:
                 V = self.g_aint_tot()
-                beta = 1.0 / (self.T + 1e-12)
+                beta = 1.0 / self.T
                 en = self.g_energies_tot()
                 tmat = self.g_hcore()
                 fo = ft_utils.ff(beta, en, self.mu)
@@ -157,7 +157,7 @@ class ueg_scf_system(system):
     def u_d_mp1(self,dveca,dvecb):
         if self.T > 0:
             Va,Vb,Vabab = self.u_aint_tot()
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T
             ea,eb = self.u_energies_tot()
             foa = ft_utils.ff(beta, ea, self.mu)
             fva = ft_utils.ffv(beta, ea, self.mu)
@@ -180,7 +180,7 @@ class ueg_scf_system(system):
     def u_mp1_den(self):
         if self.T > 0:
             Va,Vb,Vabab = self.u_aint_tot()
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T
             ea,eb = self.u_energies_tot()
             foa = ft_utils.ff(beta, ea, self.mu)
             fva = ft_utils.ffv(beta, ea, self.mu)
@@ -202,7 +202,7 @@ class ueg_scf_system(system):
     def g_d_mp1(self,dvec):
         if self.T > 0:
             V = self.g_aint_tot()
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T
             en = self.g_energies_tot()
             fo = ft_utils.ff(beta, en, self.mu)
             fv = ft_utils.ffv(beta, en, self.mu)
@@ -218,7 +218,7 @@ class ueg_scf_system(system):
     def g_mp1_den(self):
         if self.T > 0:
             V = self.g_aint_tot()
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T
             en = self.g_energies_tot()
             fo = ft_utils.ff(beta, en, self.mu)
             fv = ft_utils.ffv(beta, en, self.mu)
@@ -347,7 +347,7 @@ class ueg_scf_system(system):
         d = self.r_energies_tot()
         n = d.shape[0]
         if self.T > 0.0:
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T
             fo = ft_utils.ff(beta, d, self.mu)
             I = numpy.identity(n)
             den = einsum('pi,i,qi->pq',I,fo,I)
@@ -369,7 +369,7 @@ class ueg_scf_system(system):
         na = da.shape[0]
         nb = db.shape[0]
         if self.T > 0.0:
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T
             foa = ft_utils.ff(beta, da, self.mu)
             fob = ft_utils.ff(beta, db, self.mu)
             Ia = numpy.identity(na)
@@ -394,7 +394,7 @@ class ueg_scf_system(system):
         d = self.g_energies_tot()
         n = d.shape[0]
         if self.T > 0.0:
-            beta = 1.0 / (self.T + 1e-12)
+            beta = 1.0 / self.T
             fo = ft_utils.ff(beta, d, self.mu)
             I = numpy.identity(n)
             den = einsum('pi,i,qi->pq',I,fo,I)
@@ -417,7 +417,7 @@ class ueg_scf_system(system):
         if self.T == 0.0:
             print("WARNING: Occupations derivatives are zero at 0K")
             return numpy.zeros((n,n)),numpy.zeros((n,n))
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T
         foa = ft_utils.ff(beta, da, self.mu)
         fva = ft_utils.ffv(beta, da, self.mu)
         veca = dveca*foa*fva
@@ -442,7 +442,7 @@ class ueg_scf_system(system):
         if self.T == 0.0:
             print("WARNING: Occupations derivatives are zero at 0K")
             return numpy.zeros((n,n)),numpy.zeros((n,n))
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T
         foa = ft_utils.ff(beta, da, self.mu)
         fva = ft_utils.ffv(beta, da, self.mu)
         veca = foa*fva
@@ -462,7 +462,7 @@ class ueg_scf_system(system):
         if self.T == 0.0:
             print("WARNING: Occupations derivatives are zero at 0K")
             return numpy.zeros((n,n))
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T
         fo = ft_utils.ff(beta, d, self.mu)
         fv = ft_utils.ffv(beta, d, self.mu)
         vec = dvec*fo*fv
@@ -478,7 +478,7 @@ class ueg_scf_system(system):
         if self.T == 0.0:
             print("WARNING: Occupations derivatives are zero at 0K")
             return numpy.zeros((n,n))
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T
         fo = ft_utils.ff(beta, d, self.mu)
         fv = ft_utils.ffv(beta, d, self.mu)
         vec = fo*fv

@@ -47,7 +47,7 @@ class mol_field_system(system):
         # contribution from imaginary contour
         hcore = self.mf.get_hcore(self.mf.mol)
         h = utils.block_diag(hcore,hcore)
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T
         en = self.g_energies_tot()
         fo = ft_utils.ff(beta, en, self.mu)
         p = scf_utils.get_ao_ft_den(self.mf, fo)
@@ -64,7 +64,7 @@ class mol_field_system(system):
         return scf_utils.get_orbital_energies_gen(self.mf)
     
     def g_fock_tot(self,direc='f'):
-        beta = 1.0 / (self.T + 1e-12)
+        beta = 1.0 / self.T
         en = self.g_energies_tot()
         fo = ft_utils.ff(beta, en, self.mu)
         F = scf_utils.get_mo_ft_fock(self.mf, fo)
