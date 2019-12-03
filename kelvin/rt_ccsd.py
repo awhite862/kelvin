@@ -148,57 +148,62 @@ class RTCCSD(object):
         t2 = numpy.zeros(t2shape)
         Eccn = 0.0
 
-        def fRHS(t1,t2):
+        def fRHS(var):
+            t1,t2 = var
             k1s = -D1*t1 - F.vo.copy()
             k1d = -D2*t2 - I.vvoo.copy()
             cc_equations._Stanton(k1s,k1d,F,I,t1,t2,fac=-1.0)
-            return k1s,k1d
+            return [k1s,k1d]
 
         for i in range(1,ng):
             # propagate
             h = self.ti[i] - self.ti[i - 1]
             if self.prop == "rk1" or self.prop == "ab1":
-                d1,d2 = propagation.trk1(h, t1, t2, fRHS)
+                d1,d2 = propagation.rk1(h, [t1,t2], fRHS)
                 t1 += d1
                 t2 += d2
             elif self.prop == "rk2":
-                d1,d2 = propagation.trk2(h, t1, t2, (fRHS,fRHS))
+                d1,d2 = propagation.rk2(h, [t1, t2], (fRHS,fRHS))
                 t1 += d1
                 t2 += d2
             elif self.prop == "rk4":
-                d1,d2 = propagation.trk4(h, t1, t2, (fRHS,fRHS,fRHS,fRHS))
+                d1,d2 = propagation.rk4(h, [t1, t2], (fRHS,fRHS,fRHS,fRHS))
                 t1 += d1
                 t2 += d2
             elif self.prop == "ab2":
                 if i == 1:
                     k2s = None
                     k2d = None
-                    d1,d2,k2s,k2d = propagation.tab2(h, t1, t2, k2s, k2d, fRHS)
+                    d,k2 = propagation.ab2(h, [t1, t2], [k2s, k2d], fRHS)
+                    d1,d2 = d
+                    k2s, k2d = k2
                     t1 += d1
                     t2 += d2
                 else:
-                    d1,d2,k2s,k2d = propagation.tab2(h, t1, t2, k2s, k2d, fRHS)
+                    d,k2, = propagation.ab2(h, [t1, t2], [k2s, k2d], fRHS)
+                    d1,d2 = d
+                    k2s, k2d = k2
                     t1 += d1
                     t2 += d2
             elif self.prop == "be":
                 mi = 100
                 alpha = 0.4
                 thresh = 1e-5
-                d1,d2 = propagation.tbe(h, t1, t2, mi, alpha, thresh, fRHS, self.iprint)
+                d1,d2 = propagation.be(h, [t1, t2], mi, alpha, thresh, fRHS, self.iprint)
                 t1 += d1
                 t2 += d2
             elif self.prop == "cn":
                 mi = 100
                 alpha = 0.6
                 thresh = 1e-5
-                d1,d2 = propagation.tcn(h, t1, t2, mi, alpha, thresh, (fRHS,fRHS), self.iprint)
+                d1,d2 = propagation.cn(h, [t1, t2], mi, alpha, thresh, (fRHS,fRHS), self.iprint)
                 t1 += d1
                 t2 += d2
             elif self.prop == "am2":
                 mi = 100
                 alpha = 0.6
                 thresh = 1e-5
-                d1,d2 = propagation.tam2(h, t1, t2, mi, alpha, thresh, fRHS, self.iprint)
+                d1,d2 = propagation.am2(h, [t1, t2], mi, alpha, thresh, fRHS, self.iprint)
                 t1 += d1
                 t2 += d2
             else:
@@ -305,19 +310,21 @@ class RTCCSD(object):
                 t1shape = (n,n)
                 t2shape = (n,n,n,n)
 
-        def fRHS(t1,t2):
+        def fRHS(var):
+            t1,t2 = var
             k1s = -D1*t1 - F.vo.copy()
             k1d = -D2*t2 - I.vvoo.copy()
             cc_equations._Stanton(k1s,k1d,F,I,t1,t2,fac=-1.0)
-            return (-1.0)*k1s,(-1.0)*k1d
+            return [(-1.0)*k1s,(-1.0)*k1d]
 
-        def fLRHS(t1,t2,l1,l2):
+        def fLRHS(t1,t2,var):
+            l1,l2 = var
             l1s = -D1.transpose((1,0))*l1 - F.ov.copy()
             l1d = -D2.transpose((2,3,0,1))*l2 - I.oovv.copy()
             cc_equations._Lambda_opt(l1s, l1d, F, I,
                     l1, l2, t1, t2, fac=-1.0)
             cc_equations._LS_TS(l1s,I,t1,fac=-1.0)
-            return l1s,l1d
+            return [l1s,l1d]
 
         t1 = self.T1.copy()
         t2 = self.T2.copy()
@@ -334,29 +341,29 @@ class RTCCSD(object):
             h = self.ti[ng - i] - self.ti[ng - i - 1]
             # propagate T and lambda
             if self.prop == "rk1":
-                d1,d2 = propagation.trk1(h, t1, t2, fRHS)
-                LRHS = lambda l1,l2: fLRHS(t1, t2, l1, l2)
-                dl1,dl2 = propagation.trk1(h, l1, l2, LRHS)
+                d1,d2 = propagation.rk1(h, [t1, t2], fRHS)
+                LRHS = lambda var: fLRHS(t1, t2, var)
+                dl1,dl2 = propagation.rk1(h, [l1, l2], LRHS)
                 t1 += d1
                 t2 += d2
                 l1 += dl1
                 l2 += dl2
             elif self.prop == "rk2":
-                d1,d2 = propagation.trk2(h, t1, t2, (fRHS,fRHS))
-                LRHS1 = lambda l1,l2: fLRHS(t1, t2, l1, l2)
-                LRHS2 = lambda l1,l2: fLRHS(t1 + d1, t2 + d2, l1, l2)
-                dl1,dl2 = propagation.trk2(h, l1, l2, (LRHS1, LRHS2))
+                d1,d2 = propagation.rk2(h, [t1, t2], (fRHS,fRHS))
+                LRHS1 = lambda var: fLRHS(t1, t2, var)
+                LRHS2 = lambda var: fLRHS(t1 + d1, t2 + d2, var)
+                dl1,dl2 = propagation.rk2(h, [l1, l2], (LRHS1, LRHS2))
                 t1 += d1
                 t2 += d2
                 l1 += dl1
                 l2 += dl2
             elif self.prop == "rk4":
-                d1,d2 = propagation.trk4(h, t1, t2, (fRHS,fRHS,fRHS,fRHS))
+                d1,d2 = propagation.rk4(h, [t1, t2], (fRHS,fRHS,fRHS,fRHS))
 
-                LRHS1 = lambda l1, l2: fLRHS(t1, t2, l1, l2)
-                LRHS23 = lambda l1, l2: fLRHS(t1 + 0.5*d1, t2 + 0.5*d2, l1, l2)
-                LRHS4 = lambda l1, l2: fLRHS(t1 + d1, t2 + d2, l1, l2)
-                ld1, ld2 = propagation.trk4(h, l1, l2, (LRHS1, LRHS23, LRHS23, LRHS4))
+                LRHS1 = lambda var: fLRHS(t1, t2, var)
+                LRHS23 = lambda var: fLRHS(t1 + 0.5*d1, t2 + 0.5*d2, var)
+                LRHS4 = lambda var: fLRHS(t1 + d1, t2 + d2, var)
+                ld1, ld2 = propagation.rk4(h, [l1, l2], (LRHS1, LRHS23, LRHS23, LRHS4))
 
                 t1 += d1
                 t2 += d2
@@ -366,10 +373,10 @@ class RTCCSD(object):
                 mi = 200
                 alpha = 0.8
                 thresh = 1e-5
-                d1, d2 = propagation.tcn(h, t1, t2, mi, alpha, thresh, (fRHS,fRHS), self.iprint)
-                LRHS1 = lambda l1, l2: fLRHS(t1, t2, l1, l2)
-                LRHS2 = lambda l1, l2: fLRHS(t1 + d1, t2 + d2, l1, l2)
-                ld1, ld2 = propagation.tcn(h, l1, l2, mi, alpha, thresh, (LRHS1,LRHS2), self.iprint)
+                d1, d2 = propagation.cn(h, [t1, t2], mi, alpha, thresh, (fRHS,fRHS), self.iprint)
+                LRHS1 = lambda var: fLRHS(t1, t2, var)
+                LRHS2 = lambda var: fLRHS(t1 + d1, t2 + d2, var)
+                ld1, ld2 = propagation.cn(h, [l1, l2], mi, alpha, thresh, (LRHS1,LRHS2), self.iprint)
                 l1 += ld1
                 l2 += ld2
                 t1 += d1
