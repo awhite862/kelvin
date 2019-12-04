@@ -16,7 +16,7 @@ class RTCCSD(object):
     """
     def __init__(self, sys, T=0.0, mu=0.0, iprint=0,
         singles=True, econv=1e-8, tconv=None, max_iter=40,
-        damp=0.0, ngrid=10, athresh=0.0, quad='lin', prop="rk4"):
+        damp=0.0, ngrid=10, athresh=0.0, quad='lin', prop="rk4", saveT=False):
 
         self.T = T
         self.mu = mu
@@ -31,6 +31,7 @@ class RTCCSD(object):
         self.athresh = athresh
         self.quad = quad
         self.prop = prop
+        self.saveT = saveT
         if not sys.verify(self.T,self.mu):
             raise Exception("Sytem temperature inconsistent with CC temp")
         if self.finite_T:
@@ -57,6 +58,32 @@ class RTCCSD(object):
             if self.iprint > 0:
                 print('Running CCSD at zero Temperature')
         return self._ccsd()
+
+    def _get_t_step(self, h, t1, t2, fRHS):
+        if self.prop == "rk1":
+            d1,d2 = propagation.rk1(h, [t1, t2], fRHS)
+        elif self.prop == "rk2":
+            d1,d2 = propagation.rk2(h, [t1, t2], (fRHS,fRHS))
+        elif self.prop == "rk4":
+            d1,d2 = propagation.rk4(h, [t1, t2], (fRHS,fRHS,fRHS,fRHS))
+        elif self.prop == "cn":
+            mi = 200
+            alpha = 0.8
+            thresh = 1e-5
+            d1, d2 = propagation.cn(h, [t1, t2], mi, alpha, thresh, (fRHS,fRHS), self.iprint)
+        elif self.prop == "be":
+            mi = 100
+            alpha = 0.4
+            thresh = 1e-5
+            d1,d2 = propagation.be(h, [t1, t2], mi, alpha, thresh, fRHS, self.iprint)
+        elif self.prop == "am2":
+            mi = 100
+            alpha = 0.6
+            thresh = 1e-5
+            d1,d2 = propagation.am2(h, [t1, t2], mi, alpha, thresh, fRHS, self.iprint)
+        else:
+            raise Exception("Unrecognized propagation scheme: " + self.prop)
+        return d1,d2
 
     def _ccsd(self):
         beta = 1.0 / self.T if self.finite_T else self._beta_max
@@ -155,69 +182,30 @@ class RTCCSD(object):
             cc_equations._Stanton(k1s,k1d,F,I,t1,t2,fac=-1.0)
             return [k1s,k1d]
 
+        if self.saveT:
+            self.T1 = []
+            self.T2 = []
+
         for i in range(1,ng):
             # propagate
             h = self.ti[i] - self.ti[i - 1]
-            if self.prop == "rk1" or self.prop == "ab1":
-                d1,d2 = propagation.rk1(h, [t1,t2], fRHS)
-                t1 += d1
-                t2 += d2
-            elif self.prop == "rk2":
-                d1,d2 = propagation.rk2(h, [t1, t2], (fRHS,fRHS))
-                t1 += d1
-                t2 += d2
-            elif self.prop == "rk4":
-                d1,d2 = propagation.rk4(h, [t1, t2], (fRHS,fRHS,fRHS,fRHS))
-                t1 += d1
-                t2 += d2
-            elif self.prop == "ab2":
-                if i == 1:
-                    k2s = None
-                    k2d = None
-                    d,k2 = propagation.ab2(h, [t1, t2], [k2s, k2d], fRHS)
-                    d1,d2 = d
-                    k2s, k2d = k2
-                    t1 += d1
-                    t2 += d2
-                else:
-                    d,k2, = propagation.ab2(h, [t1, t2], [k2s, k2d], fRHS)
-                    d1,d2 = d
-                    k2s, k2d = k2
-                    t1 += d1
-                    t2 += d2
-            elif self.prop == "be":
-                mi = 100
-                alpha = 0.4
-                thresh = 1e-5
-                d1,d2 = propagation.be(h, [t1, t2], mi, alpha, thresh, fRHS, self.iprint)
-                t1 += d1
-                t2 += d2
-            elif self.prop == "cn":
-                mi = 100
-                alpha = 0.6
-                thresh = 1e-5
-                d1,d2 = propagation.cn(h, [t1, t2], mi, alpha, thresh, (fRHS,fRHS), self.iprint)
-                t1 += d1
-                t2 += d2
-            elif self.prop == "am2":
-                mi = 100
-                alpha = 0.6
-                thresh = 1e-5
-                d1,d2 = propagation.am2(h, [t1, t2], mi, alpha, thresh, fRHS, self.iprint)
-                t1 += d1
-                t2 += d2
-            else:
-                raise Exception("Unrecognized propagation scheme: " + self.prop)
+            d1,d2 = self._get_t_step(h, t1, t2, fRHS)
+            t1 += d1
+            t2 += d2
 
             # compute free energy contribution
             Eccn += g[i]*cc_energy(t1, t2, F.ov, I.oovv)/beta
+            if self.saveT:
+                self.T1.append(t1)
+                self.T2.append(t2)
 
         self.G0 = E0
         self.G1 = E1
         self.Gcc = Eccn
         self.Gtot = E0 + E1 + Eccn
-        self.T1 = t1
-        self.T2 = t2
+        if not self.saveT:
+            self.T1 = t1
+            self.T2 = t2
 
         return (Eccn+E01,Eccn)
 
@@ -227,6 +215,7 @@ class RTCCSD(object):
 
         beta = 1.0 / self.T if self.finite_T else self._beta_max
         mu = self.mu if self.finite_T else None
+        propT = False if self.saveT else True
 
         # get time-grid
         ng = self.ngrid
@@ -326,70 +315,67 @@ class RTCCSD(object):
             cc_equations._LS_TS(l1s,I,t1,fac=-1.0)
             return [l1s,l1d]
 
-        t1 = self.T1.copy()
-        t2 = self.T2.copy()
-        nv, no = t1.shape
+        if propT:
+            t1b = self.T1.copy()
+            t2b = self.T2.copy()
+        else:
+            t1b = self.T1[ng - 1]
+            t2b = self.T2[ng - 1]
+        nv, no = t1b.shape
         l1 = numpy.zeros((no,nv))
         l2 = numpy.zeros((no,no,nv,nv))
         pia = numpy.zeros((no,nv))
-        pji = g[ng - 1]*cc_equations.ccsd_1rdm_ji_opt(t1,t2,l1,l2)
-        pba = g[ng - 1]*cc_equations.ccsd_1rdm_ba_opt(t1,t2,l1,l2)
-        pai = g[ng - 1]*cc_equations.ccsd_1rdm_ai_opt(t1,t2,l1,l2)
+        pji = g[ng - 1]*cc_equations.ccsd_1rdm_ji_opt(t1b,t2b,l1,l2)
+        pba = g[ng - 1]*cc_equations.ccsd_1rdm_ba_opt(t1b,t2b,l1,l2)
+        pai = g[ng - 1]*cc_equations.ccsd_1rdm_ai_opt(t1b,t2b,l1,l2)
 
-        Eccn = g[ng - 1]*cc_energy(t1, t2, F.ov, I.oovv)/beta
+        Eccn = g[ng - 1]*cc_energy(t1b, t2b, F.ov, I.oovv)/beta
         for i in range(1,ng):
             h = self.ti[ng - i] - self.ti[ng - i - 1]
-            # propagate T and lambda
+            if propT:
+                d1,d2 = self._get_t_step(h, t1b, t2b, fRHS)
+                t1e = t1b + d1
+                t2e = t2b + d2
             if self.prop == "rk1":
-                d1,d2 = propagation.rk1(h, [t1, t2], fRHS)
-                LRHS = lambda var: fLRHS(t1, t2, var)
+                LRHS = lambda var: fLRHS(t1b, t2b, var)
                 dl1,dl2 = propagation.rk1(h, [l1, l2], LRHS)
-                t1 += d1
-                t2 += d2
                 l1 += dl1
                 l2 += dl2
             elif self.prop == "rk2":
-                d1,d2 = propagation.rk2(h, [t1, t2], (fRHS,fRHS))
-                LRHS1 = lambda var: fLRHS(t1, t2, var)
-                LRHS2 = lambda var: fLRHS(t1 + d1, t2 + d2, var)
+                LRHS1 = lambda var: fLRHS(t1b, t2b, var)
+                LRHS2 = lambda var: fLRHS(t1e, t2e, var)
                 dl1,dl2 = propagation.rk2(h, [l1, l2], (LRHS1, LRHS2))
-                t1 += d1
-                t2 += d2
                 l1 += dl1
                 l2 += dl2
             elif self.prop == "rk4":
-                d1,d2 = propagation.rk4(h, [t1, t2], (fRHS,fRHS,fRHS,fRHS))
-
-                LRHS1 = lambda var: fLRHS(t1, t2, var)
-                LRHS23 = lambda var: fLRHS(t1 + 0.5*d1, t2 + 0.5*d2, var)
-                LRHS4 = lambda var: fLRHS(t1 + d1, t2 + d2, var)
+                t1x = 0.5*(t1b + t1e)
+                t2x = 0.5*(t2b + t2e)
+                LRHS1 = lambda var: fLRHS(t1b, t2b, var)
+                LRHS23 = lambda var: fLRHS(t1x, t2x, var)
+                LRHS4 = lambda var: fLRHS(t1e, t2e, var)
                 ld1, ld2 = propagation.rk4(h, [l1, l2], (LRHS1, LRHS23, LRHS23, LRHS4))
-
-                t1 += d1
-                t2 += d2
                 l1 += ld1
                 l2 += ld2
             elif self.prop == "cn":
                 mi = 200
                 alpha = 0.8
                 thresh = 1e-5
-                d1, d2 = propagation.cn(h, [t1, t2], mi, alpha, thresh, (fRHS,fRHS), self.iprint)
-                LRHS1 = lambda var: fLRHS(t1, t2, var)
-                LRHS2 = lambda var: fLRHS(t1 + d1, t2 + d2, var)
+                LRHS1 = lambda var: fLRHS(t1b, t2b, var)
+                LRHS2 = lambda var: fLRHS(t1e, t2e, var)
                 ld1, ld2 = propagation.cn(h, [l1, l2], mi, alpha, thresh, (LRHS1,LRHS2), self.iprint)
                 l1 += ld1
                 l2 += ld2
-                t1 += d1
-                t2 += d2
             else:
                 raise Exception("Unrecognized propagation scheme: " + self.prop)
-            Eccn += g[ng - i - 1]*cc_energy(t1, t2, F.ov, I.oovv)/beta
+            Eccn += g[ng - i - 1]*cc_energy(t1e, t2e, F.ov, I.oovv)/beta
 
             # increment the RDMs
             pia += g[ng - i - 1]*l1
-            pji += g[ng - i - 1]*cc_equations.ccsd_1rdm_ji_opt(t1,t2,l1,l2)
-            pba += g[ng - i - 1]*cc_equations.ccsd_1rdm_ba_opt(t1,t2,l1,l2)
-            pai += g[ng - i - 1]*cc_equations.ccsd_1rdm_ai_opt(t1,t2,l1,l2)
+            pji += g[ng - i - 1]*cc_equations.ccsd_1rdm_ji_opt(t1e,t2e,l1,l2)
+            pba += g[ng - i - 1]*cc_equations.ccsd_1rdm_ba_opt(t1e,t2e,l1,l2)
+            pai += g[ng - i - 1]*cc_equations.ccsd_1rdm_ai_opt(t1e,t2e,l1,l2)
+            t1b = t1e
+            t2b = t2e
 
         G0 = E0
         G1 = E1
