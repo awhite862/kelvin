@@ -163,9 +163,10 @@ def full_suite():
     suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_rk4"))
     suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_cn"))
     suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_am2"))
-    #suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_active"))
+    suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_active"))
 
     suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_rk4_omega"))
+    suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_omega_active"))
     suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_rk1"))
     suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_rk4"))
     suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_cn"))
@@ -174,6 +175,7 @@ def full_suite():
     suite.addTest(test_rt_ccsd_1rdm.RTCCSD1RDMTest("test_Be_rk1"))
     suite.addTest(test_rt_ccsd_1rdm.RTCCSD1RDMTest("test_Be_rk2"))
     suite.addTest(test_rt_ccsd_1rdm.RTCCSD1RDMTest("test_Be_rk4"))
+    suite.addTest(test_rt_ccsd_1rdm.RTCCSD1RDMTest("test_Be_active"))
 
     suite.addTest(test_scf.SCFTest("test_Be_sto3g_energy"))
     suite.addTest(test_scf.SCFTest("test_diamond_energy"))
@@ -327,6 +329,7 @@ def default_suite():
     #suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_active"))
 
     suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_rk4_omega"))
+    #suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_omega_active"))
     #suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_rk1"))
     suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_rk4"))
     suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_cn"))
@@ -335,6 +338,7 @@ def default_suite():
     suite.addTest(test_rt_ccsd_1rdm.RTCCSD1RDMTest("test_Be_rk1"))
     #suite.addTest(test_rt_ccsd_1rdm.RTCCSD1RDMTest("test_Be_rk2"))
     suite.addTest(test_rt_ccsd_1rdm.RTCCSD1RDMTest("test_Be_rk4"))
+    suite.addTest(test_rt_ccsd_1rdm.RTCCSD1RDMTest("test_Be_active"))
 
     suite.addTest(test_scf.SCFTest("test_Be_sto3g_energy"))
     suite.addTest(test_scf.SCFTest("test_diamond_energy"))

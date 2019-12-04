@@ -29,24 +29,24 @@ class RTCCSDLambdaTest(unittest.TestCase):
         error = "Expected: {}  Actual: {}".format(Eccref,Eccout)
         self.assertTrue(diff < 1e-6,error)
 
-    #def test_Be_cn_omega_active(self):
-    #    mol = gto.M(
-    #        verbose = 0,
-    #        atom = 'Be 0 0 0',
-    #        basis = 'sto-3G')
+    def test_Be_omega_active(self):
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
 
-    #    m = scf.RHF(mol)
-    #    m.conv_tol = 1e-12
-    #    Escf = m.scf()
-    #    T = 0.05
-    #    mu = 0.0
-    #    sys = scf_system(m,T,mu,orbtype='g')
-    #    rtccsdT = RTCCSD(sys, T=T, mu=mu, ngrid=5120, prop="rk4", athresh=1e-20, iprint=0)
-    #    Eref,Eccref = rtccsdT.run()
-    #    Eout,Eccout = rtccsdT._ccsd_lambda()
-    #    diff = abs(Eccref - Eccout)
-    #    error = "Expected: {}  Actual: {}".format(Eccref,Eccout)
-    #    self.assertTrue(diff < 1e-6,error)
+        m = scf.RHF(mol)
+        m.conv_tol = 1e-12
+        Escf = m.scf()
+        T = 0.05
+        mu = 0.0
+        sys = scf_system(m,T,mu,orbtype='g')
+        rtccsdT = RTCCSD(sys, T=T, mu=mu, ngrid=160, prop="rk4", athresh=1e-20, iprint=0, saveT=True)
+        Eref,Eccref = rtccsdT.run()
+        Eout,Eccout = rtccsdT._ccsd_lambda()
+        diff = abs(Eccref - Eccout)
+        error = "Expected: {}  Actual: {}".format(Eccref,Eccout)
+        self.assertTrue(diff < 1e-6,error)
 
     def test_Be_rk1(self):
         mol = gto.M(
@@ -205,6 +205,32 @@ class RTCCSDLambdaTest(unittest.TestCase):
         error2 = "Difference in 2-4 L2: {}".format(d2_24)
         self.assertTrue(d1_24 < 1e-4,error1)
         self.assertTrue(d2_24 < 2e-4,error2)
+
+    def test_Be_tsave(self):
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+
+        m = scf.RHF(mol)
+        m.conv_tol = 1e-12
+        Escf = m.scf()
+        T = 0.5
+        mu = 0.0
+        sys = scf_system(m,T,mu,orbtype='g')
+
+        ccP = RTCCSD(sys, T=T, mu=mu, ngrid=320, prop="rk4")
+        Eout,Eccout = ccP.run()
+        Etmp,Ecctmp = ccP._ccsd_lambda()
+        ccS = RTCCSD(sys, T=T, mu=mu, ngrid=320, prop="rk4", saveT=True)
+        Eout,Eccout = ccS.run()
+        Etmp,Ecctmp = ccS._ccsd_lambda()
+        d1 = numpy.linalg.norm(ccS.L1 - ccP.L1)/numpy.sqrt(ccS.L1.size)
+        d2 = numpy.linalg.norm(ccS.L2 - ccP.L2)/numpy.sqrt(ccS.L2.size)
+        error1 = "Difference in 1-4 L1: {}".format(d1)
+        error2 = "Difference in 1-4 L2: {}".format(d2)
+        self.assertTrue(d1 < 1e-8,error1)
+        self.assertTrue(d2 < 1e-8,error2)
 
 if __name__ == '__main__':
     unittest.main()

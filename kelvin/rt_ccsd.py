@@ -183,8 +183,8 @@ class RTCCSD(object):
             return [k1s,k1d]
 
         if self.saveT:
-            self.T1 = []
-            self.T2 = []
+            self.T1 = [t1.copy()]
+            self.T2 = [t2.copy()]
 
         for i in range(1,ng):
             # propagate
@@ -196,8 +196,8 @@ class RTCCSD(object):
             # compute free energy contribution
             Eccn += g[i]*cc_energy(t1, t2, F.ov, I.oovv)/beta
             if self.saveT:
-                self.T1.append(t1)
-                self.T2.append(t2)
+                self.T1.append(t1.copy())
+                self.T2.append(t2.copy())
 
         self.G0 = E0
         self.G1 = E1
@@ -336,6 +336,9 @@ class RTCCSD(object):
                 d1,d2 = self._get_t_step(h, t1b, t2b, fRHS)
                 t1e = t1b + d1
                 t2e = t2b + d2
+            else:
+                t1e = self.T1[ng - i - 1]
+                t2e = self.T2[ng - i - 1]
             if self.prop == "rk1":
                 LRHS = lambda var: fLRHS(t1b, t2b, var)
                 dl1,dl2 = propagation.rk1(h, [l1, l2], LRHS)
