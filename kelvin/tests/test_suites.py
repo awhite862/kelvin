@@ -21,9 +21,9 @@ from kelvin.tests import test_neq_lambda
 from kelvin.tests import test_neq_lambda_equation
 from kelvin.tests import test_neq_prop
 from kelvin.tests import test_quadrature
-from kelvin.tests import test_rt_ccsd
-from kelvin.tests import test_rt_ccsd_lambda
-from kelvin.tests import test_rt_ccsd_1rdm
+from kelvin.tests import test_td_ccsd
+from kelvin.tests import test_td_ccsd_lambda
+from kelvin.tests import test_td_ccsd_1rdm
 from kelvin.tests import test_scf
 from kelvin.tests import test_test
 from kelvin.tests import test_ueg
@@ -158,24 +158,24 @@ def full_suite():
     suite.addTest(test_quadrature.QuadTest("test_d_simpson_exp"))
     suite.addTest(test_quadrature.QuadTest("test_d_simpson_p"))
 
-    suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_rk1"))
-    suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_rk2"))
-    suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_rk4"))
-    suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_cn"))
-    suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_am2"))
-    suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_active"))
+    suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_rk1"))
+    suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_rk2"))
+    suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_rk4"))
+    suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_cn"))
+    suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_am2"))
+    suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_active"))
 
-    suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_rk4_omega"))
-    suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_omega_active"))
-    suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_rk1"))
-    suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_rk4"))
-    suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_cn"))
-    suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_rk124"))
+    suite.addTest(test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_rk4_omega"))
+    suite.addTest(test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_omega_active"))
+    suite.addTest(test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_rk1"))
+    suite.addTest(test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_rk4"))
+    suite.addTest(test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_cn"))
+    suite.addTest(test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_rk124"))
 
-    suite.addTest(test_rt_ccsd_1rdm.RTCCSD1RDMTest("test_Be_rk1"))
-    suite.addTest(test_rt_ccsd_1rdm.RTCCSD1RDMTest("test_Be_rk2"))
-    suite.addTest(test_rt_ccsd_1rdm.RTCCSD1RDMTest("test_Be_rk4"))
-    suite.addTest(test_rt_ccsd_1rdm.RTCCSD1RDMTest("test_Be_active"))
+    suite.addTest(test_td_ccsd_1rdm.TDCCSD1RDMTest("test_Be_rk1"))
+    suite.addTest(test_td_ccsd_1rdm.TDCCSD1RDMTest("test_Be_rk2"))
+    suite.addTest(test_td_ccsd_1rdm.TDCCSD1RDMTest("test_Be_rk4"))
+    suite.addTest(test_td_ccsd_1rdm.TDCCSD1RDMTest("test_Be_active"))
 
     suite.addTest(test_scf.SCFTest("test_Be_sto3g_energy"))
     suite.addTest(test_scf.SCFTest("test_diamond_energy"))
@@ -321,24 +321,24 @@ def default_suite():
     suite.addTest(test_quadrature.QuadTest("test_d_simpson_exp"))
     suite.addTest(test_quadrature.QuadTest("test_d_simpson_p"))
 
-    #suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_rk1"))
-    #suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_rk2"))
-    suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_rk4"))
-    #suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_cn"))
-    #suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_am2"))
-    #suite.addTest(test_rt_ccsd.RTCCSDTest("test_Be_active"))
+    #suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_rk1"))
+    #suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_rk2"))
+    suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_rk4"))
+    #suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_cn"))
+    #suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_am2"))
+    #suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_active"))
 
-    suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_rk4_omega"))
-    #suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_omega_active"))
-    #suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_rk1"))
-    suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_rk4"))
-    suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_cn"))
-    #suite.addTest(test_rt_ccsd_lambda.RTCCSDLambdaTest("test_Be_rk124"))
+    suite.addTest(test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_rk4_omega"))
+    #suite.addTest(test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_omega_active"))
+    #suite.addTest(test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_rk1"))
+    suite.addTest(test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_rk4"))
+    suite.addTest(test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_cn"))
+    #suite.addTest(test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_rk124"))
 
-    suite.addTest(test_rt_ccsd_1rdm.RTCCSD1RDMTest("test_Be_rk1"))
-    #suite.addTest(test_rt_ccsd_1rdm.RTCCSD1RDMTest("test_Be_rk2"))
-    suite.addTest(test_rt_ccsd_1rdm.RTCCSD1RDMTest("test_Be_rk4"))
-    suite.addTest(test_rt_ccsd_1rdm.RTCCSD1RDMTest("test_Be_active"))
+    suite.addTest(test_td_ccsd_1rdm.TDCCSD1RDMTest("test_Be_rk1"))
+    #suite.addTest(test_td_ccsd_1rdm.TDCCSD1RDMTest("test_Be_rk2"))
+    suite.addTest(test_td_ccsd_1rdm.TDCCSD1RDMTest("test_Be_rk4"))
+    suite.addTest(test_td_ccsd_1rdm.TDCCSD1RDMTest("test_Be_active"))
 
     suite.addTest(test_scf.SCFTest("test_Be_sto3g_energy"))
     suite.addTest(test_scf.SCFTest("test_diamond_energy"))

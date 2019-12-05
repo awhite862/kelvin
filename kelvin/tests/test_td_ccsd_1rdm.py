@@ -1,11 +1,11 @@
 import unittest
 import numpy
 from pyscf import gto, scf
-from kelvin.rt_ccsd import RTCCSD
+from kelvin.td_ccsd import TDCCSD
 from kelvin.ccsd import ccsd
 from kelvin.scf_system import scf_system
 
-class RTCCSD1RDMTest(unittest.TestCase):
+class TDCCSD1RDMTest(unittest.TestCase):
     def test_Be_rk1(self):
         mol = gto.M(
             verbose = 0,
@@ -25,13 +25,13 @@ class RTCCSD1RDMTest(unittest.TestCase):
         ccsdT._g_ft_1rdm()
 
         # compute normal-order 1-rdm from propagation
-        rtccsdT = RTCCSD(sys, T=T, mu=mu, ngrid=160, prop="rk1")
-        Eout,Eccout = rtccsdT.run()
-        Etmp,Ecctmp = rtccsdT._ccsd_lambda()
-        eia = numpy.linalg.norm(ccsdT.dia - rtccsdT.dia)
-        eji = numpy.linalg.norm(ccsdT.dji - rtccsdT.dji)
-        eba = numpy.linalg.norm(ccsdT.dba - rtccsdT.dba)
-        eai = numpy.linalg.norm(ccsdT.dai - rtccsdT.dai)
+        tdccsdT = TDCCSD(sys, T=T, mu=mu, ngrid=160, prop="rk1")
+        Eout,Eccout = tdccsdT.run()
+        Etmp,Ecctmp = tdccsdT._ccsd_lambda()
+        eia = numpy.linalg.norm(ccsdT.dia - tdccsdT.dia)
+        eji = numpy.linalg.norm(ccsdT.dji - tdccsdT.dji)
+        eba = numpy.linalg.norm(ccsdT.dba - tdccsdT.dba)
+        eai = numpy.linalg.norm(ccsdT.dai - tdccsdT.dai)
         erroria = "Difference in pia: {}".format(eia)
         errorji = "Difference in pji: {}".format(eji)
         errorba = "Difference in pba: {}".format(eba)
@@ -60,13 +60,13 @@ class RTCCSD1RDMTest(unittest.TestCase):
         ccsdT._g_ft_1rdm()
 
         # compute normal-order 1-rdm from propagation
-        rtccsdT = RTCCSD(sys, T=T, mu=mu, ngrid=160, prop="rk2")
-        Eout,Eccout = rtccsdT.run()
-        Etmp,Ecctmp = rtccsdT._ccsd_lambda()
-        eia = numpy.linalg.norm(ccsdT.dia - rtccsdT.dia)
-        eji = numpy.linalg.norm(ccsdT.dji - rtccsdT.dji)
-        eba = numpy.linalg.norm(ccsdT.dba - rtccsdT.dba)
-        eai = numpy.linalg.norm(ccsdT.dai - rtccsdT.dai)
+        tdccsdT = TDCCSD(sys, T=T, mu=mu, ngrid=160, prop="rk2")
+        Eout,Eccout = tdccsdT.run()
+        Etmp,Ecctmp = tdccsdT._ccsd_lambda()
+        eia = numpy.linalg.norm(ccsdT.dia - tdccsdT.dia)
+        eji = numpy.linalg.norm(ccsdT.dji - tdccsdT.dji)
+        eba = numpy.linalg.norm(ccsdT.dba - tdccsdT.dba)
+        eai = numpy.linalg.norm(ccsdT.dai - tdccsdT.dai)
         erroria = "Difference in pia: {}".format(eia)
         errorji = "Difference in pji: {}".format(eji)
         errorba = "Difference in pba: {}".format(eba)
@@ -95,13 +95,13 @@ class RTCCSD1RDMTest(unittest.TestCase):
         ccsdT._g_ft_1rdm()
 
         # compute normal-order 1-rdm from propagation
-        rtccsdT = RTCCSD(sys, T=T, mu=mu, ngrid=160, prop="rk4")
-        Eout,Eccout = rtccsdT.run()
-        Etmp,Ecctmp = rtccsdT._ccsd_lambda()
-        eia = numpy.linalg.norm(ccsdT.dia - rtccsdT.dia)
-        eji = numpy.linalg.norm(ccsdT.dji - rtccsdT.dji)
-        eba = numpy.linalg.norm(ccsdT.dba - rtccsdT.dba)
-        eai = numpy.linalg.norm(ccsdT.dai - rtccsdT.dai)
+        tdccsdT = TDCCSD(sys, T=T, mu=mu, ngrid=160, prop="rk4")
+        Eout,Eccout = tdccsdT.run()
+        Etmp,Ecctmp = tdccsdT._ccsd_lambda()
+        eia = numpy.linalg.norm(ccsdT.dia - tdccsdT.dia)
+        eji = numpy.linalg.norm(ccsdT.dji - tdccsdT.dji)
+        eba = numpy.linalg.norm(ccsdT.dba - tdccsdT.dba)
+        eai = numpy.linalg.norm(ccsdT.dai - tdccsdT.dai)
         erroria = "Difference in pia: {}".format(eia)
         errorji = "Difference in pji: {}".format(eji)
         errorba = "Difference in pba: {}".format(eba)
@@ -130,13 +130,13 @@ class RTCCSD1RDMTest(unittest.TestCase):
         ccsdT._g_ft_1rdm()
 
         # compute normal-order 1-rdm from propagation
-        rtccsdT = RTCCSD(sys, T=T, mu=mu, ngrid=640, prop="rk4", athresh = 1e-20, saveT=True)
-        Eout,Eccout = rtccsdT.run()
-        Etmp,Ecctmp = rtccsdT._ccsd_lambda()
-        eia = numpy.linalg.norm(ccsdT.dia - rtccsdT.dia)
-        eji = numpy.linalg.norm(ccsdT.dji - rtccsdT.dji)
-        eba = numpy.linalg.norm(ccsdT.dba - rtccsdT.dba)
-        eai = numpy.linalg.norm(ccsdT.dai - rtccsdT.dai)
+        tdccsdT = TDCCSD(sys, T=T, mu=mu, ngrid=640, prop="rk4", athresh = 1e-20, saveT=True)
+        Eout,Eccout = tdccsdT.run()
+        Etmp,Ecctmp = tdccsdT._ccsd_lambda()
+        eia = numpy.linalg.norm(ccsdT.dia - tdccsdT.dia)
+        eji = numpy.linalg.norm(ccsdT.dji - tdccsdT.dji)
+        eba = numpy.linalg.norm(ccsdT.dba - tdccsdT.dba)
+        eai = numpy.linalg.norm(ccsdT.dai - tdccsdT.dai)
         #print(eia)
         #print(eji)
         #print(eba)

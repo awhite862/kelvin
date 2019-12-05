@@ -11,7 +11,7 @@ from . import ft_mp
 from . import quadrature
 from . import propagation
 
-class RTCCSD(object):
+class TDCCSD(object):
     """Real-time coupled cluster singles and doubles (CCSD) driver.
     """
     def __init__(self, sys, T=0.0, mu=0.0, iprint=0,

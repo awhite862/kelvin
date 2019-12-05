@@ -1,11 +1,11 @@
 import unittest
 import numpy
 from pyscf import gto, scf
-from kelvin.rt_ccsd import RTCCSD
+from kelvin.td_ccsd import TDCCSD
 from kelvin.ccsd import ccsd
 from kelvin.scf_system import scf_system
 
-class RTCCSDTest(unittest.TestCase):
+class TDCCSDTest(unittest.TestCase):
     def setUp(self):
         self.thresh = 1e-8
 
@@ -23,8 +23,8 @@ class RTCCSDTest(unittest.TestCase):
         sys = scf_system(m,T,mu,orbtype='g')
         ccsdT = ccsd(sys,T=T,mu=mu,ngrid=40,iprint=0)
         Eref,Eccref = ccsdT.run()
-        rtccsdT = RTCCSD(sys, T=T, mu=mu, ngrid=640, prop="rk1")
-        Eout,Eccout = rtccsdT.run()
+        tdccsdT = TDCCSD(sys, T=T, mu=mu, ngrid=640, prop="rk1")
+        Eout,Eccout = tdccsdT.run()
         diff = abs(Eccref - Eccout)
         error = "Expected: {}  Actual: {}".format(Eccref,Eccout)
         self.assertTrue(diff < 1e-3,error)
@@ -44,8 +44,8 @@ class RTCCSDTest(unittest.TestCase):
         sys = scf_system(m,T,mu,orbtype='g')
         ccsdT = ccsd(sys,T=T,mu=mu,ngrid=ng,iprint=0)
         Eref,Eccref = ccsdT.run()
-        rtccsdT = RTCCSD(sys, T=T, mu=mu, ngrid=160, prop="rk2")
-        Eout,Eccout = rtccsdT.run()
+        tdccsdT = TDCCSD(sys, T=T, mu=mu, ngrid=160, prop="rk2")
+        Eout,Eccout = tdccsdT.run()
         diff = abs(Eccref - Eccout)
         error = "Expected: {}  Actual: {}".format(Eccref,Eccout)
         self.assertTrue(diff < 1e-4,error)
@@ -64,8 +64,8 @@ class RTCCSDTest(unittest.TestCase):
         sys = scf_system(m,T,mu,orbtype='g')
         ccsdT = ccsd(sys,T=T,mu=mu,ngrid=80,iprint=0)
         Eref,Eccref = ccsdT.run()
-        rtccsdT = RTCCSD(sys, T=T, mu=mu, ngrid=80, prop="rk4")
-        Eout,Eccout = rtccsdT.run()
+        tdccsdT = TDCCSD(sys, T=T, mu=mu, ngrid=80, prop="rk4")
+        Eout,Eccout = tdccsdT.run()
         diff = abs(Eccref - Eccout)
         error = "Expected: {}  Actual: {}".format(Eccref,Eccout)
         self.assertTrue(diff < 1e-6,error)
@@ -82,10 +82,10 @@ class RTCCSDTest(unittest.TestCase):
         T = 0.5
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
-        rtccsdT = RTCCSD(sys, T=T, mu=mu, ngrid=160, prop="rk4")
-        Eref,Eccref = rtccsdT.run()
-        rtccsdT = RTCCSD(sys, T=T, mu=mu, ngrid=80, prop="cn",iprint=0)
-        Eout,Eccout = rtccsdT.run()
+        tdccsdT = TDCCSD(sys, T=T, mu=mu, ngrid=160, prop="rk4")
+        Eref,Eccref = tdccsdT.run()
+        tdccsdT = TDCCSD(sys, T=T, mu=mu, ngrid=80, prop="cn",iprint=0)
+        Eout,Eccout = tdccsdT.run()
         diff = abs(Eccref - Eccout)
         error = "Expected: {}  Actual: {}".format(Eccref,Eccout)
         self.assertTrue(diff < 1e-4,error)
@@ -102,10 +102,10 @@ class RTCCSDTest(unittest.TestCase):
         T = 0.5
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
-        rtccsdT = RTCCSD(sys, T=T, mu=mu, ngrid=160, prop="rk4")
-        Eref,Eccref = rtccsdT.run()
-        rtccsdT = RTCCSD(sys, T=T, mu=mu, ngrid=80, prop="am2",iprint=0)
-        Eout,Eccout = rtccsdT.run()
+        tdccsdT = TDCCSD(sys, T=T, mu=mu, ngrid=160, prop="rk4")
+        Eref,Eccref = tdccsdT.run()
+        tdccsdT = TDCCSD(sys, T=T, mu=mu, ngrid=80, prop="am2",iprint=0)
+        Eout,Eccout = tdccsdT.run()
         diff = abs(Eccref - Eccout)
         error = "Expected: {}  Actual: {}".format(Eccref,Eccout)
         self.assertTrue(diff < 1e-4,error)
@@ -124,8 +124,8 @@ class RTCCSDTest(unittest.TestCase):
         sys = scf_system(m,T,mu,orbtype='g')
         ccsdT = ccsd(sys,T=T,mu=mu,ngrid=100,iprint=0,athresh=1e-20)
         Eref,Eccref = ccsdT.run()
-        rtccsdT = RTCCSD(sys, T=T, mu=mu, ngrid=120, prop="rk4", athresh=1e-20, iprint=0)
-        Eout,Eccout = rtccsdT.run()
+        tdccsdT = TDCCSD(sys, T=T, mu=mu, ngrid=120, prop="rk4", athresh=1e-20, iprint=0)
+        Eout,Eccout = tdccsdT.run()
         diff = abs(Eccref - Eccout)
         error = "Expected: {}  Actual: {}".format(Eccref,Eccout)
         self.assertTrue(diff < 1e-5,error)
