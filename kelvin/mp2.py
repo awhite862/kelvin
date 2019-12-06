@@ -18,8 +18,11 @@ class mp2(object):
         self.mu = mu
         self.finite_T = False if T == 0 else True
         if self.finite_T:
+            self.beta = 1/T
             if not sys.verify(self.T,self.mu):
                 raise Exception("Sytem temperature inconsistent with MP2 temp")
+        else:
+            self.beta = 1.0e20
         self.sys = sys
         self.iprint = iprint
         self.saveT = saveT
@@ -77,17 +80,15 @@ class mp2(object):
         return (E0,E1,E2)
 
     def _ft_mp2(self):
-        T = self.T
-        beta = 1.0 / T
         mu = self.mu
 
         # get energies and occupation numbers
         en = self.sys.g_energies_tot()
-        fo = ft_utils.ff(beta, en, mu)
+        fo = ft_utils.ff(self.beta, en, mu)
 
         # compute zero order quantities 
         En = self.sys.const_energy()
-        g0 = ft_utils.GP0(beta, en, mu)
+        g0 = ft_utils.GP0(self.beta, en, mu)
         E0 = ft_mp.mp0(g0) + En
 
         # compute requisite memory

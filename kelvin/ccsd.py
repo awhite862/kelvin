@@ -60,14 +60,18 @@ class ccsd(object):
             self.realtime = True
         if not sys.verify(self.T,self.mu):
             raise Exception("Sytem temperature inconsistent with CC temp")
+        self.beta = None
+        self.ti = None
+        self.g = None
+        self.G = None
         if self.realtime:
             if self.finite_T:
-                beta_max = 1.0/(T + 1e-12)
+                self.beta = 1.0/T
+                self.beta_max = self.beta
             else:
-                beta_max = 80
-                self._beta_max = 80
+                self.beta_max = 80.0
             ng = self.ngrid
-            self.ti,self.g,self.G = quadrature.ft_quad(self.ngrid,beta_max,self.quad)
+            self.ti,self.g,self.G = quadrature.ft_quad(self.ngrid, self.beta_max, self.quad)
         self.sys = sys
         # amplitudes
         self.T1 = None
@@ -162,8 +166,7 @@ class ccsd(object):
     #            raise Exception("Not yet implemented")
     #        else:
     #            # temperature info
-    #            T = self.T
-    #            beta = 1.0 / (T + 1e-12)
+    #            beta = self.beta
     #            mu = self.mu
 
     #            # zero order contributions
@@ -200,8 +203,8 @@ class ccsd(object):
 
     def _g_ft_ESN(self,L1=None,L2=None,gderiv=True):
             # temperature info
-            T = self.T
-            beta = 1.0 / T
+            assert(self.beta_max == self.beta)
+            beta = self.beta
             mu = self.mu
 
             # zero order contributions
@@ -227,7 +230,6 @@ class ccsd(object):
             else:
                 Bcc += self._g_gderiv_approx()
 
-            # E = beta*dG/dbeta + G + mu*N
             E1 = beta*B1 + mu*N1 + self.G1
             Ecc = beta*Bcc + mu*Ncc + self.Gcc
 
@@ -246,8 +248,8 @@ class ccsd(object):
 
     def _u_ft_ESN(self,L1=None,L2=None,gderiv=True):
             # temperature info
-            T = self.T
-            beta = 1.0 / T
+            assert(self.beta_max == self.beta)
+            beta = self.beta
             mu = self.mu
 
             # zero order contributions
@@ -279,7 +281,6 @@ class ccsd(object):
             else:
                 Bcc += self._u_gderiv_approx()
 
-            # E = beta*dG/dbeta + G + mu*N
             E1 = beta*B1 + mu*N1 + self.G1
             Ecc = beta*Bcc + mu*Ncc + self.Gcc
 
@@ -675,9 +676,6 @@ class ccsd(object):
 
     def _ft_ccsd(self,T1in=None,T2in=None):
         """Solve finite temperature coupled cluster equations."""
-        #T = self.T if not self.realtime else 1.0e-5
-        beta = 1.0 / self.T if self.finite_T else self._beta_max
-        mu = self.mu if self.finite_T else None
 
         # get time-grid
         ng = self.ngrid
@@ -708,6 +706,8 @@ class ccsd(object):
             # get ERIs
             I = self.sys.g_aint()
         else:
+            beta = self.beta
+            mu = self.mu if self.finite_T else None
             # get orbital energies
             en = self.sys.g_energies_tot()
             fo = ft_utils.ff(beta, en, mu)
@@ -779,19 +779,19 @@ class ccsd(object):
                 T2old = -einsum('v,abij->vabij',Id,I.vvoo)
                 T1old = quadrature.int_tbar1(ng,T1old,ti,D1,G)
                 T2old = quadrature.int_tbar2(ng,T2old,ti,D2,G)
-            E2 = ft_cc_energy.ft_cc_energy(T1old,T2old,
-                F.ov,I.oovv,g,beta,Qterm=False)
+            E2 = ft_cc_energy.ft_cc_energy(T1old, T2old,
+                F.ov, I.oovv, g, self.beta_max, Qterm=False)
             if self.iprint > 0:
                 print('MP2 Energy: {:.10f}'.format(E2))
 
             # run CC iterations
             Eccn,T1,T2 = cc_utils.ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G,
-                    beta, ng, ti, self.iprint, conv_options)
+                    self.beta_max, ng, ti, self.iprint, conv_options)
         else:
-            T1,T2 = cc_utils.ft_cc_iter_extrap(method, F, I, D1, D2, g, G, beta, ng, ti,
+            T1,T2 = cc_utils.ft_cc_iter_extrap(method, F, I, D1, D2, g, G, self.beta_max, ng, ti,
                     self.iprint, conv_options)
             Eccn = ft_cc_energy.ft_cc_energy(T1,T2,
-                F.ov,I.oovv,g,beta)
+                F.ov,I.oovv,g,self.beta_max)
 
         # save T amplitudes
         self.T1 = T1
@@ -805,94 +805,125 @@ class ccsd(object):
 
     def _ft_uccsd(self,T1in=None,T2in=None):
         """Solve finite temperature coupled cluster equations."""
-        T = self.T
-        beta = 1.0 / T
-        mu = self.mu
-
         # get time-grid
         ng = self.ngrid
         ti = self.ti
         G = self.G
         g = self.g
 
-        # get orbital energies
-        ea,eb = self.sys.u_energies_tot()
-        na = ea.shape[0]
-        nb = eb.shape[0]
+        if self.finite_T:
+            beta = self.beta
+            mu = self.mu if self.finite_T else None
 
-        # get 0th and 1st order contributions
-        En = self.sys.const_energy()
-        g0 = ft_utils.uGP0(beta, ea, eb, mu)
-        E0 = ft_mp.ump0(g0[0],g0[1]) + En
-        E1 = self.sys.get_mp1()
-        E01 = E0 + E1
+            # get orbital energies
+            ea,eb = self.sys.u_energies_tot()
+            na = ea.shape[0]
+            nb = eb.shape[0]
 
-        if self.athresh > 0.0:
-            athresh = self.athresh
-            foa = ft_utils.ff(beta, ea, mu)
-            fva = ft_utils.ffv(beta, ea, mu)
-            fob = ft_utils.ff(beta, eb, mu)
-            fvb = ft_utils.ffv(beta, eb, mu)
-            focca = [x for x in foa if x > athresh]
-            fvira = [x for x in fva if x > athresh]
-            iocca = [i for i,x in enumerate(foa) if x > athresh]
-            ivira = [i for i,x in enumerate(fva) if x > athresh]
-            foccb = [x for x in fob if x > athresh]
-            fvirb = [x for x in fvb if x > athresh]
-            ioccb = [i for i,x in enumerate(fob) if x > athresh]
-            ivirb = [i for i,x in enumerate(fvb) if x > athresh]
-            nocca = len(focca)
-            nvira = len(fvira)
-            noccb = len(foccb)
-            nvirb = len(fvirb)
-            nacta = nocca + nvira - na
-            nactb = noccb + nvirb - nb
-            if self.iprint > 0:
-                print("FT-UCCSD orbital info:")
-                print('  nocca: {:d}'.format(nocca))
-                print('  nvira: {:d}'.format(nvira))
-                print('  nacta: {:d}'.format(nacta))
-                print('  noccb: {:d}'.format(nocca))
-                print('  nvirb: {:d}'.format(nvira))
-                print('  nactb: {:d}'.format(nacta))
+            # get 0th and 1st order contributions
+            En = self.sys.const_energy()
+            g0 = ft_utils.uGP0(beta, ea, eb, mu)
+            E0 = ft_mp.ump0(g0[0],g0[1]) + En
+            E1 = self.sys.get_mp1()
+            E01 = E0 + E1
 
-            # get energy differences
-            D1a = ea[:,None] - ea[None,:]
-            D1b = eb[:,None] - eb[None,:]
-            D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
-                    - ea[None,None,:,None] - ea[None,None,None,:]
-            D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
-                    - ea[None,None,:,None] - eb[None,None,None,:]
-            D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
-                    - eb[None,None,:,None] - eb[None,None,None,:]
-            D1a = D1a[numpy.ix_(ivira,iocca)]
-            D1b = D1b[numpy.ix_(ivirb,ioccb)]
-            D2aa = D2aa[numpy.ix_(ivira,ivira,iocca,iocca)]
-            D2ab = D2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)]
-            D2bb = D2bb[numpy.ix_(ivirb,ivirb,ioccb,ioccb)]
+            beta = self.beta
+            mu = self.mu
+            if self.athresh > 0.0:
+                athresh = self.athresh
+                foa = ft_utils.ff(beta, ea, mu)
+                fva = ft_utils.ffv(beta, ea, mu)
+                fob = ft_utils.ff(beta, eb, mu)
+                fvb = ft_utils.ffv(beta, eb, mu)
+                focca = [x for x in foa if x > athresh]
+                fvira = [x for x in fva if x > athresh]
+                iocca = [i for i,x in enumerate(foa) if x > athresh]
+                ivira = [i for i,x in enumerate(fva) if x > athresh]
+                foccb = [x for x in fob if x > athresh]
+                fvirb = [x for x in fvb if x > athresh]
+                ioccb = [i for i,x in enumerate(fob) if x > athresh]
+                ivirb = [i for i,x in enumerate(fvb) if x > athresh]
+                nocca = len(focca)
+                nvira = len(fvira)
+                noccb = len(foccb)
+                nvirb = len(fvirb)
+                nacta = nocca + nvira - na
+                nactb = noccb + nvirb - nb
+                if self.iprint > 0:
+                    print("FT-UCCSD orbital info:")
+                    print('  nocca: {:d}'.format(nocca))
+                    print('  nvira: {:d}'.format(nvira))
+                    print('  nacta: {:d}'.format(nacta))
+                    print('  noccb: {:d}'.format(nocca))
+                    print('  nvirb: {:d}'.format(nvira))
+                    print('  nactb: {:d}'.format(nacta))
 
-            # get scaled integrals
-            Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
-                    self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
+                # get energy differences
+                D1a = ea[:,None] - ea[None,:]
+                D1b = eb[:,None] - eb[None,:]
+                D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
+                        - ea[None,None,:,None] - ea[None,None,None,:]
+                D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
+                        - ea[None,None,:,None] - eb[None,None,None,:]
+                D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
+                        - eb[None,None,:,None] - eb[None,None,None,:]
+                D1a = D1a[numpy.ix_(ivira,iocca)]
+                D1b = D1b[numpy.ix_(ivirb,ioccb)]
+                D2aa = D2aa[numpy.ix_(ivira,ivira,iocca,iocca)]
+                D2ab = D2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)]
+                D2bb = D2bb[numpy.ix_(ivirb,ivirb,ioccb,ioccb)]
 
-            T1ashape = (ng,nvira,nocca)
-            T1bshape = (ng,nvirb,noccb)
+                # get scaled integrals
+                Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
+                        self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
 
+                T1ashape = (ng,nvira,nocca)
+                T1bshape = (ng,nvirb,noccb)
+
+            else:
+                # get scaled integrals
+                Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
+
+                # get energy differences
+                D1a = ea[:,None] - ea[None,:]
+                D1b = eb[:,None] - eb[None,:]
+                D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
+                        - ea[None,None,:,None] - ea[None,None,None,:]
+                D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
+                        - ea[None,None,:,None] - eb[None,None,None,:]
+                D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
+                        - eb[None,None,:,None] - eb[None,None,None,:]
+                T1ashape = (ng,na,na)
+                T1bshape = (ng,nb,nb)
         else:
-            # get scaled integrals
-            Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
+            # create energies in spin-orbital basis
+            eoa,eva,eob,evb = self.sys.u_energies()
+            no = eo.shape[0]
+            nv = ev.shape[0]
+            D1a = (eva[:,None] - eoa[None,:])
+            D1b = (evb[:,None] - eob[None,:])
+            D2aa = (eva[:,None,None,None] + eva[None,:,None,None]
+                - eoa[None,None,:,None] - eoa[None,None,None,:])
+            D2ab = (eva[:,None,None,None] + evb[None,:,None,None]
+                - eoa[None,None,:,None] - eob[None,None,None,:])
+            D2bb = (evb[:,None,None,None] + evb[None,:,None,None]
+                - eob[None,None,:,None] - eob[None,None,None,:])
 
-            # get energy differences
-            D1a = ea[:,None] - ea[None,:]
-            D1b = eb[:,None] - eb[None,:]
-            D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
-                    - ea[None,None,:,None] - ea[None,None,None,:]
-            D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
-                    - ea[None,None,:,None] - eb[None,None,None,:]
-            D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
-                    - eb[None,None,:,None] - eb[None,None,None,:]
-            T1ashape = (ng,na,na)
-            T1bshape = (ng,nb,nb)
+            # get HF energy
+            En = self.sys.const_energy()
+            E0 = zt_mp.ump0(eoa, eob) + En
+            E1 = self.sys.get_mp1()
+            E01 = E0 + E1
+
+            # get Fock matrix
+            Fa,Fb = self.sys.u_fock()
+            Fa.oo = Fa.oo - numpy.diag(eoa) # subtract diagonal
+            Fa.vv = Fa.vv - numpy.diag(eva) # subtract diagonal
+            Fb.oo = Fb.oo - numpy.diag(eob) # subtract diagonal
+            Fb.vv = Fb.vv - numpy.diag(evb) # subtract diagonal
+
+            # get ERIs
+            Ia, Ib, Iabab = self.sys.u_aint()
 
         method = "CCSD" if self.singles else "CCD"
         conv_options = {
@@ -929,7 +960,7 @@ class ccsd(object):
 
             # MP2 energy
             E2 = ft_cc_energy.ft_ucc_energy(T1aold,T1bold,T2aaold,T2abold,T2bbold,
-                Fa.ov,Fb.ov,Ia.oovv,Ib.oovv,Iabab.oovv,g,beta,Qterm=False)
+                Fa.ov,Fb.ov,Ia.oovv,Ib.oovv,Iabab.oovv,g,self.beta_max,Qterm=False)
             if self.iprint > 0:
                 print('MP2 Energy: {:.10f}'.format(E2))
 
@@ -937,12 +968,12 @@ class ccsd(object):
             # run CC iterations
             Eccn,T1,T2 = cc_utils.ft_ucc_iter(method, T1aold, T1bold, T2aaold, T2abold, T2bbold,
                     Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb,
-                    g, G, beta, ng, ti, self.iprint, conv_options)
+                    g, G, self.beta_max, ng, ti, self.iprint, conv_options)
         else:
             T1,T2 = cc_utils.ft_ucc_iter_extrap(method, Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb,
-                    g, G, beta, ng, ti, self.iprint, conv_options)
+                    g, G, self.beta_max, ng, ti, self.iprint, conv_options)
             Eccn = ft_cc_energy.ft_ucc_energy(T1[0], T1[1], T2[0], T2[1], T2[2],
-                Fa.ov,Fb.ov,Ia.oovv,Ib.oovv,Iabab.oovv,g,beta)
+                Fa.ov,Fb.ov,Ia.oovv,Ib.oovv,Iabab.oovv,g,self.beta_max)
 
         # save T amplitudes
         self.T1 = T1
@@ -956,8 +987,7 @@ class ccsd(object):
 
     def _ft_ccsd_lambda(self, L1=None, L2=None):
         """Solve FT-CCSD Lambda equations."""
-        #T = self.T
-        beta = 1.0 / self.T
+        beta = self.beta
         mu = self.mu
 
         # get time-grid
@@ -1017,9 +1047,9 @@ class ccsd(object):
 
         if L2 is None and L1 is None:
             if self.singles:
-                L1old,L2old = ft_cc_equations.ccsd_lambda_guess(F,I,self.T1,beta,ng)
+                L1old,L2old = ft_cc_equations.ccsd_lambda_guess(F,I,self.T1,self.beta_max,ng)
             else:
-                L2old = ft_cc_equations.ccd_lambda_guess(I,beta,ng)
+                L2old = ft_cc_equations.ccd_lambda_guess(I,self.beta_max,ng)
         elif L2 is not None and L1 is None:
             L2old = L2
             if self.singles:
@@ -1044,7 +1074,7 @@ class ccsd(object):
                 "damp":self.damp}
         method = "CCSD" if self.singles else "CCD"
         L1,L2 = cc_utils.ft_lambda_iter(method, L1old, L2old, self.T1, self.T2, F, I,
-                D1, D2, g, G, beta, ng, ti, self.iprint, conv_options)
+                D1, D2, g, G, self.beta_max, ng, ti, self.iprint, conv_options)
 
         # save lambda amplitudes
         self.L1 = L1
@@ -1052,8 +1082,7 @@ class ccsd(object):
 
     def _ft_uccsd_lambda(self, L1=None, L2=None):
         """Solve FT-CCSD Lambda equations."""
-        T = self.T
-        beta = 1.0 / T
+        beta = self.beta
         mu = self.mu
 
         # get time-grid
@@ -1144,9 +1173,9 @@ class ccsd(object):
         if L2 is None and L1 is None:
             if self.singles:
                 L1aold,L1bold,L2aaold,L2abold,L2bbold = ft_cc_equations.uccsd_lambda_guess(
-                    Fa,Fb,Ia,Ib,Iabab,self.T1[0],self.T1[1],beta,ng)
+                    Fa,Fb,Ia,Ib,Iabab,self.T1[0],self.T1[1],self.beta_max,ng)
             else:
-                L2aaold,L2abold,L2bbold = ft_cc_equations.uccd_lambda_guess(Ia,Ib,Iabab,beta,ng)
+                L2aaold,L2abold,L2bbold = ft_cc_equations.uccd_lambda_guess(Ia,Ib,Iabab,self.beta_max,ng)
         elif L2 is not None and L1 is None:
             L2aaold = L2aa
             L2abold = L2ab
@@ -1182,7 +1211,7 @@ class ccsd(object):
         L1a,L1b,L2aa,L2ab,L2bb = cc_utils.ft_ulambda_iter(
                 method, L1aold, L1bold, L2aaold, L2abold, L2bbold, T1aold, T1bold, 
                 T2aaold, T2abold, T2bbold, Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb, 
-                g, G, beta, ng, ti, self.iprint, conv_options)
+                g, G, self.beta_max, ng, ti, self.iprint, conv_options)
 
         # save lambda amplitudes
         self.L1 = (L1a,L1b)
@@ -1191,8 +1220,8 @@ class ccsd(object):
     def _g_nocc_deriv(self, dvec):
         """Evaluate the Lagrangian with scaled occupation number derivatives."""
         # temperature info
-        T = self.T
-        beta = 1.0 / T
+        assert(self.beta == self.beta_max)
+        beta = self.beta
         mu = self.mu
 
         # get energies and occupation numbers
@@ -1233,10 +1262,9 @@ class ccsd(object):
 
     def _u_nocc_deriv(self, dveca, dvecb):
         """Evaluate the Lagrangian with scaled occupation number derivatives."""
-        dvec = numpy.concatenate((dveca,dvecb))
         # temperature info
-        T = self.T
-        beta = 1.0 / T
+        assert(self.beta == self.beta_max)
+        beta = self.beta
         mu = self.mu
 
         # get energies and occupation numbers
@@ -1344,8 +1372,8 @@ class ccsd(object):
         the time-dependent formulation.
         """
         # temperature info
-        T = self.T
-        beta = 1.0 / T
+        assert(self.beta == self.beta_max)
+        beta = self.beta
         mu = self.mu
 
         # get energies and occupation numbers
@@ -1422,8 +1450,8 @@ class ccsd(object):
         the time-dependent formulation.
         """
         # temperature info
-        T = self.T
-        beta = 1.0 / T
+        assert(self.beta == self.beta_max)
+        beta = self.beta
         mu = self.mu
 
         # get energies and occupation numbers
@@ -1534,8 +1562,8 @@ class ccsd(object):
 
     def _g_gderiv_approx(self):
         # temperature info
-        T = self.T
-        beta = 1.0 / T
+        assert(self.beta == self.beta_max)
+        beta = self.beta
         mu = self.mu
 
         # get energies and occupation numbers
@@ -1562,8 +1590,8 @@ class ccsd(object):
 
     def _u_gderiv_approx(self):
         # temperature info
-        T = self.T
-        beta = 1.0 / T
+        assert(self.beta == self.beta_max)
+        beta = self.beta
         mu = self.mu
 
         # get energies and occupation numbers
@@ -1607,11 +1635,11 @@ class ccsd(object):
         return (Es1 + Es2) / beta
 
     def _g_ft_1rdm(self):
+        assert(self.beta == self.beta_max)
         if self.L2 is None:
             self._ft_ccsd_lambda()
         # temperature info
-        T = self.T
-        beta = 1.0 / T
+        beta = self.beta
         mu = self.mu
 
         # get time-grid
@@ -1664,9 +1692,9 @@ class ccsd(object):
             self.n1rdm = (self.ndia + self.ndba + self.ndji + self.ndai)/beta
 
     def _g_ft_2rdm(self):
+        assert(self.beta == self.beta_max)
         # temperature info
-        T = self.T
-        beta = 1.0 / T
+        beta = self.beta
         mu = self.mu
 
         # get time-grid
@@ -1755,6 +1783,7 @@ class ccsd(object):
             self.n2rdm += (1.0/beta)*einsum('klij,k,l,i,j->klij',P2[8],sfo,sfo,sfo,sfo)
 
     def _grel_ft_1rdm(self):
+        assert(self.beta == self.beta_max)
         # build unrelaxed 1RDM and 2RDM if it doesn't exist
         if self.dia is None:
             self._g_ft_1rdm()
@@ -1762,8 +1791,7 @@ class ccsd(object):
             self._g_ft_2rdm()
 
         # temperature info
-        T = self.T
-        beta = 1.0 / T
+        beta = self.beta
         mu = self.mu
 
         # get energies and occupation numbers
@@ -1900,11 +1928,11 @@ class ccsd(object):
         self.r1rdm = rdji + rdba
 
     def _u_ft_1rdm(self):
+        assert(self.beta == self.beta_max)
         if self.L2 is None:
             self._ft_uccsd_lambda()
         # temperature info
-        T = self.T
-        beta = 1.0 / T
+        beta = self.beta
         mu = self.mu
 
         # get time-grid
@@ -1992,9 +2020,9 @@ class ccsd(object):
                     (self.ndia[1] + self.ndba[1] + self.ndji[1] + self.ndai[1])/beta]
 
     def _u_ft_2rdm(self):
+        assert(self.beta == self.beta_max)
         # temperature info
-        T = self.T
-        beta = 1.0 / T
+        beta = self.beta
         mu = self.mu
 
         # get time-grid
@@ -2171,6 +2199,7 @@ class ccsd(object):
         self.n2rdm = (P2aa,P2bb,P2ab)
 
     def _urel_ft_1rdm(self):
+        assert(self.beta == self.beta_max)
         # build unrelaxed 1RDM and 2RDM if it doesn't exist
         if self.dia is None:
             self._u_ft_1rdm()
@@ -2178,8 +2207,7 @@ class ccsd(object):
             self._u_ft_2rdm()
 
         # temperature info
-        T = self.T
-        beta = 1.0 / T
+        beta = self.beta
         mu = self.mu
 
         # get energies and occupation numbers
@@ -2508,8 +2536,7 @@ class ccsd(object):
         self.r1rdm = [rdji[0] + rdba[0],rdji[1] + rdba[1]]
 
     def full_1rdm(self, relax=False):
-        T = self.T
-        beta = 1.0 / T
+        beta = self.beta
         mu = self.mu
         if self.sys.orbtype == 'u':
             if relax:
@@ -2567,10 +2594,10 @@ class ccsd(object):
             raise Exception("orbital type " + self.sys.orbtype + " is not implemented for 1rdm")
 
     def full_2rdm(self, relax=False):
+        assert(self.beta == self.beta_max)
         if relax:
             raise Exception("Rexalex 2-RDM is not implemented")
-        T = self.T
-        beta = 1.0 / T
+        beta = self.beta
         mu = self.mu
         if self.sys.orbtype == 'u':
             if self.n1rdm is None:

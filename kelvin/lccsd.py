@@ -46,13 +46,20 @@ class lccsd(object):
             self.realtime = True
         if not sys.verify(self.T,self.mu):
             raise Exception("Sytem temperature inconsistent with LCCSD temp")
+        self.beta = None
+        self.ti = None
+        self.g = None
+        self.G = None
         if self.realtime:
             if self.finite_T:
-                beta_max = 1.0/(T + 1e-12)
+                self.beta = 1.0/T
+                self.beta_max = self.beta
             else:
-                beta_max = 80.0
+                self.beta = None
+                self.beta_max = 80
             ng = self.ngrid
-            self.ti,self.g,self.G = quadrature.simpsons(self.ngrid,beta_max)
+            self.ti,self.g,self.G = quadrature.ft_quad(self.ngrid, self.beta_max, self.quad)
+        self.sys = sys
 
         self.sys = sys
 
@@ -141,7 +148,6 @@ class lccsd(object):
             - eo[None,None,:,None] - eo[None,None,None,:])
 
         # get time-grid
-        beta_max = 80.0
         ng = self.ngrid
         ti = self.ti
         G = self.G
@@ -174,8 +180,8 @@ class lccsd(object):
                 T1old = numpy.zeros((ng,nv,no))
             T2old = -numpy.einsum('v,abij->vabij',Id,I.vvoo)
             T2old = quadrature.int_tbar2(ng,T2old,ti,Dvvoo,G)
-        E2 = ft_cc_energy.ft_cc_energy(T1old,T2old,
-            F.ov,I.oovv,g,beta_max,Qterm=False)
+        E2 = ft_cc_energy.ft_cc_energy(T1old, T2old,
+            F.ov, I.oovv, g, self.beta_max, Qterm=False)
         if self.iprint > 0:
             print('MP2 energy: {:.10f}'.format(E2))
 
@@ -183,7 +189,7 @@ class lccsd(object):
         conv_options = {"econv":self.econv, "max_iter":self.max_iter, "damp":self.damp}
         method = "LCCSD" if self.singles else "LCCD"
         Eccn,T1,T2 = cc_utils.ft_cc_iter(method, T1old, T2old, F, I,
-                Dvo, Dvvoo, g, G, beta_max, ng, ti, self.iprint, conv_options)
+                Dvo, Dvvoo, g, G, self.beta_max, ng, ti, self.iprint, conv_options)
         self.T1 = T1
         self.T2 = T2
 
@@ -192,9 +198,9 @@ class lccsd(object):
 
     def _ft_lccsd(self,T1in=None,T2in=None):
         # get T and mu variables
-        T = self.T
-        beta = 1.0 / T
+        beta = self.beta
         mu = self.mu
+        assert(self.beta_max == self.beta)
 
         # get time-grid
         ng = self.ngrid
@@ -263,8 +269,8 @@ class lccsd(object):
 
     def _ft_lccsd_active(self,T1in=None,T2in=None):
         # get T and mu variables
-        T = self.T
-        beta = 1.0 / T
+        assert(self.beta_max == self.beta)
+        beta = self.beta
         mu = self.mu
 
         # get time-grid
@@ -350,8 +356,8 @@ class lccsd(object):
 
     def _ft_lccsd_lambda(self):
         # get T and mu variables
-        T = self.T
-        beta = 1.0 / T
+        assert(self.beta_max == self.beta)
+        beta = self.beta
         mu = self.mu
 
         # get time-grid

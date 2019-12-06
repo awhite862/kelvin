@@ -38,7 +38,7 @@ class hubbard_field_system(system):
             self.mu = mu
             self.na = na
             self.nb = nb
-            beta = 1.0 / self.T
+            self.beta = 1.0 / self.T
         else:
             self.na = na
             self.nb = nb
@@ -46,6 +46,7 @@ class hubbard_field_system(system):
             assert(nb > 0)
             assert(self.T == 0.0)
             self.mu = None
+            self.beta = 1.0e20
 
         # Build T = 0 fock matrices
         self.orbtype = 'u'
@@ -105,12 +106,11 @@ class hubbard_field_system(system):
             return E1
         else:
             Va,Vb,Vabab = self.u_aint_tot()
-            beta = 1.0 / self.T
             ea,eb = self.u_energies_tot()
             na = ea.shape[0]
             nb = eb.shape[0]
-            foa = ft_utils.ff(beta, ea, self.mu)
-            fob = ft_utils.ff(beta, eb, self.mu)
+            foa = ft_utils.ff(self.beta, ea, self.mu)
+            fob = ft_utils.ff(self.beta, eb, self.mu)
             E1 = -0.5*numpy.einsum('ijij,i,j->',Va,foa,foa)
             E1 = -0.5*numpy.einsum('ijij,i,j->',Vb,fob,fob)
             E1 = -numpy.einsum('ijij,i,j->',Vabab,foa,fob)
@@ -150,16 +150,14 @@ class hubbard_field_system(system):
         na = da.shape[0]
         nb = db.shape[0]
         assert(na == nb)
-        beta = 1.0 / self.T
         Tt = numpy.zeros((nt,na,na),dtype=complex)
         for i,t in enumerate(self.ti):
             dt = t - self.t0
             ex = dt*dt/(2*self.sigma*self.sigma)
             phase = self.A0*numpy.exp(-ex)*numpy.cos(self.omega*dt + self.phi)
             Tt[i] = self.model.get_tmatS(phase=phase)
-        beta = 1.0 / self.T
-        foa = ft_utils.ff(beta, da, self.mu)
-        fob = ft_utils.ff(beta, db, self.mu)
+        foa = ft_utils.ff(self.beta, da, self.mu)
+        fob = ft_utils.ff(self.beta, db, self.mu)
         Ia = numpy.identity(na)
         Ib = numpy.identity(nb)
         dena = numpy.einsum('pi,i,qi->pq',Ia,foa,Ia)
@@ -192,8 +190,7 @@ class hubbard_field_system(system):
             ex = dt*dt/(2*self.sigma*self.sigma)
             phase = self.A0*numpy.exp(-ex)*numpy.cos(self.omega*dt + self.phi)
             Tt[i] = self.model.get_tmat(phase=phase)
-        beta = 1.0 / self.T
-        fo = ft_utils.ff(beta, d, self.mu)
+        fo = ft_utils.ff(self.beta, d, self.mu)
         I = numpy.identity(n)
         den = numpy.einsum('pi,i,qi->pq',I,fo,I)
         V = self.g_aint_tot()

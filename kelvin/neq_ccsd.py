@@ -21,6 +21,10 @@ class neq_ccsd(object):
         self.ngr = ngr
         self.ngi = ngi
         self.iprint = iprint
+        if T > 0.0:
+            self.beta = 1.0/T
+        else:
+            self.beta = 80
         if not sys.verify(self.T,self.mu):
             raise Exception("Sytem temperature inconsistent with CC temp")
         self.sys = sys
@@ -31,9 +35,7 @@ class neq_ccsd(object):
 
     def _neq_ccsd(self,T1in=None,T2in=None):
 
-        T = self.T
-        assert(self.T > 0.0)
-        beta = 1.0 / T
+        beta = self.beta
         tmax = self.tmax
         mu = self.mu
 
@@ -162,9 +164,7 @@ class neq_ccsd(object):
 
     def _neq_ccsd_lambda(self, L1=None, L2=None):
         """Solve FT-CCSD Lambda equations."""
-        T = self.T
-        assert(self.T > 0.0)
-        beta = 1.0 / T
+        beta = self.beta
         mu = self.mu
 
         # get time-grid
@@ -274,9 +274,7 @@ class neq_ccsd(object):
         if self.L2f is None or self.T2f is None:
             raise Exception("Cannot compute density without Lambda!")
 
-        T = self.T
-        assert(self.T > 0.0)
-        beta = 1.0 / T
+        beta = self.beta
         mu = self.mu
 
         # get time-grid
@@ -314,9 +312,7 @@ class neq_ccsd(object):
         if self.L2f is None or self.T2f is None:
             raise Exception("Cannot compute density without Lambda!")
 
-        T = self.T
-        assert(self.T > 0.0)
-        beta = 1.0 / T
+        beta = self.beta
         mu = self.mu
 
         # get time-grid
@@ -352,8 +348,7 @@ class neq_ccsd(object):
         pji = self.dji[t]
         pai = self.dai[t]
 
-        T = self.T
-        beta = 1.0 / T
+        beta = self.beta
         mu = self.mu
         en = self.sys.g_energies_tot()
         fo = ft_utils.ff(beta, en, mu)
@@ -373,10 +368,8 @@ class neq_ccsd(object):
         return prop
 
     def compute_2e_prop(self, A, t):
-
         # compute 2-rdm on the fly
-        T = self.T
-        beta = 1.0 / T
+        beta = self.beta
         mu = self.mu
         en = self.sys.g_energies_tot()
         fo = ft_utils.ff(beta, en, mu)
@@ -405,8 +398,7 @@ class neq_ccsd(object):
         return prop
 
     def compute_1rdm(self):
-        T = self.T
-        beta = 1.0 / T
+        beta = self.beta
         mu = self.mu
         en = self.sys.g_energies_tot()
         fo = ft_utils.ff(beta, en, mu)

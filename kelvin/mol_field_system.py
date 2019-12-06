@@ -27,6 +27,7 @@ class mol_field_system(system):
         self.nt = ti.shape[0]
         self.O = O
         self.ot = ot
+        self.beta = 1/T if T > 0.0 else 1.0e20
 
     def reversible(self):
         if self.O is None:
@@ -47,9 +48,8 @@ class mol_field_system(system):
         # contribution from imaginary contour
         hcore = self.mf.get_hcore(self.mf.mol)
         h = utils.block_diag(hcore,hcore)
-        beta = 1.0 / self.T
         en = self.g_energies_tot()
-        fo = ft_utils.ff(beta, en, self.mu)
+        fo = ft_utils.ff(self.beta, en, self.mu)
         p = scf_utils.get_ao_ft_den(self.mf, fo)
         f0 = scf_utils.get_ao_fock(self.mf)
         fao = scf_utils.get_ao_ft_fock(self.mf, fo)
@@ -64,9 +64,8 @@ class mol_field_system(system):
         return scf_utils.get_orbital_energies_gen(self.mf)
     
     def g_fock_tot(self,direc='f'):
-        beta = 1.0 / self.T
         en = self.g_energies_tot()
-        fo = ft_utils.ff(beta, en, self.mu)
+        fo = ft_utils.ff(self.beta, en, self.mu)
         F = scf_utils.get_mo_ft_fock(self.mf, fo)
         E = numpy.zeros((3))
         E[2] = 1.0
@@ -80,9 +79,9 @@ class mol_field_system(system):
             temp = field*numpy.sin(self.omega*self.ti[i])
             Fock[i,:,:] += temp
         if direc == 'f':
-            Fock[self.ot,:,:] += -3.j*beta*utils.block_diag(self.O,self.O)/delta
+            Fock[self.ot,:,:] += -3.j*self.beta*utils.block_diag(self.O,self.O)/delta
         elif direc == 'b':
-            Fock[self.ot,:,:] -= 0.j*beta*utils.block_diag(self.O,self.O)/delta
+            Fock[self.ot,:,:] -= 0.j*self.beta*utils.block_diag(self.O,self.O)/delta
         else:
             raise Exception("Unrecognized direction: " + str(direc))
 

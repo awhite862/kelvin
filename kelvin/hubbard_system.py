@@ -34,13 +34,14 @@ class HubbardSystem(system):
             self.mu = mu
             self.na = na
             self.nb = nb
-            beta = 1.0 / self.T if self.T > 0.0 else 1.0e20
+            self.beta = 1.0 / self.T if self.T > 0.0 else 1.0e20
         else:
             self.na = na
             self.nb = nb
             assert(na > 0)
             assert(nb > 0)
             assert(self.T == 0.0)
+            self.beta = 1.0e20
             self.mu = None
 
         # Build T = 0 fock matrices
@@ -120,10 +121,9 @@ class HubbardSystem(system):
             return E1
         else:
             Va,Vb,Vabab = self.u_aint_tot()
-            beta = 1.0 / self.T
             ea,eb = self.u_energies_tot()
-            foa = ft_utils.ff(beta, ea, self.mu)
-            fob = ft_utils.ff(beta, eb, self.mu)
+            foa = ft_utils.ff(self.beta, ea, self.mu)
+            fob = ft_utils.ff(self.beta, eb, self.mu)
             E1 = -0.5*numpy.einsum('ijij,i,j->',Va,foa,foa)
             E1 = -0.5*numpy.einsum('ijij,i,j->',Vb,fob,fob)
             E1 = -numpy.einsum('ijij,i,j->',Vabab,foa,fob)
@@ -137,13 +137,12 @@ class HubbardSystem(system):
     def u_d_mp1(self,dveca,dvecb):
         if self.T > 0:
             Va,Vb,Vabab = self.u_aint_tot()
-            beta = 1.0 / self.T
             ea,eb = self.u_energies_tot()
-            foa = ft_utils.ff(beta, ea, self.mu)
-            fva = ft_utils.ffv(beta, ea, self.mu)
+            foa = ft_utils.ff(self.beta, ea, self.mu)
+            fva = ft_utils.ffv(self.beta, ea, self.mu)
             veca = dveca*foa*fva
-            fob = ft_utils.ff(beta, eb, self.mu)
-            fvb = ft_utils.ffv(beta, eb, self.mu)
+            fob = ft_utils.ff(self.beta, eb, self.mu)
+            fvb = ft_utils.ffv(self.beta, eb, self.mu)
             vecb = dvecb*fob*fvb
             Fa,Fb = self.u_fock_tot()
             D = -einsum('ii,i->',Fa - numpy.diag(ea),veca)
@@ -163,10 +162,9 @@ class HubbardSystem(system):
     def g_d_mp1(self,dvec):
         if self.T > 0:
             V = self.g_aint_tot()
-            beta = 1.0 / self.T
             en = self.g_energies_tot()
-            fo = ft_utils.ff(beta, en, self.mu)
-            fv = ft_utils.ffv(beta, en, self.mu)
+            fo = ft_utils.ff(self.beta, en, self.mu)
+            fv = ft_utils.ffv(self.beta, en, self.mu)
             vec = dvec*fo*fv
             F = self.g_fock_tot()
             D = -einsum('ii,i->',F - numpy.diag(en),vec)
@@ -181,7 +179,7 @@ class HubbardSystem(system):
     def u_mp1_den(self):
         if self.T > 0:
             Va,Vb,Vabab = self.u_aint_tot()
-            beta = 1.0 / self.T
+            beta = self.beta
             ea,eb = self.u_energies_tot()
             foa = ft_utils.ff(beta, ea, self.mu)
             fva = ft_utils.ffv(beta, ea, self.mu)
@@ -207,7 +205,7 @@ class HubbardSystem(system):
     def g_mp1_den(self):
         if self.T > 0:
             V = self.g_aint_tot()
-            beta = 1.0 / self.T
+            beta = self.beta
             en = self.g_energies_tot()
             T = self.model.get_tmat()
             Utot = utils.block_diag(self.ua,self.ub)
@@ -218,7 +216,6 @@ class HubbardSystem(system):
             D = -beta*numpy.einsum('ii,i->i',T - numpy.diag(en),vec)
             D += -beta*numpy.einsum('ijij,i,j->i',V,vec,fo)
             return D
-            #return -beta*einsum('ijij,i,j->',V,vec,fo)
         else:
             print("WARNING: Derivative of MP1 energy is zero at OK")
             return 0.0
@@ -336,8 +333,7 @@ class HubbardSystem(system):
         d = self.g_energies_tot()
         n = d.shape[0]
         if self.T > 0.0:
-            beta = 1.0 / self.T
-            fo = ft_utils.ff(beta, d, self.mu)
+            fo = ft_utils.ff(self.beta, d, self.mu)
             I = numpy.identity(n)
             den = numpy.einsum('pi,i,qi->pq',I,fo,I)
         else:
@@ -349,7 +345,6 @@ class HubbardSystem(system):
         V = self.g_aint_tot()
         JK = numpy.einsum('prqs,rs->pq',V,den)
         Utot = utils.block_diag(self.ua,self.ub)
-        #return numpy.einsum('ij,ip,jq->pq',T + JK,Utot,Utot)
         return JK + numpy.einsum('ij,ip,jq->pq',T,Utot,Utot)
 
     def u_fock_tot(self):
@@ -359,9 +354,8 @@ class HubbardSystem(system):
         na = da.shape[0]
         nb = db.shape[0]
         if self.T > 0.0:
-            beta = 1.0 / self.T
-            foa = ft_utils.ff(beta, da, self.mu)
-            fob = ft_utils.ff(beta, db, self.mu)
+            foa = ft_utils.ff(self.beta, da, self.mu)
+            fob = ft_utils.ff(self.beta, db, self.mu)
             Ia = numpy.identity(na)
             Ib = numpy.identity(nb)
             dena = numpy.einsum('pi,i,qi->pq',Ia,foa,Ia)
@@ -397,11 +391,10 @@ class HubbardSystem(system):
         if self.T == 0.0:
             print("WARNING: Occupation derivatives are zero at 0K")
             return numpy.zeros((na,na)),numpy.zeros((nb,nb))
-        beta = 1.0 / self.T
-        foa = ft_utils.ff(beta, da, self.mu)
-        fob = ft_utils.ff(beta, db, self.mu)
-        fva = ft_utils.ffv(beta, da, self.mu)
-        fvb = ft_utils.ffv(beta, db, self.mu)
+        foa = ft_utils.ff(self.beta, da, self.mu)
+        fob = ft_utils.ff(self.beta, db, self.mu)
+        fva = ft_utils.ffv(self.beta, da, self.mu)
+        fvb = ft_utils.ffv(self.beta, db, self.mu)
         veca = dveca*foa*fva
         vecb = dvecb*fob*fvb
         Ia = numpy.identity(na)
@@ -423,9 +416,8 @@ class HubbardSystem(system):
         if self.T == 0.0:
             print("WARNING: Occupations derivatives are zero at 0K")
             return numpy.zeros((n,n))
-        beta = 1.0 / self.T
-        fo = ft_utils.ff(beta, d, self.mu)
-        fv = ft_utils.ffv(beta, d, self.mu)
+        fo = ft_utils.ff(self.beta, d, self.mu)
+        fv = ft_utils.ffv(self.beta, d, self.mu)
         vec = dvec*fo*fv
         I = numpy.identity(n)
         den = einsum('pi,i,qi->pq',I,vec,I)
@@ -443,11 +435,10 @@ class HubbardSystem(system):
                     numpy.zeros((na,na,nb)),
                     numpy.zeros((nb,nb,na)),
                     numpy.zeros((nb,nb,nb)))
-        beta = 1.0 / self.T
-        foa = ft_utils.ff(beta, da, self.mu)
-        fob = ft_utils.ff(beta, db, self.mu)
-        fva = ft_utils.ffv(beta, da, self.mu)
-        fvb = ft_utils.ffv(beta, db, self.mu)
+        foa = ft_utils.ff(self.beta, da, self.mu)
+        fob = ft_utils.ff(self.beta, db, self.mu)
+        fva = ft_utils.ffv(self.beta, da, self.mu)
+        fvb = ft_utils.ffv(self.beta, db, self.mu)
         veca = foa*fva
         vecb = fob*fvb
         Va,Vb,Vabab = self.u_aint_tot()
@@ -463,12 +454,9 @@ class HubbardSystem(system):
         if self.T == 0.0:
             print("WARNING: Occupations derivatives are zero at 0K")
             return numpy.zeros((n,n))
-        beta = 1.0 / self.T
-        fo = ft_utils.ff(beta, d, self.mu)
-        fv = ft_utils.ffv(beta, d, self.mu)
+        fo = ft_utils.ff(self.beta, d, self.mu)
+        fv = ft_utils.ffv(self.beta, d, self.mu)
         vec = fo*fv
-        #I = numpy.identity(n)
-        #den = einsum('pi,i,qi->pq',I,vec,I)
         V = self.g_aint_tot()
         JK = einsum('piqi,i->pqi',V,vec)
         return JK

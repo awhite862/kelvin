@@ -20,6 +20,7 @@ class h2_field_system(system):
         self.m = scf.UHF(mol)
         Escf = self.m.scf()
         self.T = T
+        self.beta = 1/T if T > 0.0 else 1.0e20
         self.mu = mu
         self.omega = omega
         self.ti = ti
@@ -46,9 +47,8 @@ class h2_field_system(system):
         return self.m.mol.energy_nuc()
 
     def get_mp1(self):
-        beta = 1.0 / (self.T + 1e-12)
         en = self.g_energies_tot()
-        fo = ft_utils.ff(beta, en, self.mu)
+        fo = ft_utils.ff(self.beta, en, self.mu)
         E1 = numpy.einsum('ii,i->',self.hcore,fo) - (self.g_energies_tot()*fo).sum()
         E1 += 0.5*numpy.einsum('ijij,i,j->',self.eri,fo,fo)
         E1 -= 0.5*numpy.einsum('ijji,i,j->',self.eri,fo,fo)
@@ -64,9 +64,8 @@ class h2_field_system(system):
     
     def g_fock_tot(self,direc='f'):
         e = self.g_energies_tot()
-        beta = 1.0 / (self.T + 1e-12)
         en = self.g_energies_tot()
-        fo = ft_utils.ff(beta, en, self.mu)
+        fo = ft_utils.ff(self.beta, en, self.mu)
         E = numpy.zeros(3)
         mol = self.m.mol
         mos = self.m.mo_coeff[0]
@@ -87,9 +86,9 @@ class h2_field_system(system):
         if self.O is not None:
             delta = ti[ot] - ti[ot - 1] #if ot > 0 else ti[ot + 1] - ti[ot]
         if direc == 'f' and self.O is not None:
-            Fock[self.ot,:,:] += -1.j*beta*self.O/delta
+            Fock[self.ot,:,:] += -1.j*self.beta*self.O/delta
         elif direc == 'b'and self.O is not None:
-            Fock[self.ot,:,:] -= -0.j*beta*self.O/delta
+            Fock[self.ot,:,:] -= -0.j*self.beta*self.O/delta
 
         if direc == 'b':
             temp = Fock.copy()

@@ -23,6 +23,7 @@ class h2_pol_system(system):
         mos = self.m.mo_coeff[0]
         self.eri = integrals.get_phys(mol, mos, mos, mos, mos)
         self.hcore = numpy.einsum('mp,mn,nq->pq',mos,self.m.get_hcore(mol),mos)
+        self.beta = 1.0 / self.T if self.T > 0.0 else 1.0e20
 
     def verify(self,T,mu):
         if not (T == self.T and mu == self.mu):
@@ -40,9 +41,8 @@ class h2_pol_system(system):
         return self.m.mol.energy_nuc()
 
     def get_mp1(self):
-        beta = 1.0 / self.T if self.T > 0.0 else 1.0e20
         en = self.g_energies_tot()
-        fo = ft_utils.ff(beta, en, self.mu)
+        fo = ft_utils.ff(self.beta, en, self.mu)
         E1 = numpy.einsum('ii,i->',self.hcore,fo) - (self.g_energies_tot()*fo).sum()
         E1 += 0.5*numpy.einsum('ijij,i,j->',self.eri,fo,fo)
         E1 -= 0.5*numpy.einsum('ijji,i,j->',self.eri,fo,fo)
@@ -55,9 +55,8 @@ class h2_pol_system(system):
     
     def g_fock_tot(self):
         e = self.g_energies_tot()
-        beta = 1.0 / (self.T + 1e-12)
         en = self.g_energies_tot()
-        fo = ft_utils.ff(beta, en, self.mu)
+        fo = ft_utils.ff(self.beta, en, self.mu)
         F = self.hcore + \
             (self.eri[:,0,:,0] - self.eri[:,0,0,:])*fo[0] +\
             (self.eri[:,1,:,1] - self.eri[:,1,1,:])*fo[1]

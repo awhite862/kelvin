@@ -35,12 +35,12 @@ class TDCCSD(object):
         if not sys.verify(self.T,self.mu):
             raise Exception("Sytem temperature inconsistent with CC temp")
         if self.finite_T:
-            beta_max = 1.0/(T + 1e-12)
+            beta = 1.0/T
         else:
-            beta_max = 80
-        self._beta_max = 80
+            beta = 80
+        self.beta = beta
         ng = self.ngrid
-        self.ti,self.g,G = quadrature.ft_quad(self.ngrid,beta_max,self.quad)
+        self.ti,self.g,G = quadrature.ft_quad(self.ngrid,beta,self.quad)
         self.sys = sys
         self.dia = None
         self.dba = None
@@ -86,7 +86,7 @@ class TDCCSD(object):
         return d1,d2
 
     def _ccsd(self):
-        beta = 1.0 / self.T if self.finite_T else self._beta_max
+        beta = self.beta
         mu = self.mu if self.finite_T else None
 
         # get time-grid
@@ -213,7 +213,7 @@ class TDCCSD(object):
         if self.T1 is None or self.T2 is None:
             raise Exception("No saved T-amplitudes")
 
-        beta = 1.0 / self.T if self.finite_T else self._beta_max
+        beta = self.beta#1.0 / self.T if self.finite_T else self._beta_max
         mu = self.mu if self.finite_T else None
         propT = False if self.saveT else True
 

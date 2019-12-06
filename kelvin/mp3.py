@@ -20,8 +20,11 @@ class mp3(object):
         self.iprint = iprint
         self.finite_T = False if T == 0 else True
         if self.finite_T:
+            self.beta = 1/T
             if not sys.verify(self.T,self.mu):
                 raise Exception("Sytem temperature inconsistent with MP2 temp")
+        else:
+            self.beta = 1.0e20
         self.sys = sys
 
     def run(self):
@@ -76,15 +79,12 @@ class mp3(object):
         return (E0,E1,E2,E3)
 
     def _ft_mp3(self):
-        T = self.T
-        assert(T > 0.0)
-        beta = 1.0 / T
         mu = self.mu
 
         # get energies and occupation numbers
         en = self.sys.g_energies_tot()
-        fo = ft_utils.ff(beta, en, mu)
-        fv = ft_utils.ffv(beta, en, mu)
+        fo = ft_utils.ff(self.beta, en, mu)
+        fv = ft_utils.ffv(self.beta, en, mu)
 
         # compute requisite memory
         n = en.shape[0]
@@ -97,7 +97,7 @@ class mp3(object):
 
         # compute zero order quantities 
         En = self.sys.const_energy()
-        g0 = ft_utils.GP0(beta, en, mu)
+        g0 = ft_utils.GP0(self.beta, en, mu)
         E0 = ft_mp.mp0(g0) + En
 
         # get FT Fock matrix 
