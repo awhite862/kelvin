@@ -14,9 +14,9 @@ from . import propagation
 class TDCCSD(object):
     """Real-time coupled cluster singles and doubles (CCSD) driver.
     """
-    def __init__(self, sys, T=0.0, mu=0.0, iprint=0,
+    def __init__(self, sys, prop, T=0.0, mu=0.0, iprint=0,
         singles=True, econv=1e-8, tconv=None, max_iter=40,
-        damp=0.0, ngrid=10, athresh=0.0, quad='lin', prop="rk4", saveT=False):
+        damp=0.0, ngrid=10, athresh=0.0, quad='lin', saveT=False):
 
         self.T = T
         self.mu = mu
@@ -60,30 +60,56 @@ class TDCCSD(object):
         return self._ccsd()
 
     def _get_t_step(self, h, t1, t2, fRHS):
-        if self.prop == "rk1":
+        if self.prop["tprop"] == "rk1":
             d1,d2 = propagation.rk1(h, [t1, t2], fRHS)
-        elif self.prop == "rk2":
+        elif self.prop["tprop"] == "rk2":
             d1,d2 = propagation.rk2(h, [t1, t2], (fRHS,fRHS))
-        elif self.prop == "rk4":
+        elif self.prop["tprop"] == "rk4":
             d1,d2 = propagation.rk4(h, [t1, t2], (fRHS,fRHS,fRHS,fRHS))
-        elif self.prop == "cn":
-            mi = 200
-            alpha = 0.8
-            thresh = 1e-5
+        elif self.prop["tprop"] == "cn":
+            mi = self.prop["max_iter"]
+            alpha = self.prop["damp"]
+            thresh = self.prop["thresh"]
             d1, d2 = propagation.cn(h, [t1, t2], mi, alpha, thresh, (fRHS,fRHS), self.iprint)
-        elif self.prop == "be":
-            mi = 100
-            alpha = 0.4
-            thresh = 1e-5
+        elif self.prop["tprop"] == "be":
+            mi = self.prop["max_iter"]
+            alpha = self.prop["damp"]
+            thresh = self.prop["thresh"]
             d1,d2 = propagation.be(h, [t1, t2], mi, alpha, thresh, fRHS, self.iprint)
-        elif self.prop == "am2":
-            mi = 100
-            alpha = 0.6
-            thresh = 1e-5
+        elif self.prop["tprop"] == "am2":
+            mi = self.prop["max_iter"]
+            alpha = self.prop["damp"]
+            thresh = self.prop["thresh"]
             d1,d2 = propagation.am2(h, [t1, t2], mi, alpha, thresh, fRHS, self.iprint)
         else:
             raise Exception("Unrecognized propagation scheme: " + self.prop)
         return d1,d2
+
+    def _get_l_step(self, h, l1, l2, t1b, t2b, t1e, t2e, fLRHS):
+        if self.prop["lprop"] == "rk1":
+            LRHS = lambda var: fLRHS(t1b, t2b, var)
+            ld1,ld2 = propagation.rk1(h, [l1, l2], LRHS)
+        elif self.prop["lprop"] == "rk2":
+            LRHS1 = lambda var: fLRHS(t1b, t2b, var)
+            LRHS2 = lambda var: fLRHS(t1e, t2e, var)
+            ld1,ld2 = propagation.rk2(h, [l1, l2], (LRHS1, LRHS2))
+        elif self.prop["lprop"] == "rk4":
+            t1x = 0.5*(t1b + t1e)
+            t2x = 0.5*(t2b + t2e)
+            LRHS1 = lambda var: fLRHS(t1b, t2b, var)
+            LRHS23 = lambda var: fLRHS(t1x, t2x, var)
+            LRHS4 = lambda var: fLRHS(t1e, t2e, var)
+            ld1, ld2 = propagation.rk4(h, [l1, l2], (LRHS1, LRHS23, LRHS23, LRHS4))
+        elif self.prop["lprop"] == "cn":
+            mi = self.prop["max_iter"]
+            alpha = self.prop["damp"]
+            thresh = self.prop["thresh"]
+            LRHS1 = lambda var: fLRHS(t1b, t2b, var)
+            LRHS2 = lambda var: fLRHS(t1e, t2e, var)
+            ld1, ld2 = propagation.cn(h, [l1, l2], mi, alpha, thresh, (LRHS1,LRHS2), self.iprint)
+        else:
+            raise Exception("Unrecognized propagation scheme: " + self.prop)
+        return ld1, ld2
 
     def _ccsd(self):
         beta = self.beta
@@ -339,37 +365,9 @@ class TDCCSD(object):
             else:
                 t1e = self.T1[ng - i - 1]
                 t2e = self.T2[ng - i - 1]
-            if self.prop == "rk1":
-                LRHS = lambda var: fLRHS(t1b, t2b, var)
-                dl1,dl2 = propagation.rk1(h, [l1, l2], LRHS)
-                l1 += dl1
-                l2 += dl2
-            elif self.prop == "rk2":
-                LRHS1 = lambda var: fLRHS(t1b, t2b, var)
-                LRHS2 = lambda var: fLRHS(t1e, t2e, var)
-                dl1,dl2 = propagation.rk2(h, [l1, l2], (LRHS1, LRHS2))
-                l1 += dl1
-                l2 += dl2
-            elif self.prop == "rk4":
-                t1x = 0.5*(t1b + t1e)
-                t2x = 0.5*(t2b + t2e)
-                LRHS1 = lambda var: fLRHS(t1b, t2b, var)
-                LRHS23 = lambda var: fLRHS(t1x, t2x, var)
-                LRHS4 = lambda var: fLRHS(t1e, t2e, var)
-                ld1, ld2 = propagation.rk4(h, [l1, l2], (LRHS1, LRHS23, LRHS23, LRHS4))
-                l1 += ld1
-                l2 += ld2
-            elif self.prop == "cn":
-                mi = 200
-                alpha = 0.8
-                thresh = 1e-5
-                LRHS1 = lambda var: fLRHS(t1b, t2b, var)
-                LRHS2 = lambda var: fLRHS(t1e, t2e, var)
-                ld1, ld2 = propagation.cn(h, [l1, l2], mi, alpha, thresh, (LRHS1,LRHS2), self.iprint)
-                l1 += ld1
-                l2 += ld2
-            else:
-                raise Exception("Unrecognized propagation scheme: " + self.prop)
+            ld1, ld2 = self._get_l_step(h, l1, l2, t1b, t2b, t1e, t2e, fLRHS)
+            l1 += ld1
+            l2 += ld2
             Eccn += g[ng - i - 1]*cc_energy(t1e, t2e, F.ov, I.oovv)/beta
 
             # increment the RDMs

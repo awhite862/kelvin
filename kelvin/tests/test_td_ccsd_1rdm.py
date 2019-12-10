@@ -25,7 +25,8 @@ class TDCCSD1RDMTest(unittest.TestCase):
         ccsdT._g_ft_1rdm()
 
         # compute normal-order 1-rdm from propagation
-        tdccsdT = TDCCSD(sys, T=T, mu=mu, ngrid=160, prop="rk1")
+        prop = {"tprop" : "rk1", "lprop" : "rk1"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
         Eout,Eccout = tdccsdT.run()
         Etmp,Ecctmp = tdccsdT._ccsd_lambda()
         eia = numpy.linalg.norm(ccsdT.dia - tdccsdT.dia)
@@ -60,7 +61,8 @@ class TDCCSD1RDMTest(unittest.TestCase):
         ccsdT._g_ft_1rdm()
 
         # compute normal-order 1-rdm from propagation
-        tdccsdT = TDCCSD(sys, T=T, mu=mu, ngrid=160, prop="rk2")
+        prop = {"tprop" : "rk2", "lprop" : "rk2"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
         Eout,Eccout = tdccsdT.run()
         Etmp,Ecctmp = tdccsdT._ccsd_lambda()
         eia = numpy.linalg.norm(ccsdT.dia - tdccsdT.dia)
@@ -95,7 +97,8 @@ class TDCCSD1RDMTest(unittest.TestCase):
         ccsdT._g_ft_1rdm()
 
         # compute normal-order 1-rdm from propagation
-        tdccsdT = TDCCSD(sys, T=T, mu=mu, ngrid=160, prop="rk4")
+        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
         Eout,Eccout = tdccsdT.run()
         Etmp,Ecctmp = tdccsdT._ccsd_lambda()
         eia = numpy.linalg.norm(ccsdT.dia - tdccsdT.dia)
@@ -130,17 +133,14 @@ class TDCCSD1RDMTest(unittest.TestCase):
         ccsdT._g_ft_1rdm()
 
         # compute normal-order 1-rdm from propagation
-        tdccsdT = TDCCSD(sys, T=T, mu=mu, ngrid=640, prop="rk4", athresh = 1e-20, saveT=True)
+        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=640, athresh = 1e-20, saveT=True)
         Eout,Eccout = tdccsdT.run()
         Etmp,Ecctmp = tdccsdT._ccsd_lambda()
         eia = numpy.linalg.norm(ccsdT.dia - tdccsdT.dia)
         eji = numpy.linalg.norm(ccsdT.dji - tdccsdT.dji)
         eba = numpy.linalg.norm(ccsdT.dba - tdccsdT.dba)
         eai = numpy.linalg.norm(ccsdT.dai - tdccsdT.dai)
-        #print(eia)
-        #print(eji)
-        #print(eba)
-        #print(eai)
         erroria = "Difference in pia: {}".format(eia)
         errorji = "Difference in pji: {}".format(eji)
         errorba = "Difference in pba: {}".format(eba)

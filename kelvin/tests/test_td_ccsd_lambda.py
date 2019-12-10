@@ -22,7 +22,8 @@ class TDCCSDLambdaTest(unittest.TestCase):
         T = 0.5
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
-        tdccsdT = TDCCSD(sys, T=T, mu=mu, ngrid=120, prop="rk4")
+        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=120)
         Eref,Eccref = tdccsdT.run()
         Eout,Eccout = tdccsdT._ccsd_lambda()
         diff = abs(Eccref - Eccout)
@@ -41,7 +42,8 @@ class TDCCSDLambdaTest(unittest.TestCase):
         T = 0.05
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
-        tdccsdT = TDCCSD(sys, T=T, mu=mu, ngrid=160, prop="rk4", athresh=1e-20, iprint=0, saveT=True)
+        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160, athresh=1e-20, iprint=0, saveT=True)
         Eref,Eccref = tdccsdT.run()
         Eout,Eccout = tdccsdT._ccsd_lambda()
         diff = abs(Eccref - Eccout)
@@ -79,7 +81,8 @@ class TDCCSDLambdaTest(unittest.TestCase):
         L2new = quadrature.int_L2(ng,L2,ti,D2,g,G)
 
         # compute \bar{Lambda} from propagation using rk1
-        tdccsdT = TDCCSD(sys, T=T, mu=mu, ngrid=160, prop="rk1")
+        prop = {"tprop" : "rk1", "lprop" : "rk1"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
         Eout,Eccout = tdccsdT.run()
         Etmp,Ecctmp = tdccsdT._ccsd_lambda()
         d1 = numpy.linalg.norm(tdccsdT.L1 - L1new[0])/numpy.sqrt(L1new[0].size)
@@ -120,7 +123,8 @@ class TDCCSDLambdaTest(unittest.TestCase):
         L2new = quadrature.int_L2(ng,L2,ti,D2,g,G)
 
         # compute \bar{Lambda} from propagation using rk1
-        tdccsdT = TDCCSD(sys, T=T, mu=mu, ngrid=80, prop="rk4")
+        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80)
         Eout,Eccout = tdccsdT.run()
         Etmp,Ecctmp = tdccsdT._ccsd_lambda()
         d1 = numpy.linalg.norm(tdccsdT.L1 - L1new[0])/numpy.sqrt(L1new[0].size)
@@ -161,7 +165,8 @@ class TDCCSDLambdaTest(unittest.TestCase):
         L2new = quadrature.int_L2(ng,L2,ti,D2,g,G)
 
         # compute \bar{Lambda} from propagation using rk1
-        tdccsdT = TDCCSD(sys, T=T, mu=mu, ngrid=80, prop="cn")
+        prop = {"tprop" : "cn", "lprop" : "cn", "max_iter" : 200, "damp" : 0.3, "thresh" : 1e-5}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80)
         Eout,Eccout = tdccsdT.run()
         Etmp,Ecctmp = tdccsdT._ccsd_lambda()
         d1 = numpy.linalg.norm(tdccsdT.L1 - L1new[0])/numpy.sqrt(L1new[0].size)
@@ -183,13 +188,16 @@ class TDCCSDLambdaTest(unittest.TestCase):
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
 
-        tdccsdT4 = TDCCSD(sys, T=T, mu=mu, ngrid=320, prop="rk4")
+        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        tdccsdT4 = TDCCSD(sys, prop, T=T, mu=mu, ngrid=320)
         Eout,Eccout = tdccsdT4.run()
         Etmp,Ecctmp = tdccsdT4._ccsd_lambda()
-        tdccsdT2 = TDCCSD(sys, T=T, mu=mu, ngrid=2400, prop="rk2")
+        prop = {"tprop" : "rk2", "lprop" : "rk2"}
+        tdccsdT2 = TDCCSD(sys, prop, T=T, mu=mu, ngrid=2400)
         Eout,Eccout = tdccsdT2.run()
         Etmp,Ecctmp = tdccsdT2._ccsd_lambda()
-        tdccsdT1 = TDCCSD(sys, T=T, mu=mu, ngrid=2400, prop="rk1")
+        prop = {"tprop" : "rk1", "lprop" : "rk1"}
+        tdccsdT1 = TDCCSD(sys, prop, T=T, mu=mu, ngrid=2400)
         Eout,Eccout = tdccsdT1.run()
         Etmp,Ecctmp = tdccsdT1._ccsd_lambda()
         d1_14 = numpy.linalg.norm(tdccsdT4.L1 - tdccsdT1.L1)/numpy.sqrt(tdccsdT1.L1.size)
@@ -219,10 +227,11 @@ class TDCCSDLambdaTest(unittest.TestCase):
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
 
-        ccP = TDCCSD(sys, T=T, mu=mu, ngrid=320, prop="rk4")
+        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        ccP = TDCCSD(sys, prop, T=T, mu=mu, ngrid=320)
         Eout,Eccout = ccP.run()
         Etmp,Ecctmp = ccP._ccsd_lambda()
-        ccS = TDCCSD(sys, T=T, mu=mu, ngrid=320, prop="rk4", saveT=True)
+        ccS = TDCCSD(sys, prop, T=T, mu=mu, ngrid=320, saveT=True)
         Eout,Eccout = ccS.run()
         Etmp,Ecctmp = ccS._ccsd_lambda()
         d1 = numpy.linalg.norm(ccS.L1 - ccP.L1)/numpy.sqrt(ccS.L1.size)
