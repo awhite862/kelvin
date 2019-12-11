@@ -112,13 +112,13 @@ class mp2(object):
 
         # compute second order energy
         if self.saveT:
-            E2,T1n,T2n,T1a,T2a = ft_mp.mp2_sep(en, fo, fmo, eri, T, returnT=True)
+            E2,T1n,T2n,T1a,T2a = ft_mp.mp2_sep(en, fo, fmo, eri, self.T, returnT=True)
             self.T1n = T1n
             self.T1a = T1a
             self.T2n = T2n
             self.T2a = T2a
         else:
-            E2 = ft_mp.mp2(en, fo, fmo, eri, T)
+            E2 = ft_mp.mp2(en, fo, fmo, eri, self.T)
 
         # save a return energies
         self.E0 = E0

@@ -1309,3 +1309,494 @@ def uft_d_active_integrals(
                 oooo=Ioooo)
 
         return Fa,Fb,Ia,Ib,Iabab
+
+def g_n2rdm_full(beta, sfo, sfv, P2):
+    n2rdm = (1.0/beta)*einsum('cdab,c,d,a,b->cdab',P2[0],sfv,sfv,sfv,sfv)
+    n2rdm += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',P2[1],sfv,sfo,sfv,sfv)
+    n2rdm -= (1.0/beta)*einsum('ciab,c,i,a,b->icab',P2[1],sfv,sfo,sfv,sfv)
+    n2rdm += (1.0/beta)*einsum('bcai,b,c,a,i->bcai',P2[2],sfv,sfv,sfv,sfo)
+    n2rdm -= (1.0/beta)*einsum('bcai,b,c,a,i->bcia',P2[2],sfv,sfv,sfv,sfo)
+    n2rdm += (1.0/beta)*einsum('ijab,i,j,a,b->ijab',P2[3],sfo,sfo,sfv,sfv)
+    n2rdm += (1.0/beta)*einsum('bjai,b,j,a,i->bjai',P2[4],sfv,sfo,sfv,sfo)
+    n2rdm -= (1.0/beta)*einsum('bjai,b,j,a,i->bjia',P2[4],sfv,sfo,sfv,sfo)
+    n2rdm -= (1.0/beta)*einsum('bjai,b,j,a,i->jbai',P2[4],sfv,sfo,sfv,sfo)
+    n2rdm += (1.0/beta)*einsum('bjai,b,j,a,i->jbia',P2[4],sfv,sfo,sfv,sfo)
+    n2rdm += (1.0/beta)*einsum('abij,a,b,i,j->abij',P2[5],sfv,sfv,sfo,sfo)
+    n2rdm += (1.0/beta)*einsum('jkai,j,k,a,i->jkai',P2[6],sfo,sfo,sfv,sfo)
+    n2rdm -= (1.0/beta)*einsum('jkai,j,k,a,i->jkia',P2[6],sfo,sfo,sfv,sfo)
+    n2rdm += (1.0/beta)*einsum('kaij,k,a,i,j->kaij',P2[7],sfo,sfv,sfo,sfo)
+    n2rdm -= (1.0/beta)*einsum('kaij,k,a,i,j->akij',P2[7],sfo,sfv,sfo,sfo)
+    n2rdm += (1.0/beta)*einsum('klij,k,l,i,j->klij',P2[8],sfo,sfo,sfo,sfo)
+    return n2rdm
+
+def g_n2rdm_full_active(beta, n, iocc, ivir, sfo, sfv, P2):
+    n2rdm = numpy.zeros((n,n,n,n))
+    n2rdm[numpy.ix_(ivir,ivir,ivir,ivir)] += \
+       (1.0/beta)*einsum('cdab,c,d,a,b->cdab',P2[0],sfv,sfv,sfv,sfv)
+    n2rdm[numpy.ix_(ivir,iocc,ivir,ivir)] += \
+       (1.0/beta)*einsum('ciab,c,i,a,b->ciab',P2[1],sfv,sfo,sfv,sfv)
+    n2rdm[numpy.ix_(iocc,ivir,ivir,ivir)] -= \
+       (1.0/beta)*einsum('ciab,c,i,a,b->icab',P2[1],sfv,sfo,sfv,sfv)
+    n2rdm[numpy.ix_(ivir,ivir,ivir,iocc)] += \
+       (1.0/beta)*einsum('bcai,b,c,a,i->bcai',P2[2],sfv,sfv,sfv,sfo)
+    n2rdm[numpy.ix_(ivir,ivir,iocc,ivir)] -= \
+       (1.0/beta)*einsum('bcai,b,c,a,i->bcia',P2[2],sfv,sfv,sfv,sfo)
+    n2rdm[numpy.ix_(iocc,iocc,ivir,ivir)] += \
+       (1.0/beta)*einsum('ijab,i,j,a,b->ijab',P2[3],sfo,sfo,sfv,sfv)
+    n2rdm[numpy.ix_(ivir,iocc,ivir,iocc)] += \
+       (1.0/beta)*einsum('bjai,b,j,a,i->bjai',P2[4],sfv,sfo,sfv,sfo)
+    n2rdm[numpy.ix_(ivir,iocc,iocc,ivir)] -= \
+       (1.0/beta)*einsum('bjai,b,j,a,i->bjia',P2[4],sfv,sfo,sfv,sfo)
+    n2rdm[numpy.ix_(iocc,ivir,ivir,iocc)] -= \
+       (1.0/beta)*einsum('bjai,b,j,a,i->jbai',P2[4],sfv,sfo,sfv,sfo)
+    n2rdm[numpy.ix_(iocc,ivir,iocc,ivir)] += \
+       (1.0/beta)*einsum('bjai,b,j,a,i->jbia',P2[4],sfv,sfo,sfv,sfo)
+    n2rdm[numpy.ix_(ivir,ivir,iocc,iocc)] += \
+       (1.0/beta)*einsum('abij,a,b,i,j->abij',P2[5],sfv,sfv,sfo,sfo)
+    n2rdm[numpy.ix_(iocc,iocc,ivir,iocc)] += \
+       (1.0/beta)*einsum('jkai,j,k,a,i->jkai',P2[6],sfo,sfo,sfv,sfo)
+    n2rdm[numpy.ix_(iocc,iocc,iocc,ivir)] -= \
+       (1.0/beta)*einsum('jkai,j,k,a,i->jkia',P2[6],sfo,sfo,sfv,sfo)
+    n2rdm[numpy.ix_(iocc,ivir,iocc,iocc)] += \
+       (1.0/beta)*einsum('kaij,k,a,i,j->kaij',P2[7],sfo,sfv,sfo,sfo)
+    n2rdm[numpy.ix_(ivir,iocc,iocc,iocc)] -= \
+       (1.0/beta)*einsum('kaij,k,a,i,j->akij',P2[7],sfo,sfv,sfo,sfo)
+    n2rdm[numpy.ix_(iocc,iocc,iocc,iocc)] += \
+       (1.0/beta)*einsum('klij,k,l,i,j->klij',P2[8],sfo,sfo,sfo,sfo)
+    return n2rdm
+
+def u_n2rdm_full(beta, sfoa, sfva, sfob, sfvb, P2):
+    na = sfoa.size
+    nb = sfob.size
+    P2aa = numpy.zeros((na,na,na,na))
+    P2aa += (1.0/beta)*einsum('cdab,c,d,a,b->cdab',P2[0][0],sfva,sfva,sfva,sfva)
+    P2aa += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',P2[1][0],sfva,sfoa,sfva,sfva)
+    P2aa -= (1.0/beta)*einsum('ciab,c,i,a,b->icab',P2[1][0],sfva,sfoa,sfva,sfva)
+    P2aa += (1.0/beta)*einsum('bcai,b,c,a,i->bcai',P2[2][0],sfva,sfva,sfva,sfoa)
+    P2aa -= (1.0/beta)*einsum('bcai,b,c,a,i->bcia',P2[2][0],sfva,sfva,sfva,sfoa)
+    P2aa += (1.0/beta)*einsum('ijab,i,j,a,b->ijab',P2[3][0],sfoa,sfoa,sfva,sfva)
+    P2aa += (1.0/beta)*einsum('bjai,b,j,a,i->bjai',P2[4][0],sfva,sfoa,sfva,sfoa)
+    P2aa -= (1.0/beta)*einsum('bjai,b,j,a,i->bjia',P2[4][0],sfva,sfoa,sfva,sfoa)
+    P2aa -= (1.0/beta)*einsum('bjai,b,j,a,i->jbai',P2[4][0],sfva,sfoa,sfva,sfoa)
+    P2aa += (1.0/beta)*einsum('bjai,b,j,a,i->jbia',P2[4][0],sfva,sfoa,sfva,sfoa)
+    P2aa += (1.0/beta)*einsum('abij,a,b,i,j->abij',P2[5][0],sfva,sfva,sfoa,sfoa)
+    P2aa += (1.0/beta)*einsum('jkai,j,k,a,i->jkai',P2[6][0],sfoa,sfoa,sfva,sfoa)
+    P2aa -= (1.0/beta)*einsum('jkai,j,k,a,i->jkia',P2[6][0],sfoa,sfoa,sfva,sfoa)
+    P2aa += (1.0/beta)*einsum('kaij,k,a,i,j->kaij',P2[7][0],sfoa,sfva,sfoa,sfoa)
+    P2aa -= (1.0/beta)*einsum('kaij,k,a,i,j->akij',P2[7][0],sfoa,sfva,sfoa,sfoa)
+    P2aa += (1.0/beta)*einsum('klij,k,l,i,j->klij',P2[8][0],sfoa,sfoa,sfoa,sfoa)
+
+    P2bb = numpy.zeros((nb,nb,nb,nb))
+    P2bb += (1.0/beta)*einsum('cdab,c,d,a,b->cdab',P2[0][1],sfvb,sfvb,sfvb,sfvb)
+    P2bb += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',P2[1][1],sfvb,sfob,sfvb,sfvb)
+    P2bb -= (1.0/beta)*einsum('ciab,c,i,a,b->icab',P2[1][1],sfvb,sfob,sfvb,sfvb)
+    P2bb += (1.0/beta)*einsum('bcai,b,c,a,i->bcai',P2[2][1],sfvb,sfvb,sfvb,sfob)
+    P2bb -= (1.0/beta)*einsum('bcai,b,c,a,i->bcia',P2[2][1],sfvb,sfvb,sfvb,sfob)
+    P2bb += (1.0/beta)*einsum('ijab,i,j,a,b->ijab',P2[3][1],sfob,sfob,sfvb,sfvb)
+    P2bb += (1.0/beta)*einsum('bjai,b,j,a,i->bjai',P2[4][1],sfvb,sfob,sfvb,sfob)
+    P2bb -= (1.0/beta)*einsum('bjai,b,j,a,i->bjia',P2[4][1],sfvb,sfob,sfvb,sfob)
+    P2bb -= (1.0/beta)*einsum('bjai,b,j,a,i->jbai',P2[4][1],sfvb,sfob,sfvb,sfob)
+    P2bb += (1.0/beta)*einsum('bjai,b,j,a,i->jbia',P2[4][1],sfvb,sfob,sfvb,sfob)
+    P2bb += (1.0/beta)*einsum('abij,a,b,i,j->abij',P2[5][1],sfvb,sfvb,sfob,sfob)
+    P2bb += (1.0/beta)*einsum('jkai,j,k,a,i->jkai',P2[6][1],sfob,sfob,sfvb,sfob)
+    P2bb -= (1.0/beta)*einsum('jkai,j,k,a,i->jkia',P2[6][1],sfob,sfob,sfvb,sfob)
+    P2bb += (1.0/beta)*einsum('kaij,k,a,i,j->kaij',P2[7][1],sfob,sfvb,sfob,sfob)
+    P2bb -= (1.0/beta)*einsum('kaij,k,a,i,j->akij',P2[7][1],sfob,sfvb,sfob,sfob)
+    P2bb += (1.0/beta)*einsum('klij,k,l,i,j->klij',P2[8][1],sfob,sfob,sfob,sfob)
+
+    P2ab = numpy.zeros((na,nb,na,nb))
+    P2ab += (1.0/beta)*einsum('cdab,c,d,a,b->cdab',P2[0][2],sfva,sfvb,sfva,sfvb)
+    P2ab += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',P2[1][2],sfva,sfob,sfva,sfvb)
+    P2ab += (1.0/beta)*einsum('bcai,b,c,a,i->bcai',P2[2][2],sfva,sfvb,sfva,sfob)
+    P2ab += (1.0/beta)*einsum('ijab,i,j,a,b->ijab',P2[3][2],sfoa,sfob,sfva,sfvb)
+    P2ab += (1.0/beta)*einsum('bjai,b,j,a,i->bjai',P2[4][2],sfva,sfob,sfva,sfob)
+    P2ab += (1.0/beta)*einsum('abij,a,b,i,j->abij',P2[5][2],sfva,sfvb,sfoa,sfob)
+    P2ab += (1.0/beta)*einsum('jkai,j,k,a,i->jkai',P2[6][2],sfoa,sfob,sfva,sfob)
+    P2ab += (1.0/beta)*einsum('kaij,k,a,i,j->kaij',P2[7][2],sfoa,sfvb,sfoa,sfob)
+    P2ab += (1.0/beta)*einsum('klij,k,l,i,j->klij',P2[8][2],sfoa,sfob,sfoa,sfob)
+
+    P2ab += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',P2[1][3],sfvb,sfoa,sfvb,sfva).transpose((1,0,3,2))
+    P2ab += (1.0/beta)*einsum('bcai,b,c,a,i->bcai',P2[2][3],sfvb,sfva,sfvb,sfoa).transpose((1,0,3,2))
+
+    P2ab += (1.0/beta)*einsum('jkai,j,k,a,i->jkai',P2[6][3],sfob,sfoa,sfvb,sfoa).transpose((1,0,3,2))
+    P2ab += (1.0/beta)*einsum('kaij,k,a,i,j->kaij',P2[7][3],sfob,sfva,sfob,sfoa).transpose((1,0,3,2))
+
+    P2ab -= (1.0/beta)*einsum('bjai,b,j,a,i->bjai',P2[4][3],sfva,sfob,sfvb,sfoa).transpose((0,1,3,2))
+    P2ab -= (1.0/beta)*einsum('bjai,b,j,a,i->bjai',P2[4][4],sfvb,sfoa,sfva,sfob).transpose((1,0,2,3))
+    P2ab += (1.0/beta)*einsum('bjai,b,j,a,i->bjai',P2[4][5],sfvb,sfoa,sfvb,sfoa).transpose((1,0,3,2))
+    return (P2aa, P2bb, P2ab)
+
+def u_n2rdm_full_active(beta, na, nb, iocca, ivira, ioccb, ivirb, sfoa, sfva, sfob, sfvb, P2):
+    P2aa = numpy.zeros((na,na,na,na))
+    P2aa[numpy.ix_(ivira,ivira,ivira,ivira)] += (1.0/beta)*einsum('cdab,c,d,a,b->cdab',P2[0][0],sfva,sfva,sfva,sfva)
+    P2aa[numpy.ix_(ivira,iocca,ivira,ivira)] += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',P2[1][0],sfva,sfoa,sfva,sfva)
+    P2aa[numpy.ix_(iocca,ivira,ivira,ivira)] -= (1.0/beta)*einsum('ciab,c,i,a,b->icab',P2[1][0],sfva,sfoa,sfva,sfva)
+    P2aa[numpy.ix_(ivira,ivira,ivira,iocca)] += (1.0/beta)*einsum('bcai,b,c,a,i->bcai',P2[2][0],sfva,sfva,sfva,sfoa)
+    P2aa[numpy.ix_(ivira,ivira,iocca,ivira)] -= (1.0/beta)*einsum('bcai,b,c,a,i->bcia',P2[2][0],sfva,sfva,sfva,sfoa)
+    P2aa[numpy.ix_(iocca,iocca,ivira,ivira)] += (1.0/beta)*einsum('ijab,i,j,a,b->ijab',P2[3][0],sfoa,sfoa,sfva,sfva)
+    P2aa[numpy.ix_(ivira,iocca,ivira,iocca)] += (1.0/beta)*einsum('bjai,b,j,a,i->bjai',P2[4][0],sfva,sfoa,sfva,sfoa)
+    P2aa[numpy.ix_(ivira,iocca,iocca,ivira)] -= (1.0/beta)*einsum('bjai,b,j,a,i->bjia',P2[4][0],sfva,sfoa,sfva,sfoa)
+    P2aa[numpy.ix_(iocca,ivira,ivira,iocca)] -= (1.0/beta)*einsum('bjai,b,j,a,i->jbai',P2[4][0],sfva,sfoa,sfva,sfoa)
+    P2aa[numpy.ix_(iocca,ivira,iocca,ivira)] += (1.0/beta)*einsum('bjai,b,j,a,i->jbia',P2[4][0],sfva,sfoa,sfva,sfoa)
+    P2aa[numpy.ix_(ivira,ivira,iocca,iocca)] += (1.0/beta)*einsum('abij,a,b,i,j->abij',P2[5][0],sfva,sfva,sfoa,sfoa)
+    P2aa[numpy.ix_(iocca,iocca,ivira,iocca)] += (1.0/beta)*einsum('jkai,j,k,a,i->jkai',P2[6][0],sfoa,sfoa,sfva,sfoa)
+    P2aa[numpy.ix_(iocca,iocca,iocca,ivira)] -= (1.0/beta)*einsum('jkai,j,k,a,i->jkia',P2[6][0],sfoa,sfoa,sfva,sfoa)
+    P2aa[numpy.ix_(iocca,ivira,iocca,iocca)] += (1.0/beta)*einsum('kaij,k,a,i,j->kaij',P2[7][0],sfoa,sfva,sfoa,sfoa)
+    P2aa[numpy.ix_(ivira,iocca,iocca,iocca)] -= (1.0/beta)*einsum('kaij,k,a,i,j->akij',P2[7][0],sfoa,sfva,sfoa,sfoa)
+    P2aa[numpy.ix_(iocca,iocca,iocca,iocca)] += (1.0/beta)*einsum('klij,k,l,i,j->klij',P2[8][0],sfoa,sfoa,sfoa,sfoa)
+
+    P2bb = numpy.zeros((nb,nb,nb,nb))
+    P2bb[numpy.ix_(ivirb,ivirb,ivirb,ivirb)] += (1.0/beta)*einsum('cdab,c,d,a,b->cdab',P2[0][1],sfvb,sfvb,sfvb,sfvb)
+    P2bb[numpy.ix_(ivirb,ioccb,ivirb,ivirb)] += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',P2[1][1],sfvb,sfob,sfvb,sfvb)
+    P2bb[numpy.ix_(ioccb,ivirb,ivirb,ivirb)] -= (1.0/beta)*einsum('ciab,c,i,a,b->icab',P2[1][1],sfvb,sfob,sfvb,sfvb)
+    P2bb[numpy.ix_(ivirb,ivirb,ivirb,ioccb)] += (1.0/beta)*einsum('bcai,b,c,a,i->bcai',P2[2][1],sfvb,sfvb,sfvb,sfob)
+    P2bb[numpy.ix_(ivirb,ivirb,ioccb,ivirb)] -= (1.0/beta)*einsum('bcai,b,c,a,i->bcia',P2[2][1],sfvb,sfvb,sfvb,sfob)
+    P2bb[numpy.ix_(ioccb,ioccb,ivirb,ivirb)] += (1.0/beta)*einsum('ijab,i,j,a,b->ijab',P2[3][1],sfob,sfob,sfvb,sfvb)
+    P2bb[numpy.ix_(ivirb,ioccb,ivirb,ioccb)] += (1.0/beta)*einsum('bjai,b,j,a,i->bjai',P2[4][1],sfvb,sfob,sfvb,sfob)
+    P2bb[numpy.ix_(ivirb,ioccb,ioccb,ivirb)] -= (1.0/beta)*einsum('bjai,b,j,a,i->bjia',P2[4][1],sfvb,sfob,sfvb,sfob)
+    P2bb[numpy.ix_(ioccb,ivirb,ivirb,ioccb)] -= (1.0/beta)*einsum('bjai,b,j,a,i->jbai',P2[4][1],sfvb,sfob,sfvb,sfob)
+    P2bb[numpy.ix_(ioccb,ivirb,ioccb,ivirb)] += (1.0/beta)*einsum('bjai,b,j,a,i->jbia',P2[4][1],sfvb,sfob,sfvb,sfob)
+    P2bb[numpy.ix_(ivirb,ivirb,ioccb,ioccb)] += (1.0/beta)*einsum('abij,a,b,i,j->abij',P2[5][1],sfvb,sfvb,sfob,sfob)
+    P2bb[numpy.ix_(ioccb,ioccb,ivirb,ioccb)] += (1.0/beta)*einsum('jkai,j,k,a,i->jkai',P2[6][1],sfob,sfob,sfvb,sfob)
+    P2bb[numpy.ix_(ioccb,ioccb,ioccb,ivirb)] -= (1.0/beta)*einsum('jkai,j,k,a,i->jkia',P2[6][1],sfob,sfob,sfvb,sfob)
+    P2bb[numpy.ix_(ioccb,ivirb,ioccb,ioccb)] += (1.0/beta)*einsum('kaij,k,a,i,j->kaij',P2[7][1],sfob,sfvb,sfob,sfob)
+    P2bb[numpy.ix_(ivirb,ioccb,ioccb,ioccb)] -= (1.0/beta)*einsum('kaij,k,a,i,j->akij',P2[7][1],sfob,sfvb,sfob,sfob)
+    P2bb[numpy.ix_(ioccb,ioccb,ioccb,ioccb)] += (1.0/beta)*einsum('klij,k,l,i,j->klij',P2[8][1],sfob,sfob,sfob,sfob)
+
+    P2ab = numpy.zeros((na,nb,na,nb))
+    P2ab[numpy.ix_(ivira,ivirb,ivira,ivirb)] += (1.0/beta)*einsum('cdab,c,d,a,b->cdab',P2[0][2],sfva,sfvb,sfva,sfvb)
+    P2ab[numpy.ix_(ivira,ioccb,ivira,ivirb)] += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',P2[1][2],sfva,sfob,sfva,sfvb)
+    P2ab[numpy.ix_(ivira,ivirb,ivira,ioccb)] += (1.0/beta)*einsum('bcai,b,c,a,i->bcai',P2[2][2],sfva,sfvb,sfva,sfob)
+    P2ab[numpy.ix_(iocca,ioccb,ivira,ivirb)] += (1.0/beta)*einsum('ijab,i,j,a,b->ijab',P2[3][2],sfoa,sfob,sfva,sfvb)
+    P2ab[numpy.ix_(ivira,ioccb,ivira,ioccb)] += (1.0/beta)*einsum('bjai,b,j,a,i->bjai',P2[4][2],sfva,sfob,sfva,sfob)
+    P2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)] += (1.0/beta)*einsum('abij,a,b,i,j->abij',P2[5][2],sfva,sfvb,sfoa,sfob)
+    P2ab[numpy.ix_(iocca,ioccb,ivira,ioccb)] += (1.0/beta)*einsum('jkai,j,k,a,i->jkai',P2[6][2],sfoa,sfob,sfva,sfob)
+    P2ab[numpy.ix_(iocca,ivirb,iocca,ioccb)] += (1.0/beta)*einsum('kaij,k,a,i,j->kaij',P2[7][2],sfoa,sfvb,sfoa,sfob)
+    P2ab[numpy.ix_(iocca,ioccb,iocca,ioccb)] += (1.0/beta)*einsum('klij,k,l,i,j->klij',P2[8][2],sfoa,sfob,sfoa,sfob)
+
+    P2ab[numpy.ix_(iocca,ivirb,ivira,ivirb)] += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',P2[1][3],sfvb,sfoa,sfvb,sfva).transpose((1,0,3,2))
+    P2ab[numpy.ix_(ivira,ivirb,iocca,ivirb)] += (1.0/beta)*einsum('bcai,b,c,a,i->bcai',P2[2][3],sfvb,sfva,sfvb,sfoa).transpose((1,0,3,2))
+
+    P2ab[numpy.ix_(iocca,ioccb,iocca,ivirb)] += (1.0/beta)*einsum('jkai,j,k,a,i->jkai',P2[6][3],sfob,sfoa,sfvb,sfoa).transpose((1,0,3,2))
+    P2ab[numpy.ix_(ivira,ioccb,iocca,iocca)] += (1.0/beta)*einsum('kaij,k,a,i,j->kaij',P2[7][3],sfob,sfva,sfob,sfoa).transpose((1,0,3,2))
+
+    P2ab[numpy.ix_(ivira,ioccb,iocca,ivirb)] -= (1.0/beta)*einsum('bjai,b,j,a,i->bjai',P2[4][3],sfva,sfob,sfvb,sfoa).transpose((0,1,3,2))
+    P2ab[numpy.ix_(iocca,ivirb,ivira,ioccb)] -= (1.0/beta)*einsum('bjai,b,j,a,i->bjai',P2[4][4],sfvb,sfoa,sfva,sfob).transpose((1,0,2,3))
+    P2ab[numpy.ix_(iocca,ivirb,iocca,ivirb)] += (1.0/beta)*einsum('bjai,b,j,a,i->bjai',P2[4][5],sfvb,sfoa,sfvb,sfoa).transpose((1,0,3,2))
+    return (P2aa, P2bb, P2ab)
+
+def g_Fd_on(Fd, ndia, ndba, ndji, ndai):
+    temp = -numpy.diag(einsum('ia,aik->k',ndia,Fd))
+    temp -= numpy.diag(einsum('ba,abk->k',ndba,Fd))
+    temp -= numpy.diag(einsum('ji,ijk->k',ndji,Fd))
+    temp -= numpy.diag(einsum('ai,iak->k',ndai,Fd))
+    return temp
+
+def g_Fd_on_active(Fd, iocc, ivir, ndia, ndba, ndji, ndai):
+    Fdai = Fd[numpy.ix_(ivir,iocc)]
+    Fdab = Fd[numpy.ix_(ivir,ivir)]
+    Fdij = Fd[numpy.ix_(iocc,iocc)]
+    Fdia = Fd[numpy.ix_(iocc,ivir)]
+    temp = -numpy.diag(einsum('ia,aik->k',ndia,Fdai))
+    temp -= numpy.diag(einsum('ba,abk->k',ndba,Fdab))
+    temp -= numpy.diag(einsum('ji,ijk->k',ndji,Fdij))
+    temp -= numpy.diag(einsum('ai,iak->k',ndai,Fdia))
+    return temp
+
+def g_d_on_oo(dso, F, I, dia, dji, dai, P2, jitemp):
+    jitemp -= numpy.diag((0.5*einsum('ia,ai->i',dia,F.vo)*dso))
+    jitemp -= numpy.diag((0.5*einsum('ji,ij->i',dji,F.oo)*dso))
+    jitemp -= numpy.diag((0.5*einsum('ji,ij->j',dji,F.oo)*dso))
+    jitemp -= numpy.diag((0.5*einsum('ai,ia->i',dai,F.ov)*dso))
+
+    jitemp -= numpy.diag((0.5*0.50*einsum('ciab,abci->i',P2[1],I.vvvo)*dso))
+    jitemp -= numpy.diag((0.5*0.50*einsum('bcai,aibc->i',P2[2],I.vovv)*dso))
+    jitemp -= numpy.diag((0.5*0.5*einsum('ijab,abij->i',P2[3],I.vvoo)*dso))
+    jitemp -= numpy.diag((0.5*1.00*einsum('bjai,aibj->i',P2[4],I.vovo)*dso))
+    jitemp -= numpy.diag((0.5*1.00*einsum('bjai,aibj->j',P2[4],I.vovo)*dso))
+    jitemp -= numpy.diag((0.5*0.5*einsum('abij,ijab->i',P2[5],I.oovv)*dso))
+    jitemp -= numpy.diag((0.5*0.50*einsum('jkai,aijk->i',P2[6],I.vooo)*dso))
+    jitemp -= numpy.diag((0.5*1.0*einsum('jkai,aijk->j',P2[6],I.vooo)*dso))
+    jitemp -= numpy.diag((0.5*1.0*einsum('kaij,ijka->i',P2[7],I.ooov)*dso))
+    jitemp -= numpy.diag((0.5*0.50*einsum('kaij,ijka->k',P2[7],I.ooov)*dso))
+    jitemp -= numpy.diag((0.5*0.5*einsum('klij,ijkl->i',P2[8],I.oooo)*dso))
+    jitemp -= numpy.diag((0.5*0.5*einsum('klij,ijkl->k',P2[8],I.oooo)*dso))
+
+def g_d_on_vv(dsv, F, I, dia, dba, dai, P2, batemp):
+    batemp += numpy.diag((0.50*einsum('ia,ai->a',dia,F.vo)*dsv))
+    batemp += numpy.diag((0.50*einsum('ba,ab->b',dba,F.vv)*dsv))
+    batemp += numpy.diag((0.50*einsum('ba,ab->a',dba,F.vv)*dsv))
+    batemp += numpy.diag((0.50*einsum('ai,ia->a',dai,F.ov)*dsv))
+
+    batemp += numpy.diag((0.5*0.5*einsum('cdab,abcd->c',P2[0],I.vvvv)*dsv))
+    batemp += numpy.diag((0.5*0.5*einsum('cdab,abcd->a',P2[0],I.vvvv)*dsv))
+    batemp += numpy.diag((0.5*0.50*einsum('ciab,abci->c',P2[1],I.vvvo)*dsv))
+    batemp += numpy.diag((0.5*1.0*einsum('ciab,abci->a',P2[1],I.vvvo)*dsv))
+    batemp += numpy.diag((0.5*1.0*einsum('bcai,aibc->b',P2[2],I.vovv)*dsv))
+    batemp += numpy.diag((0.5*0.50*einsum('bcai,aibc->a',P2[2],I.vovv)*dsv))
+    batemp += numpy.diag((0.5*0.50*einsum('ijab,abij->a',P2[3],I.vvoo)*dsv))
+    batemp += numpy.diag((0.5*1.00*einsum('bjai,aibj->a',P2[4],I.vovo)*dsv))
+    batemp += numpy.diag((0.5*1.00*einsum('bjai,aibj->b',P2[4],I.vovo)*dsv))
+    batemp += numpy.diag((0.5*0.5*einsum('abij,ijab->a',P2[5],I.oovv)*dsv))
+    batemp += numpy.diag((0.5*0.50*einsum('jkai,aijk->a',P2[6],I.vooo)*dsv))
+    batemp += numpy.diag((0.5*0.50*einsum('kaij,ijka->a',P2[7],I.ooov)*dsv))
+
+def u_Fd_on(Fdaa, Fdab, Fdba, Fdbb, ndia, ndba, ndji, ndai):
+    tempA = -numpy.diag(einsum('ia,aik->k',ndia[0],Fdaa))
+    tempA -= numpy.diag(einsum('ba,abk->k',ndba[0],Fdaa))
+    tempA -= numpy.diag(einsum('ji,ijk->k',ndji[0],Fdaa))
+    tempA -= numpy.diag(einsum('ai,iak->k',ndai[0],Fdaa))
+    tempA -= numpy.diag(einsum('ia,aik->k',ndia[1],Fdba))
+    tempA -= numpy.diag(einsum('ba,abk->k',ndba[1],Fdba))
+    tempA -= numpy.diag(einsum('ji,ijk->k',ndji[1],Fdba))
+    tempA -= numpy.diag(einsum('ai,iak->k',ndai[1],Fdba))
+    tempB = -numpy.diag(einsum('ia,aik->k',ndia[1],Fdbb))
+    tempB -= numpy.diag(einsum('ba,abk->k',ndba[1],Fdbb))
+    tempB -= numpy.diag(einsum('ji,ijk->k',ndji[1],Fdbb))
+    tempB -= numpy.diag(einsum('ai,iak->k',ndai[1],Fdbb))
+    tempB -= numpy.diag(einsum('ia,aik->k',ndia[0],Fdab))
+    tempB -= numpy.diag(einsum('ba,abk->k',ndba[0],Fdab))
+    tempB -= numpy.diag(einsum('ji,ijk->k',ndji[0],Fdab))
+    tempB -= numpy.diag(einsum('ai,iak->k',ndai[0],Fdab))
+
+    return tempA, tempB
+
+def u_Fd_on_active(Fdaa, Fdab, Fdba, Fdbb, iocca, ivira, ioccb, ivirb, ndia, ndba, ndji, ndai):
+    Fdaik = Fdaa[numpy.ix_(ivira,iocca)]
+    Fdabk = Fdaa[numpy.ix_(ivira,ivira)]
+    Fdijk = Fdaa[numpy.ix_(iocca,iocca)]
+    Fdiak = Fdaa[numpy.ix_(iocca,ivira)]
+    FdaiK = Fdab[numpy.ix_(ivira,iocca)]
+    FdabK = Fdab[numpy.ix_(ivira,ivira)]
+    FdijK = Fdab[numpy.ix_(iocca,iocca)]
+    FdiaK = Fdab[numpy.ix_(iocca,ivira)]
+    FdAIK = Fdbb[numpy.ix_(ivirb,ioccb)]
+    FdABK = Fdbb[numpy.ix_(ivirb,ivirb)]
+    FdIJK = Fdbb[numpy.ix_(ioccb,ioccb)]
+    FdIAK = Fdbb[numpy.ix_(ioccb,ivirb)]
+    FdAIk = Fdba[numpy.ix_(ivirb,ioccb)]
+    FdABk = Fdba[numpy.ix_(ivirb,ivirb)]
+    FdIJk = Fdba[numpy.ix_(ioccb,ioccb)]
+    FdIAk = Fdba[numpy.ix_(ioccb,ivirb)]
+    tempA = -numpy.diag(einsum('ia,aik->k',ndia[0],Fdaik))
+    tempA -= numpy.diag(einsum('ba,abk->k',ndba[0],Fdabk))
+    tempA -= numpy.diag(einsum('ji,ijk->k',ndji[0],Fdijk))
+    tempA -= numpy.diag(einsum('ai,iak->k',ndai[0],Fdiak))
+    tempA -= numpy.diag(einsum('ia,aik->k',ndia[1],FdAIk))
+    tempA -= numpy.diag(einsum('ba,abk->k',ndba[1],FdABk))
+    tempA -= numpy.diag(einsum('ji,ijk->k',ndji[1],FdIJk))
+    tempA -= numpy.diag(einsum('ai,iak->k',ndai[1],FdIAk))
+    tempB = -numpy.diag(einsum('ia,aik->k',ndia[1],FdAIK))
+    tempB -= numpy.diag(einsum('ba,abk->k',ndba[1],FdABK))
+    tempB -= numpy.diag(einsum('ji,ijk->k',ndji[1],FdIJK))
+    tempB -= numpy.diag(einsum('ai,iak->k',ndai[1],FdIAK))
+    tempB -= numpy.diag(einsum('ia,aik->k',ndia[0],FdaiK))
+    tempB -= numpy.diag(einsum('ba,abk->k',ndba[0],FdabK))
+    tempB -= numpy.diag(einsum('ji,ijk->k',ndji[0],FdijK))
+    tempB -= numpy.diag(einsum('ai,iak->k',ndai[0],FdiaK))
+
+    return tempA, tempB
+
+def u_d_on_oo(dsoa, dsob, Fa, Fb, Ia, Ib, Iabab, dia, dji, dai, P2, jitempa, jitempb):
+    jitempa -= numpy.diag(0.5*einsum('ia,ai->i', dia[0], Fa.vo)*dsoa)
+    jitempa -= numpy.diag(0.5*einsum('ji,ij->i', dji[0], Fa.oo)*dsoa)
+    jitempa -= numpy.diag(0.5*einsum('ji,ij->j', dji[0], Fa.oo)*dsoa)
+    jitempa -= numpy.diag(0.5*einsum('ai,ia->i', dai[0], Fa.ov)*dsoa)
+
+    jitempb -= numpy.diag(0.5*einsum('ia,ai->i', dia[1], Fb.vo)*dsob)
+    jitempb -= numpy.diag(0.5*einsum('ji,ij->i', dji[1], Fb.oo)*dsob)
+    jitempb -= numpy.diag(0.5*einsum('ji,ij->j', dji[1], Fb.oo)*dsob)
+    jitempb -= numpy.diag(0.5*einsum('ai,ia->i', dai[1], Fb.ov)*dsob)
+
+    jitempa -= numpy.diag(0.5*0.5*einsum('ijab,abij->i', P2[3][0], Ia.vvoo)*dsoa)
+    jitempb -= numpy.diag(0.5*0.5*einsum('ijab,abij->i', P2[3][1], Ib.vvoo)*dsob)
+    jitempa -= numpy.diag(0.5*1.0*einsum('iJaB,aBiJ->i', P2[3][2], Iabab.vvoo)*dsoa)
+    jitempb -= numpy.diag(0.5*1.0*einsum('iJaB,aBiJ->J', P2[3][2], Iabab.vvoo)*dsob)
+
+    jitempa -= numpy.diag(0.5*0.5*einsum('ciab,abci->i', P2[1][0], Ia.vvvo)*dsoa)
+    jitempb -= numpy.diag(0.5*0.5*einsum('ciab,abci->i', P2[1][1], Ib.vvvo)*dsob)
+    jitempb -= numpy.diag(0.5*1.0*einsum('ciab,abci->i', P2[1][2], Iabab.vvvo)*dsob)
+    jitempa -= numpy.diag(0.5*1.0*einsum('ciab,baic->i', P2[1][3], Iabab.vvov)*dsoa)
+
+    jitempa -= numpy.diag(0.5*0.5*einsum('jkai,aijk->i', P2[6][0], Ia.vooo)*dsoa)
+    jitempb -= numpy.diag(0.5*0.5*einsum('jkai,aijk->i', P2[6][1], Ib.vooo)*dsob)
+    jitempb -= numpy.diag(0.5*1.0*einsum('jKaI,aIjK->I', P2[6][2], Iabab.vooo)*dsob)
+    jitempa -= numpy.diag(0.5*1.0*einsum('JkAi,iAkJ->i', P2[6][3], Iabab.ovoo)*dsoa)
+    jitempa -= numpy.diag(0.5*1.0*einsum('jkai,aijk->j', P2[6][0], Ia.vooo)*dsoa)
+    jitempb -= numpy.diag(0.5*1.0*einsum('jkai,aijk->j', P2[6][1], Ib.vooo)*dsob)
+    jitempa -= numpy.diag(0.5*1.0*einsum('jKaI,aIjK->j', P2[6][2], Iabab.vooo)*dsoa)
+    jitempb -= numpy.diag(0.5*1.0*einsum('JkAi,iAkJ->J', P2[6][3], Iabab.ovoo)*dsob)
+    jitempb -= numpy.diag(0.5*1.0*einsum('jKaI,aIjK->K', P2[6][2], Iabab.vooo)*dsob)
+    jitempa -= numpy.diag(0.5*1.0*einsum('JkAi,iAkJ->k', P2[6][3], Iabab.ovoo)*dsoa)
+
+    jitempa -= numpy.diag(0.5*1.0*einsum('bjai,aibj->i', P2[4][0], Ia.vovo)*dsoa)
+    jitempa -= numpy.diag(0.5*1.0*einsum('bjai,aibj->j', P2[4][0], Ia.vovo)*dsoa)
+    jitempb -= numpy.diag(0.5*1.0*einsum('BJAI,AIBJ->I', P2[4][1], Ib.vovo)*dsob)
+    jitempb -= numpy.diag(0.5*1.0*einsum('BJAI,AIBJ->J', P2[4][1], Ib.vovo)*dsob)
+    jitempb -= numpy.diag(0.5*1.0*einsum('bJaI,aIbJ->I', P2[4][2], Iabab.vovo)*dsob)
+    jitempb -= numpy.diag(0.5*1.0*einsum('bJaI,aIbJ->J', P2[4][2], Iabab.vovo)*dsob)
+    jitempa += numpy.diag(0.5*1.0*einsum('bJAi,iAbJ->i', P2[4][3], Iabab.ovvo)*dsoa)
+    jitempb += numpy.diag(0.5*1.0*einsum('bJAi,iAbJ->J', P2[4][3], Iabab.ovvo)*dsob)
+    jitempb += numpy.diag(0.5*1.0*einsum('BjaI,aIjB->I', P2[4][4], Iabab.voov)*dsob)
+    jitempa += numpy.diag(0.5*1.0*einsum('BjaI,aIjB->j', P2[4][4], Iabab.voov)*dsoa)
+    jitempa -= numpy.diag(0.5*1.0*einsum('BjAi,iAjB->i', P2[4][5], Iabab.ovov)*dsoa)
+    jitempa -= numpy.diag(0.5*1.0*einsum('BjAi,iAjB->j', P2[4][5], Iabab.ovov)*dsoa)
+
+    jitempa -= numpy.diag(0.5*0.5*einsum('klij,ijkl->i', P2[8][0], Ia.oooo)*dsoa)
+    jitempa -= numpy.diag(0.5*0.5*einsum('klij,ijkl->k', P2[8][0], Ia.oooo)*dsoa)
+    jitempb -= numpy.diag(0.5*0.5*einsum('klij,ijkl->i', P2[8][1], Ib.oooo)*dsob)
+    jitempb -= numpy.diag(0.5*0.5*einsum('klij,ijkl->k', P2[8][1], Ib.oooo)*dsob)
+    jitempa -= numpy.diag(0.5*1.0*einsum('kLiJ,iJkL->i', P2[8][2], Iabab.oooo)*dsoa)
+    jitempb -= numpy.diag(0.5*1.0*einsum('kLiJ,iJkL->J', P2[8][2], Iabab.oooo)*dsob)
+    jitempa -= numpy.diag(0.5*1.0*einsum('kLiJ,iJkL->k', P2[8][2], Iabab.oooo)*dsoa)
+    jitempb -= numpy.diag(0.5*1.0*einsum('kLiJ,iJkL->L', P2[8][2], Iabab.oooo)*dsob)
+
+    jitempa -= numpy.diag(0.5*0.5*einsum('bcai,aibc->i', P2[2][0], Ia.vovv)*dsoa)
+    jitempb -= numpy.diag(0.5*0.5*einsum('bcai,aibc->i', P2[2][1], Ib.vovv)*dsob)
+    jitempb -= numpy.diag(0.5*1.0*einsum('bCaI,aIbC->I', P2[2][2], Iabab.vovv)*dsob)
+    jitempa -= numpy.diag(0.5*1.0*einsum('BcAi,iAcB->i', P2[2][3], Iabab.ovvv)*dsoa)
+
+    jitempa -= numpy.diag(0.5*1.0*einsum('kaij,ijka->i', P2[7][0], Ia.ooov)*dsoa)
+    jitempa -= numpy.diag(0.5*0.5*einsum('kaij,ijka->k', P2[7][0], Ia.ooov)*dsoa)
+    jitempb -= numpy.diag(0.5*1.0*einsum('kaij,ijka->i', P2[7][1], Ib.ooov)*dsob)
+    jitempb -= numpy.diag(0.5*0.5*einsum('kaij,ijka->k', P2[7][1], Ib.ooov)*dsob)
+    jitempa -= numpy.diag(0.5*1.0*einsum('kAiJ,iJkA->i', P2[7][2], Iabab.ooov)*dsoa)
+    jitempb -= numpy.diag(0.5*1.0*einsum('kAiJ,iJkA->J', P2[7][2], Iabab.ooov)*dsob)
+    jitempa -= numpy.diag(0.5*1.0*einsum('kAiJ,iJkA->k', P2[7][2], Iabab.ooov)*dsoa)
+    jitempb -= numpy.diag(0.5*1.0*einsum('KaIj,jIaK->I', P2[7][3], Iabab.oovo)*dsob)
+    jitempa -= numpy.diag(0.5*1.0*einsum('KaIj,jIaK->j', P2[7][3], Iabab.oovo)*dsoa)
+    jitempb -= numpy.diag(0.5*1.0*einsum('KaIj,jIaK->K', P2[7][3], Iabab.oovo)*dsob)
+
+    jitempa -= numpy.diag(0.5*0.5*einsum('abij,ijab->i', P2[5][0], Ia.oovv)*dsoa)
+    jitempb -= numpy.diag(0.5*0.5*einsum('abij,ijab->i', P2[5][1], Ib.oovv)*dsob)
+    jitempa -= numpy.diag(0.5*1.0*einsum('aBiJ,iJaB->i', P2[5][2], Iabab.oovv)*dsoa)
+    jitempb -= numpy.diag(0.5*1.0*einsum('aBiJ,iJaB->J', P2[5][2], Iabab.oovv)*dsob)
+
+def u_d_on_vv(dsva, dsvb, Fa, Fb, Ia, Ib, Iabab, dia, dba, dai, P2, batempa, batempb):
+    batempa += numpy.diag(0.5*einsum('ia,ai->a', dia[0], Fa.vo)*dsva)
+    batempa += numpy.diag(0.5*einsum('ba,ab->a', dba[0], Fa.vv)*dsva)
+    batempa += numpy.diag(0.5*einsum('ba,ab->b', dba[0], Fa.vv)*dsva)
+    batempa += numpy.diag(0.5*einsum('ai,ia->a', dai[0], Fa.ov)*dsva)
+
+    batempb += numpy.diag(0.5*einsum('ia,ai->a', dia[1], Fb.vo)*dsvb)
+    batempb += numpy.diag(0.5*einsum('ba,ab->a', dba[1], Fb.vv)*dsvb)
+    batempb += numpy.diag(0.5*einsum('ba,ab->b', dba[1], Fb.vv)*dsvb)
+    batempb += numpy.diag(0.5*einsum('ai,ia->a', dai[1], Fb.ov)*dsvb)
+
+    batempa += numpy.diag(0.5*0.5*einsum('ijab,abij->a', P2[3][0], Ia.vvoo)*dsva)
+    batempb += numpy.diag(0.5*0.5*einsum('ijab,abij->a', P2[3][1], Ib.vvoo)*dsvb)
+    batempa += numpy.diag(0.5*1.0*einsum('iJaB,aBiJ->a', P2[3][2], Iabab.vvoo)*dsva)
+    batempb += numpy.diag(0.5*1.0*einsum('iJaB,aBiJ->B', P2[3][2], Iabab.vvoo)*dsvb)
+
+    batempa += numpy.diag(0.5*1.0*einsum('ciab,abci->a', P2[1][0], Ia.vvvo)*dsva)
+    batempa += numpy.diag(0.5*0.5*einsum('ciab,abci->c', P2[1][0], Ia.vvvo)*dsva)
+    batempb += numpy.diag(0.5*1.0*einsum('ciab,abci->a', P2[1][1], Ib.vvvo)*dsvb)
+    batempb += numpy.diag(0.5*0.5*einsum('ciab,abci->c', P2[1][1], Ib.vvvo)*dsvb)
+    batempa += numpy.diag(0.5*1.0*einsum('cIaB,aBcI->a', P2[1][2], Iabab.vvvo)*dsva)
+    batempb += numpy.diag(0.5*1.0*einsum('cIaB,aBcI->B', P2[1][2], Iabab.vvvo)*dsvb)
+    batempa += numpy.diag(0.5*1.0*einsum('cIaB,aBcI->c', P2[1][2], Iabab.vvvo)*dsva)
+    batempb += numpy.diag(0.5*1.0*einsum('CiAb,bAiC->A', P2[1][3], Iabab.vvov)*dsvb)
+    batempa += numpy.diag(0.5*1.0*einsum('CiAb,bAiC->b', P2[1][3], Iabab.vvov)*dsva)
+    batempb += numpy.diag(0.5*1.0*einsum('CiAb,bAiC->C', P2[1][3], Iabab.vvov)*dsvb)
+
+    batempa += numpy.diag(0.5*0.5*einsum('jkai,aijk->a', P2[6][0], Ia.vooo)*dsva)
+    batempb += numpy.diag(0.5*0.5*einsum('jkai,aijk->a', P2[6][1], Ib.vooo)*dsvb)
+    batempa += numpy.diag(0.5*1.0*einsum('jKaI,aIjK->a', P2[6][2], Iabab.vooo)*dsva)
+    batempb += numpy.diag(0.5*1.0*einsum('JkAi,iAkJ->A', P2[6][3], Iabab.ovoo)*dsvb)
+
+    batempa += numpy.diag(0.5*0.5*einsum('cdab,abcd->a', P2[0][0], Ia.vvvv)*dsva)
+    batempa += numpy.diag(0.5*0.5*einsum('cdab,abcd->c', P2[0][0], Ia.vvvv)*dsva)
+    batempb += numpy.diag(0.5*0.5*einsum('cdab,abcd->a', P2[0][1], Ib.vvvv)*dsvb)
+    batempb += numpy.diag(0.5*0.5*einsum('cdab,abcd->c', P2[0][1], Ib.vvvv)*dsvb)
+    batempa += numpy.diag(0.5*1.0*einsum('cDaB,aBcD->a', P2[0][2], Iabab.vvvv)*dsva)
+    batempb += numpy.diag(0.5*1.0*einsum('cDaB,aBcD->B', P2[0][2], Iabab.vvvv)*dsvb)
+    batempa += numpy.diag(0.5*1.0*einsum('cDaB,aBcD->c', P2[0][2], Iabab.vvvv)*dsva)
+    batempb += numpy.diag(0.5*1.0*einsum('cDaB,aBcD->D', P2[0][2], Iabab.vvvv)*dsvb)
+
+    batempa += numpy.diag(0.5*1.0*einsum('bjai,aibj->a', P2[4][0], Ia.vovo)*dsva)
+    batempa += numpy.diag(0.5*1.0*einsum('bjai,aibj->b', P2[4][0], Ia.vovo)*dsva)
+    batempb += numpy.diag(0.5*1.0*einsum('BJAI,AIBJ->A', P2[4][1], Ib.vovo)*dsvb)
+    batempb += numpy.diag(0.5*1.0*einsum('BJAI,AIBJ->B', P2[4][1], Ib.vovo)*dsvb)
+    batempa += numpy.diag(0.5*1.0*einsum('bJaI,aIbJ->a', P2[4][2], Iabab.vovo)*dsva)
+    batempa += numpy.diag(0.5*1.0*einsum('bJaI,aIbJ->b', P2[4][2], Iabab.vovo)*dsva)
+    batempb -= numpy.diag(0.5*1.0*einsum('bJAi,iAbJ->A', P2[4][3], Iabab.ovvo)*dsvb)
+    batempa -= numpy.diag(0.5*1.0*einsum('bJAi,iAbJ->b', P2[4][3], Iabab.ovvo)*dsva)
+    batempa -= numpy.diag(0.5*1.0*einsum('BjaI,aIjB->a', P2[4][4], Iabab.voov)*dsva)
+    batempb -= numpy.diag(0.5*1.0*einsum('BjaI,aIjB->B', P2[4][4], Iabab.voov)*dsvb)
+    batempb += numpy.diag(0.5*1.0*einsum('BjAi,iAjB->A', P2[4][5], Iabab.ovov)*dsvb)
+    batempb += numpy.diag(0.5*1.0*einsum('BjAi,iAjB->B', P2[4][5], Iabab.ovov)*dsvb)
+
+    batempa += numpy.diag(0.5*0.5*einsum('bcai,aibc->a', P2[2][0], Ia.vovv)*dsva)
+    batempa += numpy.diag(0.5*1.0*einsum('bcai,aibc->b', P2[2][0], Ia.vovv)*dsva)
+    batempb += numpy.diag(0.5*0.5*einsum('bcai,aibc->a', P2[2][1], Ib.vovv)*dsvb)
+    batempb += numpy.diag(0.5*1.0*einsum('bcai,aibc->b', P2[2][1], Ib.vovv)*dsvb)
+    batempa += numpy.diag(0.5*1.0*einsum('bCaI,aIbC->a', P2[2][2], Iabab.vovv)*dsva)
+    batempa += numpy.diag(0.5*1.0*einsum('bCaI,aIbC->b', P2[2][2], Iabab.vovv)*dsva)
+    batempb += numpy.diag(0.5*1.0*einsum('bCaI,aIbC->C', P2[2][2], Iabab.vovv)*dsvb)
+    batempb += numpy.diag(0.5*1.0*einsum('BcAi,iAcB->A', P2[2][3], Iabab.ovvv)*dsvb)
+    batempb += numpy.diag(0.5*1.0*einsum('BcAi,iAcB->B', P2[2][3], Iabab.ovvv)*dsvb)
+    batempa += numpy.diag(0.5*1.0*einsum('BcAi,iAcB->c', P2[2][3], Iabab.ovvv)*dsva)
+
+    batempa += numpy.diag(0.5*0.5*einsum('kaij,ijka->a', P2[7][0], Ia.ooov)*dsva)
+    batempb += numpy.diag(0.5*0.5*einsum('kaij,ijka->a', P2[7][1], Ib.ooov)*dsvb)
+    batempb += numpy.diag(0.5*1.0*einsum('kAiJ,iJkA->A', P2[7][2], Iabab.ooov)*dsvb)
+    batempa += numpy.diag(0.5*1.0*einsum('KaIj,jIaK->a', P2[7][3], Iabab.oovo)*dsva)
+
+    batempa += numpy.diag(0.5*0.5*einsum('abij,ijab->a', P2[5][0], Ia.oovv)*dsva)
+    batempb += numpy.diag(0.5*0.5*einsum('abij,ijab->a', P2[5][1], Ib.oovv)*dsvb)
+    batempa += numpy.diag(0.5*1.0*einsum('aBiJ,iJaB->a', P2[5][2], Iabab.oovv)*dsva)
+    batempb += numpy.diag(0.5*1.0*einsum('aBiJ,iJaB->B', P2[5][2], Iabab.oovv)*dsvb)
+
+def g_full_rdm2(fo, n1rdm, rdm2):
+    rdm2 += numpy.einsum('pr,qs->pqrs',numpy.diag(fo),numpy.diag(fo))
+    rdm2 -= numpy.einsum('pr,qs->pqsr',numpy.diag(fo),numpy.diag(fo))
+    rdm2 += 0.5*numpy.einsum('pr,qs->pqrs',numpy.diag(fo),n1rdm)
+    rdm2 -= 0.5*numpy.einsum('pr,qs->pqsr',numpy.diag(fo),n1rdm)
+    rdm2 += 0.5*numpy.einsum('pr,qs->pqrs',n1rdm,numpy.diag(fo))
+    rdm2 -= 0.5*numpy.einsum('pr,qs->pqsr',n1rdm,numpy.diag(fo))
+
+def g_full_rdm2_active(focc, iocc, iall, n1rdm, rdm2):
+    rdm2[numpy.ix_(iocc,iocc,iocc,iocc)] += numpy.einsum('pr,qs->pqrs',numpy.diag(focc),numpy.diag(focc))
+    rdm2[numpy.ix_(iocc,iocc,iocc,iocc)] -= numpy.einsum('pr,qs->pqsr',numpy.diag(focc),numpy.diag(focc))
+    rdm2[numpy.ix_(iocc,iall,iocc,iall)] += 0.5*numpy.einsum('pr,qs->pqrs',numpy.diag(focc),n1rdm)
+    rdm2[numpy.ix_(iocc,iall,iall,iocc)] -= 0.5*numpy.einsum('pr,qs->pqsr',numpy.diag(focc),n1rdm)
+    rdm2[numpy.ix_(iall,iocc,iall,iocc)] += 0.5*numpy.einsum('pr,qs->pqrs',n1rdm,numpy.diag(focc))
+    rdm2[numpy.ix_(iall,iocc,iocc,iall)] -= 0.5*numpy.einsum('pr,qs->pqsr',n1rdm,numpy.diag(focc))
+
+def u_full_rdm2(foa, fob, n1rdm, rdm2):
+    rdm2[0] += numpy.einsum('pr,qs->pqrs',numpy.diag(foa),numpy.diag(foa))
+    rdm2[0] -= numpy.einsum('pr,qs->pqsr',numpy.diag(foa),numpy.diag(foa))
+    rdm2[0] += 0.5*numpy.einsum('pr,qs->pqrs',numpy.diag(foa),n1rdm[0])
+    rdm2[0] -= 0.5*numpy.einsum('pr,qs->pqsr',numpy.diag(foa),n1rdm[0])
+    rdm2[0] += 0.5*numpy.einsum('pr,qs->pqrs',n1rdm[0],numpy.diag(foa))
+    rdm2[0] -= 0.5*numpy.einsum('pr,qs->pqsr',n1rdm[0],numpy.diag(foa))
+
+    rdm2[1] += numpy.einsum('pr,qs->pqrs',numpy.diag(fob),numpy.diag(fob))
+    rdm2[1] -= numpy.einsum('pr,qs->pqsr',numpy.diag(fob),numpy.diag(foa))
+    rdm2[1] += 0.5*numpy.einsum('pr,qs->pqrs',numpy.diag(fob),n1rdm[1])
+    rdm2[1] -= 0.5*numpy.einsum('pr,qs->pqsr',numpy.diag(fob),n1rdm[1])
+    rdm2[1] += 0.5*numpy.einsum('pr,qs->pqrs',n1rdm[1],numpy.diag(fob))
+    rdm2[1] -= 0.5*numpy.einsum('pr,qs->pqsr',n1rdm[1],numpy.diag(fob))
+
+    rdm2[2] += numpy.einsum('pr,qs->pqrs',numpy.diag(foa),numpy.diag(fob))
+    rdm2[2] += 0.5*numpy.einsum('pr,qs->pqrs',numpy.diag(foa),n1rdm[1])
+    rdm2[2] += 0.5*numpy.einsum('pr,qs->pqrs',n1rdm[0],numpy.diag(fob))
+
+def u_full_rdm2_active(focca, foccb, iocca, ioccb, ialla, iallb, n1rdm, rdm2):
+    rdm2[0][numpy.ix_(iocca,iocca,iocca,iocca)] += numpy.einsum('pr,qs->pqrs',numpy.diag(focca),numpy.diag(focca))
+    rdm2[0][numpy.ix_(iocca,iocca,iocca,iocca)] -= numpy.einsum('pr,qs->pqsr',numpy.diag(focca),numpy.diag(focca))
+    rdm2[0][numpy.ix_(iocca,ialla,iocca,ialla)] += 0.5*numpy.einsum('pr,qs->pqrs',numpy.diag(focca),n1rdm[0])
+    rdm2[0][numpy.ix_(iocca,ialla,ialla,iocca)] -= 0.5*numpy.einsum('pr,qs->pqsr',numpy.diag(focca),n1rdm[0])
+    rdm2[0][numpy.ix_(ialla,iocca,ialla,iocca)] += 0.5*numpy.einsum('pr,qs->pqrs',n1rdm[0],numpy.diag(focca))
+    rdm2[0][numpy.ix_(ialla,iocca,iocca,ialla)] -= 0.5*numpy.einsum('pr,qs->pqsr',n1rdm[0],numpy.diag(focca))
+
+    rdm2[1][numpy.ix_(ioccb,ioccb,ioccb,ioccb)] += numpy.einsum('pr,qs->pqrs',numpy.diag(foccb),numpy.diag(foccb))
+    rdm2[1][numpy.ix_(ioccb,ioccb,ioccb,ioccb)] -= numpy.einsum('pr,qs->pqsr',numpy.diag(foccb),numpy.diag(foccb))
+    rdm2[1][numpy.ix_(ioccb,iallb,ioccb,iallb)] += 0.5*numpy.einsum('pr,qs->pqrs',numpy.diag(foccb),n1rdm[1])
+    rdm2[1][numpy.ix_(ioccb,iallb,iallb,ioccb)] -= 0.5*numpy.einsum('pr,qs->pqsr',numpy.diag(foccb),n1rdm[1])
+    rdm2[1][numpy.ix_(iallb,ioccb,iallb,ioccb)] += 0.5*numpy.einsum('pr,qs->pqrs',n1rdm[1],numpy.diag(foccb))
+    rdm2[1][numpy.ix_(iallb,ioccb,ioccb,iallb)] -= 0.5*numpy.einsum('pr,qs->pqsr',n1rdm[1],numpy.diag(foccb))
+
+    rdm2[2][numpy.ix_(iocca,ioccb,iocca,ioccb)] += numpy.einsum('pr,qs->pqrs',numpy.diag(focca),numpy.diag(foccb))
+    rdm2[2][numpy.ix_(iocca,iallb,iocca,iallb)] += 0.5*numpy.einsum('pr,qs->pqrs',numpy.diag(focca),n1rdm[1])
+    rdm2[2][numpy.ix_(ialla,ioccb,ialla,ioccb)] += 0.5*numpy.einsum('pr,qs->pqrs',n1rdm[0],numpy.diag(foccb))
