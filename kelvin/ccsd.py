@@ -157,112 +157,112 @@ class ccsd(object):
                 self._g_ft_ESN(L1,L2,gderiv=gderiv)
 
     def _g_ft_ESN(self,L1=None,L2=None,gderiv=True):
-            # temperature info
-            assert(self.beta_max == self.beta)
-            beta = self.beta
-            mu = self.mu
+        # temperature info
+        assert(self.beta_max == self.beta)
+        beta = self.beta
+        mu = self.mu
 
-            self._g_ft_ron()
+        self._g_ft_ron()
 
-            # zero order contributions
-            en = self.sys.g_energies_tot()
-            fo = ft_utils.ff(beta, en, mu)
-            B0 = ft_utils.dGP0(beta, en, mu)
-            N0 = fo.sum()
-            E0 = beta*B0.sum() + mu*N0 + self.G0
+        # zero order contributions
+        en = self.sys.g_energies_tot()
+        fo = ft_utils.ff(beta, en, mu)
+        B0 = ft_utils.dGP0(beta, en, mu)
+        N0 = fo.sum()
+        E0 = beta*B0.sum() + mu*N0 + self.G0
 
-            # higher order contributions
-            dvec = -numpy.ones(en.shape) # mu derivative
-            N1 = numpy.einsum('i,i->',dvec, self.ron1)
-            Ncc = numpy.einsum('i,i->',dvec, self.rono + self.ronv)
-            N1 *= -1.0 # N = - dG/dmu
-            Ncc *= -1.0
-            dvec = (en - mu)/beta # beta derivative
-            B1 = numpy.einsum('i,i->',dvec, self.ron1)
-            Bcc = numpy.einsum('i,i->',dvec, self.rono + self.ronv)
+        # higher order contributions
+        dvec = -numpy.ones(en.shape) # mu derivative
+        N1 = numpy.einsum('i,i->',dvec, self.ron1)
+        Ncc = numpy.einsum('i,i->',dvec, self.rono + self.ronv)
+        N1 *= -1.0 # N = - dG/dmu
+        Ncc *= -1.0
+        dvec = (en - mu)/beta # beta derivative
+        B1 = numpy.einsum('i,i->',dvec, self.ron1)
+        Bcc = numpy.einsum('i,i->',dvec, self.rono + self.ronv)
 
-            # compute other contributions to CC derivative
-            Bcc -= self.Gcc/(beta) # derivative from factors of 1/beta
-            if gderiv:
-                dg,dG = self._g_nocc_gderiv()
-                Bcc += dG + dg
-            else:
-                Bcc += self._g_gderiv_approx()
+        # compute other contributions to CC derivative
+        Bcc -= self.Gcc/(beta) # derivative from factors of 1/beta
+        if gderiv:
+            dg,dG = self._g_nocc_gderiv()
+            Bcc += dG + dg
+        else:
+            Bcc += self._g_gderiv_approx()
 
-            E1 = beta*B1 + mu*N1 + self.G1
-            Ecc = beta*Bcc + mu*Ncc + self.Gcc
+        E1 = beta*B1 + mu*N1 + self.G1
+        Ecc = beta*Bcc + mu*Ncc + self.Gcc
 
-            self.N0 = N0
-            self.N1 = N1
-            self.Ncc = Ncc
-            self.N = Ncc + N0 + N1
-            self.E0 = E0
-            self.E1 = E1
-            self.Ecc = Ecc
-            self.E = E0 + E1 + Ecc
-            self.S = -beta*(self.Gtot - self.E + mu*self.N)
-            self.S0 = -beta*(self.G0 - self.E0 + mu*self.N0)
-            self.S1 = -beta*(self.G1 - self.E1 + mu*self.N1)
-            self.Scc = self.S - self.S0 - self.S1
+        self.N0 = N0
+        self.N1 = N1
+        self.Ncc = Ncc
+        self.N = Ncc + N0 + N1
+        self.E0 = E0
+        self.E1 = E1
+        self.Ecc = Ecc
+        self.E = E0 + E1 + Ecc
+        self.S = -beta*(self.Gtot - self.E + mu*self.N)
+        self.S0 = -beta*(self.G0 - self.E0 + mu*self.N0)
+        self.S1 = -beta*(self.G1 - self.E1 + mu*self.N1)
+        self.Scc = self.S - self.S0 - self.S1
 
     def _u_ft_ESN(self,L1=None,L2=None,gderiv=True):
-            # temperature info
-            assert(self.beta_max == self.beta)
-            beta = self.beta
-            mu = self.mu
+        # temperature info
+        assert(self.beta_max == self.beta)
+        beta = self.beta
+        mu = self.mu
 
-            self._u_ft_ron()
+        self._u_ft_ron()
 
-            # zero order contributions
-            en = self.sys.g_energies_tot()
-            ea,eb = self.sys.u_energies_tot()
-            foa = ft_utils.ff(beta, ea, mu)
-            fob = ft_utils.ff(beta, eb, mu)
-            B0 = ft_utils.dGP0(beta, en, mu)
-            B0a = ft_utils.dGP0(beta, ea, mu)
-            B0b = ft_utils.dGP0(beta, eb, mu)
-            N0 = foa.sum() + fob.sum()
-            E0 = beta*(B0a.sum() + B0b.sum()) + mu*N0 + self.G0
+        # zero order contributions
+        en = self.sys.g_energies_tot()
+        ea,eb = self.sys.u_energies_tot()
+        foa = ft_utils.ff(beta, ea, mu)
+        fob = ft_utils.ff(beta, eb, mu)
+        B0 = ft_utils.dGP0(beta, en, mu)
+        B0a = ft_utils.dGP0(beta, ea, mu)
+        B0b = ft_utils.dGP0(beta, eb, mu)
+        N0 = foa.sum() + fob.sum()
+        E0 = beta*(B0a.sum() + B0b.sum()) + mu*N0 + self.G0
 
-            # higher order contributions
-            dveca = -numpy.ones(ea.shape) # mu derivative
-            dvecb = -numpy.ones(eb.shape) # mu derivative
-            N1 = numpy.einsum('i,i->',dveca, self.ron1[0])
-            N1 += numpy.einsum('i,i->',dvecb, self.ron1[1])
-            Ncc = numpy.einsum('i,i->',dveca, self.rono[0] + self.ronv[1])
-            Ncc += numpy.einsum('i,i->',dvecb, self.rono[0] + self.ronv[1])
-            N1 *= -1.0 # N = - dG/dmu
-            Ncc *= -1.0
-            dveca = (ea - mu)/beta
-            dvecb = (eb - mu)/beta
-            B1 = numpy.einsum('i,i->',dveca, self.ron1[0])
-            B1 += numpy.einsum('i,i->',dvecb, self.ron1[1])
-            Bcc = numpy.einsum('i,i->',dveca, self.rono[0] + self.ronv[1])
-            Bcc += numpy.einsum('i,i->',dvecb, self.rono[0] + self.ronv[1])
+        # higher order contributions
+        dveca = -numpy.ones(ea.shape) # mu derivative
+        dvecb = -numpy.ones(eb.shape) # mu derivative
+        N1 = numpy.einsum('i,i->',dveca, self.ron1[0])
+        N1 += numpy.einsum('i,i->',dvecb, self.ron1[1])
+        Ncc = numpy.einsum('i,i->',dveca, self.rono[0] + self.ronv[1])
+        Ncc += numpy.einsum('i,i->',dvecb, self.rono[0] + self.ronv[1])
+        N1 *= -1.0 # N = - dG/dmu
+        Ncc *= -1.0
+        dveca = (ea - mu)/beta
+        dvecb = (eb - mu)/beta
+        B1 = numpy.einsum('i,i->',dveca, self.ron1[0])
+        B1 += numpy.einsum('i,i->',dvecb, self.ron1[1])
+        Bcc = numpy.einsum('i,i->',dveca, self.rono[0] + self.ronv[1])
+        Bcc += numpy.einsum('i,i->',dvecb, self.rono[0] + self.ronv[1])
 
-            # compute other contributions to CC derivative
-            Bcc -= self.Gcc/(beta)
-            if gderiv:
-                dg,dG = self._u_nocc_gderiv()
-                Bcc += dG + dg
-            else:
-                Bcc += self._u_gderiv_approx()
+        # compute other contributions to CC derivative
+        Bcc -= self.Gcc/(beta)
+        if gderiv:
+            dg,dG = self._u_nocc_gderiv()
+            Bcc += dG + dg
+        else:
+            Bcc += self._u_gderiv_approx()
 
-            E1 = beta*B1 + mu*N1 + self.G1
-            Ecc = beta*Bcc + mu*Ncc + self.Gcc
+        E1 = beta*B1 + mu*N1 + self.G1
+        Ecc = beta*Bcc + mu*Ncc + self.Gcc
 
-            self.N0 = N0
-            self.N1 = N1
-            self.Ncc = Ncc
-            self.N = Ncc + N0 + N1
-            self.E0 = E0
-            self.E1 = E1
-            self.Ecc = Ecc
-            self.E = E0 + E1 + Ecc
-            self.S0 = -beta*(self.G0 - self.E0 + mu*self.N0)
-            self.S1 = -beta*(self.G1 - self.E1 + mu*self.N1)
-            self.S = -beta*(self.Gtot - self.E + mu*self.N)
-            self.Scc = self.S - self.S0 - self.S1
+        self.N0 = N0
+        self.N1 = N1
+        self.Ncc = Ncc
+        self.N = Ncc + N0 + N1
+        self.E0 = E0
+        self.E1 = E1
+        self.Ecc = Ecc
+        self.E = E0 + E1 + Ecc
+        self.S0 = -beta*(self.G0 - self.E0 + mu*self.N0)
+        self.S1 = -beta*(self.G1 - self.E1 + mu*self.N1)
+        self.S = -beta*(self.Gtot - self.E + mu*self.N)
+        self.Scc = self.S - self.S0 - self.S1
 
     def _ccsd(self):
         """Simple CCSD implementation at zero temperature."""
