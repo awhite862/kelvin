@@ -24,6 +24,7 @@ from kelvin.tests import test_quadrature
 from kelvin.tests import test_td_ccsd
 from kelvin.tests import test_td_ccsd_lambda
 from kelvin.tests import test_td_ccsd_1rdm
+from kelvin.tests import test_td_ccsd_2rdm
 from kelvin.tests import test_scf
 from kelvin.tests import test_test
 from kelvin.tests import test_ueg
@@ -176,6 +177,9 @@ def full_suite():
     suite.addTest(test_td_ccsd_1rdm.TDCCSD1RDMTest("test_Be_rk2"))
     suite.addTest(test_td_ccsd_1rdm.TDCCSD1RDMTest("test_Be_rk4"))
     suite.addTest(test_td_ccsd_1rdm.TDCCSD1RDMTest("test_Be_active"))
+
+    suite.addTest(test_td_ccsd_2rdm.TDCCSD2RDMTest("test_Be_rk4"))
+    suite.addTest(test_td_ccsd_2rdm.TDCCSD2RDMTest("test_Be_rk4_active"))
 
     suite.addTest(test_scf.SCFTest("test_Be_sto3g_energy"))
     suite.addTest(test_scf.SCFTest("test_diamond_energy"))
@@ -339,6 +343,9 @@ def default_suite():
     #suite.addTest(test_td_ccsd_1rdm.TDCCSD1RDMTest("test_Be_rk2"))
     suite.addTest(test_td_ccsd_1rdm.TDCCSD1RDMTest("test_Be_rk4"))
     suite.addTest(test_td_ccsd_1rdm.TDCCSD1RDMTest("test_Be_active"))
+
+    #suite.addTest(test_td_ccsd_2rdm.TDCCSD2RDMTest("test_Be_rk4"))
+    suite.addTest(test_td_ccsd_2rdm.TDCCSD2RDMTest("test_Be_rk4_active"))
 
     suite.addTest(test_scf.SCFTest("test_Be_sto3g_energy"))
     suite.addTest(test_scf.SCFTest("test_diamond_energy"))

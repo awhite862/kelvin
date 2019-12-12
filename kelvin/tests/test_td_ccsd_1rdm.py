@@ -134,7 +134,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
 
         # compute normal-order 1-rdm from propagation
         prop = {"tprop" : "rk4", "lprop" : "rk4"}
-        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=640, athresh = 1e-20, saveT=True)
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=640, athresh=1e-20, saveT=True)
         Eout,Eccout = tdccsdT.run()
         Etmp,Ecctmp = tdccsdT._ccsd_lambda()
         eia = numpy.linalg.norm(ccsdT.dia - tdccsdT.dia)

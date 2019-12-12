@@ -42,10 +42,12 @@ class TDCCSD(object):
         ng = self.ngrid
         self.ti,self.g,G = quadrature.ft_quad(self.ngrid,beta,self.quad)
         self.sys = sys
+        # pieces of normal-ordered 1-rdm
         self.dia = None
         self.dba = None
         self.dji = None
         self.dai = None
+        # pieces of normal-ordered 2-rdm
         self.P2 = None
 
     def run(self,response=None):
@@ -355,6 +357,17 @@ class TDCCSD(object):
         pba = g[ng - 1]*cc_equations.ccsd_1rdm_ba_opt(t1b,t2b,l1,l2)
         pai = g[ng - 1]*cc_equations.ccsd_1rdm_ai_opt(t1b,t2b,l1,l2)
 
+        if rdm2:
+            Pcdab = g[ng -1]*cc_equations.ccsd_2rdm_cdab_opt(t1b, t2b, l1, l2)
+            Pciab = g[ng -1]*cc_equations.ccsd_2rdm_ciab_opt(t1b, t2b, l1, l2)
+            Pbcai = g[ng -1]*cc_equations.ccsd_2rdm_bcai_opt(t1b, t2b, l1, l2)
+            Pijab = g[ng -1]*l2
+            Pbjai = g[ng -1]*cc_equations.ccsd_2rdm_bjai_opt(t1b, t2b, l1, l2)
+            Pabij = g[ng -1]*cc_equations.ccsd_2rdm_abij_opt(t1b, t2b, l1, l2)
+            Pjkai = g[ng -1]*cc_equations.ccsd_2rdm_jkai_opt(t1b, t2b, l1, l2)
+            Pkaij = g[ng -1]*cc_equations.ccsd_2rdm_kaij_opt(t1b, t2b, l1, l2)
+            Pklij = g[ng -1]*cc_equations.ccsd_2rdm_klij_opt(t1b, t2b, l1, l2)
+
         Eccn = g[ng - 1]*cc_energy(t1b, t2b, F.ov, I.oovv)/beta
         for i in range(1,ng):
             h = self.ti[ng - i] - self.ti[ng - i - 1]
@@ -375,6 +388,16 @@ class TDCCSD(object):
             pji += g[ng - i - 1]*cc_equations.ccsd_1rdm_ji_opt(t1e,t2e,l1,l2)
             pba += g[ng - i - 1]*cc_equations.ccsd_1rdm_ba_opt(t1e,t2e,l1,l2)
             pai += g[ng - i - 1]*cc_equations.ccsd_1rdm_ai_opt(t1e,t2e,l1,l2)
+            if rdm2:
+                Pcdab += g[ng - 1 - i]*cc_equations.ccsd_2rdm_cdab_opt(t1e, t2e, l1, l2)
+                Pciab += g[ng - 1 - i]*cc_equations.ccsd_2rdm_ciab_opt(t1e, t2e, l1, l2)
+                Pbcai += g[ng - 1 - i]*cc_equations.ccsd_2rdm_bcai_opt(t1e, t2e, l1, l2)
+                Pijab += g[ng - 1 - i]*l2
+                Pbjai += g[ng - 1 - i]*cc_equations.ccsd_2rdm_bjai_opt(t1e, t2e, l1, l2)
+                Pabij += g[ng - 1 - i]*cc_equations.ccsd_2rdm_abij_opt(t1e, t2e, l1, l2)
+                Pjkai += g[ng - 1 - i]*cc_equations.ccsd_2rdm_jkai_opt(t1e, t2e, l1, l2)
+                Pkaij += g[ng - 1 - i]*cc_equations.ccsd_2rdm_kaij_opt(t1e, t2e, l1, l2)
+                Pklij += g[ng - 1 - i]*cc_equations.ccsd_2rdm_klij_opt(t1e, t2e, l1, l2)
             t1b = t1e
             t2b = t2e
 
@@ -388,5 +411,7 @@ class TDCCSD(object):
         self.dji = pji
         self.dba = pba
         self.dai = pai
+        if rdm2:
+            self.P2 = (Pcdab, Pciab, Pbcai, Pijab, Pbjai, Pabij, Pjkai, Pkaij, Pklij)
 
         return (Eccn+E01,Eccn)

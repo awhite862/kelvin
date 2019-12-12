@@ -78,7 +78,7 @@ class ccsd(object):
         self.T2 = None
         self.L1 = None
         self.L2 = None
-        # pieces of 1-rdm
+        # pieces of normal-ordered 1-rdm
         self.dia = None
         self.dba = None
         self.dji = None
@@ -95,7 +95,7 @@ class ccsd(object):
         self.ndba = None
         self.ndji = None
         self.ndai = None
-        # 2-rdm
+        # pieces of normal-ordered 2-rdm
         self.P2 = None
         # full unrelaxed 1-rdm
         self.n1rdm = None
@@ -1510,6 +1510,8 @@ class ccsd(object):
 
     def _g_ft_2rdm(self):
         assert(self.beta == self.beta_max)
+        if self.L2 is None:
+            self._ft_ccsd_lambda()
         # temperature info
         beta = self.beta
         mu = self.mu
