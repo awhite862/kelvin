@@ -83,6 +83,13 @@ class ccsd(object):
         self.dba = None
         self.dji = None
         self.dai = None
+        # occupation number response
+        self.rono = None
+        self.ronv = None
+        self.ron1 = None
+        # orbital energy response
+        self.rorbo = None
+        self.rorbv = None
         # pieces of 1-rdm with ONs
         self.ndia = None
         self.ndba = None
@@ -90,9 +97,9 @@ class ccsd(object):
         self.ndai = None
         # 2-rdm
         self.P2 = None
-        # full 1-rdm with ONs
+        # full unrelaxed 1-rdm
         self.n1rdm = None
-        # full 2-rdm with ONs
+        # full unrelaxed 2-rdm
         self.n2rdm = None
         # ON- and OE-relaxation contribution to 1-rdm
         self.r1rdm = None
@@ -149,63 +156,13 @@ class ccsd(object):
             else:
                 self._g_ft_ESN(L1,L2,gderiv=gderiv)
 
-    #def compute_1eprop(self,A,L1=None,L2=None):
-    #    if not self.finite_T:
-    #        raise Exception("Not implemented")
-    #    else:
-    #        if self.L1 is None:
-    #            if self.sys.has_u():
-    #                self._ft_uccsd_lambda(L1=L1,L2=L2)
-    #                self._u_ft_1rdm()
-    #                self._u_ft_2rdm()
-    #            else:
-    #                self._ft_ccsd_lambda(L1=L1,L2=L2)
-    #                self._g_ft_1rdm()
-    #                self._g_ft_2rdm()
-    #        if self.sys.has_u():
-    #            raise Exception("Not yet implemented")
-    #        else:
-    #            # temperature info
-    #            beta = self.beta
-    #            mu = self.mu
-
-    #            # zero order contributions
-    #            en = self.sys.g_energies_tot()
-    #            fo = ft_utils.ff(beta, en, mu)
-    #            A0 = numpy.einsum('i,i->',fo,A.diagonal())
-    #            A1,Acc = self._g_nocc_deriv(A.diagonal()*beta)
-
-    #            D1 = en[:,None] - en[None,:]
-    #            D2 = en[:,None,None,None] + en[None,:,None,None] \
-    #                - en[None,None,:,None] - en[None,None,None,:]
-    #            F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
-    #            Gnew = self.G.copy()
-    #            m = Gnew.shape[0]
-    #            n = Gnew.shape[0]
-    #            for i in range(m):
-    #                for j in range(n):
-    #                    Gnew[i,j] *= (self.ti[j] - self.ti[i])
-
-    #            ng = self.ti.shape[0]
-    #            T1temp,T2temp = ft_cc_equations.ccsd_stanton(F,I,self.T1,self.T2,
-    #                    D1,D2,self.ti,ng,Gnew)
-    #            DA1 = A.diagonal()[:,None] - A.diagonal()[None,:]
-    #            DA2 = A.diagonal()[:,None,None,None] + A.diagonal()[None,:,None,None] \
-    #                    - A.diagonal()[None,None,:,None] - A.diagonal()[None,None,None,:]
-    #            T1temp *= DA1
-    #            T2temp *= DA2
-
-    #            At1 = (1.0/beta)*einsum('via,vai->v',self.L1, T1temp)
-    #            At2 = (1.0/beta)*0.25*einsum('vijab,vabij->v',self.L2, T2temp)
-    #            At1g = einsum('v,v->',At1,self.g)
-    #            At2g = einsum('v,v->',At2,self.g)
-    #            return A0,A1,(Acc + At1g + At2g)
-
     def _g_ft_ESN(self,L1=None,L2=None,gderiv=True):
             # temperature info
             assert(self.beta_max == self.beta)
             beta = self.beta
             mu = self.mu
+
+            self._g_ft_ron()
 
             # zero order contributions
             en = self.sys.g_energies_tot()
@@ -215,12 +172,14 @@ class ccsd(object):
             E0 = beta*B0.sum() + mu*N0 + self.G0
 
             # higher order contributions
-            dvec = -beta*numpy.ones(en.shape) # mu derivative
-            N1,Ncc = self._g_nocc_deriv(dvec)
+            dvec = -numpy.ones(en.shape) # mu derivative
+            N1 = numpy.einsum('i,i->',dvec, self.ron1)
+            Ncc = numpy.einsum('i,i->',dvec, self.rono + self.ronv)
             N1 *= -1.0 # N = - dG/dmu
             Ncc *= -1.0
-            dvec = en - mu # beta derivative
-            B1,Bcc = self._g_nocc_deriv(dvec)
+            dvec = (en - mu)/beta # beta derivative
+            B1 = numpy.einsum('i,i->',dvec, self.ron1)
+            Bcc = numpy.einsum('i,i->',dvec, self.rono + self.ronv)
 
             # compute other contributions to CC derivative
             Bcc -= self.Gcc/(beta) # derivative from factors of 1/beta
@@ -252,6 +211,8 @@ class ccsd(object):
             beta = self.beta
             mu = self.mu
 
+            self._u_ft_ron()
+
             # zero order contributions
             en = self.sys.g_energies_tot()
             ea,eb = self.sys.u_energies_tot()
@@ -264,14 +225,20 @@ class ccsd(object):
             E0 = beta*(B0a.sum() + B0b.sum()) + mu*N0 + self.G0
 
             # higher order contributions
-            dveca = -beta*numpy.ones(ea.shape) # mu derivative
-            dvecb = -beta*numpy.ones(eb.shape) # mu derivative
-            N1,Ncc = self._u_nocc_deriv(dveca,dvecb)
+            dveca = -numpy.ones(ea.shape) # mu derivative
+            dvecb = -numpy.ones(eb.shape) # mu derivative
+            N1 = numpy.einsum('i,i->',dveca, self.ron1[0])
+            N1 += numpy.einsum('i,i->',dvecb, self.ron1[1])
+            Ncc = numpy.einsum('i,i->',dveca, self.rono[0] + self.ronv[1])
+            Ncc += numpy.einsum('i,i->',dvecb, self.rono[0] + self.ronv[1])
             N1 *= -1.0 # N = - dG/dmu
             Ncc *= -1.0
-            dveca = ea - mu
-            dvecb = eb - mu
-            B1,Bcc = self._u_nocc_deriv(dveca,dvecb)
+            dveca = (ea - mu)/beta
+            dvecb = (eb - mu)/beta
+            B1 = numpy.einsum('i,i->',dveca, self.ron1[0])
+            B1 += numpy.einsum('i,i->',dvecb, self.ron1[1])
+            Bcc = numpy.einsum('i,i->',dveca, self.rono[0] + self.ronv[1])
+            Bcc += numpy.einsum('i,i->',dvecb, self.rono[0] + self.ronv[1])
 
             # compute other contributions to CC derivative
             Bcc -= self.Gcc/(beta)
@@ -1217,156 +1184,6 @@ class ccsd(object):
         self.L1 = (L1a,L1b)
         self.L2 = (L2aa,L2ab,L2bb)
 
-    def _g_nocc_deriv(self, dvec):
-        """Evaluate the Lagrangian with scaled occupation number derivatives."""
-        # temperature info
-        assert(self.beta == self.beta_max)
-        beta = self.beta
-        mu = self.mu
-
-        # get energies and occupation numbers
-        en = self.sys.g_energies_tot()
-        fo = ft_utils.ff(beta, en, mu)
-        fv = ft_utils.ffv(beta, en, mu)
-        #n = fo.shape[0]
-
-        # first order contributions
-        der1 = self.sys.g_d_mp1(dvec)
-
-        if self.athresh > 0.0:
-            athresh = self.athresh
-            focc = [x for x in fo if x > athresh]
-            fvir = [x for x in fv if x > athresh]
-            iocc = [i for i,x in enumerate(fo) if x > athresh]
-            ivir = [i for i,x in enumerate(fv) if x > athresh]
-            F,I = cc_utils.ft_d_active_integrals(
-                    self.sys, en, fo, fv, iocc, ivir, dvec)
-        else:
-            F,I = cc_utils.ft_d_integrals(self.sys, en, fo, fv, dvec)
-        A1 = (1.0/beta)*einsum('ia,ai->',self.dia,F.vo)
-        A1 += (1.0/beta)*einsum('ba,ab->',self.dba,F.vv)
-        A1 += (1.0/beta)*einsum('ji,ij->',self.dji,F.oo)
-        A1 += (1.0/beta)*einsum('ai,ia->',self.dai,F.ov)
-        A2 = (0.25/beta)*einsum('cdab,abcd->',self.P2[0],I.vvvv)
-        A2 += (0.5/beta)*einsum('ciab,abci->',self.P2[1],I.vvvo)
-        A2 += (0.5/beta)*einsum('bcai,aibc->',self.P2[2],I.vovv)
-        A2 += (0.25/beta)*einsum('ijab,abij->',self.P2[3],I.vvoo)
-        A2 += (1.0/beta)*einsum('bjai,aibj->',self.P2[4],I.vovo)
-        A2 += (0.25/beta)*einsum('abij,ijab->',self.P2[5],I.oovv)
-        A2 += (0.5/beta)*einsum('jkai,aijk->',self.P2[6],I.vooo)
-        A2 += (0.5/beta)*einsum('kaij,ijka->',self.P2[7],I.ooov)
-        A2 += (0.25/beta)*einsum('klij,ijkl->',self.P2[8],I.oooo)
-        der_cc = A1 + A2
-
-        return der1,der_cc
-
-    def _u_nocc_deriv(self, dveca, dvecb):
-        """Evaluate the Lagrangian with scaled occupation number derivatives."""
-        # temperature info
-        assert(self.beta == self.beta_max)
-        beta = self.beta
-        mu = self.mu
-
-        # get energies and occupation numbers
-        ea,eb = self.sys.u_energies_tot()
-        na = ea.shape[0]
-        nb = eb.shape[0]
-        n = na + nb
-        foa = ft_utils.ff(beta, ea, mu)
-        fob = ft_utils.ff(beta, eb, mu)
-        fva = ft_utils.ffv(beta, ea, mu)
-        fvb = ft_utils.ffv(beta, eb, mu)
-
-        # first order contributions
-        der1 = self.sys.u_d_mp1(dveca,dvecb)
-
-        # get exponentials
-        D1a = ea[:,None] - ea[None,:]
-        D1b = eb[:,None] - eb[None,:]
-        D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
-            - ea[None,None,:,None] - ea[None,None,None,:]
-        D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
-            - ea[None,None,:,None] - eb[None,None,None,:]
-        D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
-            - eb[None,None,:,None] - eb[None,None,None,:]
-        if self.athresh > 0.0:
-            athresh = self.athresh
-            foa = ft_utils.ff(beta, ea, mu)
-            fva = ft_utils.ffv(beta, ea, mu)
-            fob = ft_utils.ff(beta, eb, mu)
-            fvb = ft_utils.ffv(beta, eb, mu)
-            focca = [x for x in foa if x > athresh]
-            fvira = [x for x in fva if x > athresh]
-            iocca = [i for i,x in enumerate(foa) if x > athresh]
-            ivira = [i for i,x in enumerate(fva) if x > athresh]
-            foccb = [x for x in fob if x > athresh]
-            fvirb = [x for x in fvb if x > athresh]
-            ioccb = [i for i,x in enumerate(fob) if x > athresh]
-            ivirb = [i for i,x in enumerate(fvb) if x > athresh]
-            D1a = D1a[numpy.ix_(ivira,iocca)]
-            D1b = D1b[numpy.ix_(ivirb,ioccb)]
-            D2aa = D2aa[numpy.ix_(ivira,ivira,iocca,iocca)]
-            D2ab = D2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)]
-            Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_d_active_integrals(
-                    self.sys, ea, eb, foa, fva, fob, fvb,
-                    iocca, ivira, ioccb, ivirb, dveca, dvecb)
-        else:
-            Fa,Fb,Ia,Ib,Iabab = cc_utils.u_ft_d_integrals(self.sys, ea, eb, foa, fva, fob, fvb, dveca, dvecb)
-        A1 = (1.0/beta)*einsum('ia,ai->', self.dia[0], Fa.vo)
-        A1 += (1.0/beta)*einsum('ia,ai->', self.dia[1], Fb.vo)
-        A1 += (1.0/beta)*einsum('ba,ab->', self.dba[0], Fa.vv)
-        A1 += (1.0/beta)*einsum('ba,ab->', self.dba[1], Fb.vv)
-        A1 += (1.0/beta)*einsum('ji,ij->', self.dji[0], Fa.oo)
-        A1 += (1.0/beta)*einsum('ji,ij->', self.dji[1], Fb.oo)
-        A1 += (1.0/beta)*einsum('ai,ia->', self.dai[0], Fa.ov)
-        A1 += (1.0/beta)*einsum('ai,ia->', self.dai[1], Fb.ov)
-
-        A2 = (0.25/beta)*einsum('ijab,abij->', self.P2[3][0], Ia.vvoo)
-        A2 += (0.25/beta)*einsum('ijab,abij->', self.P2[3][1], Ib.vvoo)
-        A2 += (1.0/beta)*einsum('ijab,abij->', self.P2[3][2], Iabab.vvoo)
-
-        A2 += (0.5/beta)*einsum('ciab,abci->', self.P2[1][0], Ia.vvvo)
-        A2 += (0.5/beta)*einsum('ciab,abci->', self.P2[1][1], Ib.vvvo)
-        A2 += (1.0/beta)*einsum('ciab,abci->', self.P2[1][2], Iabab.vvvo)
-        A2 += (1.0/beta)*einsum('ciab,baic->', self.P2[1][3], Iabab.vvov)
-
-        A2 += (0.5/beta)*einsum('jkai,aijk->', self.P2[6][0], Ia.vooo)
-        A2 += (0.5/beta)*einsum('jkai,aijk->', self.P2[6][1], Ib.vooo)
-        A2 += (1.0/beta)*einsum('jKaI,aIjK->', self.P2[6][2], Iabab.vooo)
-        A2 += (1.0/beta)*einsum('JkAi,iAkJ->', self.P2[6][3], Iabab.ovoo)
-
-        A2 += (0.25/beta)*einsum('cdab,abcd->', self.P2[0][0], Ia.vvvv)
-        A2 += (0.25/beta)*einsum('cdab,abcd->', self.P2[0][1], Ib.vvvv)
-        A2 += (1.0/beta)*einsum('cdab,abcd->', self.P2[0][2], Iabab.vvvv)
-
-        A2 += (1.0/beta)*einsum('bjai,aibj->', self.P2[4][0], Ia.vovo)
-        A2 += (1.0/beta)*einsum('BJAI,AIBJ->', self.P2[4][1], Ib.vovo)
-        A2 += (1.0/beta)*einsum('bJaI,aIbJ->', self.P2[4][2], Iabab.vovo)
-        A2 -= (1.0/beta)*einsum('bJAi,iAbJ->', self.P2[4][3], Iabab.ovvo)
-        A2 -= (1.0/beta)*einsum('BjaI,aIjB->', self.P2[4][4], Iabab.voov)
-        A2 += (1.0/beta)*einsum('BjAi,iAjB->', self.P2[4][5], Iabab.ovov)
-
-        A2 += (0.25/beta)*einsum('klij,ijkl->', self.P2[8][0], Ia.oooo)
-        A2 += (0.25/beta)*einsum('klij,ijkl->', self.P2[8][1], Ib.oooo)
-        A2 += (1.0/beta)*einsum('kLiJ,iJkL->', self.P2[8][2], Iabab.oooo)
-
-        A2 += (0.5/beta)*einsum('bcai,aibc->', self.P2[2][0], Ia.vovv)
-        A2 += (0.5/beta)*einsum('bcai,aibc->', self.P2[2][1], Ib.vovv)
-        A2 += (1.0/beta)*einsum('bCaI,aIbC->', self.P2[2][2], Iabab.vovv)
-        A2 += (1.0/beta)*einsum('BcAi,iAcB->', self.P2[2][3], Iabab.ovvv)
-
-        A2 += (0.5/beta)*einsum('kaij,ijka->', self.P2[7][0], Ia.ooov)
-        A2 += (0.5/beta)*einsum('kaij,ijka->', self.P2[7][1], Ib.ooov)
-        A2 += (1.0/beta)*einsum('kaij,ijka->', self.P2[7][2], Iabab.ooov)
-        A2 += (1.0/beta)*einsum('KaIj,jIaK->', self.P2[7][3], Iabab.oovo)
-
-        A2 += (0.25/beta)*einsum('abij,ijab->', self.P2[5][0], Ia.oovv)
-        A2 += (0.25/beta)*einsum('abij,ijab->', self.P2[5][1], Ib.oovv)
-        A2 += (1.0/beta)*einsum('aBiJ,iJaB->', self.P2[5][2], Iabab.oovv)
-        der_cc = A1 + A2
-
-        return der1,der_cc
-
     def _g_nocc_gderiv(self):
         """Evaluate the derivatives of the weight matrices in 
         the time-dependent formulation.
@@ -1735,14 +1552,69 @@ class ccsd(object):
         else:
             self.n2rdm = cc_utils.g_n2rdm_full(beta, sfo, sfv, P2)
 
-    def _grel_ft_1rdm(self):
-        assert(self.beta == self.beta_max)
-        # build unrelaxed 1RDM and 2RDM if it doesn't exist
-        if self.dia is None:
-            self._g_ft_1rdm()
-        if self.P2 is None:
-            self._g_ft_2rdm()
 
+    def _g_ft_ron(self):
+        # temperature info
+        beta = self.beta
+        mu = self.mu
+
+        # get energies and occupation numbers
+        en = self.sys.g_energies_tot()
+        fo = ft_utils.ff(beta, en, mu)
+        fv = ft_utils.ffv(beta, en, mu)
+
+        # get ON correction to HF free energy
+        self.ron1 = self.sys.g_mp1_den()
+
+        # get integrals
+        if self.athresh > 0.0:
+            athresh = self.athresh
+            focc = [x for x in fo if x > athresh]
+            fvir = [x for x in fv if x > athresh]
+            iocc = [i for i,x in enumerate(fo) if x > athresh]
+            ivir = [i for i,x in enumerate(fv) if x > athresh]
+            nocc = len(focc)
+            nvir = len(fvir)
+            F,I = cc_utils.ft_active_integrals(
+                    self.sys, en, focc, fvir, iocc, ivir)
+        else:
+            focc = fo
+            fvir = fv
+            F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
+        if self.athresh > 0.0:
+            dso = fv[numpy.ix_(iocc)]
+            dsv = fo[numpy.ix_(ivir)]
+        else:
+            dso = fv
+            dsv = fo
+        n = fo.shape[0]
+        rono = numpy.zeros(n)
+        ronv = numpy.zeros(n)
+
+        # perturbed ON contribution to Fock matrix
+        Fd = self.sys.g_fock_d_den()
+        if self.athresh > 0.0:
+            rono += cc_utils.g_Fd_on_active(
+                    Fd, iocc, ivir, self.ndia, self.ndba, self.ndji, self.ndai)
+        else:
+            rono += cc_utils.g_Fd_on(Fd, self.ndia, self.ndba, self.ndji, self.ndai)
+
+        # Add contributions from occupation number relaxation
+        jitemp = numpy.zeros(nocc) if self.athresh > 0.0 else numpy.zeros(n)
+        batemp = numpy.zeros(nvir) if self.athresh > 0.0 else numpy.zeros(n)
+        cc_utils.g_d_on_oo(dso, F, I, self.dia, self.dji, self.dai, self.P2, jitemp)
+        cc_utils.g_d_on_vv(dsv, F, I, self.dia, self.dba, self.dai, self.P2, batemp)
+
+        if self.athresh > 0.0:
+            rono[numpy.ix_(iocc)] += jitemp
+            ronv[numpy.ix_(ivir)] += batemp
+        else:
+            rono += jitemp
+            ronv += batemp
+        self.rono = rono
+        self.ronv = ronv
+
+    def _g_ft_rorb(self):
         # temperature info
         beta = self.beta
         mu = self.mu
@@ -1773,38 +1645,10 @@ class ccsd(object):
         else:
             dso = fv
             dsv = fo
-        n = fo.shape[0]
-
-        # perturbed ON contribution to Fock matrix
-        Fd = self.sys.g_fock_d_den()
-        rdba = numpy.zeros((n,n))
-        rdji = numpy.zeros((n,n))
-        if self.athresh > 0.0:
-            rdji += cc_utils.g_Fd_on_active(
-                    Fd, iocc, ivir, self.ndia, self.ndba, self.ndji, self.ndai)
-        else:
-            rdji += cc_utils.g_Fd_on(Fd, self.ndia, self.ndba, self.ndji, self.ndai)
-
-        # append HF density matrix
-        rdji += numpy.diag(fo)
-
-        # append ON correction to HF density
-        rdji += numpy.diag(self.sys.g_mp1_den())
-
-        # Add contributions from occupation number relaxation
-        jitemp = numpy.zeros((nocc,nocc)) if self.athresh > 0.0 else numpy.zeros((n,n))
-        batemp = numpy.zeros((nvir,nvir)) if self.athresh > 0.0 else numpy.zeros((n,n))
-        cc_utils.g_d_on_oo(dso, F, I, self.dia, self.dji, self.dai, self.P2, jitemp)
-        cc_utils.g_d_on_vv(dsv, F, I, self.dia, self.dba, self.dai, self.P2, batemp)
-
-        if self.athresh > 0.0:
-            rdji[numpy.ix_(iocc,iocc)] += jitemp
-            rdba[numpy.ix_(ivir,ivir)] += batemp
-        else:
-            rdji += jitemp
-            rdba += batemp
-
         # orbital energy derivatives
+        n = fo.shape[0]
+        self.rorbo = numpy.zeros(n)
+        self.rorbv = numpy.zeros(n)
         Gnew = self.G.copy()
         m = Gnew.shape[0]
         n = Gnew.shape[0]
@@ -1828,11 +1672,41 @@ class ccsd(object):
         At2a = -(1.0/beta)*0.25*einsum('vijab,vabij->va',self.L2, T2temp)
         At2b = -(1.0/beta)*0.25*einsum('vijab,vabij->vb',self.L2, T2temp)
         if self.athresh > 0.0:
-            rdji[numpy.ix_(iocc,iocc)] -= numpy.diag(einsum('vi,v->i',At1i+At2i+At2j,self.g))
-            rdba[numpy.ix_(ivir,ivir)] += numpy.diag(einsum('va,v->a',At1a+At2a+At2b,self.g))
+            self.rorbo[numpy.ix_(iocc)] -= einsum('vi,v->i',At1i+At2i+At2j,self.g)
+            self.rorbv[numpy.ix_(ivir)] += einsum('va,v->a',At1a+At2a+At2b,self.g)
         else:
-            rdji -= numpy.diag(einsum('vi,v->i',At1i+At2i+At2j,self.g))
-            rdba += numpy.diag(einsum('va,v->a',At1a+At2a+At2b,self.g))
+            self.rorbo -= einsum('vi,v->i',At1i+At2i+At2j,self.g)
+            self.rorbv += einsum('va,v->a',At1a+At2a+At2b,self.g)
+
+    def _grel_ft_1rdm(self):
+        assert(self.beta == self.beta_max)
+        # build unrelaxed 1RDM and 2RDM if it doesn't exist
+        if self.dia is None:
+            self._g_ft_1rdm()
+        if self.P2 is None:
+            self._g_ft_2rdm()
+
+        # temperature info
+        beta = self.beta
+        mu = self.mu
+
+        # get energies and occupation numbers
+        en = self.sys.g_energies_tot()
+        fo = ft_utils.ff(beta, en, mu)
+
+        # get occupation number and orbital response
+        self._g_ft_ron()
+        self._g_ft_rorb()
+        n = fo.shape[0]
+
+        rdji = numpy.diag(self.rono)
+        rdba = numpy.diag(self.ronv)
+        rdji += numpy.diag(self.ron1)
+        rdji += numpy.diag(self.rorbo)
+        rdba += numpy.diag(self.rorbv)
+
+        # append HF density matrix
+        rdji += numpy.diag(fo)
 
         self.r1rdm = rdji + rdba
 
@@ -1995,6 +1869,207 @@ class ccsd(object):
         else:
             self.n2rdm = cc_utils.u_n2rdm_full(beta, sfoa, sfva, sfob, sfvb, self.P2)
 
+    def _u_ft_ron(self):
+        # temperature info
+        beta = self.beta
+        mu = self.mu
+
+        # ON correction to HF free energy
+        mp1da,mp1db = self.sys.u_mp1_den()
+        self.ron1 = [mp1da, mp1db]
+
+        # get energies and occupation numbers
+        ea,eb = self.sys.u_energies_tot()
+        na = ea.shape[0]
+        nb = eb.shape[0]
+        foa = ft_utils.ff(beta, ea, mu)
+        fva = ft_utils.ffv(beta, ea, mu)
+        fob = ft_utils.ff(beta, eb, mu)
+        fvb = ft_utils.ffv(beta, eb, mu)
+
+        # get integrals
+        if self.athresh > 0.0:
+            athresh = self.athresh
+            focca = [x for x in foa if x > athresh]
+            fvira = [x for x in fva if x > athresh]
+            iocca = [i for i,x in enumerate(foa) if x > athresh]
+            ivira = [i for i,x in enumerate(fva) if x > athresh]
+            foccb = [x for x in fob if x > athresh]
+            fvirb = [x for x in fvb if x > athresh]
+            ioccb = [i for i,x in enumerate(fob) if x > athresh]
+            ivirb = [i for i,x in enumerate(fvb) if x > athresh]
+            nocca = len(focca)
+            nvira = len(fvira)
+            noccb = len(foccb)
+            nvirb = len(fvirb)
+            Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
+                    self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
+        else:
+            focca = foa
+            fvira = fva
+            foccb = fob
+            fvirb = fvb
+            Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
+        if self.athresh > 0.0:
+            dsoa = fva[numpy.ix_(iocca)]
+            dsva = foa[numpy.ix_(ivira)]
+            dsob = fvb[numpy.ix_(ioccb)]
+            dsvb = fob[numpy.ix_(ivirb)]
+        else:
+            dsoa = fva
+            dsva = foa
+            dsob = fvb
+            dsvb = fob
+
+        # perturbed ON contribution to Fock matrix
+        Fdaa,Fdab,Fdbb,Fdba = self.sys.u_fock_d_den()
+        ronoa = numpy.zeros(na)
+        ronva = numpy.zeros(na)
+        ronob = numpy.zeros(nb)
+        ronvb = numpy.zeros(nb)
+        if self.athresh > 0.0:
+            temp = cc_utils.u_Fd_on_active(
+                    Fdaa, Fdab, Fdba, Fdbb, iocca, ivira, ioccb, ivirb, 
+                    self.ndia, self.ndba, self.ndji, self.ndai)
+            ronoa += temp[0]
+            ronob += temp[1]
+        else:
+            temp = cc_utils.u_Fd_on(
+                    Fdaa, Fdab, Fdba, Fdbb, self.ndia, self.ndba, self.ndji, self.ndai)
+            ronoa += temp[0]
+            ronob += temp[1]
+
+        # Add contributions from occupation number relaxation
+        jitempa = numpy.zeros(nocca) if self.athresh > 0.0 else numpy.zeros(na)
+        batempa = numpy.zeros(nvira) if self.athresh > 0.0 else numpy.zeros(na)
+        jitempb = numpy.zeros(noccb) if self.athresh > 0.0 else numpy.zeros(nb)
+        batempb = numpy.zeros(nvirb) if self.athresh > 0.0 else numpy.zeros(nb)
+        cc_utils.u_d_on_oo(
+                dsoa, dsob, Fa, Fb, Ia, Ib, Iabab, 
+                self.dia, self.dji, self.dai, self.P2, jitempa, jitempb)
+        cc_utils.u_d_on_vv(
+                dsva, dsvb, Fa, Fb, Ia, Ib, Iabab, 
+                self.dia, self.dba, self.dai, self.P2, batempa, batempb)
+
+        if self.athresh > 0.0:
+            ronoa[numpy.ix_(iocca)] += jitempa
+            ronob[numpy.ix_(ioccb)] += jitempb
+            ronva[numpy.ix_(ivira)] += batempa
+            ronvb[numpy.ix_(ivirb)] += batempb
+        else:
+            ronoa += jitempa
+            ronob += jitempb
+            ronva += batempa
+            ronvb += batempb
+        self.rono = [ronoa, ronob]
+        self.ronv = [ronva, ronvb]
+
+    def _u_ft_rorb(self):
+        # temperature info
+        beta = self.beta
+        mu = self.mu
+
+        # get energies and occupation numbers
+        ea,eb = self.sys.u_energies_tot()
+        na = ea.shape[0]
+        nb = eb.shape[0]
+        foa = ft_utils.ff(beta, ea, mu)
+        fva = ft_utils.ffv(beta, ea, mu)
+        fob = ft_utils.ff(beta, eb, mu)
+        fvb = ft_utils.ffv(beta, eb, mu)
+
+        # get integrals
+        if self.athresh > 0.0:
+            athresh = self.athresh
+            focca = [x for x in foa if x > athresh]
+            fvira = [x for x in fva if x > athresh]
+            iocca = [i for i,x in enumerate(foa) if x > athresh]
+            ivira = [i for i,x in enumerate(fva) if x > athresh]
+            foccb = [x for x in fob if x > athresh]
+            fvirb = [x for x in fvb if x > athresh]
+            ioccb = [i for i,x in enumerate(fob) if x > athresh]
+            ivirb = [i for i,x in enumerate(fvb) if x > athresh]
+            nocca = len(focca)
+            nvira = len(fvira)
+            noccb = len(foccb)
+            nvirb = len(fvirb)
+            Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
+                    self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
+        else:
+            focca = foa
+            fvira = fva
+            foccb = fob
+            fvirb = fvb
+            Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
+        if self.athresh > 0.0:
+            dsoa = fva[numpy.ix_(iocca)]
+            dsva = foa[numpy.ix_(ivira)]
+            dsob = fvb[numpy.ix_(ioccb)]
+            dsvb = fob[numpy.ix_(ivirb)]
+        else:
+            dsoa = fva
+            dsva = foa
+            dsob = fvb
+            dsvb = fob
+
+        rorboa = numpy.zeros(na)
+        rorbva = numpy.zeros(na)
+        rorbob = numpy.zeros(nb)
+        rorbvb = numpy.zeros(nb)
+        # orbital energy derivatives
+        Gnew = self.G.copy()
+        m = Gnew.shape[0]
+        n = Gnew.shape[0]
+        for i in range(m):
+            for j in range(n):
+                Gnew[i,j] *= (self.ti[j] - self.ti[i])
+
+        ng = self.ti.shape[0]
+        D1a = ea[:,None] - ea[None,:]
+        D1b = eb[:,None] - eb[None,:]
+        D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
+            - ea[None,None,:,None] - ea[None,None,None,:]
+        D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
+            - ea[None,None,:,None] - eb[None,None,None,:]
+        D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
+            - eb[None,None,:,None] - eb[None,None,None,:]
+        if self.athresh > 0.0:
+            D1a = D1a[numpy.ix_(ivira,iocca)]
+            D1b = D1b[numpy.ix_(ivirb,ioccb)]
+            D2aa = D2aa[numpy.ix_(ivira,ivira,iocca,iocca)]
+            D2ab = D2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)]
+            D2bb = D2bb[numpy.ix_(ivirb,ivirb,ioccb,ioccb)]
+        T1t,T2t = ft_cc_equations.uccsd_stanton(Fa,Fb,Ia,Ib,Iabab,self.T1[0],self.T1[1],
+                self.T2[0],self.T2[1],self.T2[2],D1a,D1b,D2aa,D2ab,D2bb,self.ti,ng,Gnew)
+        At1i = -(1.0/beta)*einsum('via,vai->vi',self.L1[0], T1t[0])
+        At1I = -(1.0/beta)*einsum('via,vai->vi',self.L1[1], T1t[1])
+        At1a = -(1.0/beta)*einsum('via,vai->va',self.L1[0], T1t[0])
+        At1A = -(1.0/beta)*einsum('via,vai->va',self.L1[1], T1t[1])
+        At2i = -(1.0/beta)*0.25*einsum('vijab,vabij->vi',self.L2[0], T2t[0])
+        At2I = -(1.0/beta)*0.25*einsum('vijab,vabij->vi',self.L2[2], T2t[2])
+        At2j = -(1.0/beta)*0.25*einsum('vijab,vabij->vj',self.L2[0], T2t[0])
+        At2J = -(1.0/beta)*0.25*einsum('vijab,vabij->vj',self.L2[2], T2t[2])
+        At2a = -(1.0/beta)*0.25*einsum('vijab,vabij->va',self.L2[0], T2t[0])
+        At2A = -(1.0/beta)*0.25*einsum('vijab,vabij->va',self.L2[2], T2t[2])
+        At2b = -(1.0/beta)*0.25*einsum('vijab,vabij->vb',self.L2[0], T2t[0])
+        At2B = -(1.0/beta)*0.25*einsum('vijab,vabij->vb',self.L2[2], T2t[2])
+        At2i -= (1.0/beta)*einsum('viJaB,vaBiJ->vi',self.L2[1], T2t[1])
+        At2J -= (1.0/beta)*einsum('viJaB,vaBiJ->vJ',self.L2[1], T2t[1])
+        At2a -= (1.0/beta)*einsum('viJaB,vaBiJ->va',self.L2[1], T2t[1])
+        At2B -= (1.0/beta)*einsum('viJaB,vaBiJ->vB',self.L2[1], T2t[1])
+        if self.athresh > 0.0:
+            rorboa[numpy.ix_(iocca)] -= einsum('vi,v->i',At1i+At2i+At2j,self.g)
+            rorbob[numpy.ix_(ioccb)] -= einsum('vi,v->i',At1I+At2I+At2J,self.g)
+            rorbva[numpy.ix_(ivira)] += einsum('va,v->a',At1a+At2a+At2b,self.g)
+            rorbvb[numpy.ix_(ivirb)] += einsum('va,v->a',At1A+At2A+At2B,self.g)
+        else:
+            rorboa -= einsum('vi,v->i',At1i+At2i+At2j,self.g)
+            rorbob -= einsum('vi,v->i',At1I+At2I+At2J,self.g)
+            rorbva += einsum('va,v->a',At1a+At2a+At2b,self.g)
+            rorbvb += einsum('va,v->a',At1A+At2A+At2B,self.g)
+        self.rorbo = [rorboa, rorbob]
+        self.rorbv = [rorbva, rorbvb]
+
     def _urel_ft_1rdm(self):
         assert(self.beta == self.beta_max)
         # build unrelaxed 1RDM and 2RDM if it doesn't exist
@@ -2002,6 +2077,9 @@ class ccsd(object):
             self._u_ft_1rdm()
         if self.P2 is None:
             self._u_ft_2rdm()
+
+        self._u_ft_ron()
+        self._u_ft_rorb()
 
         # temperature info
         beta = self.beta
@@ -2050,105 +2128,22 @@ class ccsd(object):
             dsob = fvb
             dsvb = fob
 
-        # perturbed ON contribution to Fock matrix
-        Fdaa,Fdab,Fdbb,Fdba = self.sys.u_fock_d_den()
         rdba = [numpy.zeros((na,na)),numpy.zeros((nb,nb))]
         rdji = [numpy.zeros((na,na)),numpy.zeros((nb,nb))]
-        if self.athresh > 0.0:
-            temp = cc_utils.u_Fd_on_active(
-                    Fdaa, Fdab, Fdba, Fdbb, iocca, ivira, ioccb, ivirb, 
-                    self.ndia, self.ndba, self.ndji, self.ndai)
-            rdji[0] += temp[0]
-            rdji[1] += temp[1]
-        else:
-            temp = cc_utils.u_Fd_on(
-                    Fdaa, Fdab, Fdba, Fdbb, self.ndia, self.ndba, self.ndji, self.ndai)
-            rdji[0] += temp[0]
-            rdji[1] += temp[1]
+        rdba[0] += numpy.diag(self.ronv[0])
+        rdba[1] += numpy.diag(self.ronv[1])
+        rdji[0] += numpy.diag(self.rono[0])
+        rdji[1] += numpy.diag(self.rono[1])
+        rdji[0] += numpy.diag(self.ron1[0])
+        rdji[1] += numpy.diag(self.ron1[1])
+        rdba[0] += numpy.diag(self.rorbv[0])
+        rdba[1] += numpy.diag(self.rorbv[1])
+        rdji[0] += numpy.diag(self.rorbo[0])
+        rdji[1] += numpy.diag(self.rorbo[1])
 
         # append HF density matrix
         rdji[0] += numpy.diag(foa)
         rdji[1] += numpy.diag(fob)
-
-        # append ON correction
-        mp1da,mp1db = self.sys.u_mp1_den()
-        rdji[0] += numpy.diag(mp1da)
-        rdji[1] += numpy.diag(mp1db)
-
-        # Add contributions from occupation number relaxation
-        jitempa = numpy.zeros((nocca,nocca)) if self.athresh > 0.0 else numpy.zeros((na,na))
-        batempa = numpy.zeros((nvira,nvira)) if self.athresh > 0.0 else numpy.zeros((na,na))
-        jitempb = numpy.zeros((noccb,noccb)) if self.athresh > 0.0 else numpy.zeros((nb,nb))
-        batempb = numpy.zeros((nvirb,nvirb)) if self.athresh > 0.0 else numpy.zeros((nb,nb))
-        cc_utils.u_d_on_oo(
-                dsoa, dsob, Fa, Fb, Ia, Ib, Iabab, 
-                self.dia, self.dji, self.dai, self.P2, jitempa, jitempb)
-        cc_utils.u_d_on_vv(
-                dsva, dsvb, Fa, Fb, Ia, Ib, Iabab, 
-                self.dia, self.dba, self.dai, self.P2, batempa, batempb)
-
-        if self.athresh > 0.0:
-            rdji[0][numpy.ix_(iocca,iocca)] += jitempa
-            rdji[1][numpy.ix_(ioccb,ioccb)] += jitempb
-            rdba[0][numpy.ix_(ivira,ivira)] += batempa
-            rdba[1][numpy.ix_(ivirb,ivirb)] += batempb
-        else:
-            rdji[0] += jitempa
-            rdji[1] += jitempb
-            rdba[0] += batempa
-            rdba[1] += batempb
-
-        # orbital energy derivatives
-        Gnew = self.G.copy()
-        m = Gnew.shape[0]
-        n = Gnew.shape[0]
-        for i in range(m):
-            for j in range(n):
-                Gnew[i,j] *= (self.ti[j] - self.ti[i])
-
-        ng = self.ti.shape[0]
-        D1a = ea[:,None] - ea[None,:]
-        D1b = eb[:,None] - eb[None,:]
-        D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
-            - ea[None,None,:,None] - ea[None,None,None,:]
-        D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
-            - ea[None,None,:,None] - eb[None,None,None,:]
-        D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
-            - eb[None,None,:,None] - eb[None,None,None,:]
-        if self.athresh > 0.0:
-            D1a = D1a[numpy.ix_(ivira,iocca)]
-            D1b = D1b[numpy.ix_(ivirb,ioccb)]
-            D2aa = D2aa[numpy.ix_(ivira,ivira,iocca,iocca)]
-            D2ab = D2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)]
-            D2bb = D2bb[numpy.ix_(ivirb,ivirb,ioccb,ioccb)]
-        T1t,T2t = ft_cc_equations.uccsd_stanton(Fa,Fb,Ia,Ib,Iabab,self.T1[0],self.T1[1],
-                self.T2[0],self.T2[1],self.T2[2],D1a,D1b,D2aa,D2ab,D2bb,self.ti,ng,Gnew)
-        At1i = -(1.0/beta)*einsum('via,vai->vi',self.L1[0], T1t[0])
-        At1I = -(1.0/beta)*einsum('via,vai->vi',self.L1[1], T1t[1])
-        At1a = -(1.0/beta)*einsum('via,vai->va',self.L1[0], T1t[0])
-        At1A = -(1.0/beta)*einsum('via,vai->va',self.L1[1], T1t[1])
-        At2i = -(1.0/beta)*0.25*einsum('vijab,vabij->vi',self.L2[0], T2t[0])
-        At2I = -(1.0/beta)*0.25*einsum('vijab,vabij->vi',self.L2[2], T2t[2])
-        At2j = -(1.0/beta)*0.25*einsum('vijab,vabij->vj',self.L2[0], T2t[0])
-        At2J = -(1.0/beta)*0.25*einsum('vijab,vabij->vj',self.L2[2], T2t[2])
-        At2a = -(1.0/beta)*0.25*einsum('vijab,vabij->va',self.L2[0], T2t[0])
-        At2A = -(1.0/beta)*0.25*einsum('vijab,vabij->va',self.L2[2], T2t[2])
-        At2b = -(1.0/beta)*0.25*einsum('vijab,vabij->vb',self.L2[0], T2t[0])
-        At2B = -(1.0/beta)*0.25*einsum('vijab,vabij->vb',self.L2[2], T2t[2])
-        At2i -= (1.0/beta)*einsum('viJaB,vaBiJ->vi',self.L2[1], T2t[1])
-        At2J -= (1.0/beta)*einsum('viJaB,vaBiJ->vJ',self.L2[1], T2t[1])
-        At2a -= (1.0/beta)*einsum('viJaB,vaBiJ->va',self.L2[1], T2t[1])
-        At2B -= (1.0/beta)*einsum('viJaB,vaBiJ->vB',self.L2[1], T2t[1])
-        if self.athresh > 0.0:
-            rdji[0][numpy.ix_(iocca,iocca)] -= numpy.diag(einsum('vi,v->i',At1i+At2i+At2j,self.g))
-            rdji[1][numpy.ix_(ioccb,ioccb)] -= numpy.diag(einsum('vi,v->i',At1I+At2I+At2J,self.g))
-            rdba[0][numpy.ix_(ivira,ivira)] += numpy.diag(einsum('va,v->a',At1a+At2a+At2b,self.g))
-            rdba[1][numpy.ix_(ivirb,ivirb)] += numpy.diag(einsum('va,v->a',At1A+At2A+At2B,self.g))
-        else:
-            rdji[0] -= numpy.diag(einsum('vi,v->i',At1i+At2i+At2j,self.g))
-            rdji[1] -= numpy.diag(einsum('vi,v->i',At1I+At2I+At2J,self.g))
-            rdba[0] += numpy.diag(einsum('va,v->a',At1a+At2a+At2b,self.g))
-            rdba[1] += numpy.diag(einsum('va,v->a',At1A+At2A+At2B,self.g))
 
         self.r1rdm = [rdji[0] + rdba[0],rdji[1] + rdba[1]]
 
