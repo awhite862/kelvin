@@ -42,13 +42,26 @@ class TDCCSD(object):
         ng = self.ngrid
         self.ti,self.g,G = quadrature.ft_quad(self.ngrid,beta,self.quad)
         self.sys = sys
+        self.T1 = None
+        self.T2 = None
+        self.L1 = None
+        self.L2 = None
         # pieces of normal-ordered 1-rdm
         self.dia = None
         self.dba = None
         self.dji = None
         self.dai = None
+        # pieces of unrelaxed 1-rdm
+        self.ndia = None
+        self.ndba = None
+        self.ndji = None
+        self.ndai = None
         # pieces of normal-ordered 2-rdm
         self.P2 = None
+        # occupation number response
+        self.rono = None
+        self.ronv = None
+        self.ron1 = None
 
     def run(self,response=None):
         """Run CCSD calculation."""
@@ -60,6 +73,81 @@ class TDCCSD(object):
             if self.iprint > 0:
                 print('Running CCSD at zero Temperature')
         return self._ccsd()
+
+    def compute_ESN(self):
+        """Compute energy, entropy, particle number."""
+        if not self.finite_T:
+            N = self.sys.g_energies()[0].shape[0]
+            print("T = 0: ")
+            print('  E = {}'.format(self.Etot))
+            print('  S = {}'.format(0.0))
+            print('  N = {}'.format(N))
+        else:
+            if self.L1 is None:
+                if self.sys.has_u():
+                    assert(False)
+                #    self._ft_uccsd_lambda(L1=L1,L2=L2)
+                #    ti = time.time()
+                #    self._u_ft_1rdm()
+                #    self._u_ft_2rdm()
+                #    tf = time.time()
+                #    if self.iprint > 0:
+                #        print("RDM construction time: {} s".format(tf - ti))
+                else:
+                    self._ccsd_lambda(rdm2=True)
+            if self.sys.has_u():
+                    assert(False)
+            #    ti = time.time()
+            #    self._u_ft_ESN(L1,L2,gderiv=gderiv)
+            #    tf = time.time()
+            #    if self.iprint > 0:
+            #        print("Total derivative time: {} s".format(tf - ti))
+            else:
+                self._g_ft_ESN()
+
+    def _g_ft_ESN(self,L1=None,L2=None,gderiv=True):
+        # temperature info
+        beta = self.beta
+        mu = self.mu
+
+        self._g_ft_ron()
+
+        # zero order contributions
+        en = self.sys.g_energies_tot()
+        fo = ft_utils.ff(beta, en, mu)
+        B0 = ft_utils.dGP0(beta, en, mu)
+        N0 = fo.sum()
+        E0 = beta*B0.sum() + mu*N0 + self.G0
+
+        # higher order contributions
+        dvec = -numpy.ones(en.shape) # mu derivative
+        N1 = numpy.einsum('i,i->',dvec, self.ron1)
+        Ncc = numpy.einsum('i,i->',dvec, self.rono + self.ronv)
+        N1 *= -1.0 # N = - dG/dmu
+        Ncc *= -1.0
+        dvec = (en - mu)/beta # beta derivative
+        B1 = numpy.einsum('i,i->',dvec, self.ron1)
+        Bcc = numpy.einsum('i,i->',dvec, self.rono + self.ronv)
+
+        # compute other contributions to CC derivative
+        Bcc -= self.Gcc/(beta) # derivative from factors of 1/beta
+        Bcc += self._g_gderiv_approx()
+
+        E1 = beta*B1 + mu*N1 + self.G1
+        Ecc = beta*Bcc + mu*Ncc + self.Gcc
+
+        self.N0 = N0
+        self.N1 = N1
+        self.Ncc = Ncc
+        self.N = Ncc + N0 + N1
+        self.E0 = E0
+        self.E1 = E1
+        self.Ecc = Ecc
+        self.E = E0 + E1 + Ecc
+        self.S = -beta*(self.Gtot - self.E + mu*self.N)
+        self.S0 = -beta*(self.G0 - self.E0 + mu*self.N0)
+        self.S1 = -beta*(self.G1 - self.E1 + mu*self.N1)
+        self.Scc = self.S - self.S0 - self.S1
 
     def _get_t_step(self, h, t1, t2, fRHS):
         if self.prop["tprop"] == "rk1":
@@ -274,6 +362,8 @@ class TDCCSD(object):
 
             # get ERIs
             I = self.sys.g_aint()
+            sfo = numpy.ones(no)
+            sfv = numpy.ones(nv)
         else:
             # get orbital energies
             en = self.sys.g_energies_tot()
@@ -315,6 +405,8 @@ class TDCCSD(object):
                 D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
                 t1shape = (nvir,nocc)
                 t1shape = (nvir,nvir,nocc,nocc)
+                sfo = numpy.sqrt(focc)
+                sfv = numpy.sqrt(fvir)
 
             else:
                 # get scaled integrals
@@ -326,6 +418,8 @@ class TDCCSD(object):
                         - en[None,None,:,None] - en[None,None,None,:]
                 t1shape = (n,n)
                 t2shape = (n,n,n,n)
+                sfo = numpy.sqrt(fo)
+                sfv = numpy.sqrt(fv)
 
         def fRHS(var):
             t1,t2 = var
@@ -411,7 +505,102 @@ class TDCCSD(object):
         self.dji = pji
         self.dba = pba
         self.dai = pai
+        self.ndia = numpy.einsum('ia,i,a->ia',self.dia,sfo,sfv)
+        self.ndba = numpy.einsum('ba,b,a->ba',self.dba,sfv,sfv)
+        self.ndji = numpy.einsum('ji,j,i->ji',self.dji,sfo,sfo)
+        self.ndai = numpy.einsum('ai,a,i->ai',self.dai,sfv,sfo)
         if rdm2:
             self.P2 = (Pcdab, Pciab, Pbcai, Pijab, Pbjai, Pabij, Pjkai, Pkaij, Pklij)
 
         return (Eccn+E01,Eccn)
+
+    def _g_gderiv_approx(self):
+        # temperature info
+        beta = self.beta
+        mu = self.mu
+
+        # get energies and occupation numbers
+        en = self.sys.g_energies_tot()
+        fo = ft_utils.ff(beta, en, mu)
+        fv = ft_utils.ffv(beta, en, mu)
+
+        if self.athresh > 0.0:
+            athresh = self.athresh
+            focc = [x for x in fo if x > athresh]
+            fvir = [x for x in fv if x > athresh]
+            iocc = [i for i,x in enumerate(fo) if x > athresh]
+            ivir = [i for i,x in enumerate(fv) if x > athresh]
+            F,I = cc_utils.ft_active_integrals(
+                    self.sys, en, focc, fvir, iocc, ivir)
+        else:
+            F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
+        if not self.saveT:
+            t2_temp = 0.25*self.T2 + 0.5*numpy.einsum('ai,bj->abij',self.T1,self.T1)
+            Es1 = numpy.einsum('ai,ia->',self.T1,F.ov)
+        else:
+            ng = self.ngrid
+            t2_temp = 0.25*self.T2[ng - 1] + 0.5*numpy.einsum('ai,bj->abij',self.T1[ng - 1],self.T1[ng -1])
+            Es1 = numpy.einsum('ai,ia->',self.T1[ng - 1],F.ov)
+        Es2 = numpy.einsum('abij,ijab->',t2_temp,I.oovv)
+        return (Es1 + Es2)/beta
+
+    def _g_ft_ron(self):
+        # temperature info
+        beta = self.beta
+        mu = self.mu
+
+        # get energies and occupation numbers
+        en = self.sys.g_energies_tot()
+        fo = ft_utils.ff(beta, en, mu)
+        fv = ft_utils.ffv(beta, en, mu)
+
+        # get ON correction to HF free energy
+        self.ron1 = self.sys.g_mp1_den()
+
+        # get integrals
+        if self.athresh > 0.0:
+            athresh = self.athresh
+            focc = [x for x in fo if x > athresh]
+            fvir = [x for x in fv if x > athresh]
+            iocc = [i for i,x in enumerate(fo) if x > athresh]
+            ivir = [i for i,x in enumerate(fv) if x > athresh]
+            nocc = len(focc)
+            nvir = len(fvir)
+            F,I = cc_utils.ft_active_integrals(
+                    self.sys, en, focc, fvir, iocc, ivir)
+        else:
+            focc = fo
+            fvir = fv
+            F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
+        if self.athresh > 0.0:
+            dso = fv[numpy.ix_(iocc)]
+            dsv = fo[numpy.ix_(ivir)]
+        else:
+            dso = fv
+            dsv = fo
+        n = fo.shape[0]
+        rono = numpy.zeros(n)
+        ronv = numpy.zeros(n)
+
+        # perturbed ON contribution to Fock matrix
+        Fd = self.sys.g_fock_d_den()
+        if self.athresh > 0.0:
+            rono += cc_utils.g_Fd_on_active(
+                    Fd, iocc, ivir, self.ndia, self.ndba, self.ndji, self.ndai)
+        else:
+            rono += cc_utils.g_Fd_on(Fd, self.ndia, self.ndba, self.ndji, self.ndai)
+
+        # Add contributions from occupation number relaxation
+        jitemp = numpy.zeros(nocc) if self.athresh > 0.0 else numpy.zeros(n)
+        batemp = numpy.zeros(nvir) if self.athresh > 0.0 else numpy.zeros(n)
+        cc_utils.g_d_on_oo(dso, F, I, self.dia, self.dji, self.dai, self.P2, jitemp)
+        cc_utils.g_d_on_vv(dsv, F, I, self.dia, self.dba, self.dai, self.P2, batemp)
+
+        if self.athresh > 0.0:
+            rono[numpy.ix_(iocc)] += jitemp
+            ronv[numpy.ix_(ivir)] += batemp
+        else:
+            rono += jitemp
+            ronv += batemp
+        self.rono = rono
+        self.ronv = ronv

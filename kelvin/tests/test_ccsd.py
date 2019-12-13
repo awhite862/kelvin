@@ -115,7 +115,7 @@ class CCSDTest(unittest.TestCase):
         mycc.conv_tol_normt = 1e-9
         Ecc = mycc.kernel()
         sys = scf_system(mf,0.0,0.0,orbtype='g')
-        ccsd0 = ccsd(sys,iprint=1,max_iter=100,econv=1e-11,damp=0.0)
+        ccsd0 = ccsd(sys,iprint=0,max_iter=100,econv=1e-11,damp=0.0)
         Etot,Ecc2 = ccsd0.run()
         diff = abs(Ecc[0] - Ecc2)
         #print(diff)
@@ -151,7 +151,7 @@ class CCSDTest(unittest.TestCase):
         mycc.conv_tol_normt = 1e-9
         Ecc = mycc.kernel()
         sys = scf_system(mf,0.0,0.0)
-        ccsd0 = ccsd(sys,iprint=1,max_iter=100,econv=1e-11,damp=0.0)
+        ccsd0 = ccsd(sys,iprint=0,max_iter=100,econv=1e-11,damp=0.0)
         Etot,Ecc2 = ccsd0.run()
         diff = abs(Ecc[0] - Ecc2)
         #print(diff)

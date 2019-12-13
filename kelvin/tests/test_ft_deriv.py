@@ -14,15 +14,14 @@ try:
 except:
     has_lattice = False
 
-def fd_ESN(m, T, mu, ng, Ecctot, athresh = 0.0, quad = 'lin'):
-    delta = 5e-4
+def fd_ESN(m, T, mu, ng, Ecctot, athresh = 0.0, quad = 'lin', damp=0.0, mi=35, delta=5e-4):
     muf = mu + delta
     mub = mu - delta
     sys = scf_system(m,T,muf,orbtype='g')
-    ccsdT = ccsd(sys,iprint=0,T=T,mu=muf,max_iter=35,damp=0.0,ngrid=ng,econv=1e-10,athresh=athresh,quad=quad)
+    ccsdT = ccsd(sys,iprint=0,T=T,mu=muf,max_iter=mi,damp=damp,ngrid=ng,econv=1e-10,athresh=athresh,quad=quad)
     Ef,Ecf = ccsdT.run()
     sys = scf_system(m,T,mub,orbtype='g')
-    ccsdT = ccsd(sys,iprint=0,T=T,mu=mub,max_iter=35,damp=0.0,ngrid=ng,econv=1e-10,athresh=athresh,quad=quad)
+    ccsdT = ccsd(sys,iprint=0,T=T,mu=mub,max_iter=mi,damp=damp,ngrid=ng,econv=1e-10,athresh=athresh,quad=quad)
     Eb,Ecb = ccsdT.run()
     
     Nx = -(Ef - Eb)/(2*delta)
@@ -30,10 +29,10 @@ def fd_ESN(m, T, mu, ng, Ecctot, athresh = 0.0, quad = 'lin'):
     Tf = T + delta
     Tb = T - delta
     sys = scf_system(m,Tf,mu,orbtype='g')
-    ccsdT = ccsd(sys,iprint=0,T=Tf,mu=mu,max_iter=35,damp=0.0,ngrid=ng,econv=1e-10,athresh=athresh,quad=quad)
+    ccsdT = ccsd(sys,iprint=0,T=Tf,mu=mu,max_iter=mi,damp=damp,ngrid=ng,econv=1e-10,athresh=athresh,quad=quad)
     Ef,Ecf = ccsdT.run()
     sys = scf_system(m,Tb,mu,orbtype='g')
-    ccsdT = ccsd(sys,iprint=0,T=Tb,mu=mu,max_iter=35,damp=0.0,ngrid=ng,econv=1e-10,athresh=athresh,quad=quad)
+    ccsdT = ccsd(sys,iprint=0,T=Tb,mu=mu,max_iter=mi,damp=damp,ngrid=ng,econv=1e-10,athresh=athresh,quad=quad)
     Eb,Ecb = ccsdT.run()
     
     Sx = -(Ef - Eb)/(2*delta)
@@ -107,15 +106,15 @@ class FTDerivTest(unittest.TestCase):
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
         Escf = m.scf()
-        T = 0.5
+        T = 0.02
         mu = 0.0
-        ng = 20
+        ng = 40
         athresh = 1e-20
         sys = scf_system(m,T,mu,orbtype='g')
-        ccsdT = ccsd(sys,iprint=0,T=T,mu=mu,max_iter=35,damp=0.0,ngrid=ng,econv=1e-10,athresh=athresh,singles=True)
+        ccsdT = ccsd(sys,iprint=0,T=T,mu=mu,max_iter=100,damp=0.3,ngrid=ng,econv=1e-10,athresh=athresh,singles=True)
         Ecctot,Ecc = ccsdT.run()
         ccsdT.compute_ESN()
-        Ex,Nx,Sx = fd_ESN(m, T, mu, ng, Ecctot, athresh=athresh)
+        Ex,Nx,Sx = fd_ESN(m, T, mu, ng, Ecctot, athresh=athresh, damp=0.3, mi=100, delta=2e-5)
         dE = abs((ccsdT.E - Ex)/Ex)
         dS = abs((ccsdT.S - Sx)/Sx)
         dN = abs((ccsdT.N - Nx)/Nx)
@@ -134,15 +133,15 @@ class FTDerivTest(unittest.TestCase):
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
         Escf = m.scf()
-        T = 0.5
+        T = 0.02
         mu = 0.0
-        ng = 20
+        ng = 40
         athresh = 1e-20
         sys = scf_system(m,T,mu,orbtype='u')
-        ccsdT = ccsd(sys,iprint=0,T=T,mu=mu,max_iter=35,damp=0.0,ngrid=ng,econv=1e-10,athresh=athresh,singles=True)
+        ccsdT = ccsd(sys,iprint=0,T=T,mu=mu,max_iter=100,damp=0.3,ngrid=ng,econv=1e-10,athresh=athresh,singles=True)
         Ecctot,Ecc = ccsdT.run()
         ccsdT.compute_ESN()
-        Ex,Nx,Sx = fd_ESN(m, T, mu, ng, Ecctot, athresh=athresh)
+        Ex,Nx,Sx = fd_ESN(m, T, mu, ng, Ecctot, athresh=athresh, damp=0.3, mi=100, delta=2e-5)
         dE = abs((ccsdT.E - Ex)/Ex)
         dS = abs((ccsdT.S - Sx)/Sx)
         dN = abs((ccsdT.N - Nx)/Nx)

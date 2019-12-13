@@ -22,6 +22,7 @@ from kelvin.tests import test_neq_lambda_equation
 from kelvin.tests import test_neq_prop
 from kelvin.tests import test_quadrature
 from kelvin.tests import test_td_ccsd
+from kelvin.tests import test_td_ccsd_ESN
 from kelvin.tests import test_td_ccsd_lambda
 from kelvin.tests import test_td_ccsd_1rdm
 from kelvin.tests import test_td_ccsd_2rdm
@@ -165,6 +166,10 @@ def full_suite():
     suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_cn"))
     suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_am2"))
     suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_active"))
+
+    suite.addTest(test_td_ccsd_ESN.TDCCSDESNTest("test_Be_gen"))
+    suite.addTest(test_td_ccsd_ESN.TDCCSDESNTest("test_UEG_gen"))
+    suite.addTest(test_td_ccsd_ESN.TDCCSDESNTest("test_Be_gen_active"))
 
     suite.addTest(test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_rk4_omega"))
     suite.addTest(test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_omega_active"))
@@ -331,6 +336,10 @@ def default_suite():
     #suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_cn"))
     #suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_am2"))
     #suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_active"))
+
+    suite.addTest(test_td_ccsd_ESN.TDCCSDESNTest("test_Be_gen"))
+    #suite.addTest(test_td_ccsd_ESN.TDCCSDESNTest("test_UEG_gen"))
+    #suite.addTest(test_td_ccsd_ESN.TDCCSDESNTest("test_Be_gen_active"))
 
     suite.addTest(test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_rk4_omega"))
     #suite.addTest(test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_omega_active"))
