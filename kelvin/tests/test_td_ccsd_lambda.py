@@ -241,5 +241,53 @@ class TDCCSDLambdaTest(unittest.TestCase):
         self.assertTrue(d1 < 1e-8,error1)
         self.assertTrue(d2 < 1e-8,error2)
 
+    def test_Be_u_vs_g(self):
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+
+        m = scf.RHF(mol)
+        m.conv_tol = 1e-12
+        Escf = m.scf()
+        T = 0.5
+        mu = 0.0
+
+        # compute normal-order 1-rdm from propagation
+        sys = scf_system(m,T,mu,orbtype='g')
+        ea,eb = sys.u_energies_tot()
+        na = ea.shape[0]
+        nb = eb.shape[0]
+        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
+        Etmp,Ecctmp = tdccsdT.run()
+        Eref,Eccref = tdccsdT._ccsd_lambda()
+        l1aref = tdccsdT.L1[:na,:na]
+        l1bref = tdccsdT.L1[na:,na:]
+        l2aaref = tdccsdT.L2[:na,:na,:na,:na]
+        l2abref = tdccsdT.L2[:na,na:,:na,na:]
+        l2bbref = tdccsdT.L2[na:,na:,na:,na:]
+        # compute normal-order 1-rdm from propagation
+        sys = scf_system(m,T,mu,orbtype='u')
+        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
+        Etmp,Ecctmp = tdccsdT.run()
+        Eout,Eccout = tdccsdT._uccsd_lambda()
+        d1a = numpy.linalg.norm(l1aref - tdccsdT.L1[0])/numpy.linalg.norm(l1aref)
+        d1b = numpy.linalg.norm(l1bref - tdccsdT.L1[1])/numpy.linalg.norm(l1bref)
+        d2aa = numpy.linalg.norm(l2aaref - tdccsdT.L2[0])/numpy.linalg.norm(l2aaref)
+        d2ab = numpy.linalg.norm(l2abref - tdccsdT.L2[1])/numpy.linalg.norm(l2abref)
+        d2bb = numpy.linalg.norm(l2bbref - tdccsdT.L2[2])/numpy.linalg.norm(l2bbref)
+        e1a = "Error in L1a: {}".format(d1a)
+        e1b = "Error in L1b: {}".format(d1b)
+        e2aa = "Error in L2aa: {}".format(d2aa)
+        e2ab = "Error in L2ab: {}".format(d2ab)
+        e2bb = "Error in L2bb: {}".format(d2bb)
+        self.assertTrue(d1a < 1e-13, e1a)
+        self.assertTrue(d1b < 1e-13, e1b)
+        self.assertTrue(d2aa < 1e-13, e2aa)
+        self.assertTrue(d2ab < 1e-13, e2ab)
+        self.assertTrue(d2bb < 1e-13, e2bb)
+
 if __name__ == '__main__':
     unittest.main()

@@ -3,13 +3,15 @@ import time
 from pyscf import lib
 from cqcpy import cc_equations
 from cqcpy import ft_utils
-from cqcpy.cc_energy import cc_energy
+from cqcpy.cc_energy import cc_energy, ucc_energy
 from . import cc_utils
 from . import ft_cc_energy
 from . import ft_cc_equations
 from . import ft_mp
 from . import quadrature
 from . import propagation
+
+einsum = numpy.einsum
 
 class TDCCSD(object):
     """Real-time coupled cluster singles and doubles (CCSD) driver.
@@ -72,7 +74,10 @@ class TDCCSD(object):
         else:
             if self.iprint > 0:
                 print('Running CCSD at zero Temperature')
-        return self._ccsd()
+        if self.sys.has_u():
+            return self._uccsd()
+        else:
+            return self._ccsd()
 
     def compute_ESN(self):
         """Compute energy, entropy, particle number."""
@@ -85,27 +90,15 @@ class TDCCSD(object):
         else:
             if self.L1 is None:
                 if self.sys.has_u():
-                    assert(False)
-                #    self._ft_uccsd_lambda(L1=L1,L2=L2)
-                #    ti = time.time()
-                #    self._u_ft_1rdm()
-                #    self._u_ft_2rdm()
-                #    tf = time.time()
-                #    if self.iprint > 0:
-                #        print("RDM construction time: {} s".format(tf - ti))
+                    self._uccsd_lambda(rdm2=True)
                 else:
                     self._ccsd_lambda(rdm2=True)
             if self.sys.has_u():
-                    assert(False)
-            #    ti = time.time()
-            #    self._u_ft_ESN(L1,L2,gderiv=gderiv)
-            #    tf = time.time()
-            #    if self.iprint > 0:
-            #        print("Total derivative time: {} s".format(tf - ti))
+                self._u_ft_ESN()
             else:
                 self._g_ft_ESN()
 
-    def _g_ft_ESN(self,L1=None,L2=None,gderiv=True):
+    def _g_ft_ESN(self):
         # temperature info
         beta = self.beta
         mu = self.mu
@@ -149,57 +142,110 @@ class TDCCSD(object):
         self.S1 = -beta*(self.G1 - self.E1 + mu*self.N1)
         self.Scc = self.S - self.S0 - self.S1
 
-    def _get_t_step(self, h, t1, t2, fRHS):
+    def _u_ft_ESN(self):
+        # temperature info
+        beta = self.beta
+        mu = self.mu
+
+        self._u_ft_ron()
+
+        # zero order contributions
+        en = self.sys.g_energies_tot()
+        ea,eb = self.sys.u_energies_tot()
+        foa = ft_utils.ff(beta, ea, mu)
+        fob = ft_utils.ff(beta, eb, mu)
+        B0 = ft_utils.dGP0(beta, en, mu)
+        B0a = ft_utils.dGP0(beta, ea, mu)
+        B0b = ft_utils.dGP0(beta, eb, mu)
+        N0 = foa.sum() + fob.sum()
+        E0 = beta*(B0a.sum() + B0b.sum()) + mu*N0 + self.G0
+
+        # higher order contributions
+        dveca = -numpy.ones(ea.shape) # mu derivative
+        dvecb = -numpy.ones(eb.shape) # mu derivative
+        N1 = numpy.einsum('i,i->',dveca, self.ron1[0])
+        N1 += numpy.einsum('i,i->',dvecb, self.ron1[1])
+        Ncc = numpy.einsum('i,i->',dveca, self.rono[0] + self.ronv[1])
+        Ncc += numpy.einsum('i,i->',dvecb, self.rono[0] + self.ronv[1])
+        N1 *= -1.0 # N = - dG/dmu
+        Ncc *= -1.0
+        dveca = (ea - mu)/beta
+        dvecb = (eb - mu)/beta
+        B1 = numpy.einsum('i,i->',dveca, self.ron1[0])
+        B1 += numpy.einsum('i,i->',dvecb, self.ron1[1])
+        Bcc = numpy.einsum('i,i->',dveca, self.rono[0] + self.ronv[1])
+        Bcc += numpy.einsum('i,i->',dvecb, self.rono[0] + self.ronv[1])
+
+        # compute other contributions to CC derivative
+        Bcc -= self.Gcc/(beta)
+        Bcc += self._u_gderiv_approx()
+
+        E1 = beta*B1 + mu*N1 + self.G1
+        Ecc = beta*Bcc + mu*Ncc + self.Gcc
+
+        self.N0 = N0
+        self.N1 = N1
+        self.Ncc = Ncc
+        self.N = Ncc + N0 + N1
+        self.E0 = E0
+        self.E1 = E1
+        self.Ecc = Ecc
+        self.E = E0 + E1 + Ecc
+        self.S0 = -beta*(self.G0 - self.E0 + mu*self.N0)
+        self.S1 = -beta*(self.G1 - self.E1 + mu*self.N1)
+        self.S = -beta*(self.Gtot - self.E + mu*self.N)
+        self.Scc = self.S - self.S0 - self.S1
+
+    def _get_t_step(self, h, ttot, fRHS):
         if self.prop["tprop"] == "rk1":
-            d1,d2 = propagation.rk1(h, [t1, t2], fRHS)
+            dtot = propagation.rk1(h, ttot, fRHS)
         elif self.prop["tprop"] == "rk2":
-            d1,d2 = propagation.rk2(h, [t1, t2], (fRHS,fRHS))
+            dtot = propagation.rk2(h, ttot, (fRHS,fRHS))
         elif self.prop["tprop"] == "rk4":
-            d1,d2 = propagation.rk4(h, [t1, t2], (fRHS,fRHS,fRHS,fRHS))
+            dtot = propagation.rk4(h, ttot, (fRHS,fRHS,fRHS,fRHS))
         elif self.prop["tprop"] == "cn":
             mi = self.prop["max_iter"]
             alpha = self.prop["damp"]
             thresh = self.prop["thresh"]
-            d1, d2 = propagation.cn(h, [t1, t2], mi, alpha, thresh, (fRHS,fRHS), self.iprint)
+            dtot = propagation.cn(h, ttot, mi, alpha, thresh, (fRHS,fRHS), self.iprint)
         elif self.prop["tprop"] == "be":
             mi = self.prop["max_iter"]
             alpha = self.prop["damp"]
             thresh = self.prop["thresh"]
-            d1,d2 = propagation.be(h, [t1, t2], mi, alpha, thresh, fRHS, self.iprint)
+            dtot = propagation.be(h, ttot, mi, alpha, thresh, fRHS, self.iprint)
         elif self.prop["tprop"] == "am2":
             mi = self.prop["max_iter"]
             alpha = self.prop["damp"]
             thresh = self.prop["thresh"]
-            d1,d2 = propagation.am2(h, [t1, t2], mi, alpha, thresh, fRHS, self.iprint)
+            dtot = propagation.am2(h, ttot, mi, alpha, thresh, fRHS, self.iprint)
         else:
             raise Exception("Unrecognized propagation scheme: " + self.prop)
-        return d1,d2
+        return dtot
 
-    def _get_l_step(self, h, l1, l2, t1b, t2b, t1e, t2e, fLRHS):
+    def _get_l_step(self, h, ltot, tb, te, fLRHS):
         if self.prop["lprop"] == "rk1":
-            LRHS = lambda var: fLRHS(t1b, t2b, var)
-            ld1,ld2 = propagation.rk1(h, [l1, l2], LRHS)
+            LRHS = lambda var: fLRHS(tb, var)
+            ldtot = propagation.rk1(h, ltot, LRHS)
         elif self.prop["lprop"] == "rk2":
-            LRHS1 = lambda var: fLRHS(t1b, t2b, var)
-            LRHS2 = lambda var: fLRHS(t1e, t2e, var)
-            ld1,ld2 = propagation.rk2(h, [l1, l2], (LRHS1, LRHS2))
+            LRHS1 = lambda var: fLRHS(tb, var)
+            LRHS2 = lambda var: fLRHS(te, var)
+            ldtot = propagation.rk2(h, ltot, (LRHS1, LRHS2))
         elif self.prop["lprop"] == "rk4":
-            t1x = 0.5*(t1b + t1e)
-            t2x = 0.5*(t2b + t2e)
-            LRHS1 = lambda var: fLRHS(t1b, t2b, var)
-            LRHS23 = lambda var: fLRHS(t1x, t2x, var)
-            LRHS4 = lambda var: fLRHS(t1e, t2e, var)
-            ld1, ld2 = propagation.rk4(h, [l1, l2], (LRHS1, LRHS23, LRHS23, LRHS4))
+            tx = [0.5*(b + e) for b,e in zip(tb,te)]
+            LRHS1 = lambda var: fLRHS(tb, var)
+            LRHS23 = lambda var: fLRHS(tx, var)
+            LRHS4 = lambda var: fLRHS(te, var)
+            ldtot = propagation.rk4(h, ltot, (LRHS1, LRHS23, LRHS23, LRHS4))
         elif self.prop["lprop"] == "cn":
             mi = self.prop["max_iter"]
             alpha = self.prop["damp"]
             thresh = self.prop["thresh"]
-            LRHS1 = lambda var: fLRHS(t1b, t2b, var)
-            LRHS2 = lambda var: fLRHS(t1e, t2e, var)
-            ld1, ld2 = propagation.cn(h, [l1, l2], mi, alpha, thresh, (LRHS1,LRHS2), self.iprint)
+            LRHS1 = lambda var: fLRHS(tb, var)
+            LRHS2 = lambda var: fLRHS(te, var)
+            ldtot = propagation.cn(h, ltot, mi, alpha, thresh, (LRHS1,LRHS2), self.iprint)
         else:
             raise Exception("Unrecognized propagation scheme: " + self.prop)
-        return ld1, ld2
+        return ldtot
 
     def _ccsd(self):
         beta = self.beta
@@ -305,7 +351,7 @@ class TDCCSD(object):
         for i in range(1,ng):
             # propagate
             h = self.ti[i] - self.ti[i - 1]
-            d1,d2 = self._get_t_step(h, t1, t2, fRHS)
+            d1,d2 = self._get_t_step(h, [t1,t2], fRHS)
             t1 += d1
             t2 += d2
 
@@ -325,11 +371,183 @@ class TDCCSD(object):
 
         return (Eccn+E01,Eccn)
 
-    def _ccsd_lambda(self,rdm2=False):
+    def _uccsd(self):
+        beta = self.beta
+        mu = self.mu if self.finite_T else None
+
+        # get time-grid
+        ng = self.ngrid
+        ti = self.ti
+        g = self.g
+
+        if not self.finite_T:
+            # create energies in spin-orbital basis
+            eoa,eva,eob,evb = self.sys.u_energies()
+            no = eo.shape[0]
+            nv = ev.shape[0]
+            D1a = (eva[:,None] - eoa[None,:])
+            D1b = (evb[:,None] - eob[None,:])
+            D2aa = (eva[:,None,None,None] + eva[None,:,None,None]
+                - eoa[None,None,:,None] - eoa[None,None,None,:])
+            D2ab = (eva[:,None,None,None] + evb[None,:,None,None]
+                - eoa[None,None,:,None] - eob[None,None,None,:])
+            D2bb = (evb[:,None,None,None] + evb[None,:,None,None]
+                - eob[None,None,:,None] - eob[None,None,None,:])
+
+            # get HF energy
+            En = self.sys.const_energy()
+            E0 = zt_mp.ump0(eoa, eob) + En
+            E1 = self.sys.get_mp1()
+            E01 = E0 + E1
+
+            # get Fock matrix
+            Fa,Fb = self.sys.u_fock()
+            Fa.oo = Fa.oo - numpy.diag(eoa) # subtract diagonal
+            Fa.vv = Fa.vv - numpy.diag(eva) # subtract diagonal
+            Fb.oo = Fb.oo - numpy.diag(eob) # subtract diagonal
+            Fb.vv = Fb.vv - numpy.diag(evb) # subtract diagonal
+
+            # get ERIs
+            Ia, Ib, Iabab = self.sys.u_aint()
+        else:
+            # get orbital energies
+            ea,eb = self.sys.u_energies_tot()
+            na = ea.shape[0]
+            nb = eb.shape[0]
+
+            # get 0th and 1st order contributions
+            En = self.sys.const_energy()
+            g0 = ft_utils.uGP0(beta, ea, eb, mu)
+            E0 = ft_mp.ump0(g0[0],g0[1]) + En
+            E1 = self.sys.get_mp1()
+            E01 = E0 + E1
+
+            beta = self.beta
+            mu = self.mu
+            if self.athresh > 0.0:
+                athresh = self.athresh
+                foa = ft_utils.ff(beta, ea, mu)
+                fva = ft_utils.ffv(beta, ea, mu)
+                fob = ft_utils.ff(beta, eb, mu)
+                fvb = ft_utils.ffv(beta, eb, mu)
+                focca = [x for x in foa if x > athresh]
+                fvira = [x for x in fva if x > athresh]
+                iocca = [i for i,x in enumerate(foa) if x > athresh]
+                ivira = [i for i,x in enumerate(fva) if x > athresh]
+                foccb = [x for x in fob if x > athresh]
+                fvirb = [x for x in fvb if x > athresh]
+                ioccb = [i for i,x in enumerate(fob) if x > athresh]
+                ivirb = [i for i,x in enumerate(fvb) if x > athresh]
+                nocca = len(focca)
+                nvira = len(fvira)
+                noccb = len(foccb)
+                nvirb = len(fvirb)
+                nacta = nocca + nvira - na
+                nactb = noccb + nvirb - nb
+                if self.iprint > 0:
+                    print("FT-UCCSD orbital info:")
+                    print('  nocca: {:d}'.format(nocca))
+                    print('  nvira: {:d}'.format(nvira))
+                    print('  nacta: {:d}'.format(nacta))
+                    print('  noccb: {:d}'.format(nocca))
+                    print('  nvirb: {:d}'.format(nvira))
+                    print('  nactb: {:d}'.format(nacta))
+
+                # get energy differences
+                D1a = ea[:,None] - ea[None,:]
+                D1b = eb[:,None] - eb[None,:]
+                D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
+                        - ea[None,None,:,None] - ea[None,None,None,:]
+                D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
+                        - ea[None,None,:,None] - eb[None,None,None,:]
+                D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
+                        - eb[None,None,:,None] - eb[None,None,None,:]
+                D1a = D1a[numpy.ix_(ivira,iocca)]
+                D1b = D1b[numpy.ix_(ivirb,ioccb)]
+                D2aa = D2aa[numpy.ix_(ivira,ivira,iocca,iocca)]
+                D2ab = D2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)]
+                D2bb = D2bb[numpy.ix_(ivirb,ivirb,ioccb,ioccb)]
+
+                # get scaled integrals
+                Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
+                        self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
+
+            else:
+                # get scaled integrals
+                Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
+
+                # get energy differences
+                D1a = ea[:,None] - ea[None,:]
+                D1b = eb[:,None] - eb[None,:]
+                D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
+                        - ea[None,None,:,None] - ea[None,None,None,:]
+                D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
+                        - ea[None,None,:,None] - eb[None,None,None,:]
+                D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
+                        - eb[None,None,:,None] - eb[None,None,None,:]
+                T1ashape = (na,na)
+                T1bshape = (nb,nb)
+                T2ashape = (na,na,na,na)
+                T2bshape = (nb,nb,nb,nb)
+                nocca = na
+                nvira = na
+                noccb = nb
+                nvirb = nb
+
+        t1a = numpy.zeros((nvira,nocca))
+        t1b = numpy.zeros((nvirb,noccb))
+        t2aa = numpy.zeros((nvira,nvira,nocca,nocca))
+        t2ab = numpy.zeros((nvira,nvirb,nocca,noccb))
+        t2bb = numpy.zeros((nvirb,nvirb,noccb,noccb))
+        Eccn = 0.0
+
+        def fRHS(var):
+            t1a,t1b,t2aa,t2ab,t2bb = var
+            k1sa = -D1a*t1a - Fa.vo.copy()
+            k1sb = -D1b*t1b - Fb.vo.copy()
+            k1daa = -D2aa*t2aa - Ia.vvoo.copy()
+            k1dab = -D2ab*t2ab - Iabab.vvoo.copy()
+            k1dbb = -D2bb*t2bb - Ib.vvoo.copy()
+            cc_equations._u_Stanton(k1sa, k1sb, k1daa, k1dab, k1dbb,
+                    Fa, Fb, Ia, Ib, Iabab, (t1a,t1b), (t2aa,t2ab,t2bb), fac=-1.0)
+            return [k1sa,k1sb,k1daa,k1dab,k1dbb]
+
+        if self.saveT:
+            self.T1 = [(t1a.copy(),t1b.copy())]
+            self.T2 = [(t2aa.copy(),t2ab.copy(),t2bb.copy())]
+
+        for i in range(1,ng):
+            # propagate
+            h = self.ti[i] - self.ti[i - 1]
+            d1a,d1b,d2aa,d2ab,d2bb = self._get_t_step(h, [t1a,t1b,t2aa,t2ab,t2bb], fRHS)
+            t1a += d1a
+            t1b += d1b
+            t2aa += d2aa
+            t2ab += d2ab
+            t2bb += d2bb
+
+            # compute free energy contribution
+            Eccn += g[i]*ucc_energy((t1a,t1b), (t2aa,t2ab,t2bb),
+                    Fa.ov, Fb.ov, Ia.oovv, Ib.oovv, Iabab.oovv)/beta
+            if self.saveT:
+                self.T1.append((t1a.copy(),t1b.copy()))
+                self.T2.append((t2aa.copy(),t2ab.copy(),t2bb.copy()))
+
+        self.G0 = E0
+        self.G1 = E1
+        self.Gcc = Eccn
+        self.Gtot = E0 + E1 + Eccn
+        if not self.saveT:
+            self.T1 = (t1a,t1b)
+            self.T2 = (t2aa,t2ab,t2bb)
+
+        return (Eccn+E01,Eccn)
+
+    def _ccsd_lambda(self, rdm2=False):
         if self.T1 is None or self.T2 is None:
             raise Exception("No saved T-amplitudes")
 
-        beta = self.beta#1.0 / self.T if self.finite_T else self._beta_max
+        beta = self.beta
         mu = self.mu if self.finite_T else None
         propT = False if self.saveT else True
 
@@ -428,8 +646,9 @@ class TDCCSD(object):
             cc_equations._Stanton(k1s,k1d,F,I,t1,t2,fac=-1.0)
             return [(-1.0)*k1s,(-1.0)*k1d]
 
-        def fLRHS(t1,t2,var):
+        def fLRHS(ttot,var):
             l1,l2 = var
+            t1,t2 = ttot
             l1s = -D1.transpose((1,0))*l1 - F.ov.copy()
             l1d = -D2.transpose((2,3,0,1))*l2 - I.oovv.copy()
             cc_equations._Lambda_opt(l1s, l1d, F, I,
@@ -452,27 +671,27 @@ class TDCCSD(object):
         pai = g[ng - 1]*cc_equations.ccsd_1rdm_ai_opt(t1b,t2b,l1,l2)
 
         if rdm2:
-            Pcdab = g[ng -1]*cc_equations.ccsd_2rdm_cdab_opt(t1b, t2b, l1, l2)
-            Pciab = g[ng -1]*cc_equations.ccsd_2rdm_ciab_opt(t1b, t2b, l1, l2)
-            Pbcai = g[ng -1]*cc_equations.ccsd_2rdm_bcai_opt(t1b, t2b, l1, l2)
-            Pijab = g[ng -1]*l2
-            Pbjai = g[ng -1]*cc_equations.ccsd_2rdm_bjai_opt(t1b, t2b, l1, l2)
-            Pabij = g[ng -1]*cc_equations.ccsd_2rdm_abij_opt(t1b, t2b, l1, l2)
-            Pjkai = g[ng -1]*cc_equations.ccsd_2rdm_jkai_opt(t1b, t2b, l1, l2)
-            Pkaij = g[ng -1]*cc_equations.ccsd_2rdm_kaij_opt(t1b, t2b, l1, l2)
-            Pklij = g[ng -1]*cc_equations.ccsd_2rdm_klij_opt(t1b, t2b, l1, l2)
+            Pcdab = g[ng - 1]*cc_equations.ccsd_2rdm_cdab_opt(t1b, t2b, l1, l2)
+            Pciab = g[ng - 1]*cc_equations.ccsd_2rdm_ciab_opt(t1b, t2b, l1, l2)
+            Pbcai = g[ng - 1]*cc_equations.ccsd_2rdm_bcai_opt(t1b, t2b, l1, l2)
+            Pijab = g[ng - 1]*l2
+            Pbjai = g[ng - 1]*cc_equations.ccsd_2rdm_bjai_opt(t1b, t2b, l1, l2)
+            Pabij = g[ng - 1]*cc_equations.ccsd_2rdm_abij_opt(t1b, t2b, l1, l2)
+            Pjkai = g[ng - 1]*cc_equations.ccsd_2rdm_jkai_opt(t1b, t2b, l1, l2)
+            Pkaij = g[ng - 1]*cc_equations.ccsd_2rdm_kaij_opt(t1b, t2b, l1, l2)
+            Pklij = g[ng - 1]*cc_equations.ccsd_2rdm_klij_opt(t1b, t2b, l1, l2)
 
         Eccn = g[ng - 1]*cc_energy(t1b, t2b, F.ov, I.oovv)/beta
         for i in range(1,ng):
             h = self.ti[ng - i] - self.ti[ng - i - 1]
             if propT:
-                d1,d2 = self._get_t_step(h, t1b, t2b, fRHS)
+                d1,d2 = self._get_t_step(h, [t1b,t2b], fRHS)
                 t1e = t1b + d1
                 t2e = t2b + d2
             else:
                 t1e = self.T1[ng - i - 1]
                 t2e = self.T2[ng - i - 1]
-            ld1, ld2 = self._get_l_step(h, l1, l2, t1b, t2b, t1e, t2e, fLRHS)
+            ld1, ld2 = self._get_l_step(h, (l1,l2), (t1b,t2b), (t1e,t2e), fLRHS)
             l1 += ld1
             l2 += ld2
             Eccn += g[ng - i - 1]*cc_energy(t1e, t2e, F.ov, I.oovv)/beta
@@ -514,6 +733,405 @@ class TDCCSD(object):
 
         return (Eccn+E01,Eccn)
 
+    def _uccsd_lambda(self, rdm2=False):
+        if self.T1 is None or self.T2 is None:
+            raise Exception("No saved T-amplitudes")
+
+        beta = self.beta
+        mu = self.mu if self.finite_T else None
+        propT = False if self.saveT else True
+
+        # get time-grid
+        ng = self.ngrid
+        ti = self.ti
+        g = self.g
+
+        if not self.finite_T:
+            # create energies in spin-orbital basis
+            eoa,eva,eob,evb = self.sys.u_energies()
+            noa = eoa.shape[0]
+            nob = eob.shape[0]
+            nva = eva.shape[0]
+            nvb = evb.shape[0]
+            D1a = (eva[:,None] - eoa[None,:])
+            D1b = (evb[:,None] - eob[None,:])
+            D2aa = (eva[:,None,None,None] + eva[None,:,None,None]
+                - eoa[None,None,:,None] - eoa[None,None,None,:])
+            D2ab = (eva[:,None,None,None] + evb[None,:,None,None]
+                - eoa[None,None,:,None] - eob[None,None,None,:])
+            D2bb = (evb[:,None,None,None] + evb[None,:,None,None]
+                - eob[None,None,:,None] - eob[None,None,None,:])
+
+            # get HF energy
+            En = self.sys.const_energy()
+            E0 = zt_mp.ump0(eoa, eob) + En
+            E1 = self.sys.get_mp1()
+            E01 = E0 + E1
+
+            # get Fock matrix
+            Fa,Fb = self.sys.u_fock()
+            Fa.oo = Fa.oo - numpy.diag(eoa) # subtract diagonal
+            Fa.vv = Fa.vv - numpy.diag(eva) # subtract diagonal
+            Fb.oo = Fb.oo - numpy.diag(eob) # subtract diagonal
+            Fb.vv = Fb.vv - numpy.diag(evb) # subtract diagonal
+
+            # get ERIs
+            Ia, Ib, Iabab = self.sys.u_aint()
+            sfoa = numpy.ones(noa)
+            sfob = numpy.ones(nob)
+            sfva = numpy.ones(nva)
+            sfvb = numpy.ones(nvb)
+        else:
+            # get orbital energies
+            ea,eb = self.sys.u_energies_tot()
+            na = ea.shape[0]
+            nb = eb.shape[0]
+
+            # get 0th and 1st order contributions
+            En = self.sys.const_energy()
+            g0 = ft_utils.uGP0(beta, ea, eb, mu)
+            E0 = ft_mp.ump0(g0[0],g0[1]) + En
+            E1 = self.sys.get_mp1()
+            E01 = E0 + E1
+            foa = ft_utils.ff(beta, ea, mu)
+            fva = ft_utils.ffv(beta, ea, mu)
+            fob = ft_utils.ff(beta, eb, mu)
+            fvb = ft_utils.ffv(beta, eb, mu)
+
+            beta = self.beta
+            mu = self.mu
+            if self.athresh > 0.0:
+                athresh = self.athresh
+                focca = [x for x in foa if x > athresh]
+                fvira = [x for x in fva if x > athresh]
+                iocca = [i for i,x in enumerate(foa) if x > athresh]
+                ivira = [i for i,x in enumerate(fva) if x > athresh]
+                foccb = [x for x in fob if x > athresh]
+                fvirb = [x for x in fvb if x > athresh]
+                ioccb = [i for i,x in enumerate(fob) if x > athresh]
+                ivirb = [i for i,x in enumerate(fvb) if x > athresh]
+                noa = len(focca)
+                nva = len(fvira)
+                nob = len(foccb)
+                nvb = len(fvirb)
+                nacta = noa + nva - na
+                nactb = nob + nvb - nb
+                if self.iprint > 0:
+                    print("FT-UCCSD orbital info:")
+                    print('  nocca: {:d}'.format(nocca))
+                    print('  nvira: {:d}'.format(nvira))
+                    print('  nacta: {:d}'.format(nacta))
+                    print('  noccb: {:d}'.format(nocca))
+                    print('  nvirb: {:d}'.format(nvira))
+                    print('  nactb: {:d}'.format(nacta))
+
+                # get energy differences
+                D1a = ea[:,None] - ea[None,:]
+                D1b = eb[:,None] - eb[None,:]
+                D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
+                        - ea[None,None,:,None] - ea[None,None,None,:]
+                D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
+                        - ea[None,None,:,None] - eb[None,None,None,:]
+                D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
+                        - eb[None,None,:,None] - eb[None,None,None,:]
+                D1a = D1a[numpy.ix_(ivira,iocca)]
+                D1b = D1b[numpy.ix_(ivirb,ioccb)]
+                D2aa = D2aa[numpy.ix_(ivira,ivira,iocca,iocca)]
+                D2ab = D2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)]
+                D2bb = D2bb[numpy.ix_(ivirb,ivirb,ioccb,ioccb)]
+
+                # get scaled integrals
+                Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
+                        self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
+                sfoa = numpy.sqrt(focca)
+                sfob = numpy.sqrt(foccb)
+                sfva = numpy.sqrt(fvira)
+                sfvb = numpy.sqrt(fvirb)
+
+            else:
+                # get scaled integrals
+                Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
+
+                # get energy differences
+                D1a = ea[:,None] - ea[None,:]
+                D1b = eb[:,None] - eb[None,:]
+                D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
+                        - ea[None,None,:,None] - ea[None,None,None,:]
+                D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
+                        - ea[None,None,:,None] - eb[None,None,None,:]
+                D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
+                        - eb[None,None,:,None] - eb[None,None,None,:]
+                T1ashape = (na,na)
+                T1bshape = (nb,nb)
+                T2ashape = (na,na,na,na)
+                T2bshape = (nb,nb,nb,nb)
+                noa = na
+                nva = na
+                nob = nb
+                nvb = nb
+                sfoa = numpy.sqrt(foa)
+                sfob = numpy.sqrt(fob)
+                sfva = numpy.sqrt(fva)
+                sfvb = numpy.sqrt(fvb)
+
+        def fRHS(var):
+            t1a,t1b,t2aa,t2ab,t2bb = var
+            k1sa = -D1a*t1a - Fa.vo.copy()
+            k1sb = -D1b*t1b - Fb.vo.copy()
+            k1daa = -D2aa*t2aa - Ia.vvoo.copy()
+            k1dab = -D2ab*t2ab - Iabab.vvoo.copy()
+            k1dbb = -D2bb*t2bb - Ib.vvoo.copy()
+            cc_equations._u_Stanton(k1sa, k1sb, k1daa, k1dab, k1dbb,
+                    Fa, Fb, Ia, Ib, Iabab, (t1a,t1b), (t2aa,t2ab,t2bb), fac=-1.0)
+            return [(-1)*k1sa,(-1)*k1sb,(-1)*k1daa,(-1)*k1dab,(-1)*k1dbb]
+
+        def fLRHS(ttot,var):
+            l1a,l1b,l2aa,l2ab,l2bb = var
+            t1a,t1b,t2aa,t2ab,t2bb = ttot
+            l1sa = -D1a.transpose((1,0))*l1a - Fa.ov.copy()
+            l1sb = -D1b.transpose((1,0))*l1b - Fb.ov.copy()
+            l1daa = -D2aa.transpose((2,3,0,1))*l2aa - Ia.oovv.copy()
+            l1dab = -D2ab.transpose((2,3,0,1))*l2ab - Iabab.oovv.copy()
+            l1dbb = -D2bb.transpose((2,3,0,1))*l2bb - Ib.oovv.copy()
+            cc_equations._uccsd_Lambda_opt(l1sa, l1sb, l1daa, l1dab, l1dbb,
+                    Fa, Fb, Ia, Ib, Iabab, (l1a,l1b), (l2aa,l2ab,l2bb),
+                    (t1a,t1b), (t2aa,t2ab,t2bb), fac=-1.0)
+            cc_equations._u_LS_TS(l1sa, l1sb, Ia, Ib, Iabab, t1a, t1b, fac=-1.0)
+            return [l1sa,l1sb,l1daa,l1dab,l1dbb]
+
+        if propT:
+            t1da = self.T1[0].copy()
+            t1db = self.T1[1].copy()
+            t2daa = self.T2[0].copy()
+            t2dab = self.T2[1].copy()
+            t2dbb = self.T2[2].copy()
+        else:
+            t1da = self.T1[ng - 1][0]
+            t1db = self.T1[ng - 1][1]
+            t2daa = self.T2[ng - 1][0]
+            t2dab = self.T2[ng - 1][1]
+            t2dbb = self.T2[ng - 1][2]
+        l1a = numpy.zeros((noa,nva))
+        l1b = numpy.zeros((nob,nvb))
+        l2aa = numpy.zeros((noa,noa,nva,nva))
+        l2ab = numpy.zeros((noa,nob,nva,nvb))
+        l2bb = numpy.zeros((nob,nob,nvb,nvb))
+        pia = numpy.zeros((noa,nva))
+        pIA = numpy.zeros((nob,nvb))
+        pji,pJI = cc_equations.uccsd_1rdm_ji(
+                t1da, t1db, t2daa, t2dab, t2dbb, l1a, l1b, l2aa, l2ab, l2bb)
+        pba,pBA = cc_equations.uccsd_1rdm_ba(
+                t1da, t1db, t2daa, t2dab, t2dbb, l1a, l1b, l2aa, l2ab, l2bb)
+        pai,pAI = cc_equations.uccsd_1rdm_ai(
+                t1da, t1db, t2daa, t2dab, t2dbb, l1a, l1b, l2aa, l2ab, l2bb)
+        pji *= g[ng - 1]
+        pJI *= g[ng - 1]
+        pba *= g[ng - 1]
+        pBA *= g[ng - 1]
+        pai *= g[ng - 1]
+        pAI *= g[ng - 1]
+
+        if rdm2:
+            Pijab = numpy.zeros((noa,noa,nva,nva))
+            PiJaB = numpy.zeros((noa,nob,nva,nvb))
+            PIJAB = numpy.zeros((nob,nob,nvb,nvb))
+
+            Pcdab_tot = cc_equations.uccsd_2rdm_cdab(t1da, t1db, t2daa, t2dab, t2dbb,
+                    l1a, l1b, l2aa, l2ab, l2bb)
+            Pcdab = g[ng - 1]*Pcdab_tot[0]
+            PCDAB = g[ng - 1]*Pcdab_tot[1]
+            PcDaB = g[ng - 1]*Pcdab_tot[2]
+
+            Pciab_tot = cc_equations.uccsd_2rdm_ciab(t1da, t1db, t2daa, t2dab, t2dbb,
+                    l1a, l1b, l2aa, l2ab, l2bb)
+            Pciab = g[ng - 1]*Pciab_tot[0]
+            PCIAB = g[ng - 1]*Pciab_tot[1]
+            PcIaB = g[ng - 1]*Pciab_tot[2]
+            PCiAb = g[ng - 1]*Pciab_tot[3]
+
+            Pbcai_tot = cc_equations.uccsd_2rdm_bcai(t1da, t1db, t2daa, t2dab, t2dbb,
+                    l1a, l1b, l2aa, l2ab, l2bb)
+            Pbcai = g[ng - 1]*Pbcai_tot[0]
+            PBCAI = g[ng - 1]*Pbcai_tot[1]
+            PbCaI = g[ng - 1]*Pbcai_tot[2]
+            PBcAi = g[ng - 1]*Pbcai_tot[3]
+
+            Pbjai_tot = cc_equations.uccsd_2rdm_bjai(t1da, t1db, t2daa, t2dab, t2dbb,
+                    l1a, l1b, l2aa, l2ab, l2bb)
+            Pbjai = g[ng - 1]*Pbjai_tot[0]
+            PBJAI = g[ng - 1]*Pbjai_tot[1]
+            PbJaI = g[ng - 1]*Pbjai_tot[2]
+            PbJAi = g[ng - 1]*Pbjai_tot[3]
+            PBjaI = g[ng - 1]*Pbjai_tot[4]
+            PBjAi = g[ng - 1]*Pbjai_tot[5]
+
+            Pabij_tot = cc_equations.uccsd_2rdm_abij(t1da, t1db, t2daa, t2dab, t2dbb,
+                    l1a, l1b, l2aa, l2ab, l2bb)
+            Pabij = g[ng - 1]*Pabij_tot[0]
+            PABIJ = g[ng - 1]*Pabij_tot[1]
+            PaBiJ = g[ng - 1]*Pabij_tot[2]
+
+            Pjkai_tot = cc_equations.uccsd_2rdm_jkai(t1da, t1db, t2daa, t2dab, t2dbb,
+                    l1a, l1b, l2aa, l2ab, l2bb)
+            Pjkai = g[ng - 1]*Pjkai_tot[0]
+            PJKAI = g[ng - 1]*Pjkai_tot[1]
+            PjKaI = g[ng - 1]*Pjkai_tot[2]
+            PJkAi = g[ng - 1]*Pjkai_tot[3]
+
+            Pkaij_tot = cc_equations.uccsd_2rdm_kaij(t1da, t1db, t2daa, t2dab, t2dbb,
+                    l1a, l1b, l2aa, l2ab, l2bb)
+            Pkaij = g[ng - 1]*Pkaij_tot[0]
+            PKAIJ = g[ng - 1]*Pkaij_tot[1]
+            PkAiJ = g[ng - 1]*Pkaij_tot[2]
+            PKaIj = g[ng - 1]*Pkaij_tot[3]
+
+            Pklij_tot = cc_equations.uccsd_2rdm_klij(t1da, t1db, t2daa, t2dab, t2dbb,
+                    l1a, l1b, l2aa, l2ab, l2bb)
+            Pklij = g[ng - 1]*Pklij_tot[0]
+            PKLIJ = g[ng - 1]*Pklij_tot[1]
+            PkLiJ = g[ng - 1]*Pklij_tot[2]
+
+        Eccn = g[ng - 1]*ucc_energy((t1da,t1db), (t2daa,t2dab,t2dbb),
+                Fa.ov, Fb.ov, Ia.oovv, Ib.oovv, Iabab.oovv)/beta
+        for i in range(1,ng):
+            h = self.ti[ng - i] - self.ti[ng - i - 1]
+            if propT:
+                d1a,d1b,d2aa,d2ab,d2bb = self._get_t_step(h, [t1da,t1db,t2daa,t2dab,t2dbb], fRHS)
+                t1ea = t1da + d1a
+                t1eb = t1db + d1b
+                t2eaa = t2daa + d2aa
+                t2eab = t2dab + d2ab
+                t2ebb = t2dbb + d2bb
+            else:
+                t1ea = self.T1[ng - i - 1][0]
+                t1eb = self.T1[ng - i - 1][1]
+                t2eaa = self.T2[ng - i - 1][0]
+                t2eab = self.T2[ng - i - 1][1]
+                t2ebb = self.T2[ng - i - 1][2]
+            ld1a, ld1b, ld2aa, ld2ab, ld2bb = self._get_l_step(
+                    h, (l1a,l1b,l2aa,l2ab,l2bb), (t1da,t1db,t2daa,t2dab,t2dbb), (t1ea,t1eb,t2eaa,t2eab,t2ebb), fLRHS)
+            l1a += ld1a
+            l1b += ld1b
+            l2aa += ld2aa
+            l2ab += ld2ab
+            l2bb += ld2bb
+            Eccn += g[ng - i - 1]*ucc_energy((t1ea,t1eb), (t2eaa,t2eab,t2ebb),
+                    Fa.ov, Fb.ov, Ia.oovv, Ib.oovv, Iabab.oovv)/beta
+
+            # increment the RDMs
+            pia += g[ng - i - 1]*l1a
+            pIA += g[ng - i - 1]*l1b
+            ji_inc = cc_equations.uccsd_1rdm_ji(
+                    t1ea, t1eb, t2eaa, t2eab, t2ebb, l1a, l1b, l2aa, l2ab, l2bb)
+            ba_inc = cc_equations.uccsd_1rdm_ba(
+                    t1ea, t1eb, t2eaa, t2eab, t2ebb, l1a, l1b, l2aa, l2ab, l2bb)
+            ai_inc = cc_equations.uccsd_1rdm_ai(
+                    t1ea, t1eb, t2eaa, t2eab, t2ebb, l1a, l1b, l2aa, l2ab, l2bb)
+            pji += g[ng - i - 1]*ji_inc[0]
+            pJI += g[ng - i - 1]*ji_inc[1]
+            pba += g[ng - i - 1]*ba_inc[0]
+            pBA += g[ng - i - 1]*ba_inc[1]
+            pai += g[ng - i - 1]*ai_inc[0]
+            pAI += g[ng - i - 1]*ai_inc[1]
+
+            if rdm2:
+                cdab_tot = cc_equations.uccsd_2rdm_cdab(
+                        t1ea, t1eb, t2eaa, t2eab, t2ebb, l1a, l1b, l2aa, l2ab, l2bb)
+                ciab_tot = cc_equations.uccsd_2rdm_ciab(
+                        t1ea, t1eb, t2eaa, t2eab, t2ebb, l1a, l1b, l2aa, l2ab, l2bb)
+                bcai_tot = cc_equations.uccsd_2rdm_bcai(
+                        t1ea, t1eb, t2eaa, t2eab, t2ebb, l1a, l1b, l2aa, l2ab, l2bb)
+                bjai_tot = cc_equations.uccsd_2rdm_bjai(
+                        t1ea, t1eb, t2eaa, t2eab, t2ebb, l1a, l1b, l2aa, l2ab, l2bb)
+                abij_tot = cc_equations.uccsd_2rdm_abij(
+                        t1ea, t1eb, t2eaa, t2eab, t2ebb, l1a, l1b, l2aa, l2ab, l2bb)
+                jkai_tot = cc_equations.uccsd_2rdm_jkai(
+                        t1ea, t1eb, t2eaa, t2eab, t2ebb, l1a, l1b, l2aa, l2ab, l2bb)
+                kaij_tot = cc_equations.uccsd_2rdm_kaij(
+                        t1ea, t1eb, t2eaa, t2eab, t2ebb, l1a, l1b, l2aa, l2ab, l2bb)
+                klij_tot = cc_equations.uccsd_2rdm_klij(
+                        t1ea, t1eb, t2eaa, t2eab, t2ebb, l1a, l1b, l2aa, l2ab, l2bb)
+
+                Pijab += g[ng - i - 1]*l2aa
+                PiJaB += g[ng - i - 1]*l2ab
+                PIJAB += g[ng - i - 1]*l2bb
+
+                Pcdab += g[ng - i - 1]*cdab_tot[0]
+                PCDAB += g[ng - i - 1]*cdab_tot[1]
+                PcDaB += g[ng - i - 1]*cdab_tot[2]
+
+                Pciab += g[ng - i - 1]*ciab_tot[0]
+                PCIAB += g[ng - i - 1]*ciab_tot[1]
+                PcIaB += g[ng - i - 1]*ciab_tot[2]
+                PCiAb += g[ng - i - 1]*ciab_tot[3]
+
+                Pbcai += g[ng - i - 1]*bcai_tot[0]
+                PBCAI += g[ng - i - 1]*bcai_tot[1]
+                PbCaI += g[ng - i - 1]*bcai_tot[2]
+                PBcAi += g[ng - i - 1]*bcai_tot[3]
+
+                Pbjai += g[ng - i - 1]*bjai_tot[0]
+                PBJAI += g[ng - i - 1]*bjai_tot[1]
+                PbJaI += g[ng - i - 1]*bjai_tot[2]
+                PbJAi += g[ng - i - 1]*bjai_tot[3]
+                PBjaI += g[ng - i - 1]*bjai_tot[4]
+                PBjAi += g[ng - i - 1]*bjai_tot[5]
+
+                Pabij += g[ng - i - 1]*abij_tot[0]
+                PABIJ += g[ng - i - 1]*abij_tot[1]
+                PaBiJ += g[ng - i - 1]*abij_tot[2]
+
+                Pjkai += g[ng - i - 1]*jkai_tot[0]
+                PJKAI += g[ng - i - 1]*jkai_tot[1]
+                PjKaI += g[ng - i - 1]*jkai_tot[2]
+                PJkAi += g[ng - i - 1]*jkai_tot[3]
+
+                Pkaij += g[ng - i - 1]*kaij_tot[0]
+                PKAIJ += g[ng - i - 1]*kaij_tot[1]
+                PkAiJ += g[ng - i - 1]*kaij_tot[2]
+                PKaIj += g[ng - i - 1]*kaij_tot[3]
+
+                Pklij += g[ng - i - 1]*klij_tot[0]
+                PKLIJ += g[ng - i - 1]*klij_tot[1]
+                PkLiJ += g[ng - i - 1]*klij_tot[2]
+
+            t1da = t1ea
+            t1db = t1eb
+            t2daa = t2eaa
+            t2dab = t2eab
+            t2dbb = t2ebb
+
+        G0 = E0
+        G1 = E1
+        Gcc = Eccn
+        Gtot = E0 + E1 + Eccn
+        self.L1 = (l1a,l1b)
+        self.L2 = (l2aa,l2ab,l2bb)
+        self.dia = (pia,pIA)
+        self.dji = (pji,pJI)
+        self.dba = (pba,pBA)
+        self.dai = (pai,pAI)
+        self.ndia = (numpy.einsum('ia,i,a->ia',self.dia[0],sfoa,sfva),
+                numpy.einsum('ia,i,a->ia',self.dia[1],sfob,sfvb))
+        self.ndba = (numpy.einsum('ba,b,a->ba',self.dba[0],sfva,sfva),
+                numpy.einsum('ba,b,a->ba',self.dba[1],sfvb,sfvb))
+        self.ndji = (numpy.einsum('ji,j,i->ji',self.dji[0],sfoa,sfoa),
+                numpy.einsum('ji,j,i->ji',self.dji[1],sfob,sfob))
+        self.ndai = (numpy.einsum('ai,a,i->ai',self.dai[0],sfva,sfoa),
+                numpy.einsum('ai,a,i->ai',self.dai[1],sfvb,sfob))
+        if rdm2:
+            self.P2 = ((Pcdab,PCDAB,PcDaB),
+                    (Pciab,PCIAB,PcIaB,PCiAb),
+                    (Pbcai,PBCAI,PbCaI,PBcAi),
+                    (Pijab,PIJAB,PiJaB),
+                    (Pbjai,PBJAI,PbJaI,PbJAi,PBjaI,PBjAi),
+                    (Pabij,PABIJ,PaBiJ),
+                    (Pjkai,PJKAI,PjKaI,PJkAi),
+                    (Pkaij,PKAIJ,PkAiJ,PKaIj),
+                    (Pklij,PKLIJ,PkLiJ))
+
+        return (Eccn+E01,Eccn)
+
     def _g_gderiv_approx(self):
         # temperature info
         beta = self.beta
@@ -543,6 +1161,61 @@ class TDCCSD(object):
             Es1 = numpy.einsum('ai,ia->',self.T1[ng - 1],F.ov)
         Es2 = numpy.einsum('abij,ijab->',t2_temp,I.oovv)
         return (Es1 + Es2)/beta
+
+    def _u_gderiv_approx(self):
+        # temperature info
+        beta = self.beta
+        mu = self.mu
+
+        # get energies and occupation numbers
+        en = self.sys.g_energies_tot()
+        ea,eb = self.sys.u_energies_tot()
+        na = ea.shape[0]
+        nb = eb.shape[0]
+
+        ng = self.ngrid
+        if self.athresh > 0.0:
+            athresh = self.athresh
+            foa = ft_utils.ff(beta, ea, mu)
+            fva = ft_utils.ffv(beta, ea, mu)
+            fob = ft_utils.ff(beta, eb, mu)
+            fvb = ft_utils.ffv(beta, eb, mu)
+            focca = [x for x in foa if x > athresh]
+            fvira = [x for x in fva if x > athresh]
+            iocca = [i for i,x in enumerate(foa) if x > athresh]
+            ivira = [i for i,x in enumerate(fva) if x > athresh]
+            foccb = [x for x in fob if x > athresh]
+            fvirb = [x for x in fvb if x > athresh]
+            ioccb = [i for i,x in enumerate(fob) if x > athresh]
+            ivirb = [i for i,x in enumerate(fvb) if x > athresh]
+            Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
+                    self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
+        else:
+            Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
+
+        if self.saveT:
+            T1a,T1b = self.T1[ng - 1]
+            T2aa,T2ab,T2bb = self.T2[ng - 1]
+            t2aa_temp = 0.25*T2aa + 0.5*einsum('ai,bj->abij',T1a,T1a)
+            t2bb_temp = 0.25*T2bb + 0.5*einsum('ai,bj->abij',T1b,T1b)
+            t2ab_temp = T2ab + einsum('ai,bj->abij',T1a,T1b)
+
+            Es1 = einsum('ai,ia->',T1a,Fa.ov)
+            Es1 += einsum('ai,ia->',T1b,Fb.ov)
+        else:
+            T1a,T1b = self.T1
+            T2aa,T2ab,T2bb = self.T2
+            t2aa_temp = 0.25*T2aa + 0.5*einsum('ai,bj->abij',T1a,T1a)
+            t2bb_temp = 0.25*T2bb + 0.5*einsum('ai,bj->abij',T1b,T1b)
+            t2ab_temp = T2ab + einsum('ai,bj->abij',T1a,T1b)
+
+            Es1 = einsum('ai,ia->',T1a,Fa.ov)
+            Es1 += einsum('ai,ia->',T1b,Fb.ov)
+        Es2 = einsum('abij,ijab->',t2aa_temp,Ia.oovv)
+        Es2 += einsum('abij,ijab->',t2ab_temp,Iabab.oovv)
+        Es2 += einsum('abij,ijab->',t2bb_temp,Ib.oovv)
+
+        return (Es1 + Es2) / beta
 
     def _g_ft_ron(self):
         # temperature info
@@ -604,3 +1277,98 @@ class TDCCSD(object):
             ronv += batemp
         self.rono = rono
         self.ronv = ronv
+
+    def _u_ft_ron(self):
+        # temperature info
+        beta = self.beta
+        mu = self.mu
+
+        # ON correction to HF free energy
+        mp1da,mp1db = self.sys.u_mp1_den()
+        self.ron1 = [mp1da, mp1db]
+
+        # get energies and occupation numbers
+        ea,eb = self.sys.u_energies_tot()
+        na = ea.shape[0]
+        nb = eb.shape[0]
+        foa = ft_utils.ff(beta, ea, mu)
+        fva = ft_utils.ffv(beta, ea, mu)
+        fob = ft_utils.ff(beta, eb, mu)
+        fvb = ft_utils.ffv(beta, eb, mu)
+
+        # get integrals
+        if self.athresh > 0.0:
+            athresh = self.athresh
+            focca = [x for x in foa if x > athresh]
+            fvira = [x for x in fva if x > athresh]
+            iocca = [i for i,x in enumerate(foa) if x > athresh]
+            ivira = [i for i,x in enumerate(fva) if x > athresh]
+            foccb = [x for x in fob if x > athresh]
+            fvirb = [x for x in fvb if x > athresh]
+            ioccb = [i for i,x in enumerate(fob) if x > athresh]
+            ivirb = [i for i,x in enumerate(fvb) if x > athresh]
+            nocca = len(focca)
+            nvira = len(fvira)
+            noccb = len(foccb)
+            nvirb = len(fvirb)
+            Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
+                    self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
+        else:
+            focca = foa
+            fvira = fva
+            foccb = fob
+            fvirb = fvb
+            Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
+        if self.athresh > 0.0:
+            dsoa = fva[numpy.ix_(iocca)]
+            dsva = foa[numpy.ix_(ivira)]
+            dsob = fvb[numpy.ix_(ioccb)]
+            dsvb = fob[numpy.ix_(ivirb)]
+        else:
+            dsoa = fva
+            dsva = foa
+            dsob = fvb
+            dsvb = fob
+
+        # perturbed ON contribution to Fock matrix
+        Fdaa,Fdab,Fdbb,Fdba = self.sys.u_fock_d_den()
+        ronoa = numpy.zeros(na)
+        ronva = numpy.zeros(na)
+        ronob = numpy.zeros(nb)
+        ronvb = numpy.zeros(nb)
+        if self.athresh > 0.0:
+            temp = cc_utils.u_Fd_on_active(
+                    Fdaa, Fdab, Fdba, Fdbb, iocca, ivira, ioccb, ivirb,
+                    self.ndia, self.ndba, self.ndji, self.ndai)
+            ronoa += temp[0]
+            ronob += temp[1]
+        else:
+            temp = cc_utils.u_Fd_on(
+                    Fdaa, Fdab, Fdba, Fdbb, self.ndia, self.ndba, self.ndji, self.ndai)
+            ronoa += temp[0]
+            ronob += temp[1]
+
+        # Add contributions from occupation number relaxation
+        jitempa = numpy.zeros(nocca) if self.athresh > 0.0 else numpy.zeros(na)
+        batempa = numpy.zeros(nvira) if self.athresh > 0.0 else numpy.zeros(na)
+        jitempb = numpy.zeros(noccb) if self.athresh > 0.0 else numpy.zeros(nb)
+        batempb = numpy.zeros(nvirb) if self.athresh > 0.0 else numpy.zeros(nb)
+        cc_utils.u_d_on_oo(
+                dsoa, dsob, Fa, Fb, Ia, Ib, Iabab,
+                self.dia, self.dji, self.dai, self.P2, jitempa, jitempb)
+        cc_utils.u_d_on_vv(
+                dsva, dsvb, Fa, Fb, Ia, Ib, Iabab,
+                self.dia, self.dba, self.dai, self.P2, batempa, batempb)
+
+        if self.athresh > 0.0:
+            ronoa[numpy.ix_(iocca)] += jitempa
+            ronob[numpy.ix_(ioccb)] += jitempb
+            ronva[numpy.ix_(ivira)] += batempa
+            ronvb[numpy.ix_(ivirb)] += batempb
+        else:
+            ronoa += jitempa
+            ronob += jitempb
+            ronva += batempa
+            ronvb += batempb
+        self.rono = [ronoa, ronob]
+        self.ronv = [ronva, ronvb]

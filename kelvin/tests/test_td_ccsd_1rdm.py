@@ -19,7 +19,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
 
-        # compute normal-ordered 1-rdm 
+        # compute normal-ordered 1-rdm
         ccsdT = ccsd(sys,T=T,mu=mu,ngrid=40,iprint=0)
         Eref,Eccref = ccsdT.run()
         ccsdT._g_ft_1rdm()
@@ -55,7 +55,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
 
-        # compute normal-ordered 1-rdm 
+        # compute normal-ordered 1-rdm
         ccsdT = ccsd(sys,T=T,mu=mu,ngrid=40,iprint=0)
         Eref,Eccref = ccsdT.run()
         ccsdT._g_ft_1rdm()
@@ -91,7 +91,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
 
-        # compute normal-ordered 1-rdm 
+        # compute normal-ordered 1-rdm
         ccsdT = ccsd(sys,T=T,mu=mu,ngrid=80,iprint=0)
         Eref,Eccref = ccsdT.run()
         ccsdT._g_ft_1rdm()
@@ -127,7 +127,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
 
-        # compute normal-ordered 1-rdm 
+        # compute normal-ordered 1-rdm
         ccsdT = ccsd(sys,T=T,mu=mu,ngrid=100,iprint=0,damp=0.4,athresh = 1e-20)
         Eref,Eccref = ccsdT.run()
         ccsdT._g_ft_1rdm()
@@ -149,6 +149,122 @@ class TDCCSD1RDMTest(unittest.TestCase):
         self.assertTrue(eji < 5e-4,errorji)
         self.assertTrue(eba < 5e-4,errorba)
         self.assertTrue(eai < 5e-4,errorai)
+
+    def test_Be_u_vs_g(self):
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+
+        m = scf.RHF(mol)
+        m.conv_tol = 1e-12
+        Escf = m.scf()
+        T = 0.5
+        mu = 0.0
+
+        # compute normal-order 1-rdm from propagation
+        sys = scf_system(m,T,mu,orbtype='g')
+        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
+        Etmp,Ecctmp = tdccsdT.run()
+        Eref,Eccref = tdccsdT._ccsd_lambda()
+        dia = tdccsdT.dia
+        dji = tdccsdT.dji
+        dba = tdccsdT.dba
+        dai = tdccsdT.dai
+        # compute normal-order 1-rdm from propagation
+        sys = scf_system(m,T,mu,orbtype='u')
+        ea,eb = sys.u_energies_tot()
+        na = ea.shape[0]
+        nb = eb.shape[0]
+        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
+        Etmp,Ecctmp = tdccsdT.run()
+        Eout,Eccout = tdccsdT._uccsd_lambda()
+        eia = numpy.linalg.norm(tdccsdT.dia[0] - dia[:na,:na])
+        eIA = numpy.linalg.norm(tdccsdT.dia[1] - dia[na:,na:])
+        eji = numpy.linalg.norm(tdccsdT.dji[0] - dji[:na,:na])
+        eJI = numpy.linalg.norm(tdccsdT.dji[1] - dji[na:,na:])
+        eba = numpy.linalg.norm(tdccsdT.dba[0] - dba[:na,:na])
+        eBA = numpy.linalg.norm(tdccsdT.dba[1] - dba[na:,na:])
+        eai = numpy.linalg.norm(tdccsdT.dai[0] - dai[:na,:na])
+        eAI = numpy.linalg.norm(tdccsdT.dai[1] - dai[na:,na:])
+        erroria = "Difference in pia: {}".format(eia)
+        errorIA = "Difference in pIA: {}".format(eIA)
+        errorji = "Difference in pji: {}".format(eji)
+        errorJI = "Difference in pJI: {}".format(eJI)
+        errorba = "Difference in pba: {}".format(eba)
+        errorBA = "Difference in pBA: {}".format(eBA)
+        errorai = "Difference in pai: {}".format(eai)
+        errorAI = "Difference in pAI: {}".format(eAI)
+        self.assertTrue(eia < 1e-12,erroria)
+        self.assertTrue(eia < 1e-12,errorIA)
+        self.assertTrue(eji < 1e-12,errorji)
+        self.assertTrue(eji < 1e-12,errorJI)
+        self.assertTrue(eba < 1e-12,errorba)
+        self.assertTrue(eba < 1e-12,errorBA)
+        self.assertTrue(eai < 1e-12,errorai)
+        self.assertTrue(eai < 1e-12,errorAI)
+
+    def test_Be_u_vs_g_active(self):
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+
+        m = scf.RHF(mol)
+        m.conv_tol = 1e-12
+        Escf = m.scf()
+        T = 0.05
+        mu = 0.0
+
+        # compute normal-order 1-rdm from propagation
+        sys = scf_system(m,T,mu,orbtype='g')
+        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=320, athresh=1e-20, saveT=True)
+        Etmp,Ecctmp = tdccsdT.run()
+        Eref,Eccref = tdccsdT._ccsd_lambda()
+        dia = tdccsdT.dia
+        dji = tdccsdT.dji
+        dba = tdccsdT.dba
+        dai = tdccsdT.dai
+        # compute normal-order 1-rdm from propagation
+        sys = scf_system(m,T,mu,orbtype='u')
+        ea,eb = sys.u_energies_tot()
+        na = ea.shape[0]
+        nb = eb.shape[0]
+        noa = na
+        nob = nb
+        nva = na - 1
+        nvb = nb - 1
+        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=320, athresh=1e-20, saveT=True)
+        Etmp,Ecctmp = tdccsdT.run()
+        Eout,Eccout = tdccsdT._uccsd_lambda()
+        eia = numpy.linalg.norm(tdccsdT.dia[0] - dia[:noa,:nva])
+        eIA = numpy.linalg.norm(tdccsdT.dia[1] - dia[noa:,nva:])
+        eji = numpy.linalg.norm(tdccsdT.dji[0] - dji[:noa,:noa])
+        eJI = numpy.linalg.norm(tdccsdT.dji[1] - dji[noa:,noa:])
+        eba = numpy.linalg.norm(tdccsdT.dba[0] - dba[:nva,:nva])
+        eBA = numpy.linalg.norm(tdccsdT.dba[1] - dba[nva:,nva:])
+        eai = numpy.linalg.norm(tdccsdT.dai[0] - dai[:nva,:noa])
+        eAI = numpy.linalg.norm(tdccsdT.dai[1] - dai[nva:,noa:])
+        erroria = "Difference in pia: {}".format(eia)
+        errorIA = "Difference in pIA: {}".format(eIA)
+        errorji = "Difference in pji: {}".format(eji)
+        errorJI = "Difference in pJI: {}".format(eJI)
+        errorba = "Difference in pba: {}".format(eba)
+        errorBA = "Difference in pBA: {}".format(eBA)
+        errorai = "Difference in pai: {}".format(eai)
+        errorAI = "Difference in pAI: {}".format(eAI)
+        self.assertTrue(eia < 1e-12,erroria)
+        self.assertTrue(eia < 1e-12,errorIA)
+        self.assertTrue(eji < 1e-12,errorji)
+        self.assertTrue(eji < 1e-12,errorJI)
+        self.assertTrue(eba < 1e-12,errorba)
+        self.assertTrue(eba < 1e-12,errorBA)
+        self.assertTrue(eai < 1e-12,errorai)
+        self.assertTrue(eai < 1e-12,errorAI)
 
 if __name__ == '__main__':
     unittest.main()

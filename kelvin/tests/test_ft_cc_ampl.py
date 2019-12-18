@@ -32,8 +32,8 @@ class FTamplEquationsTest(unittest.TestCase):
         diff2 = numpy.linalg.norm(T2stn - T2sim)
         s1 = diff1 < self.thresh*numpy.sqrt(T1sim.size)
         s2 = diff2 < self.thresh*numpy.sqrt(T2sim.size)
-        e1 = "Error in Stanton FT T1"
-        e2 = "Error in Stanton FT T2"
+        e1 = "Error in Stanton FT T1: {}".format(diff1)
+        e2 = "Error in Stanton FT T2: {}".format(diff2)
         self.assertTrue(s1,e1)
         self.assertTrue(s2,e2)
 
@@ -100,8 +100,8 @@ class FTamplEquationsTest(unittest.TestCase):
         diff2 = numpy.linalg.norm(T2ref - T2)
         s1 = diff1 < self.thresh*numpy.sqrt(T1ref.size)
         s2 = diff2 < self.thresh*numpy.sqrt(T2ref.size)
-        e1 = "Error in unrestricted FT T1"
-        e2 = "Error in unrestricted FT T2"
+        e1 = "Error in unrestricted FT T1: {}".format(diff1)
+        e2 = "Error in unrestricted FT T2: {}".format(diff2)
         self.assertTrue(s1,e1)
         self.assertTrue(s2,e2)
 

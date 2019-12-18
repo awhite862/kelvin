@@ -19,7 +19,7 @@ class ccsd(object):
 
     Attributes:
         sys: System object.
-        T (float): Temperature.    
+        T (float): Temperature.
         mu (float): Chemical potential.
         iprint (int): Print level.
         singles (bool): Include singles (False -> CCD).
@@ -39,7 +39,7 @@ class ccsd(object):
     """
     def __init__(self, sys, T=0.0, mu=0.0, iprint=0,
         singles=True, econv=1e-8, tconv=None, max_iter=40,
-        damp=0.0, ngrid=10, realtime=False, athresh=0.0, 
+        damp=0.0, ngrid=10, realtime=False, athresh=0.0,
         quad='lin', rt_iter="all"):
 
         self.T = T
@@ -273,17 +273,17 @@ class ccsd(object):
         Doovv = 1.0/(eo[:,None,None,None] + eo[None,:,None,None]
             - ev[None,None,:,None] - ev[None,None,None,:])
 
-        # get HF energy 
+        # get HF energy
         t1 = time.time()
         En = self.sys.const_energy()
         E0 = zt_mp.mp0(eo) + En
         E1 = self.sys.get_mp1()
         Ehf = E0 + E1
         t2 = time.time()
-    
+
         # compute required memory
-        no = eo.shape[0] 
-        nv = ev.shape[0] 
+        no = eo.shape[0]
+        nv = ev.shape[0]
         noa = no//2
         nva = nv//2
         mem1e = no*no + 5*no*nv + nv*nv  # include memory for D1
@@ -973,10 +973,10 @@ class ccsd(object):
         g0 = ft_utils.GP0(beta, en, mu)
         E0 = ft_mp.mp0(g0) + En
 
-        # get HF free energies  
+        # get HF free energies
         E1 = self.sys.get_mp1()
         E01 = E0 + E1
-        
+
         if self.athresh > 0.0:
             athresh = self.athresh
             focc = [x for x in fo if x > athresh]
@@ -1176,8 +1176,8 @@ class ccsd(object):
                 "damp":self.damp}
         method = "CCSD" if self.singles else "CCD"
         L1a,L1b,L2aa,L2ab,L2bb = cc_utils.ft_ulambda_iter(
-                method, L1aold, L1bold, L2aaold, L2abold, L2bbold, T1aold, T1bold, 
-                T2aaold, T2abold, T2bbold, Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb, 
+                method, L1aold, L1bold, L2aaold, L2abold, L2bbold, T1aold, T1bold,
+                T2aaold, T2abold, T2bbold, Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb,
                 g, G, self.beta_max, ng, ti, self.iprint, conv_options)
 
         # save lambda amplitudes
@@ -1185,7 +1185,7 @@ class ccsd(object):
         self.L2 = (L2aa,L2ab,L2bb)
 
     def _g_nocc_gderiv(self):
-        """Evaluate the derivatives of the weight matrices in 
+        """Evaluate the derivatives of the weight matrices in
         the time-dependent formulation.
         """
         # temperature info
@@ -1247,7 +1247,7 @@ class ccsd(object):
         for i in range(m):
             for j in range(n):
                 Gnew[i,j] *= (self.ti[j] - self.ti[i])/beta
- 
+
         T1temp,T2temp = ft_cc_equations.ccsd_stanton(F,I,self.T1,self.T2,
                 D1,D2,ti,ng,Gnew)
         T1temp *= D1
@@ -1931,7 +1931,7 @@ class ccsd(object):
         ronvb = numpy.zeros(nb)
         if self.athresh > 0.0:
             temp = cc_utils.u_Fd_on_active(
-                    Fdaa, Fdab, Fdba, Fdbb, iocca, ivira, ioccb, ivirb, 
+                    Fdaa, Fdab, Fdba, Fdbb, iocca, ivira, ioccb, ivirb,
                     self.ndia, self.ndba, self.ndji, self.ndai)
             ronoa += temp[0]
             ronob += temp[1]
@@ -1947,10 +1947,10 @@ class ccsd(object):
         jitempb = numpy.zeros(noccb) if self.athresh > 0.0 else numpy.zeros(nb)
         batempb = numpy.zeros(nvirb) if self.athresh > 0.0 else numpy.zeros(nb)
         cc_utils.u_d_on_oo(
-                dsoa, dsob, Fa, Fb, Ia, Ib, Iabab, 
+                dsoa, dsob, Fa, Fb, Ia, Ib, Iabab,
                 self.dia, self.dji, self.dai, self.P2, jitempa, jitempb)
         cc_utils.u_d_on_vv(
-                dsva, dsvb, Fa, Fb, Ia, Ib, Iabab, 
+                dsva, dsvb, Fa, Fb, Ia, Ib, Iabab,
                 self.dia, self.dba, self.dai, self.P2, batempa, batempb)
 
         if self.athresh > 0.0:
