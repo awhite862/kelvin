@@ -64,6 +64,9 @@ class TDCCSD(object):
         self.rono = None
         self.ronv = None
         self.ron1 = None
+        # orbital energy response
+        self.rorbo = None
+        self.rorbv = None
 
     def run(self,response=None):
         """Run CCSD calculation."""
@@ -543,7 +546,7 @@ class TDCCSD(object):
 
         return (Eccn+E01,Eccn)
 
-    def _ccsd_lambda(self, rdm2=False):
+    def _ccsd_lambda(self, rdm2=False, erel=False):
         if self.T1 is None or self.T2 is None:
             raise Exception("No saved T-amplitudes")
 
@@ -681,6 +684,18 @@ class TDCCSD(object):
             Pkaij = g[ng - 1]*cc_equations.ccsd_2rdm_kaij_opt(t1b, t2b, l1, l2)
             Pklij = g[ng - 1]*cc_equations.ccsd_2rdm_klij_opt(t1b, t2b, l1, l2)
 
+        if erel:
+            self.rorbo = numpy.zeros(n)
+            self.rorbv = numpy.zeros(n)
+            x1 = numpy.zeros(l1.shape)
+            x2 = numpy.zeros(l2.shape)
+            def fXRHS(ltot,var):
+                l1,l2 = ltot
+                x1,x2 = var
+                l1s = -D1.transpose((1,0))*x1 - l1
+                l1d = -D2.transpose((2,3,0,1))*x2 - l2
+                return [l1s,l1d]
+
         Eccn = g[ng - 1]*cc_energy(t1b, t2b, F.ov, I.oovv)/beta
         for i in range(1,ng):
             h = self.ti[ng - i] - self.ti[ng - i - 1]
@@ -692,6 +707,13 @@ class TDCCSD(object):
                 t1e = self.T1[ng - i - 1]
                 t2e = self.T2[ng - i - 1]
             ld1, ld2 = self._get_l_step(h, (l1,l2), (t1b,t2b), (t1e,t2e), fLRHS)
+            if erel:
+                dx1, dx2 = self._get_l_step(h, (x1,x2), (l1,l2), (l1 + ld1, l2 + ld2), fXRHS)
+                x1 += dx1
+                x2 += dx2
+                d1test = -F.vo.copy()
+                d2test = -I.vvoo.copy()
+                cc_equations._Stanton(d1test,d2test,F,I,t1e,t2e,fac=-1.0)
             l1 += ld1
             l2 += ld2
             Eccn += g[ng - i - 1]*cc_energy(t1e, t2e, F.ov, I.oovv)/beta
@@ -711,6 +733,20 @@ class TDCCSD(object):
                 Pjkai += g[ng - 1 - i]*cc_equations.ccsd_2rdm_jkai_opt(t1e, t2e, l1, l2)
                 Pkaij += g[ng - 1 - i]*cc_equations.ccsd_2rdm_kaij_opt(t1e, t2e, l1, l2)
                 Pklij += g[ng - 1 - i]*cc_equations.ccsd_2rdm_klij_opt(t1e, t2e, l1, l2)
+            if erel:
+                At1i = -(1.0/beta)*einsum('ia,ai->i',x1, d1test)
+                At1a = -(1.0/beta)*einsum('ia,ai->a',x1, d1test)
+                At2i = -(1.0/beta)*0.25*einsum('ijab,abij->i',x2, d2test)
+                At2j = -(1.0/beta)*0.25*einsum('ijab,abij->j',x2, d2test)
+                At2a = -(1.0/beta)*0.25*einsum('ijab,abij->a',x2, d2test)
+                At2b = -(1.0/beta)*0.25*einsum('ijab,abij->b',x2, d2test)
+                if self.athresh > 0.0:
+                    self.rorbo[numpy.ix_(iocc)] -= g[ng - 1 - i]*(At1i + At2i + At2j)
+                    self.rorbv[numpy.ix_(ivir)] += g[ng - 1 - i]*(At1a + At2a + At2b)
+                else:
+                    self.rorbo -= g[ng - 1 - i]*(At1i + At2i + At2j)
+                    self.rorbv += g[ng - 1 - i]*(At1a + At2a + At2b)
+
             t1b = t1e
             t2b = t2e
 

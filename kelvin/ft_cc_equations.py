@@ -10,7 +10,7 @@ einsum = lib.einsum
 #einsum = einsum
 
 def lccd_simple(F,I,T2old,D2,ti,ng,G):
-    """Time-dependent linearized coupled cluster 
+    """Time-dependent linearized coupled cluster
     doubles (LCCD) iteration.
     """
     t1 = time.time()
@@ -27,7 +27,7 @@ def lccd_simple(F,I,T2old,D2,ti,ng,G):
     return T2new
 
 def lccsd_simple(F,I,T1old,T2old,D1,D2,ti,ng,G):
-    """Time-dependent linearized coupled cluster 
+    """Time-dependent linearized coupled cluster
     singles and doubles (LCCSD) iteration.
     """
     t1 = time.time()
@@ -49,7 +49,7 @@ def lccsd_simple(F,I,T1old,T2old,D1,D2,ti,ng,G):
     return T1new,T2new
 
 def ccd_simple(F,I,T2old,D2,ti,ng,G):
-    """Time-dependent coupled cluster doubles (CCD) 
+    """Time-dependent coupled cluster doubles (CCD)
     iteration.
     """
     t1 = time.time()
@@ -67,7 +67,7 @@ def ccd_simple(F,I,T2old,D2,ti,ng,G):
     return T2new
 
 def ccsd_simple(F,I,T1old,T2old,D1,D2,ti,ng,G):
-    """Time-dependent coupled cluster singles and 
+    """Time-dependent coupled cluster singles and
     doubles (CCSD) iteration.
     """
     t1 = time.time()
@@ -99,8 +99,8 @@ def ccsd_simple(F,I,T1old,T2old,D1,D2,ti,ng,G):
     return T1new,T2new
 
 def ccsd_stanton(F,I,T1old,T2old,D1,D2,ti,ng,G):
-    """Time-dependent coupled cluster singles and 
-    doubles (CCSD) iteration using Stanton-Gauss 
+    """Time-dependent coupled cluster singles and
+    doubles (CCSD) iteration using Stanton-Gauss
     intermediates.
     """
     t1 = time.time()
@@ -295,8 +295,8 @@ def neq_ccsd_stanton(Ff,Fb,F,I,T1oldf,T1oldb,T1oldi,
     return T1newf,T1newb,T1newi,T2newf,T2newb,T2newi
 
 def lccd_lambda_simple(F,I,T2old,L2old,D2,ti,ng,g,G,beta):
-    """Time-dependent linearized coupled cluster doubles (LCCD) 
-    Lambda iteration. 
+    """Time-dependent linearized coupled cluster doubles (LCCD)
+    Lambda iteration.
     """
     t1 = time.time()
     # integrate old lambda amplitudes
@@ -317,8 +317,8 @@ def lccd_lambda_simple(F,I,T2old,L2old,D2,ti,ng,g,G,beta):
     return L2
 
 def lccsd_lambda_simple(F,I,T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G,beta):
-    """Time-dependent linearized coupled cluster singles and doubles (LCCSD) 
-    Lambda iteration. 
+    """Time-dependent linearized coupled cluster singles and doubles (LCCSD)
+    Lambda iteration.
     """
     t1 = time.time()
     # integrate old lambda amplitudes
@@ -348,8 +348,8 @@ def lccsd_lambda_simple(F,I,T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G,beta):
     return L1,L2
 
 def ccsd_lambda_simple(F,I,T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G,beta):
-    """Time-dependent coupled cluster singles and doubles (CCSD) 
-    Lambda iteration. 
+    """Time-dependent coupled cluster singles and doubles (CCSD)
+    Lambda iteration.
     """
     # integrate old lambda amplitudes
     L1int = quadrature.int_L1(ng,L1old,ti,D1,g,G)
@@ -389,7 +389,7 @@ def ccsd_lambda_simple(F,I,T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G,beta):
     return L1,L2
 
 def ccsd_lambda_opt(F,I,T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G,beta):
-    """Time-dependent coupled cluster singles and doubles (CCSD) 
+    """Time-dependent coupled cluster singles and doubles (CCSD)
     Lambda iteration with intermediates.
     """
     # integrate old lambda amplitudes
@@ -469,10 +469,10 @@ def ft_ccsd_lambda_int(F, I, T1old, T2old):
     intor = []
     for y in range(ng):
         intor.append(cc_equations.lambda_int(F, I, T1old[y,:,:], T2old[y,:,:,:,:]))
-    return intor 
+    return intor
 
 def ccsd_lambda_opt_int(F,I,T1old,T2old,L1old,L2old,intor,D1,D2,ti,ng,g,G,beta):
-    """Time-dependent coupled cluster singles and doubles (CCSD) 
+    """Time-dependent coupled cluster singles and doubles (CCSD)
     Lambda iteration with precomputed intermediates.
     """
     # integrate old lambda amplitudes
@@ -505,7 +505,7 @@ def ccd_lambda_guess(F,I,beta):
     return L2
 
 def ccsd_lambda_guess(F,I,T1old,beta,ng):
-    """Time-dependent coupled cluster singles and doubles (CCSD) 
+    """Time-dependent coupled cluster singles and doubles (CCSD)
     Lambda guess.
     """
     Id = numpy.ones((ng))
@@ -682,7 +682,7 @@ def neq_lambda_opt(Ff,Fb,F,I,L1oldf,L1oldb,L1oldi,
 
 
 def ccd_lambda_simple(F,I,T2old,L2old,D2,ti,ng,g,G,beta):
-    """Time-dependent coupled cluster doubles (CCD) 
+    """Time-dependent coupled cluster doubles (CCD)
     Lambda iteration.
     """
     t1 = time.time()
