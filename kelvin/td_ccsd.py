@@ -736,16 +736,14 @@ class TDCCSD(object):
             if erel:
                 At1i = -(1.0/beta)*einsum('ia,ai->i',x1, d1test)
                 At1a = -(1.0/beta)*einsum('ia,ai->a',x1, d1test)
-                At2i = -(1.0/beta)*0.25*einsum('ijab,abij->i',x2, d2test)
-                At2j = -(1.0/beta)*0.25*einsum('ijab,abij->j',x2, d2test)
-                At2a = -(1.0/beta)*0.25*einsum('ijab,abij->a',x2, d2test)
-                At2b = -(1.0/beta)*0.25*einsum('ijab,abij->b',x2, d2test)
+                At2i = -(1.0/beta)*0.5*einsum('ijab,abij->i',x2, d2test)
+                At2a = -(1.0/beta)*0.5*einsum('ijab,abij->a',x2, d2test)
                 if self.athresh > 0.0:
-                    self.rorbo[numpy.ix_(iocc)] -= g[ng - 1 - i]*(At1i + At2i + At2j)
-                    self.rorbv[numpy.ix_(ivir)] += g[ng - 1 - i]*(At1a + At2a + At2b)
+                    self.rorbo[numpy.ix_(iocc)] -= g[ng - 1 - i]*(At1i + At2i)
+                    self.rorbv[numpy.ix_(ivir)] += g[ng - 1 - i]*(At1a + At2a)
                 else:
-                    self.rorbo -= g[ng - 1 - i]*(At1i + At2i + At2j)
-                    self.rorbv += g[ng - 1 - i]*(At1a + At2a + At2b)
+                    self.rorbo -= g[ng - 1 - i]*(At1i + At2i)
+                    self.rorbv += g[ng - 1 - i]*(At1a + At2a)
 
             t1b = t1e
             t2b = t2e
@@ -769,7 +767,7 @@ class TDCCSD(object):
 
         return (Eccn+E01,Eccn)
 
-    def _uccsd_lambda(self, rdm2=False):
+    def _uccsd_lambda(self, rdm2=False, erel=False):
         if self.T1 is None or self.T2 is None:
             raise Exception("No saved T-amplitudes")
 
@@ -1027,6 +1025,26 @@ class TDCCSD(object):
             PKLIJ = g[ng - 1]*Pklij_tot[1]
             PkLiJ = g[ng - 1]*Pklij_tot[2]
 
+        if erel:
+            rorbo_a = numpy.zeros(na)
+            rorbo_b = numpy.zeros(nb)
+            rorbv_a = numpy.zeros(na)
+            rorbv_b = numpy.zeros(nb)
+            x1a = numpy.zeros(l1a.shape)
+            x1b = numpy.zeros(l1b.shape)
+            x2aa = numpy.zeros(l2aa.shape)
+            x2ab = numpy.zeros(l2ab.shape)
+            x2bb = numpy.zeros(l2bb.shape)
+            def fXRHS(ltot,var):
+                l1a,l1b,l2aa,l2ab,l2bb = ltot
+                x1a,x1b,x2aa,x2ab,x2bb = var
+                l1sa = -D1a.transpose((1,0))*x1a - l1a
+                l1sb = -D1b.transpose((1,0))*x1b - l1b
+                l1daa = -D2aa.transpose((2,3,0,1))*x2aa - l2aa
+                l1dab = -D2ab.transpose((2,3,0,1))*x2ab - l2ab
+                l1dbb = -D2bb.transpose((2,3,0,1))*x2bb - l2bb
+                return [l1sa,l1sb,l1daa,l1dab,l1dbb]
+
         Eccn = g[ng - 1]*ucc_energy((t1da,t1db), (t2daa,t2dab,t2dbb),
                 Fa.ov, Fb.ov, Ia.oovv, Ib.oovv, Iabab.oovv)/beta
         for i in range(1,ng):
@@ -1046,6 +1064,21 @@ class TDCCSD(object):
                 t2ebb = self.T2[ng - i - 1][2]
             ld1a, ld1b, ld2aa, ld2ab, ld2bb = self._get_l_step(
                     h, (l1a,l1b,l2aa,l2ab,l2bb), (t1da,t1db,t2daa,t2dab,t2dbb), (t1ea,t1eb,t2eaa,t2eab,t2ebb), fLRHS)
+            if erel:
+                dx1a, dx1b, dx2aa, dx2ab, dx2bb = self._get_l_step(h, (x1a,x1b,x2aa,x2ab,x2bb), 
+                        (l1a,l1b,l2aa,l2ab,l2bb), (l1a + ld1a, l1b + ld1b, l2aa + ld2aa, l2ab + ld2ab, l2bb + ld2bb), fXRHS)
+                x1a += dx1a
+                x1b += dx1b
+                x2aa += dx2aa
+                x2ab += dx2ab
+                x2bb += dx2bb
+                d1atest = -Fa.vo.copy()
+                d1btest = -Fb.vo.copy()
+                d2aatest = -Ia.vvoo.copy()
+                d2abtest = -Iabab.vvoo.copy()
+                d2bbtest = -Ib.vvoo.copy()
+                cc_equations._u_Stanton(d1atest,d1btest,d2aatest,d2abtest,d2bbtest,
+                        Fa,Fb,Ia,Ib,Iabab,(t1ea,t1eb),(t2eaa,t2eab,t2ebb),fac=-1.0)
             l1a += ld1a
             l1b += ld1b
             l2aa += ld2aa
@@ -1131,6 +1164,30 @@ class TDCCSD(object):
                 PKLIJ += g[ng - i - 1]*klij_tot[1]
                 PkLiJ += g[ng - i - 1]*klij_tot[2]
 
+            if erel:
+                At1i_a = -(1.0/beta)*einsum('ia,ai->i',x1a, d1atest)
+                At1i_b = -(1.0/beta)*einsum('ia,ai->i',x1b, d1btest)
+                At1a_a = -(1.0/beta)*einsum('ia,ai->a',x1a, d1atest)
+                At1a_b = -(1.0/beta)*einsum('ia,ai->a',x1b, d1btest)
+                At2i_a = -(1.0/beta)*0.5*einsum('ijab,abij->i',x2aa, d2aatest)
+                At2i_b = -(1.0/beta)*0.5*einsum('ijab,abij->i',x2bb, d2bbtest)
+                At2i_a -= (1.0/beta)*einsum('ijab,abij->i',x2ab, d2abtest)
+                At2i_b -= (1.0/beta)*einsum('ijab,abij->j',x2ab, d2abtest)
+                At2a_a = -(1.0/beta)*0.5*einsum('ijab,abij->a',x2aa, d2aatest)
+                At2a_b = -(1.0/beta)*0.5*einsum('ijab,abij->a',x2bb, d2bbtest)
+                At2a_a -= (1.0/beta)*einsum('ijab,abij->a',x2ab, d2abtest)
+                At2a_b -= (1.0/beta)*einsum('ijab,abij->b',x2ab, d2abtest)
+                if self.athresh > 0.0:
+                    rorbo_a[numpy.ix_(iocca)] -= g[ng - 1 - i]*(At1i_a + At2i_a)
+                    rorbo_b[numpy.ix_(ioccb)] -= g[ng - 1 - i]*(At1i_b + At2i_b)
+                    rorbv_a[numpy.ix_(ivira)] += g[ng - 1 - i]*(At1a_a + At2a_a)
+                    rorbv_b[numpy.ix_(ivirb)] += g[ng - 1 - i]*(At1a_b + At2a_b)
+                else:
+                    rorbo_a -= g[ng - 1 - i]*(At1i_a + At2i_a)
+                    rorbo_b -= g[ng - 1 - i]*(At1i_b + At2i_b)
+                    rorbv_a += g[ng - 1 - i]*(At1a_a + At2a_a)
+                    rorbv_b += g[ng - 1 - i]*(At1a_b + At2a_b)
+
             t1da = t1ea
             t1db = t1eb
             t2daa = t2eaa
@@ -1165,6 +1222,9 @@ class TDCCSD(object):
                     (Pjkai,PJKAI,PjKaI,PJkAi),
                     (Pkaij,PKAIJ,PkAiJ,PKaIj),
                     (Pklij,PKLIJ,PkLiJ))
+        if erel:
+            self.rorbo = [rorbo_a, rorbo_b]
+            self.rorbv = [rorbv_a, rorbv_b]
 
         return (Eccn+E01,Eccn)
 
