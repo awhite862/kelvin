@@ -44,8 +44,8 @@ class TDCCSD(object):
         ng = self.ngrid
         self.ti,self.g,G = quadrature.ft_quad(self.ngrid,beta,self.quad)
         self.sys = sys
-        self.T1 = None
-        self.T2 = None
+        self.T1 = [None]*ng
+        self.T2 = [None]*ng
         self.L1 = None
         self.L2 = None
         # pieces of normal-ordered 1-rdm
@@ -250,6 +250,12 @@ class TDCCSD(object):
             raise Exception("Unrecognized propagation scheme: " + self.prop)
         return ldtot
 
+    def _save_T1(self, i, T1):
+        self.T1[i] = T1
+
+    def _save_T2(self, i, T2):
+        self.T2[i] = T2
+
     def _ccsd(self):
         beta = self.beta
         mu = self.mu if self.finite_T else None
@@ -348,8 +354,8 @@ class TDCCSD(object):
             return [k1s,k1d]
 
         if self.saveT:
-            self.T1 = [t1.copy()]
-            self.T2 = [t2.copy()]
+            self._save_T1(0, t1.copy())
+            self._save_T2(0, t2.copy())
 
         for i in range(1,ng):
             # propagate
@@ -361,16 +367,16 @@ class TDCCSD(object):
             # compute free energy contribution
             Eccn += g[i]*cc_energy(t1, t2, F.ov, I.oovv)/beta
             if self.saveT:
-                self.T1.append(t1.copy())
-                self.T2.append(t2.copy())
+                self._save_T1(i, t1.copy())
+                self._save_T2(i, t2.copy())
 
         self.G0 = E0
         self.G1 = E1
         self.Gcc = Eccn
         self.Gtot = E0 + E1 + Eccn
         if not self.saveT:
-            self.T1 = t1
-            self.T2 = t2
+            self._save_T1(ng - 1,t1)
+            self._save_T2(ng - 1,t2)
 
         return (Eccn+E01,Eccn)
 
@@ -516,8 +522,8 @@ class TDCCSD(object):
             return [k1sa,k1sb,k1daa,k1dab,k1dbb]
 
         if self.saveT:
-            self.T1 = [(t1a.copy(),t1b.copy())]
-            self.T2 = [(t2aa.copy(),t2ab.copy(),t2bb.copy())]
+            self._save_T1(0, (t1a.copy(),t1b.copy()))
+            self._save_T2(0, (t2aa.copy(),t2ab.copy(),t2bb.copy()))
 
         for i in range(1,ng):
             # propagate
@@ -533,26 +539,22 @@ class TDCCSD(object):
             Eccn += g[i]*ucc_energy((t1a,t1b), (t2aa,t2ab,t2bb),
                     Fa.ov, Fb.ov, Ia.oovv, Ib.oovv, Iabab.oovv)/beta
             if self.saveT:
-                self.T1.append((t1a.copy(),t1b.copy()))
-                self.T2.append((t2aa.copy(),t2ab.copy(),t2bb.copy()))
+                self._save_T1(i, (t1a.copy(),t1b.copy()))
+                self._save_T2(i, (t2aa.copy(),t2ab.copy(),t2bb.copy()))
 
         self.G0 = E0
         self.G1 = E1
         self.Gcc = Eccn
         self.Gtot = E0 + E1 + Eccn
         if not self.saveT:
-            self.T1 = (t1a,t1b)
-            self.T2 = (t2aa,t2ab,t2bb)
+            self._save_T1(ng - 1, (t1a,t1b))
+            self._save_T2(ng - 1, (t2aa,t2ab,t2bb))
 
         return (Eccn+E01,Eccn)
 
     def _ccsd_lambda(self, rdm2=False, erel=False):
-        if self.T1 is None or self.T2 is None:
-            raise Exception("No saved T-amplitudes")
-
         beta = self.beta
         mu = self.mu if self.finite_T else None
-        propT = False if self.saveT else True
 
         # get time-grid
         ng = self.ngrid
@@ -659,12 +661,8 @@ class TDCCSD(object):
             cc_equations._LS_TS(l1s,I,t1,fac=-1.0)
             return [l1s,l1d]
 
-        if propT:
-            t1b = self.T1.copy()
-            t2b = self.T2.copy()
-        else:
-            t1b = self.T1[ng - 1]
-            t2b = self.T2[ng - 1]
+        t1b = self.T1[ng - 1]
+        t2b = self.T2[ng - 1]
         nv, no = t1b.shape
         l1 = numpy.zeros((no,nv))
         l2 = numpy.zeros((no,no,nv,nv))
@@ -699,7 +697,7 @@ class TDCCSD(object):
         Eccn = g[ng - 1]*cc_energy(t1b, t2b, F.ov, I.oovv)/beta
         for i in range(1,ng):
             h = self.ti[ng - i] - self.ti[ng - i - 1]
-            if propT:
+            if not self.saveT:
                 d1,d2 = self._get_t_step(h, [t1b,t2b], fRHS)
                 t1e = t1b + d1
                 t2e = t2b + d2
@@ -768,12 +766,8 @@ class TDCCSD(object):
         return (Eccn+E01,Eccn)
 
     def _uccsd_lambda(self, rdm2=False, erel=False):
-        if self.T1 is None or self.T2 is None:
-            raise Exception("No saved T-amplitudes")
-
         beta = self.beta
         mu = self.mu if self.finite_T else None
-        propT = False if self.saveT else True
 
         # get time-grid
         ng = self.ngrid
@@ -933,18 +927,11 @@ class TDCCSD(object):
             cc_equations._u_LS_TS(l1sa, l1sb, Ia, Ib, Iabab, t1a, t1b, fac=-1.0)
             return [l1sa,l1sb,l1daa,l1dab,l1dbb]
 
-        if propT:
-            t1da = self.T1[0].copy()
-            t1db = self.T1[1].copy()
-            t2daa = self.T2[0].copy()
-            t2dab = self.T2[1].copy()
-            t2dbb = self.T2[2].copy()
-        else:
-            t1da = self.T1[ng - 1][0]
-            t1db = self.T1[ng - 1][1]
-            t2daa = self.T2[ng - 1][0]
-            t2dab = self.T2[ng - 1][1]
-            t2dbb = self.T2[ng - 1][2]
+        t1da = self.T1[ng - 1][0]
+        t1db = self.T1[ng - 1][1]
+        t2daa = self.T2[ng - 1][0]
+        t2dab = self.T2[ng - 1][1]
+        t2dbb = self.T2[ng - 1][2]
         l1a = numpy.zeros((noa,nva))
         l1b = numpy.zeros((nob,nvb))
         l2aa = numpy.zeros((noa,noa,nva,nva))
@@ -1049,7 +1036,7 @@ class TDCCSD(object):
                 Fa.ov, Fb.ov, Ia.oovv, Ib.oovv, Iabab.oovv)/beta
         for i in range(1,ng):
             h = self.ti[ng - i] - self.ti[ng - i - 1]
-            if propT:
+            if not self.saveT:
                 d1a,d1b,d2aa,d2ab,d2bb = self._get_t_step(h, [t1da,t1db,t2daa,t2dab,t2dbb], fRHS)
                 t1ea = t1da + d1a
                 t1eb = t1db + d1b
@@ -1248,13 +1235,9 @@ class TDCCSD(object):
                     self.sys, en, focc, fvir, iocc, ivir)
         else:
             F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
-        if not self.saveT:
-            t2_temp = 0.25*self.T2 + 0.5*numpy.einsum('ai,bj->abij',self.T1,self.T1)
-            Es1 = numpy.einsum('ai,ia->',self.T1,F.ov)
-        else:
-            ng = self.ngrid
-            t2_temp = 0.25*self.T2[ng - 1] + 0.5*numpy.einsum('ai,bj->abij',self.T1[ng - 1],self.T1[ng -1])
-            Es1 = numpy.einsum('ai,ia->',self.T1[ng - 1],F.ov)
+        ng = self.ngrid
+        t2_temp = 0.25*self.T2[ng - 1] + 0.5*numpy.einsum('ai,bj->abij',self.T1[ng - 1],self.T1[ng -1])
+        Es1 = numpy.einsum('ai,ia->',self.T1[ng - 1],F.ov)
         Es2 = numpy.einsum('abij,ijab->',t2_temp,I.oovv)
         return (Es1 + Es2)/beta
 
@@ -1289,24 +1272,14 @@ class TDCCSD(object):
         else:
             Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
 
-        if self.saveT:
-            T1a,T1b = self.T1[ng - 1]
-            T2aa,T2ab,T2bb = self.T2[ng - 1]
-            t2aa_temp = 0.25*T2aa + 0.5*einsum('ai,bj->abij',T1a,T1a)
-            t2bb_temp = 0.25*T2bb + 0.5*einsum('ai,bj->abij',T1b,T1b)
-            t2ab_temp = T2ab + einsum('ai,bj->abij',T1a,T1b)
+        T1a,T1b = self.T1[ng - 1]
+        T2aa,T2ab,T2bb = self.T2[ng - 1]
+        t2aa_temp = 0.25*T2aa + 0.5*einsum('ai,bj->abij',T1a,T1a)
+        t2bb_temp = 0.25*T2bb + 0.5*einsum('ai,bj->abij',T1b,T1b)
+        t2ab_temp = T2ab + einsum('ai,bj->abij',T1a,T1b)
 
-            Es1 = einsum('ai,ia->',T1a,Fa.ov)
-            Es1 += einsum('ai,ia->',T1b,Fb.ov)
-        else:
-            T1a,T1b = self.T1
-            T2aa,T2ab,T2bb = self.T2
-            t2aa_temp = 0.25*T2aa + 0.5*einsum('ai,bj->abij',T1a,T1a)
-            t2bb_temp = 0.25*T2bb + 0.5*einsum('ai,bj->abij',T1b,T1b)
-            t2ab_temp = T2ab + einsum('ai,bj->abij',T1a,T1b)
-
-            Es1 = einsum('ai,ia->',T1a,Fa.ov)
-            Es1 += einsum('ai,ia->',T1b,Fb.ov)
+        Es1 = einsum('ai,ia->',T1a,Fa.ov)
+        Es1 += einsum('ai,ia->',T1b,Fb.ov)
         Es2 = einsum('abij,ijab->',t2aa_temp,Ia.oovv)
         Es2 += einsum('abij,ijab->',t2ab_temp,Iabab.oovv)
         Es2 += einsum('abij,ijab->',t2bb_temp,Ib.oovv)
