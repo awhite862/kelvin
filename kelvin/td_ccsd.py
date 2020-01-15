@@ -256,6 +256,12 @@ class TDCCSD(object):
     def _save_T2(self, i, T2):
         self.T2[i] = T2
 
+    def _read_T1(self, i):
+        return self.T1[i]
+
+    def _read_T2(self, i):
+        return self.T2[i]
+
     def _ccsd(self):
         beta = self.beta
         mu = self.mu if self.finite_T else None
@@ -661,8 +667,8 @@ class TDCCSD(object):
             cc_equations._LS_TS(l1s,I,t1,fac=-1.0)
             return [l1s,l1d]
 
-        t1b = self.T1[ng - 1]
-        t2b = self.T2[ng - 1]
+        t1b = self._read_T1(ng - 1)
+        t2b = self._read_T2(ng - 1)
         nv, no = t1b.shape
         l1 = numpy.zeros((no,nv))
         l2 = numpy.zeros((no,no,nv,nv))
@@ -702,8 +708,8 @@ class TDCCSD(object):
                 t1e = t1b + d1
                 t2e = t2b + d2
             else:
-                t1e = self.T1[ng - i - 1]
-                t2e = self.T2[ng - i - 1]
+                t1e = self._read_T1(ng - i - 1)
+                t2e = self._read_T2(ng - i - 1)
             ld1, ld2 = self._get_l_step(h, (l1,l2), (t1b,t2b), (t1e,t2e), fLRHS)
             if erel:
                 dx1, dx2 = self._get_l_step(h, (x1,x2), (l1,l2), (l1 + ld1, l2 + ld2), fXRHS)
@@ -927,11 +933,8 @@ class TDCCSD(object):
             cc_equations._u_LS_TS(l1sa, l1sb, Ia, Ib, Iabab, t1a, t1b, fac=-1.0)
             return [l1sa,l1sb,l1daa,l1dab,l1dbb]
 
-        t1da = self.T1[ng - 1][0]
-        t1db = self.T1[ng - 1][1]
-        t2daa = self.T2[ng - 1][0]
-        t2dab = self.T2[ng - 1][1]
-        t2dbb = self.T2[ng - 1][2]
+        t1da,t1db = self._read_T1(ng - 1)
+        t2daa,t2dab,t2dbb = self._read_T2(ng - 1)
         l1a = numpy.zeros((noa,nva))
         l1b = numpy.zeros((nob,nvb))
         l2aa = numpy.zeros((noa,noa,nva,nva))
@@ -1044,11 +1047,8 @@ class TDCCSD(object):
                 t2eab = t2dab + d2ab
                 t2ebb = t2dbb + d2bb
             else:
-                t1ea = self.T1[ng - i - 1][0]
-                t1eb = self.T1[ng - i - 1][1]
-                t2eaa = self.T2[ng - i - 1][0]
-                t2eab = self.T2[ng - i - 1][1]
-                t2ebb = self.T2[ng - i - 1][2]
+                t1ea,t1eb = self._read_T1(ng - i - 1)
+                t2eaa,t2eab,t2ebb = self._read_T2(ng - i - 1)
             ld1a, ld1b, ld2aa, ld2ab, ld2bb = self._get_l_step(
                     h, (l1a,l1b,l2aa,l2ab,l2bb), (t1da,t1db,t2daa,t2dab,t2dbb), (t1ea,t1eb,t2eaa,t2eab,t2ebb), fLRHS)
             if erel:
@@ -1236,8 +1236,10 @@ class TDCCSD(object):
         else:
             F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
         ng = self.ngrid
-        t2_temp = 0.25*self.T2[ng - 1] + 0.5*numpy.einsum('ai,bj->abij',self.T1[ng - 1],self.T1[ng -1])
-        Es1 = numpy.einsum('ai,ia->',self.T1[ng - 1],F.ov)
+        t1 = self._read_T1(ng - 1)
+        t2 = self._read_T2(ng - 1)
+        t2_temp = 0.25*t2 + 0.5*numpy.einsum('ai,bj->abij',t1,t1)
+        Es1 = numpy.einsum('ai,ia->',t1,F.ov)
         Es2 = numpy.einsum('abij,ijab->',t2_temp,I.oovv)
         return (Es1 + Es2)/beta
 
@@ -1272,8 +1274,8 @@ class TDCCSD(object):
         else:
             Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
 
-        T1a,T1b = self.T1[ng - 1]
-        T2aa,T2ab,T2bb = self.T2[ng - 1]
+        T1a,T1b = self._read_T1(ng - 1)
+        T2aa,T2ab,T2bb = self._read_T2(ng - 1)
         t2aa_temp = 0.25*T2aa + 0.5*einsum('ai,bj->abij',T1a,T1a)
         t2bb_temp = 0.25*T2bb + 0.5*einsum('ai,bj->abij',T1b,T1b)
         t2ab_temp = T2ab + einsum('ai,bj->abij',T1a,T1b)
