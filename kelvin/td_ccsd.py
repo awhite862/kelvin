@@ -940,11 +940,11 @@ class TDCCSD(object):
                 nactb = nob + nvb - nb
                 if self.iprint > 0:
                     print("FT-UCCSD orbital info:")
-                    print('  nocca: {:d}'.format(nocca))
-                    print('  nvira: {:d}'.format(nvira))
+                    print('  nocca: {:d}'.format(noa))
+                    print('  nvira: {:d}'.format(nva))
                     print('  nacta: {:d}'.format(nacta))
-                    print('  noccb: {:d}'.format(nocca))
-                    print('  nvirb: {:d}'.format(nvira))
+                    print('  noccb: {:d}'.format(noa))
+                    print('  nvirb: {:d}'.format(nva))
                     print('  nactb: {:d}'.format(nacta))
 
                 # get energy differences
