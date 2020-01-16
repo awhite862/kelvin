@@ -141,6 +141,40 @@ class TDCCSDESNTest(unittest.TestCase):
         self.assertTrue(dS < 5e-5,eS)
         self.assertTrue(dN < 5e-5,eN)
 
+    def test_UEG_h5py(self):
+        T = 0.1
+        mu = 0.1
+        L = 2*numpy.pi/numpy.sqrt(1.0)
+        norb = 7
+        cut = 1.2
+        damp = 0.2
+        mi = 50
+        ng = 30
+        ueg = ueg_system(T,L,cut,mu=mu,norb=norb,orbtype='u')
+        ccsdT = ccsd(ueg,T=T,mu=mu,iprint=0,max_iter=mi,damp=damp,ngrid=ng)
+        Ecctot,Ecc = ccsdT.run()
+        ccsdT.compute_ESN()
+        Eref = ccsdT.E
+        Sref = ccsdT.S
+        Nref = ccsdT.N
+        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        tdccsdT = TDCCSD(ueg, prop, T=T, mu=mu, ngrid=40, saveT=True, tmem="hdf5")
+        Eout,Eccout = tdccsdT.run()
+        tdccsdT.compute_ESN()
+        E = tdccsdT.E
+        S = tdccsdT.S
+        N = tdccsdT.N
+
+        dE = abs(Eref - E)/Eref
+        dS = abs(Sref - S)/Sref
+        dN = abs(Nref - N)/Nref
+        eE = "Expected: {}  Actual: {}".format(Eref,E)
+        eS = "Expected: {}  Actual: {}".format(Sref,S)
+        eN = "Expected: {}  Actual: {}".format(Nref,N)
+        self.assertTrue(dE < 5e-5,eE)
+        self.assertTrue(dS < 5e-5,eS)
+        self.assertTrue(dN < 5e-5,eN)
+
     def test_Be_active(self):
         mol = gto.M(
             verbose = 0,

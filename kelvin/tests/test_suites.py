@@ -174,6 +174,7 @@ def full_suite():
     suite.addTest(test_td_ccsd_ESN.TDCCSDESNTest("test_UEG_gen"))
     suite.addTest(test_td_ccsd_ESN.TDCCSDESNTest("test_Be_gen_active"))
     suite.addTest(test_td_ccsd_ESN.TDCCSDESNTest("test_UEG"))
+    suite.addTest(test_td_ccsd_ESN.TDCCSDESNTest("test_UEG_h5py"))
     suite.addTest(test_td_ccsd_ESN.TDCCSDESNTest("test_Be_active"))
 
     suite.addTest(test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_rk4_omega"))

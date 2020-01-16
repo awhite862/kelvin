@@ -18,7 +18,8 @@ class TDCCSD(object):
     """
     def __init__(self, sys, prop, T=0.0, mu=0.0, iprint=0,
         singles=True, econv=1e-8, tconv=None, max_iter=40,
-        damp=0.0, ngrid=10, athresh=0.0, quad='lin', saveT=False):
+        damp=0.0, ngrid=10, athresh=0.0, quad='lin', saveT=False,
+        tmem="mem", scratch=""):
 
         self.T = T
         self.mu = mu
@@ -34,6 +35,8 @@ class TDCCSD(object):
         self.quad = quad
         self.prop = prop
         self.saveT = saveT
+        self.tmem = tmem
+        self.scratch = scratch
         if not sys.verify(self.T,self.mu):
             raise Exception("Sytem temperature inconsistent with CC temp")
         if self.finite_T:
@@ -67,6 +70,9 @@ class TDCCSD(object):
         # orbital energy response
         self.rorbo = None
         self.rorbv = None
+
+    def __del__(self):
+        self._rmfile()
 
     def run(self,response=None):
         """Run CCSD calculation."""
@@ -251,16 +257,98 @@ class TDCCSD(object):
         return ldtot
 
     def _save_T1(self, i, T1):
-        self.T1[i] = T1
+        if self.tmem == "mem":
+            self.T1[i] = T1
+        elif self.tmem == "hdf5":
+            import h5py
+            filename = self.scratch + "T1_" + "{:05d}".format(i)
+            self.T1[i] = filename
+            h5f = h5py.File(filename, 'w')
+            if type(T1) is tuple:
+                t1a,t1b = T1
+                h5f.create_dataset("t1a", data=t1a)
+                h5f.create_dataset("t1b", data=t1b)
+            else:
+                h5f.create_dataset("t1", data=T1)
+            h5f.close()
+        else:
+            raise Exception("Unrecognized memory option for amplitudes!")
 
     def _save_T2(self, i, T2):
-        self.T2[i] = T2
+        if self.tmem == "mem":
+            self.T2[i] = T2
+        elif self.tmem == "hdf5":
+            import h5py
+            filename = self.scratch + "T2_" + "{:05d}".format(i)
+            self.T2[i] = filename
+            h5f = h5py.File(filename, 'w')
+            if type(T2) is tuple:
+                t2aa,t2ab,t2bb = T2
+                h5f.create_dataset("t2aa", data=t2aa)
+                h5f.create_dataset("t2ab", data=t2ab)
+                h5f.create_dataset("t2bb", data=t2bb)
+            else:
+                h5f.create_dataset("t2", data=T2)
+            h5f.close()
+        else:
+            raise Exception("Unrecognized memory option for amplitudes!")
 
     def _read_T1(self, i):
-        return self.T1[i]
+        if self.tmem == "mem":
+            return self.T1[i]
+        elif self.tmem == "hdf5":
+            import h5py
+            filename = self.T1[i]
+            h5f = h5py.File(filename, 'r')
+            n = len(h5f.keys())
+            if n == 1:
+                t1 = h5f["t1"][:]
+                h5f.close()
+                return t1
+            elif n == 2:
+                t1a = h5f["t1a"][:]
+                t1b = h5f["t1b"][:]
+                h5f.close()
+                return (t1a,t1b)
+            else:
+                h5f.close()
+                raise Exception("Wrong number of T1 amplitudes in " + filename)
+        else:
+            raise Exception("Unrecognized memory option for amplitudes!")
 
     def _read_T2(self, i):
-        return self.T2[i]
+        if self.tmem == "mem":
+            return self.T2[i]
+        elif self.tmem == "hdf5":
+            import h5py
+            filename = self.T2[i]
+            h5f = h5py.File(filename, 'r')
+            n = len(h5f.keys())
+            if n == 1:
+                t1 = h5f["t2"][:]
+                h5f.close()
+                return t2
+            elif n == 3:
+                t2aa = h5f["t2aa"][:]
+                t2ab = h5f["t2ab"][:]
+                t2bb = h5f["t2bb"][:]
+                h5f.close()
+                return (t2aa,t2ab,t2bb)
+            else:
+                h5f.close()
+                raise Exception("Wrong number of T2 amplitudes in " + filename)
+        else:
+            raise Exception("Unrecognized memory option for amplitudes!")
+
+    def _rmfile(self):
+        if self.tmem == "hdf5":
+            import os
+            for f in self.T1:
+                os.remove(f)
+            for f in self.T2:
+                os.remove(f)
+        else:
+            return
 
     def _ccsd(self):
         beta = self.beta
@@ -270,7 +358,7 @@ class TDCCSD(object):
         ng = self.ngrid
         ti = self.ti
         g = self.g
-        
+
         if not self.finite_T:
             # create energies in spin-orbital basis
             eo,ev = self.sys.g_energies()
@@ -1052,7 +1140,7 @@ class TDCCSD(object):
             ld1a, ld1b, ld2aa, ld2ab, ld2bb = self._get_l_step(
                     h, (l1a,l1b,l2aa,l2ab,l2bb), (t1da,t1db,t2daa,t2dab,t2dbb), (t1ea,t1eb,t2eaa,t2eab,t2ebb), fLRHS)
             if erel:
-                dx1a, dx1b, dx2aa, dx2ab, dx2bb = self._get_l_step(h, (x1a,x1b,x2aa,x2ab,x2bb), 
+                dx1a, dx1b, dx2aa, dx2ab, dx2bb = self._get_l_step(h, (x1a,x1b,x2aa,x2ab,x2bb),
                         (l1a,l1b,l2aa,l2ab,l2bb), (l1a + ld1a, l1b + ld1b, l2aa + ld2aa, l2ab + ld2ab, l2bb + ld2bb), fXRHS)
                 x1a += dx1a
                 x1b += dx1b
