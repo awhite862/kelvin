@@ -1,12 +1,20 @@
 import numpy
 from pyscf import gto, scf
+from pyscf.scf import uhf
+from pyscf.scf import hf
 from cqcpy import utils
+
+def is_uhf(mf):
+    return isinstance(mf, uhf.UHF)
+
+def is_rhf(mf):
+    return isinstance(mf, hf.RHF)
 
 def get_r_orbital_energies(mf):
     """Get restricted orbital energies in o-v blocks."""
 
     mo_occ = mf.mo_occ
-    if len(mo_occ.shape) == 1:
+    if is_rhf(mf):
         eo = mf.mo_energy[mo_occ>0]
         ev = mf.mo_energy[mo_occ==0]
         return (eo, ev)
@@ -17,11 +25,11 @@ def get_u_orbital_energies(mf):
     """Get unrestricted orbital energies in o-v blocks."""
 
     mo_occ = mf.mo_occ
-    if len(mo_occ.shape) == 1:
+    if is_rhf(mf):
         eo = mf.mo_energy[mo_occ>0]
         ev = mf.mo_energy[mo_occ==0]
         return (eo, ev, eo, ev)
-    elif len(mo_occ.shape) == 2:
+    elif is_uhf(mf):
         eoa = mf.mo_energy[0][mo_occ[0]>0]
         eva = mf.mo_energy[0][mo_occ[0]==0]
         eob = mf.mo_energy[1][mo_occ[1]>0]
@@ -34,14 +42,13 @@ def get_orbital_energies(mf):
     """Get spin-orbital orbital energies in o-v blocks."""
     mo_occ = mf.mo_occ
 
-    if len(mo_occ.shape) == 1:
+    if is_rhf(mf):
         eo = mf.mo_energy[mo_occ>0]
         ev = mf.mo_energy[mo_occ==0]
         eo2 = numpy.concatenate((eo,eo))
         ev2 = numpy.concatenate((ev,ev))
         return (eo2, ev2)
-
-    elif len(mo_occ.shape) == 2:
+    elif is_uhf(mf):
         mo_occa = mf.mo_occ[0]
         mo_occb = mf.mo_occ[1]
         eoa = (mf.mo_energy[0])[mo_occa>0]
@@ -51,22 +58,21 @@ def get_orbital_energies(mf):
         eo = numpy.concatenate((eoa,eob))
         ev = numpy.concatenate((eva,evb))
         return (eo,ev)
-
     else:
         raise Exception("unrecognized SCF type")
 
 def get_r_orbital_energies_tot(mf):
     """Get all restricted orbital energies."""
-    if len(mf.mo_occ.shape) == 1:
+    if is_rhf(mf):
         return mf.mo_energy
     else:
         raise Exception("Mean-field object is not restricted")
 
 def get_u_orbital_energies_tot(mf):
     """Get all restricted orbital energies."""
-    if len(mf.mo_occ.shape) == 1:
+    if is_rhf(mf):
         return (mf.mo_energy,mf.mo_energy)
-    elif len(mf.mo_occ.shape) == 2:
+    elif is_uhf(mf):
         return mf.mo_energy[0],mf.mo_energy[1]
     else:
         raise Exception("Unexpected size of mo_energy")
@@ -75,55 +81,49 @@ def get_orbital_energies_gen(mf):
     """Get all spin-orbital orbital energies."""
     mo_occ = mf.mo_occ
 
-    if len(mo_occ.shape) == 1:
+    if is_rhf(mf):
         e = mf.mo_energy
         return numpy.concatenate((e,e))
-
-    elif len(mo_occ.shape) == 2:
+    elif is_uhf(mf):
         ea = mf.mo_energy[0]
         eb = mf.mo_energy[1]
         return numpy.concatenate((ea,eb))
-
     else:
         raise Exception("unrecognized SCF type")
 
 
 def get_ao_den(mf):
-    if len(mf.mo_occ.shape) == 1:
+    if is_rhf(mf):
         p = 0.5*mf.make_rdm1()
         return utils.block_diag(p,p)
-
-    elif len(mf.mo_occ.shape) == 2:
+    elif is_uhf(mf):
         pa,pb = mf.make_rdm1()
         return utils.block_diag(pa,pb)
-
     else:
         raise Exception("unrecognized SCF type")
 
 def get_ao_ft_den(mf, fo):
-    if len(mf.mo_occ.shape) == 1:
+    if is_rhf(mf):
         n = fo.shape[0]//2
         mo = mf.mo_coeff
         p = numpy.dot(numpy.dot(mo,numpy.diag(fo[:n])),mo.T)
         return utils.block_diag(p,p)
-
-    elif len(mf.mo_occ.shape) == 2:
+    elif is_uhf(mf):
         n = fo.shape[0]//2
         moa = mf.mo_coeff[0]
         mob = mf.mo_coeff[1]
         pa = numpy.dot(numpy.dot(moa,numpy.diag(fo[:n])),moa.T)
         pb = numpy.dot(numpy.dot(mob,numpy.diag(fo[n:])),mob.T)
         return utils.block_diag(pa,pb)
-
     else:
         raise Exception("unrecognized SCF type")
 
 def get_ao_fock(mf):
-    if len(mf.mo_occ.shape) == 1:
+    if is_rhf(mf):
         f = mf.get_fock()
         return utils.block_diag(f,f)
 
-    elif len(mf.mo_occ.shape) == 2:
+    elif is_uhf(mf):
         pa,pb = mf.make_rdm1()
         dm = numpy.array((pa,pb))
         h1 = mf.get_hcore(mf.mol)
@@ -144,14 +144,14 @@ def get_ao_fock(mf):
         raise Exception("unrecognized SCF type")
 
 def mo_tran_1e(mf, h):
-    if len(mf.mo_occ.shape) == 1:
+    if is_rhf(mf):
         mo = mf.mo_coeff
         nao = mo.shape[0]
         assert(h.shape[0] == nao)
         hmo = numpy.einsum('mp,mn,nq->pq',mo,h,mo)
         return utils.block_diag(hmo,hmo)
 
-    elif len(mf.mo_occ.shape) == 2:
+    elif is_uhf(mf):
         moa = mf.mo_coeff[0]
         mob = mf.mo_coeff[1]
         ha = numpy.einsum('mp,mn,nq->pq',moa,h,moa)
@@ -159,14 +159,14 @@ def mo_tran_1e(mf, h):
         return utils.block_diag(ha,hb)
 
 def u_mo_tran_1e(mf, h):
-    if len(mf.mo_occ.shape) == 1:
+    if is_rhf(mf):
         mo = mf.mo_coeff
         nao = mo.shape[0]
         assert(h.shape[0] == nao)
         hmo = numpy.einsum('mp,mn,nq->pq',mo,h,mo)
         return hmo,hmo
 
-    elif len(mf.mo_occ.shape) == 2:
+    elif is_uhf(mf):
         moa = mf.mo_coeff[0]
         mob = mf.mo_coeff[1]
         ha = numpy.einsum('mp,mn,nq->pq',moa,h,moa)
@@ -182,7 +182,7 @@ def get_ao_ft_fock(mf, fo):
         pbc = True
     except AttributeError:
         pbc = False
-    if len(mf.mo_occ.shape) == 1:
+    if is_rhf(mf):
         mo = mf.mo_coeff
         p = numpy.dot(numpy.dot(mo,numpy.diag(fo[:n])),mo.T)
         h1 = mf.get_hcore(mf.mol)
@@ -193,7 +193,7 @@ def get_ao_ft_fock(mf, fo):
         fT = h1 + 2*veff
         return utils.block_diag(fT,fT)
 
-    elif len(mf.mo_occ.shape) == 2:
+    elif is_uhf(mf):
         moa = mf.mo_coeff[0]
         mob = mf.mo_coeff[1]
         pa = numpy.dot(numpy.dot(moa,numpy.diag(fo[:n])),moa.T)
@@ -220,7 +220,7 @@ def get_r_ft_fock(mf, fo):
         pbc = True
     except AttributeError:
         pbc = False
-    if len(mf.mo_occ.shape) == 1:
+    if is_rhf(mf):
         mo = mf.mo_coeff
         p = numpy.dot(numpy.dot(mo,numpy.diag(fo[:n])),mo.T)
         h1 = mf.get_hcore(mf.mol)
@@ -242,7 +242,7 @@ def get_u_ft_fock(mf, foa, fob):
     except AttributeError:
         pbc = False
     h1 = mf.get_hcore(mf.mol)
-    if len(mf.mo_occ.shape) == 1:
+    if is_rhf(mf):
         mo = mf.mo_coeff
         p = numpy.dot(numpy.dot(mo,numpy.diag(foa)),mo.T)
         if pbc:
@@ -253,7 +253,7 @@ def get_u_ft_fock(mf, foa, fob):
         fmo = numpy.einsum('mp,mn,nq->pq',mo,fT,mo)
         return fmo,fmo
 
-    elif len(mf.mo_occ.shape) == 2:
+    elif is_uhf(mf):
         moa = mf.mo_coeff[0]
         mob = mf.mo_coeff[1]
         pa = numpy.dot(numpy.dot(moa,numpy.diag(foa)),moa.T)
@@ -282,7 +282,7 @@ def get_mo_ft_fock(mf, fo):
     except AttributeError:
         pbc = False
     h1 = mf.get_hcore(mf.mol)
-    if len(mf.mo_occ.shape) == 1:
+    if is_rhf(mf):
         mo = mf.mo_coeff
         p = numpy.dot(numpy.dot(mo,numpy.diag(fo[:n])),mo.T)
         if pbc:
@@ -293,7 +293,7 @@ def get_mo_ft_fock(mf, fo):
         fmo = numpy.einsum('mp,mn,nq->pq',mo,fT,mo)
         return utils.block_diag(fmo,fmo)
         
-    elif len(mf.mo_occ.shape) == 2:
+    elif is_uhf(mf):
         moa = mf.mo_coeff[0]
         mob = mf.mo_coeff[1]
         pa = numpy.dot(numpy.dot(moa,numpy.diag(fo[:n])),moa.T)
@@ -321,7 +321,7 @@ def get_mo_d_ft_fock(mf, fo, fv, dvec):
         pbc = True
     except AttributeError:
         pbc = False
-    if len(mf.mo_occ.shape) == 1:
+    if is_rhf(mf):
         mo = mf.mo_coeff
         p = numpy.dot(numpy.dot(mo,numpy.diag(fov[:n])),mo.T)
         h1 = mf.get_hcore(mf.mol)
@@ -333,7 +333,7 @@ def get_mo_d_ft_fock(mf, fo, fv, dvec):
         fmo = numpy.einsum('mp,mn,nq->pq',mo,fT,mo)
         return utils.block_diag(-fmo,-fmo)
  
-    elif len(mf.mo_occ.shape) == 2:
+    elif is_uhf(mf):
         moa = mf.mo_coeff[0]
         mob = mf.mo_coeff[1]
         pa = numpy.dot(numpy.dot(moa,numpy.diag(fov[:n])),moa.T)
@@ -363,7 +363,7 @@ def u_mo_d_ft_fock(mf, foa, fva, fob, fvb, dveca, dvecb):
         pbc = True
     except AttributeError:
         pbc = False
-    if len(mf.mo_occ.shape) == 1:
+    if is_rhf(mf):
         mo = mf.mo_coeff
         p = numpy.dot(numpy.dot(mo,numpy.diag(fova)),mo.T)
         h1 = mf.get_hcore(mf.mol)
@@ -374,8 +374,7 @@ def u_mo_d_ft_fock(mf, foa, fva, fob, fvb, dveca, dvecb):
         fT = 2*veff
         fmo = numpy.einsum('mp,mn,nq->pq',mo,fT,mo)
         return -fmo,-fmo
-
-    elif len(mf.mo_occ.shape) == 2:
+    elif is_uhf(mf):
         moa = mf.mo_coeff[0]
         mob = mf.mo_coeff[1]
         pa = numpy.dot(numpy.dot(moa,numpy.diag(fova)),moa.T)
@@ -396,7 +395,7 @@ def u_mo_d_ft_fock(mf, foa, fva, fob, fvb, dveca, dvecb):
 class r_fock_blocks(object):
     def __init__(self,mf,orb='a'):
         mo_occ = mf.mo_occ
-        if len(mo_occ.shape) == 1:
+        if is_rhf(mf):
             o = mf.mo_coeff[:,mo_occ>0]
             v = mf.mo_coeff[:,mo_occ==0]
             f = mf.get_fock()
@@ -429,12 +428,12 @@ class g_fock_blocks(object):
             pbc = True
         except AttributeError:
             pbc = False
-        if len(mo_occ.shape) == 1:
+        if is_rhf(mf):
             o = mf.mo_coeff[:,mo_occ>0]
             v = mf.mo_coeff[:,mo_occ==0]
             f = mf.get_fock()
             self._transform_fock(mf,o,o,v,v,f,f)
-        elif len(mo_occ.shape) == 2:
+        elif is_uhf(mf):
             mo_occa = mf.mo_occ[0]
             mo_occb = mf.mo_occ[1]
             oa = (mf.mo_coeff[0])[:,mo_occa>0]
