@@ -1,6 +1,8 @@
 import numpy
 import functools
 from pyscf import gto, scf
+from pyscf.scf import uhf
+from pyscf.scf import hf
 from cqcpy import ft_utils
 from cqcpy import integrals
 from cqcpy.ov_blocks import one_e_blocks
@@ -28,6 +30,8 @@ class scf_system(system):
         self.T = T
         self.mu = mu
         self.orbtype = orbtype
+        self.is_uhf = isinstance(mf, uhf.UHF)
+        self.is_rhf = isinstance(mf, hf.RHF)
 
     def verify(self,T,mu):
         if not (T == self.T and mu == self.mu):
@@ -250,18 +254,20 @@ class scf_system(system):
         mo_coeff = self.mf.mo_coeff
         mo_occ = self.mf.mo_occ
         _Ia,_Ib,_Iabab = self.u_aint_tot()
-        if len(mo_occ.shape) == 1:
+        if self.is_rhf:
             noa = mo_occ[mo_occ>0].size
             nva = mo_occ[mo_occ==0].size
             nob = noa
             nvb = nva
-        elif len(mo_occ.shape) == 2:
+        elif self.is_uhf:
             mo_occa = mo_occ[0]
             mo_occb = mo_occ[1]
             noa = mo_occa[mo_occa>0].size
             nva = mo_occa[mo_occa==0].size
             nob = mo_occb[mo_occb>0].size
             nvb = mo_occb[mo_occb==0].size
+        else:
+            raise Exception("incompatible MF type")
         Ia = make_two_e_blocks(_Ia,noa,nva,noa,nva,noa,nva,noa,nva)
         Ib = make_two_e_blocks(_Ib,nob,nvb,nob,nvb,nob,nvb,nob,nvb)
         Iabab = make_two_e_blocks_full(_Iabab,
@@ -294,12 +300,14 @@ class scf_system(system):
     def u_aint_tot(self):
         mo_coeff = self.mf.mo_coeff
         mo_occ = self.mf.mo_occ
-        if len(mo_occ.shape) == 1:
+        if self.is_rhf:
             moa = self.mf.mo_coeff
             mob = moa
-        elif len(mo_occ.shape) == 2:
+        elif self.is_uhf:
             moa = self.mf.mo_coeff[0]
             mob = self.mf.mo_coeff[1]
+        else:
+            raise Exception("Incompatible MF type")
 
         #mol = self.mf.mol
         mf = self.mf
