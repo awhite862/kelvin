@@ -145,11 +145,11 @@ def uccsd_stanton(Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,T2aaold,T2abold,T2bbold,
     nva,noa = Fa.vo.shape
     nvb,nob = Fb.vo.shape
 
-    T1a = numpy.zeros((ng,nva,noa))
-    T1b = numpy.zeros((ng,nvb,nob))
-    T2aa = numpy.zeros((ng,nva,nva,noa,noa))
-    T2ab = numpy.zeros((ng,nva,nvb,noa,nob))
-    T2bb = numpy.zeros((ng,nvb,nvb,nob,nob))
+    T1a = numpy.zeros((ng,nva,noa), dtype=T1aold.dtype)
+    T1b = numpy.zeros((ng,nvb,nob), dtype=T1bold.dtype)
+    T2aa = numpy.zeros((ng,nva,nva,noa,noa), dtype=T2aaold.dtype)
+    T2ab = numpy.zeros((ng,nva,nvb,noa,nob), dtype=T2abold.dtype)
+    T2bb = numpy.zeros((ng,nvb,nvb,nob,nob), dtype=T2bbold.dtype)
 
     for y in range(ng):
         T1a[y,:,:] = -Fa.vo.copy()
@@ -303,7 +303,7 @@ def lccd_lambda_simple(F,I,T2old,L2old,D2,ti,ng,g,G,beta):
     L2int = quadrature.int_L2(ng,L2old,ti,D2,g,G)
 
     # initialize lambda amplitudes
-    L2 = numpy.zeros(L2old.shape)
+    L2 = numpy.zeros(L2old.shape, dtype=L2old.dtype)
 
     # amplitude term
     for y in range(ng):
@@ -326,8 +326,8 @@ def lccsd_lambda_simple(F,I,T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G,beta):
     L2int = quadrature.int_L2(ng,L2old,ti,D2,g,G)
 
     # initialize lambda amplitudes
-    L1 = numpy.zeros(L1old.shape)
-    L2 = numpy.zeros(L2old.shape)
+    L1 = numpy.zeros(L1old.shape, dtype=L1old.dtype)
+    L2 = numpy.zeros(L2old.shape, dtype=L2old.dtype)
 
     # amplitude term
     for y in range(ng):
@@ -356,8 +356,8 @@ def ccsd_lambda_simple(F,I,T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G,beta):
     L2int = quadrature.int_L2(ng,L2old,ti,D2,g,G)
 
     # initialize lambda amplitudes
-    L1 = numpy.zeros(L1old.shape)
-    L2 = numpy.zeros(L2old.shape)
+    L1 = numpy.zeros(L1old.shape, dtype=L1old.dtype)
+    L2 = numpy.zeros(L2old.shape, dtype=L2old.dtype)
 
     # amplitude term
     for y in range(ng):
@@ -397,8 +397,8 @@ def ccsd_lambda_opt(F,I,T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G,beta):
     L2int = quadrature.int_L2(ng,L2old,ti,D2,g,G)
 
     # initialize lambda amplitudes
-    L1 = numpy.zeros(L1old.shape)
-    L2 = numpy.zeros(L2old.shape)
+    L1 = numpy.zeros(L1old.shape, dtype=L1old.dtype)
+    L2 = numpy.zeros(L2old.shape, dtype=L2old.dtype)
 
     # amplitude term
     t1 = time.time()
@@ -434,11 +434,11 @@ def uccsd_lambda_opt(Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,T2aaold,T2abold,T2bbold,
     L2bbint = quadrature.int_L2(ng,L2bbold,ti,D2bb,g,G)
 
     # initialize lambda amplitudes
-    L1a = numpy.zeros((ng,noa,nva))
-    L1b = numpy.zeros((ng,nob,nvb))
-    L2aa = numpy.zeros((ng,noa,noa,nva,nva))
-    L2ab = numpy.zeros((ng,noa,nob,nva,nvb))
-    L2bb = numpy.zeros((ng,nob,nob,nvb,nvb))
+    L1a = numpy.zeros((ng,noa,nva), dtype=L1aold.dtype)
+    L1b = numpy.zeros((ng,nob,nvb), dtype=L1bold.dtype)
+    L2aa = numpy.zeros((ng,noa,noa,nva,nva), dtype=L2aaold.dtype)
+    L2ab = numpy.zeros((ng,noa,nob,nva,nvb), dtype=L2abold.dtype)
+    L2bb = numpy.zeros((ng,nob,nob,nvb,nvb), dtype=L2bbold.dtype)
 
     # amplitude term
     t1 = time.time()
@@ -480,8 +480,8 @@ def ccsd_lambda_opt_int(F,I,T1old,T2old,L1old,L2old,intor,D1,D2,ti,ng,g,G,beta):
     L2int = quadrature.int_L2(ng,L2old,ti,D2,g,G)
 
     # initialize lambda amplitudes
-    L1 = numpy.zeros(L1old.shape)
-    L2 = numpy.zeros(L2old.shape)
+    L1 = numpy.zeros(L1old.shape, dtype=L1old.dtype)
+    L2 = numpy.zeros(L2old.shape, dtype=L2old.dtype)
 
     # amplitude term
     t1 = time.time()
@@ -690,7 +690,7 @@ def ccd_lambda_simple(F,I,T2old,L2old,D2,ti,ng,g,G,beta):
     L2int = quadrature.int_L2(ng,L2old,ti,D2,g,G)
 
     # initialize lambda amplitudes
-    L2 = numpy.zeros(L2old.shape)
+    L2 = numpy.zeros(L2old.shape, dtype=L2old.dtype)
 
     # amplitude term
     for y in range(ng):
@@ -715,9 +715,9 @@ def ccsd_1rdm(T1,T2,L1,L2,D1,D2,ti,ng,g,G):
 
     # compute response densities
     pia = numpy.einsum('sia,s->ia',L1new,g)
-    pba = numpy.zeros((nv,nv))
-    pji = numpy.zeros((no,no))
-    pai = numpy.zeros((nv,no))
+    pba = numpy.zeros((nv,nv), dtype=T1.dtype)
+    pji = numpy.zeros((no,no), dtype=T1.dtype)
+    pai = numpy.zeros((nv,no), dtype=T1.dtype)
     for i in range(nt):
         pba += g[i]*cc_equations.ccsd_1rdm_ba_opt(T1[i],T2[i],L1new[i],L2new[i])
         pji += g[i]*cc_equations.ccsd_1rdm_ji_opt(T1[i],T2[i],L1new[i],L2new[i])
@@ -734,15 +734,15 @@ def ccsd_2rdm(T1,T2,L1,L2,D1,D2,ti,ng,g,G):
     L2new = quadrature.int_L2(ng,L2,ti,D2,g,G)
 
     # compute response densities
-    Pcdab = numpy.zeros((nv,nv,nv,nv))
-    Pciab = numpy.zeros((nv,no,nv,nv))
-    Pbcai = numpy.zeros((nv,nv,nv,no))
+    Pcdab = numpy.zeros((nv,nv,nv,nv), dtype=T2.dtype)
+    Pciab = numpy.zeros((nv,no,nv,nv), dtype=T2.dtype)
+    Pbcai = numpy.zeros((nv,nv,nv,no), dtype=T2.dtype)
     Pijab = einsum('sijab,s->ijab',L2new,g)
-    Pbjai = numpy.zeros((nv,no,nv,no))
-    Pabij = numpy.zeros((nv,nv,no,no))
-    Pjkai = numpy.zeros((no,no,nv,no))
-    Pkaij = numpy.zeros((no,nv,no,no))
-    Pklij = numpy.zeros((no,no,no,no))
+    Pbjai = numpy.zeros((nv,no,nv,no), dtype=T2.dtype)
+    Pabij = numpy.zeros((nv,nv,no,no), dtype=T2.dtype)
+    Pjkai = numpy.zeros((no,no,nv,no), dtype=T2.dtype)
+    Pkaij = numpy.zeros((no,nv,no,no), dtype=T2.dtype)
+    Pklij = numpy.zeros((no,no,no,no), dtype=T2.dtype)
     for i in range(nt):
         Pcdab += g[i]*cc_equations.ccsd_2rdm_cdab_opt(T1[i],T2[i],L1new[i],L2new[i])
         Pciab += g[i]*cc_equations.ccsd_2rdm_ciab_opt(T1[i],T2[i],L1new[i],L2new[i])
@@ -772,12 +772,12 @@ def uccsd_1rdm(T1a,T1b,T2aa,T2ab,T2bb,L1a,L1b,L2aa,L2ab,L2bb,
     # spin blocks of the response densities
     pia = numpy.einsum('sia,s->ia',L1anew,g)
     pIA = numpy.einsum('sia,s->ia',L1bnew,g)
-    pba = numpy.zeros((nva,nva))
-    pBA = numpy.zeros((nvb,nvb))
-    pji = numpy.zeros((noa,noa))
-    pJI = numpy.zeros((nob,nob))
-    pai = numpy.zeros((nva,noa))
-    pAI = numpy.zeros((nvb,nob))
+    pba = numpy.zeros((nva,nva), dtype=T1a.dtype)
+    pBA = numpy.zeros((nvb,nvb), dtype=T1b.dtype)
+    pji = numpy.zeros((noa,noa), dtype=T1a.dtype)
+    pJI = numpy.zeros((nob,nob), dtype=T1b.dtype)
+    pai = numpy.zeros((nva,noa), dtype=T1a.dtype)
+    pAI = numpy.zeros((nvb,nob), dtype=T1b.dtype)
     for i in range(ng):
         pba_tot = cc_equations.uccsd_1rdm_ba(T1a[i],T1b[i],T2aa[i],T2ab[i],T2bb[i],
                 L1anew[i],L1bnew[i],L2aanew[i],L2abnew[i],L2bbnew[i])
@@ -810,45 +810,45 @@ def uccsd_2rdm(T1a,T1b,T2aa,T2ab,T2bb,L1a,L1b,L2aa,L2ab,L2bb,
     L2bbnew = quadrature.int_L2(ng,L2bb,ti,D2bb,g,G)
 
     # spin blocks of the response densities
-    Pcdab = numpy.zeros((nva,nva,nva,nva))
-    Pciab = numpy.zeros((nva,noa,nva,nva))
-    Pbcai = numpy.zeros((nva,nva,nva,noa))
+    Pcdab = numpy.zeros((nva,nva,nva,nva), dtype=T2aa.dtype)
+    Pciab = numpy.zeros((nva,noa,nva,nva), dtype=T2aa.dtype)
+    Pbcai = numpy.zeros((nva,nva,nva,noa), dtype=T2aa.dtype)
     Pijab = einsum('sijab,s->ijab',L2aanew,g)
-    Pbjai = numpy.zeros((nva,noa,nva,noa))
-    Pabij = numpy.zeros((nva,nva,noa,noa))
-    Pjkai = numpy.zeros((noa,noa,nva,noa))
-    Pkaij = numpy.zeros((noa,nva,noa,noa))
-    Pklij = numpy.zeros((noa,noa,noa,noa))
+    Pbjai = numpy.zeros((nva,noa,nva,noa), dtype=T2aa.dtype)
+    Pabij = numpy.zeros((nva,nva,noa,noa), dtype=T2aa.dtype)
+    Pjkai = numpy.zeros((noa,noa,nva,noa), dtype=T2aa.dtype)
+    Pkaij = numpy.zeros((noa,nva,noa,noa), dtype=T2aa.dtype)
+    Pklij = numpy.zeros((noa,noa,noa,noa), dtype=T2aa.dtype)
 
-    PCDAB = numpy.zeros((nvb,nvb,nvb,nvb))
-    PCIAB = numpy.zeros((nvb,nob,nvb,nvb))
-    PBCAI = numpy.zeros((nvb,nvb,nvb,nob))
+    PCDAB = numpy.zeros((nvb,nvb,nvb,nvb), dtype=T2bb.dtype)
+    PCIAB = numpy.zeros((nvb,nob,nvb,nvb), dtype=T2bb.dtype)
+    PBCAI = numpy.zeros((nvb,nvb,nvb,nob), dtype=T2bb.dtype)
     PIJAB = einsum('sijab,s->ijab',L2bbnew,g)
-    PBJAI = numpy.zeros((nvb,nob,nvb,nob))
-    PABIJ = numpy.zeros((nvb,nvb,nob,nob))
-    PJKAI = numpy.zeros((nob,nob,nvb,nob))
-    PKAIJ = numpy.zeros((nob,nvb,nob,nob))
-    PKLIJ = numpy.zeros((nob,nob,nob,nob))
+    PBJAI = numpy.zeros((nvb,nob,nvb,nob), dtype=T2bb.dtype)
+    PABIJ = numpy.zeros((nvb,nvb,nob,nob), dtype=T2bb.dtype)
+    PJKAI = numpy.zeros((nob,nob,nvb,nob), dtype=T2bb.dtype)
+    PKAIJ = numpy.zeros((nob,nvb,nob,nob), dtype=T2bb.dtype)
+    PKLIJ = numpy.zeros((nob,nob,nob,nob), dtype=T2bb.dtype)
 
-    PcDaB = numpy.zeros((nva,nvb,nva,nvb))
-    PcIaB = numpy.zeros((nva,nob,nva,nvb))
-    PbCaI = numpy.zeros((nva,nvb,nva,nob))
+    PcDaB = numpy.zeros((nva,nvb,nva,nvb), dtype=T2ab.dtype)
+    PcIaB = numpy.zeros((nva,nob,nva,nvb), dtype=T2ab.dtype)
+    PbCaI = numpy.zeros((nva,nvb,nva,nob), dtype=T2ab.dtype)
     PiJaB = einsum('sijab,s->ijab',L2abnew,g)
-    PbJaI = numpy.zeros((nva,nob,nva,nob))
-    PaBiJ = numpy.zeros((nva,nvb,noa,nob))
-    PjKaI = numpy.zeros((noa,nob,nva,nob))
-    PkAiJ = numpy.zeros((noa,nvb,noa,nob))
-    PkLiJ = numpy.zeros((noa,nob,noa,nob))
+    PbJaI = numpy.zeros((nva,nob,nva,nob), dtype=T2ab.dtype)
+    PaBiJ = numpy.zeros((nva,nvb,noa,nob), dtype=T2ab.dtype)
+    PjKaI = numpy.zeros((noa,nob,nva,nob), dtype=T2ab.dtype)
+    PkAiJ = numpy.zeros((noa,nvb,noa,nob), dtype=T2ab.dtype)
+    PkLiJ = numpy.zeros((noa,nob,noa,nob), dtype=T2ab.dtype)
 
-    PCiAb = numpy.zeros((nvb,noa,nvb,nva))
-    PBcAi = numpy.zeros((nvb,nva,nvb,noa))
-    PJkAi = numpy.zeros((nob,noa,nvb,noa))
-    PKaIj = numpy.zeros((nob,nva,nob,noa))
-    PKlIj = numpy.zeros((nob,noa,nob,noa))
+    PCiAb = numpy.zeros((nvb,noa,nvb,nva), dtype=T2ab.dtype)
+    PBcAi = numpy.zeros((nvb,nva,nvb,noa), dtype=T2ab.dtype)
+    PJkAi = numpy.zeros((nob,noa,nvb,noa), dtype=T2ab.dtype)
+    PKaIj = numpy.zeros((nob,nva,nob,noa), dtype=T2ab.dtype)
+    PKlIj = numpy.zeros((nob,noa,nob,noa), dtype=T2ab.dtype)
 
-    PbJAi = numpy.zeros((nva,nob,nvb,noa))
-    PBjaI = numpy.zeros((nvb,noa,nva,nob))
-    PBjAi = numpy.zeros((nvb,noa,nvb,noa))
+    PbJAi = numpy.zeros((nva,nob,nvb,noa), dtype=T2ab.dtype)
+    PBjaI = numpy.zeros((nvb,noa,nva,nob), dtype=T2ab.dtype)
+    PBjAi = numpy.zeros((nvb,noa,nvb,noa), dtype=T2ab.dtype)
 
     # compute response densities
     for i in range(ng):

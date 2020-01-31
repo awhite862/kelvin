@@ -13,8 +13,8 @@ def ump0(g0a, g0b):
 def mp1(p, f, h):
     """Return 1st order free energy."""
     # compute contributions to 0th and 1st order energy
-    ec1 = numpy.tensordot(h,p,axes=([0,1],[0,1])) 
-    ec2 = numpy.tensordot(f,p,axes=([0,1],[0,1]))
+    ec1 = numpy.einsum('ij,ji->',h,p)
+    ec2 = numpy.einsum('ij,ji->',f,p)
 
     # compute free energy at 1st order
     return 0.5*(ec1 - ec2)

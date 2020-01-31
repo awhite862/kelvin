@@ -60,6 +60,7 @@ class scf_system(system):
             en = self.g_energies_tot()
             fo = ft_utils.ff(beta, en, self.mu)
             p = scf_utils.get_ao_ft_den(self.mf, fo)
+            p0 = scf_utils.get_ao_den(self.mf)
             f0 = scf_utils.get_ao_fock(self.mf)
             fao = scf_utils.get_ao_ft_fock(self.mf, fo)
             return ft_mp.mp1(p,2*f0 - fao,h)
@@ -243,7 +244,7 @@ class scf_system(system):
 
     def r_hcore(self):
         hcore = self.mf.get_hcore()
-        h1e = list(functools.reduce(numpy.dot, (self.mf.mo_coeff.T, hcore, self.mf.mo_coeff)))
+        h1e = list(functools.reduce(numpy.dot, (numpy.conj(self.mf.mo_coeff.T), hcore, self.mf.mo_coeff)))
         return h1e
 
     #def g_hcore(self):

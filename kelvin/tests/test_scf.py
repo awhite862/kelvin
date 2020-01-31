@@ -35,6 +35,28 @@ def get_diamond():
     mf.conv_tol = 1e-12
     return mf
 
+def get_diamond_k():
+    import pyscf.pbc.gto as pbc_gto
+    import pyscf.pbc.scf as pbc_scf
+    cell = pbc_gto.Cell()
+    cell.atom='''
+    C 0.000000000000   0.000000000000   0.000000000000
+    C 1.685068664391   1.685068664391   1.685068664391
+    '''
+    cell.basis = 'gth-szv'
+    cell.pseudo = 'gth-pade'
+    cell.a = '''
+    0.000000000, 3.370137329, 3.370137329
+    3.370137329, 0.000000000, 3.370137329
+    3.370137329, 3.370137329, 0.000000000'''
+    cell.unit = 'B'
+    cell.verbose = 0
+    cell.build()
+    mf = pbc_scf.RHF(cell, kpt=(0.1,0.1,0.1), exxdiv=None)
+    mf.conv_tol_grad = 1e-8
+    mf.conv_tol = 1e-12
+    return mf
+
 class SCFTest(unittest.TestCase):
     def setUp(self):
         self.thresh = 1e-10
@@ -134,6 +156,32 @@ class SCFTest(unittest.TestCase):
         mu = 0.0
         beta = 1.0/T
         m = get_diamond()
+        Escf = m.scf()
+        sys = scf_system(m,T,mu)
+
+        # derivative with respect to mu
+        en = sys.g_energies_tot()
+        dvec = -beta*numpy.ones(en.shape)
+        ea,eb = sys.u_energies_tot()
+        dveca = -beta*numpy.ones(ea.shape)
+        dvecb = -beta*numpy.ones(eb.shape)
+        dMP1au = sys.u_d_mp1(dveca,dvecb)
+        dMP1a = sys.g_d_mp1(dvec)
+
+        delta = 5e-4
+        sysf = scf_system(m,T,mu+delta)
+        MP1f = sysf.get_mp1()
+        sysb = scf_system(m,T,mu-delta)
+        MP1b = sysb.get_mp1()
+        dMP1d = 0.5*(MP1f - MP1b)/delta
+        diff = abs(dMP1a - dMP1d)
+        self.assertTrue(diff < 1e-6)
+
+    def test_diamond_ft_mp_deriv_k(self):
+        T = 0.5
+        mu = 0.0
+        beta = 1.0/T
+        m = get_diamond_k()
         Escf = m.scf()
         sys = scf_system(m,T,mu)
 

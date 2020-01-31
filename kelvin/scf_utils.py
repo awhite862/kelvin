@@ -106,14 +106,14 @@ def get_ao_ft_den(mf, fo):
     if is_rhf(mf):
         n = fo.shape[0]//2
         mo = mf.mo_coeff
-        p = numpy.dot(numpy.dot(mo,numpy.diag(fo[:n])),mo.T)
+        p = numpy.dot(numpy.dot(mo,numpy.diag(fo[:n])),numpy.conj(mo.T))
         return utils.block_diag(p,p)
     elif is_uhf(mf):
         n = fo.shape[0]//2
         moa = mf.mo_coeff[0]
         mob = mf.mo_coeff[1]
-        pa = numpy.dot(numpy.dot(moa,numpy.diag(fo[:n])),moa.T)
-        pb = numpy.dot(numpy.dot(mob,numpy.diag(fo[n:])),mob.T)
+        pa = numpy.dot(numpy.dot(moa,numpy.diag(fo[:n])),numpy.conj(moa.T))
+        pb = numpy.dot(numpy.dot(mob,numpy.diag(fo[n:])),numpy.conj(mob.T))
         return utils.block_diag(pa,pb)
     else:
         raise Exception("unrecognized SCF type")
@@ -148,14 +148,14 @@ def mo_tran_1e(mf, h):
         mo = mf.mo_coeff
         nao = mo.shape[0]
         assert(h.shape[0] == nao)
-        hmo = numpy.einsum('mp,mn,nq->pq',mo,h,mo)
+        hmo = numpy.einsum('mp,mn,nq->pq',numpy.conj(mo),h,mo)
         return utils.block_diag(hmo,hmo)
 
     elif is_uhf(mf):
         moa = mf.mo_coeff[0]
         mob = mf.mo_coeff[1]
-        ha = numpy.einsum('mp,mn,nq->pq',moa,h,moa)
-        hb = numpy.einsum('mp,mn,nq->pq',mob,h,mob)
+        ha = numpy.einsum('mp,mn,nq->pq',numpy.conj(moa),h,moa)
+        hb = numpy.einsum('mp,mn,nq->pq',numpy.conj(mob),h,mob)
         return utils.block_diag(ha,hb)
 
 def u_mo_tran_1e(mf, h):
@@ -163,18 +163,17 @@ def u_mo_tran_1e(mf, h):
         mo = mf.mo_coeff
         nao = mo.shape[0]
         assert(h.shape[0] == nao)
-        hmo = numpy.einsum('mp,mn,nq->pq',mo,h,mo)
+        hmo = numpy.einsum('mp,mn,nq->pq',numpy.conj(mo),h,mo)
         return hmo,hmo
 
     elif is_uhf(mf):
         moa = mf.mo_coeff[0]
         mob = mf.mo_coeff[1]
-        ha = numpy.einsum('mp,mn,nq->pq',moa,h,moa)
-        hb = numpy.einsum('mp,mn,nq->pq',mob,h,mob)
+        ha = numpy.einsum('mp,mn,nq->pq',numpy.conj(moa),h,moa)
+        hb = numpy.einsum('mp,mn,nq->pq',numpy.conj(mob),h,mob)
         return ha,hb
 
 def get_ao_ft_fock(mf, fo):
-    #f0 = get_ao_fock(mf)
     n = fo.shape[0]//2
     pbc = False
     try:
@@ -184,7 +183,7 @@ def get_ao_ft_fock(mf, fo):
         pbc = False
     if is_rhf(mf):
         mo = mf.mo_coeff
-        p = numpy.dot(numpy.dot(mo,numpy.diag(fo[:n])),mo.T)
+        p = numpy.dot(numpy.dot(mo,numpy.diag(fo[:n])),numpy.conj(mo.T))
         h1 = mf.get_hcore(mf.mol)
         if pbc:
             veff = mf.get_veff(mf.cell,p)
@@ -196,8 +195,8 @@ def get_ao_ft_fock(mf, fo):
     elif is_uhf(mf):
         moa = mf.mo_coeff[0]
         mob = mf.mo_coeff[1]
-        pa = numpy.dot(numpy.dot(moa,numpy.diag(fo[:n])),moa.T)
-        pb = numpy.dot(numpy.dot(mob,numpy.diag(fo[n:])),mob.T)
+        pa = numpy.dot(numpy.dot(moa,numpy.diag(fo[:n])),numpy.conj(moa.T))
+        pb = numpy.dot(numpy.dot(mob,numpy.diag(fo[n:])),numpy.conj(mob.T))
         d = (pa,pb)
         h1 = mf.get_hcore(mf.mol)
         if pbc:
@@ -222,14 +221,14 @@ def get_r_ft_fock(mf, fo):
         pbc = False
     if is_rhf(mf):
         mo = mf.mo_coeff
-        p = numpy.dot(numpy.dot(mo,numpy.diag(fo[:n])),mo.T)
+        p = numpy.dot(numpy.dot(mo,numpy.diag(fo[:n])),numpy.conj(mo.T))
         h1 = mf.get_hcore(mf.mol)
         if pbc:
             veff = mf.get_veff(mf.cell,p)
         else:
             veff = mf.get_veff(mf.mol,p)
         fT = h1 + 2*veff
-        fmo = numpy.einsum('mp,mn,nq->pq',mo,fT,mo)
+        fmo = numpy.einsum('mp,mn,nq->pq',numpy.conj(mo),fT,mo)
         return fmo 
     else:
         raise Exception("SCF is not resstricted")
@@ -244,20 +243,20 @@ def get_u_ft_fock(mf, foa, fob):
     h1 = mf.get_hcore(mf.mol)
     if is_rhf(mf):
         mo = mf.mo_coeff
-        p = numpy.dot(numpy.dot(mo,numpy.diag(foa)),mo.T)
+        p = numpy.dot(numpy.dot(mo,numpy.diag(foa)),numpy.conj(mo.T))
         if pbc:
             veff = mf.get_veff(mf.cell,p)
         else:
             veff = mf.get_veff(mf.mol,p)
         fT = h1 + 2*veff
-        fmo = numpy.einsum('mp,mn,nq->pq',mo,fT,mo)
+        fmo = numpy.einsum('mp,mn,nq->pq',numpy.conj(mo),fT,mo)
         return fmo,fmo
 
     elif is_uhf(mf):
         moa = mf.mo_coeff[0]
         mob = mf.mo_coeff[1]
-        pa = numpy.dot(numpy.dot(moa,numpy.diag(foa)),moa.T)
-        pb = numpy.dot(numpy.dot(mob,numpy.diag(fob)),mob.T)
+        pa = numpy.dot(numpy.dot(moa,numpy.diag(foa)),numpy.conj(moa.T))
+        pb = numpy.dot(numpy.dot(mob,numpy.diag(fob)),numpy.conj(mob.T))
         d = (pa,pb)
         if pbc:
             veff = mf.get_veff(mf.cell,d)
@@ -265,8 +264,8 @@ def get_u_ft_fock(mf, foa, fob):
             veff = mf.get_veff(mf.mol,d)
         fTa = h1 + veff[0]
         fTb = h1 + veff[1]
-        fmoa = numpy.einsum('mp,mn,nq->pq',moa,fTa,moa)
-        fmob = numpy.einsum('mp,mn,nq->pq',mob,fTb,mob)
+        fmoa = numpy.einsum('mp,mn,nq->pq',numpy.conj(moa),fTa,moa)
+        fmob = numpy.einsum('mp,mn,nq->pq',numpy.conj(mob),fTb,mob)
         return fmoa,fmob
 
     else:
@@ -284,20 +283,20 @@ def get_mo_ft_fock(mf, fo):
     h1 = mf.get_hcore(mf.mol)
     if is_rhf(mf):
         mo = mf.mo_coeff
-        p = numpy.dot(numpy.dot(mo,numpy.diag(fo[:n])),mo.T)
+        p = numpy.dot(numpy.dot(mo,numpy.diag(fo[:n])),numpy.conj(mo.T))
         if pbc:
             veff = mf.get_veff(mf.cell,p)
         else:
             veff = mf.get_veff(mf.mol,p)
         fT = h1 + 2*veff
-        fmo = numpy.einsum('mp,mn,nq->pq',mo,fT,mo)
+        fmo = numpy.einsum('mp,mn,nq->pq',numpy.conj(mo),fT,mo)
         return utils.block_diag(fmo,fmo)
         
     elif is_uhf(mf):
         moa = mf.mo_coeff[0]
         mob = mf.mo_coeff[1]
-        pa = numpy.dot(numpy.dot(moa,numpy.diag(fo[:n])),moa.T)
-        pb = numpy.dot(numpy.dot(mob,numpy.diag(fo[n:])),mob.T)
+        pa = numpy.dot(numpy.dot(moa,numpy.diag(fo[:n])),numpy.conj(moa.T))
+        pb = numpy.dot(numpy.dot(mob,numpy.diag(fo[n:])),numpy.conj(mob.T))
         d = (pa,pb)
         if pbc:
             veff = mf.get_veff(mf.cell,d)
@@ -305,8 +304,8 @@ def get_mo_ft_fock(mf, fo):
             veff = mf.get_veff(mf.mol,d)
         fTa = h1 + veff[0]
         fTb = h1 + veff[1]
-        fmoa = numpy.einsum('mp,mn,nq->pq',moa,fTa,moa)
-        fmob = numpy.einsum('mp,mn,nq->pq',mob,fTb,mob)
+        fmoa = numpy.einsum('mp,mn,nq->pq',numpy.conj(moa),fTa,moa)
+        fmob = numpy.einsum('mp,mn,nq->pq',numpy.conj(mob),fTb,mob)
         return utils.block_diag(fmoa,fmob)
 
     else:
@@ -323,21 +322,21 @@ def get_mo_d_ft_fock(mf, fo, fv, dvec):
         pbc = False
     if is_rhf(mf):
         mo = mf.mo_coeff
-        p = numpy.dot(numpy.dot(mo,numpy.diag(fov[:n])),mo.T)
+        p = numpy.dot(numpy.dot(mo,numpy.diag(fov[:n])),numpy.conj(mo.T))
         h1 = mf.get_hcore(mf.mol)
         if pbc:
             veff = mf.get_veff(mf.cell,p)
         else:
             veff = mf.get_veff(mf.mol,p)
         fT = 2*veff
-        fmo = numpy.einsum('mp,mn,nq->pq',mo,fT,mo)
+        fmo = numpy.einsum('mp,mn,nq->pq',numpy.conj(mo),fT,mo)
         return utils.block_diag(-fmo,-fmo)
  
     elif is_uhf(mf):
         moa = mf.mo_coeff[0]
         mob = mf.mo_coeff[1]
-        pa = numpy.dot(numpy.dot(moa,numpy.diag(fov[:n])),moa.T)
-        pb = numpy.dot(numpy.dot(mob,numpy.diag(fov[n:])),mob.T)
+        pa = numpy.dot(numpy.dot(moa,numpy.diag(fov[:n])),numpy.conj(moa.T))
+        pb = numpy.dot(numpy.dot(mob,numpy.diag(fov[n:])),numpy.conj(mob.T))
         d = (pa,pb)
         if pbc:
             veff = mf.get_veff(mf.cell,d)
@@ -345,8 +344,8 @@ def get_mo_d_ft_fock(mf, fo, fv, dvec):
             veff = mf.get_veff(mf.mol,d)
         fTa = veff[0]
         fTb = veff[1]
-        fmoa = numpy.einsum('mp,mn,nq->pq',moa,fTa,moa)
-        fmob = numpy.einsum('mp,mn,nq->pq',mob,fTb,mob)
+        fmoa = numpy.einsum('mp,mn,nq->pq',numpy.conj(moa),fTa,moa)
+        fmob = numpy.einsum('mp,mn,nq->pq',numpy.conj(mob),fTb,mob)
         return utils.block_diag(-fmoa,-fmob)
 
     else:
@@ -365,20 +364,20 @@ def u_mo_d_ft_fock(mf, foa, fva, fob, fvb, dveca, dvecb):
         pbc = False
     if is_rhf(mf):
         mo = mf.mo_coeff
-        p = numpy.dot(numpy.dot(mo,numpy.diag(fova)),mo.T)
+        p = numpy.dot(numpy.dot(mo,numpy.diag(fova)),numpy.conj(mo.T))
         h1 = mf.get_hcore(mf.mol)
         if pbc:
             veff = mf.get_veff(mf.cell,p)
         else:
             veff = mf.get_veff(mf.mol,p)
         fT = 2*veff
-        fmo = numpy.einsum('mp,mn,nq->pq',mo,fT,mo)
+        fmo = numpy.einsum('mp,mn,nq->pq',numpy.conj(mo),fT,mo)
         return -fmo,-fmo
     elif is_uhf(mf):
         moa = mf.mo_coeff[0]
         mob = mf.mo_coeff[1]
-        pa = numpy.dot(numpy.dot(moa,numpy.diag(fova)),moa.T)
-        pb = numpy.dot(numpy.dot(mob,numpy.diag(fovb)),mob.T)
+        pa = numpy.dot(numpy.dot(moa,numpy.diag(fova)),numpy.conj(moa.T))
+        pb = numpy.dot(numpy.dot(mob,numpy.diag(fovb)),numpy.conj(mob.T))
         d = (pa,pb)
         if pbc:
             veff = mf.get_veff(mf.cell,d)
@@ -386,8 +385,8 @@ def u_mo_d_ft_fock(mf, foa, fva, fob, fvb, dveca, dvecb):
             veff = mf.get_veff(mf.mol,d)
         fTa = veff[0]
         fTb = veff[1]
-        fmoa = numpy.einsum('mp,mn,nq->pq',moa,fTa,moa)
-        fmob = numpy.einsum('mp,mn,nq->pq',mob,fTb,mob)
+        fmoa = numpy.einsum('mp,mn,nq->pq',numpy.conj(moa),fTa,moa)
+        fmob = numpy.einsum('mp,mn,nq->pq',numpy.conj(mob),fTb,mob)
         return -fmoa,-fmob
     else:
         raise Exception("unrecognized SCF type")
@@ -414,10 +413,10 @@ class r_fock_blocks(object):
             raise Exception("SCF is not restricted")
 
     def _transform_fock(self, mf, o, v, f):
-        self.oo = numpy.einsum('mo,mn,np->op',o,f,o)
-        self.ov = numpy.einsum('mo,mn,nv->ov',o,f,v)
-        self.vo = numpy.einsum('mv,mn,no->vo',v,f,o)
-        self.vv = numpy.einsum('mv,mn,nu->vu',v,f,v)
+        self.oo = numpy.einsum('mo,mn,np->op',numpy.conj(o),f,o)
+        self.ov = numpy.einsum('mo,mn,nv->ov',numpy.conj(o),f,v)
+        self.vo = numpy.einsum('mv,mn,no->vo',numpy.conj(v),f,o)
+        self.vv = numpy.einsum('mv,mn,nu->vu',numpy.conj(v),f,v)
 
 class g_fock_blocks(object):
     def __init__(self,mf):
@@ -440,8 +439,8 @@ class g_fock_blocks(object):
             va = (mf.mo_coeff[0])[:,mo_occa==0]
             ob = (mf.mo_coeff[1])[:,mo_occb>0]
             vb = (mf.mo_coeff[1])[:,mo_occb==0]
-            pa = numpy.dot(oa, oa.T)
-            pb = numpy.dot(ob, ob.T)
+            pa = numpy.dot(oa, numpy.conj(oa.T))
+            pb = numpy.dot(ob, numpy.conj(ob.T))
             dm = numpy.array((pa,pb))
             h1 = mf.get_hcore(mf.mol)
             if pbc:
@@ -454,14 +453,14 @@ class g_fock_blocks(object):
             raise Exception("unrecognized SCF type")
 
     def _transform_fock(self, mf, oa, ob, va, vb, fa, fb):
-        fvoa = numpy.einsum('mv,mn,no->vo',va,fa,oa)
-        fova = numpy.einsum('mv,mn,no->vo',oa,fa,va)
-        fooa = numpy.einsum('mo,mn,np->op',oa,fa,oa)
-        fvva = numpy.einsum('mv,mn,nu->vu',va,fa,va)
-        fvob = numpy.einsum('mv,mn,no->vo',vb,fb,ob)
-        fovb = numpy.einsum('mv,mn,no->vo',ob,fb,vb)
-        foob = numpy.einsum('mo,mn,np->op',ob,fb,ob)
-        fvvb = numpy.einsum('mv,mn,nu->vu',vb,fb,vb)
+        fvoa = numpy.einsum('mv,mn,no->vo',numpy.conj(va),fa,oa)
+        fova = numpy.einsum('mv,mn,no->vo',numpy.conj(oa),fa,va)
+        fooa = numpy.einsum('mo,mn,np->op',numpy.conj(oa),fa,oa)
+        fvva = numpy.einsum('mv,mn,nu->vu',numpy.conj(va),fa,va)
+        fvob = numpy.einsum('mv,mn,no->vo',numpy.conj(vb),fb,ob)
+        fovb = numpy.einsum('mv,mn,no->vo',numpy.conj(ob),fb,vb)
+        foob = numpy.einsum('mo,mn,np->op',numpy.conj(ob),fb,ob)
+        fvvb = numpy.einsum('mv,mn,nu->vu',numpy.conj(vb),fb,vb)
         self.oo = utils.block_diag(fooa,foob)
         self.ov = utils.block_diag(fova,fovb)
         self.vo = utils.block_diag(fvoa,fvob)

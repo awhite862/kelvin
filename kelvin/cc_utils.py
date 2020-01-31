@@ -148,7 +148,10 @@ def ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G, beta, ng, ti,
 
         # determine convergence
         if iprint > 0:
-            print(' %2d  %.10f   %.4E' % (i+1,E,res1+res2))
+            if isinstance(E, complex):
+                print(' %2d  %.10f  %.3E %.4E' % (i+1,E.real,E.imag,res1+res2))
+            else:
+                print(' %2d  %.10f   %.4E' % (i+1,E,res1+res2))
         i = i + 1
         if numpy.abs(E - Eold) < ethresh and res1+res2 < tthresh:
             converged = True
@@ -187,10 +190,10 @@ def ft_cc_iter_extrap(method, F, I, D1, D2, g, G, beta, ng, ti,
     alpha = conv_options["damp"]
 
     no,nv = F.ov.shape
-    t1bar = numpy.zeros((ng,nv,no))
-    t2bar = numpy.zeros((ng,nv,nv,no,no))
-    T1new = numpy.zeros((ng,nv,no))
-    T2new = numpy.zeros((ng,nv,nv,no,no))
+    t1bar = numpy.zeros((ng,nv,no), dtype=F.vo.dtype)
+    t2bar = numpy.zeros((ng,nv,nv,no,no), dtype=I.vvoo.dtype)
+    T1new = numpy.zeros((ng,nv,no), dtype=t1bar.dtype)
+    T2new = numpy.zeros((ng,nv,nv,no,no), dtype=t2bar.dtype)
 
     # loop over grid points
     for ig in range(ng):
@@ -294,7 +297,10 @@ def ft_ucc_iter(method, T1aold, T1bold, T2aaold, T2abold, T2bbold, Fa, Fb, Ia, I
 
         # determine convergence
         if iprint > 0:
-            print(' %2d  %.10f   %.4E' % (i+1,E,res1+res2))
+            if isinstance(E, complex):
+                print(' %2d  %.10f  %.3E %.4E' % (i+1,E.real,E.imag,res1+res2))
+            else:
+                print(' %2d  %.10f   %.4E' % (i+1,E,res1+res2))
         i = i + 1
         if numpy.abs(E - Eold) < ethresh and res1+res2 < tthresh:
             converged = True
@@ -334,16 +340,16 @@ def ft_ucc_iter_extrap(method, Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb
 
     noa,nva = Fa.ov.shape
     nob,nvb = Fb.ov.shape
-    t1bara = numpy.zeros((ng,nva,noa))
-    t1barb = numpy.zeros((ng,nvb,nob))
-    t2baraa = numpy.zeros((ng,nva,nva,noa,noa))
-    t2barab = numpy.zeros((ng,nva,nvb,noa,nob))
-    t2barbb = numpy.zeros((ng,nvb,nvb,nob,nob))
-    T1newa = numpy.zeros(t1bara.shape)
-    T1newb = numpy.zeros(t1barb.shape)
-    T2newaa = numpy.zeros(t2baraa.shape)
-    T2newab = numpy.zeros(t2barab.shape)
-    T2newbb = numpy.zeros(t2barbb.shape)
+    t1bara = numpy.zeros((ng,nva,noa), dtype=Fa.vo.dtype)
+    t1barb = numpy.zeros((ng,nvb,nob), dtype=Fb.vo.dtype)
+    t2baraa = numpy.zeros((ng,nva,nva,noa,noa), dtype=Ia.vvoo.dtype)
+    t2barab = numpy.zeros((ng,nva,nvb,noa,nob), dtype=Iabab.vvoo.dtype)
+    t2barbb = numpy.zeros((ng,nvb,nvb,nob,nob), dtype=Ib.vvoo.dtype)
+    T1newa = numpy.zeros(t1bara.shape, dtype=t1bara.dtype)
+    T1newb = numpy.zeros(t1barb.shape, dtype=t1barb.dtype)
+    T2newaa = numpy.zeros(t2baraa.shape, dtype=t2baraa.dtype)
+    T2newab = numpy.zeros(t2barab.shape, dtype=t2barab.dtype)
+    T2newbb = numpy.zeros(t2barbb.shape, dtype=t2barbb.dtype)
 
     # loop over grid points
     for ig in range(ng):
@@ -1330,7 +1336,7 @@ def g_n2rdm_full(beta, sfo, sfv, P2):
     return n2rdm
 
 def g_n2rdm_full_active(beta, n, iocc, ivir, sfo, sfv, P2):
-    n2rdm = numpy.zeros((n,n,n,n))
+    n2rdm = numpy.zeros((n,n,n,n), dtype=P2[0].dtype)
     n2rdm[numpy.ix_(ivir,ivir,ivir,ivir)] += \
        (1.0/beta)*einsum('cdab,c,d,a,b->cdab',P2[0],sfv,sfv,sfv,sfv)
     n2rdm[numpy.ix_(ivir,iocc,ivir,ivir)] += \
@@ -1368,7 +1374,7 @@ def g_n2rdm_full_active(beta, n, iocc, ivir, sfo, sfv, P2):
 def u_n2rdm_full(beta, sfoa, sfva, sfob, sfvb, P2):
     na = sfoa.size
     nb = sfob.size
-    P2aa = numpy.zeros((na,na,na,na))
+    P2aa = numpy.zeros((na,na,na,na), dtype=P2[0][0].dtype)
     P2aa += (1.0/beta)*einsum('cdab,c,d,a,b->cdab',P2[0][0],sfva,sfva,sfva,sfva)
     P2aa += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',P2[1][0],sfva,sfoa,sfva,sfva)
     P2aa -= (1.0/beta)*einsum('ciab,c,i,a,b->icab',P2[1][0],sfva,sfoa,sfva,sfva)
@@ -1386,7 +1392,7 @@ def u_n2rdm_full(beta, sfoa, sfva, sfob, sfvb, P2):
     P2aa -= (1.0/beta)*einsum('kaij,k,a,i,j->akij',P2[7][0],sfoa,sfva,sfoa,sfoa)
     P2aa += (1.0/beta)*einsum('klij,k,l,i,j->klij',P2[8][0],sfoa,sfoa,sfoa,sfoa)
 
-    P2bb = numpy.zeros((nb,nb,nb,nb))
+    P2bb = numpy.zeros((nb,nb,nb,nb), dtype=P2[0][1].dtype)
     P2bb += (1.0/beta)*einsum('cdab,c,d,a,b->cdab',P2[0][1],sfvb,sfvb,sfvb,sfvb)
     P2bb += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',P2[1][1],sfvb,sfob,sfvb,sfvb)
     P2bb -= (1.0/beta)*einsum('ciab,c,i,a,b->icab',P2[1][1],sfvb,sfob,sfvb,sfvb)
@@ -1404,7 +1410,7 @@ def u_n2rdm_full(beta, sfoa, sfva, sfob, sfvb, P2):
     P2bb -= (1.0/beta)*einsum('kaij,k,a,i,j->akij',P2[7][1],sfob,sfvb,sfob,sfob)
     P2bb += (1.0/beta)*einsum('klij,k,l,i,j->klij',P2[8][1],sfob,sfob,sfob,sfob)
 
-    P2ab = numpy.zeros((na,nb,na,nb))
+    P2ab = numpy.zeros((na,nb,na,nb), dtype=P2[0][2].dtype)
     P2ab += (1.0/beta)*einsum('cdab,c,d,a,b->cdab',P2[0][2],sfva,sfvb,sfva,sfvb)
     P2ab += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',P2[1][2],sfva,sfob,sfva,sfvb)
     P2ab += (1.0/beta)*einsum('bcai,b,c,a,i->bcai',P2[2][2],sfva,sfvb,sfva,sfob)
@@ -1427,7 +1433,7 @@ def u_n2rdm_full(beta, sfoa, sfva, sfob, sfvb, P2):
     return (P2aa, P2bb, P2ab)
 
 def u_n2rdm_full_active(beta, na, nb, iocca, ivira, ioccb, ivirb, sfoa, sfva, sfob, sfvb, P2):
-    P2aa = numpy.zeros((na,na,na,na))
+    P2aa = numpy.zeros((na,na,na,na), dtype=P2[0][0].dtype)
     P2aa[numpy.ix_(ivira,ivira,ivira,ivira)] += (1.0/beta)*einsum('cdab,c,d,a,b->cdab',P2[0][0],sfva,sfva,sfva,sfva)
     P2aa[numpy.ix_(ivira,iocca,ivira,ivira)] += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',P2[1][0],sfva,sfoa,sfva,sfva)
     P2aa[numpy.ix_(iocca,ivira,ivira,ivira)] -= (1.0/beta)*einsum('ciab,c,i,a,b->icab',P2[1][0],sfva,sfoa,sfva,sfva)
@@ -1445,7 +1451,7 @@ def u_n2rdm_full_active(beta, na, nb, iocca, ivira, ioccb, ivirb, sfoa, sfva, sf
     P2aa[numpy.ix_(ivira,iocca,iocca,iocca)] -= (1.0/beta)*einsum('kaij,k,a,i,j->akij',P2[7][0],sfoa,sfva,sfoa,sfoa)
     P2aa[numpy.ix_(iocca,iocca,iocca,iocca)] += (1.0/beta)*einsum('klij,k,l,i,j->klij',P2[8][0],sfoa,sfoa,sfoa,sfoa)
 
-    P2bb = numpy.zeros((nb,nb,nb,nb))
+    P2bb = numpy.zeros((nb,nb,nb,nb), dtype=P2[0][1].dtype)
     P2bb[numpy.ix_(ivirb,ivirb,ivirb,ivirb)] += (1.0/beta)*einsum('cdab,c,d,a,b->cdab',P2[0][1],sfvb,sfvb,sfvb,sfvb)
     P2bb[numpy.ix_(ivirb,ioccb,ivirb,ivirb)] += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',P2[1][1],sfvb,sfob,sfvb,sfvb)
     P2bb[numpy.ix_(ioccb,ivirb,ivirb,ivirb)] -= (1.0/beta)*einsum('ciab,c,i,a,b->icab',P2[1][1],sfvb,sfob,sfvb,sfvb)
@@ -1463,7 +1469,7 @@ def u_n2rdm_full_active(beta, na, nb, iocca, ivira, ioccb, ivirb, sfoa, sfva, sf
     P2bb[numpy.ix_(ivirb,ioccb,ioccb,ioccb)] -= (1.0/beta)*einsum('kaij,k,a,i,j->akij',P2[7][1],sfob,sfvb,sfob,sfob)
     P2bb[numpy.ix_(ioccb,ioccb,ioccb,ioccb)] += (1.0/beta)*einsum('klij,k,l,i,j->klij',P2[8][1],sfob,sfob,sfob,sfob)
 
-    P2ab = numpy.zeros((na,nb,na,nb))
+    P2ab = numpy.zeros((na,nb,na,nb), dtype=P2[0][2].dtype)
     P2ab[numpy.ix_(ivira,ivirb,ivira,ivirb)] += (1.0/beta)*einsum('cdab,c,d,a,b->cdab',P2[0][2],sfva,sfvb,sfva,sfvb)
     P2ab[numpy.ix_(ivira,ioccb,ivira,ivirb)] += (1.0/beta)*einsum('ciab,c,i,a,b->ciab',P2[1][2],sfva,sfob,sfva,sfvb)
     P2ab[numpy.ix_(ivira,ivirb,ivira,ioccb)] += (1.0/beta)*einsum('bcai,b,c,a,i->bcai',P2[2][2],sfva,sfvb,sfva,sfob)

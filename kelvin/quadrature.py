@@ -266,7 +266,7 @@ def d_ft_quad(ng, beta, quad):
 
 def int_tbar1(ng,t1bar,ti,D1,G):
     """Integrate t1bar with exponential factor."""
-    t1_out = numpy.zeros(t1bar.shape)
+    t1_out = numpy.zeros(t1bar.shape, dtype=t1bar.dtype)
     dt = numpy.zeros((ng))
     for y in range(ng):
         for i in range(y):
@@ -279,7 +279,7 @@ def int_tbar1(ng,t1bar,ti,D1,G):
 
 def int_tbar2(ng,t2bar,ti,D2,G):
     """Integrate t2bar with exponential factor."""
-    t2_out = numpy.zeros(t2bar.shape)
+    t2_out = numpy.zeros(t2bar.shape, dtype=t2bar.dtype)
     dt = numpy.zeros((ng))
     for y in range(ng):
         for i in range(y):
@@ -292,7 +292,7 @@ def int_tbar2(ng,t2bar,ti,D2,G):
 
 def int_L1(ng,L1old,ti,D1,g,G):
     """Return L1bar."""
-    L1_out = numpy.zeros(L1old.shape)
+    L1_out = numpy.zeros(L1old.shape, dtype=L1old.dtype)
     for s in range(ng):
         dt = numpy.zeros((ng))
         for y in range(s,ng):
@@ -305,7 +305,7 @@ def int_L1(ng,L1old,ti,D1,g,G):
 
 def int_L2(ng,L2old,ti,D2,g,G):
     """Return L2bar."""
-    L2_out = numpy.zeros(L2old.shape)
+    L2_out = numpy.zeros(L2old.shape, dtype=L2old.dtype)
     for s in range(ng):
         dt = numpy.zeros((ng))
         for y in range(s,ng):

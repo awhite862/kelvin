@@ -325,7 +325,7 @@ class ccsd(object):
             if self.singles:
                 T1,T2 = cc_equations.ccsd_stanton(F,I,T1old,T2old)
             else:
-                T1 = numpy.zeros(F.vo.shape)
+                T1 = numpy.zeros(F.vo.shape, dtype=F.vo.dtype)
                 T2 = cc_equations.ccd_simple(F,I,T2old)
             T1 = einsum('ai,ia->ai',T1,Dov)
             T2 = einsum('abij,ijab->abij',T2,Doovv)
@@ -511,7 +511,7 @@ class ccsd(object):
         if self.singles:
             L1old = self.T1.transpose((1,0))
         else:
-            L1old = numpy.zeros(F.ov.shape)
+            L1old = numpy.zeros(F.ov.shape, dtype=F.ov.dtype)
         L2old = self.T2.transpose((2,3,0,1))
         if self.singles:
             intor = cc_equations.lambda_int(F,I,self.T1,self.T2)
@@ -526,7 +526,7 @@ class ccsd(object):
             if self.singles:
                 L1,L2 = cc_equations.ccsd_lambda_opt_int(F,I,L1old,L2old,self.T1,self.T2,intor)
             else:
-                L1 = numpy.zeros(F.ov.shape)
+                L1 = numpy.zeros(F.ov.shape, F.ov.dtype)
                 L2 = cc_equations.ccd_lambda_simple(F,I,L2old,self.T2)
             L1 = einsum('ia,ia->ia',L1,Dov)
             L2 = einsum('ijab,ijab->ijab',L2,Doovv)
@@ -606,7 +606,7 @@ class ccsd(object):
                 L2aa,L2ab,L2bb = L2s
             else:
                 raise Exception("UCCD Lambdas not implemented")
-                L1 = numpy.zeros(F.ov.shape)
+                L1 = numpy.zeros(F.ov.shape, dtype=F.ov.dtype)
                 L2 = cc_equations.ccd_lambda_simple(F,I,L2old,self.T2)
             L1a = einsum('ia,ia->ia',L1a,Dova)
             L1b = einsum('ia,ia->ia',L1b,Dovb)
@@ -734,14 +734,14 @@ class ccsd(object):
                 print("WARNING: Converngece scheme ({}) is being ignored.".format(self.rt_iter))
             # get MP2 T-amplitudes
             if T1in is not None and T2in is not None:
-                T1old = T1in if self.singles else numpy.zeros((ng,n,n))
+                T1old = T1in if self.singles else numpy.zeros((ng,n,n), dtype=F.vo.dtype)
                 T2old = T2in
             else:
                 if self.singles:
                     Id = numpy.ones((ng))
                     T1old = -einsum('v,ai->vai',Id,F.vo)
                 else:
-                    T1old = numpy.zeros((ng,n,n))
+                    T1old = numpy.zeros((ng,n,n), dtype=F.vo.dtype)
                 Id = numpy.ones((ng))
                 T2old = -einsum('v,abij->vabij',Id,I.vvoo)
                 T1old = quadrature.int_tbar1(ng,T1old,ti,D1,G)
@@ -903,8 +903,8 @@ class ccsd(object):
                 print("WARNING: Converngece scheme ({}) is being ignored.".format(self.rt_iter))
             # get MP2 T-amplitudes
             if T1in is not None and T2in is not None:
-                T1aold = T1in[0] if self.singles else numpy.zeros(T1ashape)
-                T1bold = T1in[1] if self.singles else numpy.zeros(T1bshape)
+                T1aold = T1in[0] if self.singles else numpy.zeros(T1ashape, dtype=Fa.vo.dtype)
+                T1bold = T1in[1] if self.singles else numpy.zeros(T1bshape, dtype=Fb.vo.dtype)
                 T2aaold = T2in[0]
                 T2abold = T2in[1]
                 T2bbold = T2in[2]
@@ -914,7 +914,8 @@ class ccsd(object):
                     T1aold = -einsum('v,ai->vai',Id,Fa.vo)
                     T1bold = -einsum('v,ai->vai',Id,Fb.vo)
                 else:
-                    T1old = numpy.zeros((ng,n,n))
+                    T1aold = numpy.zeros((ng,n,n), dtype=Fa.vo.dtype)
+                    T1bold = numpy.zeros((ng,n,n), dtype=Fb.vo.dtype)
                 Id = numpy.ones((ng))
                 T2aaold = -einsum('v,abij->vabij',Id,Ia.vvoo)
                 T2abold = -einsum('v,abij->vabij',Id,Iabab.vvoo)
@@ -1021,11 +1022,11 @@ class ccsd(object):
             L2old = L2
             if self.singles:
                 ng,nv,no = self.T1.shape
-                L1old = numpy.zeros((ng,no,nv))
+                L1old = numpy.zeros((ng,no,nv), self.T1.dtype)
         elif L1 is not None and L2 is None:
             ng,nv,no = self.T1.shape
             L1old = L1
-            L2old = numpy.zeros((ng,no,nv))
+            L2old = numpy.zeros((ng,no,nv), self.T2.dtype)
             if not self.singles:
                 raise Exception("Singles guess provided to FT-CCD Lambda equations")
         else:
@@ -1149,15 +1150,15 @@ class ccsd(object):
             L2bbold = L2bb
             if self.singles:
                 ng,nv,no = self.T1.shape
-                L1aold = numpy.zeros((ng,no,nv))
-                L1bold = numpy.zeros((ng,no,nv))
+                L1aold = numpy.zeros((ng,no,nv), dtype=self.T1[0].dtype)
+                L1bold = numpy.zeros((ng,no,nv), dtype=self.T1[1].dtype)
         elif L1 is not None and L2 is None:
             ng,nv,no = self.T1.shape
             L1aold = L1[0]
             L1bold = L1[1]
-            L2aaold = numpy.zeros((ng,no,nv))
-            L2abold = numpy.zeros((ng,no,nv))
-            L2bbold = numpy.zeros((ng,no,nv))
+            L2aaold = numpy.zeros((ng,no,nv), dtype=self.T2[0].dtype)
+            L2abold = numpy.zeros((ng,no,nv), dtype=self.T2[1].dtype)
+            L2bbold = numpy.zeros((ng,no,nv), dtype=self.T2[2].dtype)
             if not self.singles:
                 raise Exception("Singles guess provided to FT-CCD Lambda equations")
         else:
@@ -1500,7 +1501,7 @@ class ccsd(object):
         self.ndji = einsum('ji,j,i->ji',self.dji,sfo,sfo)
         self.ndai = einsum('ai,a,i->ai',self.dai,sfv,sfo)
         if self.athresh > 0.0:
-            self.n1rdm = numpy.zeros((n,n))
+            self.n1rdm = numpy.zeros((n,n), dtype=pia.dtype)
             self.n1rdm[numpy.ix_(iocc,ivir)] += self.ndia/beta
             self.n1rdm[numpy.ix_(ivir,ivir)] += self.ndba/beta
             self.n1rdm[numpy.ix_(iocc,iocc)] += self.ndji/beta
@@ -1589,12 +1590,13 @@ class ccsd(object):
         else:
             dso = fv
             dsv = fo
+        Fd = self.sys.g_fock_d_den()
         n = fo.shape[0]
-        rono = numpy.zeros(n)
-        ronv = numpy.zeros(n)
+        dt = Fd.dtype
+        rono = numpy.zeros(n, dtype=dt)
+        ronv = numpy.zeros(n, dtype=dt)
 
         # perturbed ON contribution to Fock matrix
-        Fd = self.sys.g_fock_d_den()
         if self.athresh > 0.0:
             rono += cc_utils.g_Fd_on_active(
                     Fd, iocc, ivir, self.ndia, self.ndba, self.ndji, self.ndai)
@@ -1602,8 +1604,8 @@ class ccsd(object):
             rono += cc_utils.g_Fd_on(Fd, self.ndia, self.ndba, self.ndji, self.ndai)
 
         # Add contributions from occupation number relaxation
-        jitemp = numpy.zeros(nocc) if self.athresh > 0.0 else numpy.zeros(n)
-        batemp = numpy.zeros(nvir) if self.athresh > 0.0 else numpy.zeros(n)
+        jitemp = numpy.zeros(nocc, dtype=dt) if self.athresh > 0.0 else numpy.zeros(n, dtype=dt)
+        batemp = numpy.zeros(nvir, dtype=dt) if self.athresh > 0.0 else numpy.zeros(n, dtype=dt)
         cc_utils.g_d_on_oo(dso, F, I, self.dia, self.dji, self.dai, self.P2, jitemp)
         cc_utils.g_d_on_vv(dsv, F, I, self.dia, self.dba, self.dai, self.P2, batemp)
 
@@ -1649,8 +1651,8 @@ class ccsd(object):
             dsv = fo
         # orbital energy derivatives
         n = fo.shape[0]
-        self.rorbo = numpy.zeros(n)
-        self.rorbv = numpy.zeros(n)
+        self.rorbo = numpy.zeros(n, dtype=self.L1.dtype)
+        self.rorbv = numpy.zeros(n, dtype=self.L1.dtype)
         Gnew = self.G.copy()
         m = Gnew.shape[0]
         n = Gnew.shape[0]
@@ -1791,7 +1793,8 @@ class ccsd(object):
         self.ndai = (einsum('ai,a,i->ai',self.dai[0],sfva,sfoa),
                 einsum('ai,a,i->ai',self.dai[1],sfvb,sfob))
         if self.athresh > 0.0:
-            self.n1rdm = [numpy.zeros((na,na)),numpy.zeros((nb,nb))]
+            self.n1rdm = [numpy.zeros((na,na), dtype=self.ndia[0].dtype),
+                    numpy.zeros((nb,nb), dtype=self.ndia[1].dtype)]
             self.n1rdm[0][numpy.ix_(iocca,ivira)] += self.ndia[0]/beta
             self.n1rdm[0][numpy.ix_(ivira,ivira)] += self.ndba[0]/beta
             self.n1rdm[0][numpy.ix_(iocca,iocca)] += self.ndji[0]/beta
@@ -1925,10 +1928,12 @@ class ccsd(object):
 
         # perturbed ON contribution to Fock matrix
         Fdaa,Fdab,Fdbb,Fdba = self.sys.u_fock_d_den()
-        ronoa = numpy.zeros(na)
-        ronva = numpy.zeros(na)
-        ronob = numpy.zeros(nb)
-        ronvb = numpy.zeros(nb)
+        dta = Fdaa.dtype
+        dtb = Fdbb.dtype
+        ronoa = numpy.zeros(na, dtype=dta)
+        ronva = numpy.zeros(na, dtype=dta)
+        ronob = numpy.zeros(nb, dtype=dtb)
+        ronvb = numpy.zeros(nb, dtype=dtb)
         if self.athresh > 0.0:
             temp = cc_utils.u_Fd_on_active(
                     Fdaa, Fdab, Fdba, Fdbb, iocca, ivira, ioccb, ivirb,
@@ -1942,10 +1947,11 @@ class ccsd(object):
             ronob += temp[1]
 
         # Add contributions from occupation number relaxation
-        jitempa = numpy.zeros(nocca) if self.athresh > 0.0 else numpy.zeros(na)
-        batempa = numpy.zeros(nvira) if self.athresh > 0.0 else numpy.zeros(na)
-        jitempb = numpy.zeros(noccb) if self.athresh > 0.0 else numpy.zeros(nb)
-        batempb = numpy.zeros(nvirb) if self.athresh > 0.0 else numpy.zeros(nb)
+
+        jitempa = numpy.zeros(nocca, dtype=dta) if self.athresh > 0.0 else numpy.zeros(na, dtype=dta)
+        batempa = numpy.zeros(nvira, dtype=dta) if self.athresh > 0.0 else numpy.zeros(na, dtype=dta)
+        jitempb = numpy.zeros(noccb, dtype=dtb) if self.athresh > 0.0 else numpy.zeros(nb, dtype=dtb)
+        batempb = numpy.zeros(nvirb, dtype=dtb) if self.athresh > 0.0 else numpy.zeros(nb, dtype=dtb)
         cc_utils.u_d_on_oo(
                 dsoa, dsob, Fa, Fb, Ia, Ib, Iabab,
                 self.dia, self.dji, self.dai, self.P2, jitempa, jitempb)
@@ -2014,10 +2020,12 @@ class ccsd(object):
             dsob = fvb
             dsvb = fob
 
-        rorboa = numpy.zeros(na)
-        rorbva = numpy.zeros(na)
-        rorbob = numpy.zeros(nb)
-        rorbvb = numpy.zeros(nb)
+        dta = self.T1[0].dtype
+        dtb = self.T1[1].dtype
+        rorboa = numpy.zeros(na, dtype=dta)
+        rorbva = numpy.zeros(na, dtype=dta)
+        rorbob = numpy.zeros(nb, dtype=dtb)
+        rorbvb = numpy.zeros(nb, dtype=dtb)
         # orbital energy derivatives
         Gnew = self.G.copy()
         m = Gnew.shape[0]
@@ -2130,8 +2138,10 @@ class ccsd(object):
             dsob = fvb
             dsvb = fob
 
-        rdba = [numpy.zeros((na,na)),numpy.zeros((nb,nb))]
-        rdji = [numpy.zeros((na,na)),numpy.zeros((nb,nb))]
+        rdba = [numpy.zeros((na,na), dtype=self.ronv[0].dtype),
+                numpy.zeros((nb,nb), dtype=self.ronv[1].dtype)]
+        rdji = [numpy.zeros((na,na), dtype=self.rono[0].dtype),
+                numpy.zeros((nb,nb), dtype=self.rono[1].dtype)]
         rdba[0] += numpy.diag(self.ronv[0])
         rdba[1] += numpy.diag(self.ronv[1])
         rdji[0] += numpy.diag(self.rono[0])

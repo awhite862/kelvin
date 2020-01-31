@@ -206,6 +206,7 @@ def full_suite():
     suite.addTest(test_scf.SCFTest("test_diamond_ft_deriv"))
     suite.addTest(test_scf.SCFTest("test_Be_sto3g_ft_mp_deriv"))
     suite.addTest(test_scf.SCFTest("test_diamond_ft_mp_deriv"))
+    suite.addTest(test_scf.SCFTest("test_diamond_ft_mp_deriv_k"))
 
     suite.addTest(test_ueg.UEGTest("test_2_07_4"))
     suite.addTest(test_ueg.UEGTest("test_2_07_8"))
@@ -387,6 +388,7 @@ def default_suite():
     suite.addTest(test_scf.SCFTest("test_diamond_ft_deriv"))
     suite.addTest(test_scf.SCFTest("test_Be_sto3g_ft_mp_deriv"))
     #suite.addTest(test_scf.SCFTest("test_diamond_ft_mp_deriv"))
+    suite.addTest(test_scf.SCFTest("test_diamond_ft_mp_deriv_k"))
 
     suite.addTest(test_ueg.UEGTest("test_2_07_4"))
     #suite.addTest(test_ueg.UEGTest("test_2_07_8"))

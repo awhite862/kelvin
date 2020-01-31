@@ -436,8 +436,8 @@ class TDCCSD(object):
                 t1shape = (n,n)
                 t2shape = (n,n,n,n)
 
-        t1 = numpy.zeros(t1shape)
-        t2 = numpy.zeros(t2shape)
+        t1 = numpy.zeros(t1shape, dtype=F.vo.dtype)
+        t2 = numpy.zeros(t2shape, dtype=I.vvoo.dtype)
         Eccn = 0.0
 
         def fRHS(var):
@@ -597,11 +597,11 @@ class TDCCSD(object):
                 noccb = nb
                 nvirb = nb
 
-        t1a = numpy.zeros((nvira,nocca))
-        t1b = numpy.zeros((nvirb,noccb))
-        t2aa = numpy.zeros((nvira,nvira,nocca,nocca))
-        t2ab = numpy.zeros((nvira,nvirb,nocca,noccb))
-        t2bb = numpy.zeros((nvirb,nvirb,noccb,noccb))
+        t1a = numpy.zeros((nvira,nocca), dtype=Fa.vo.dtype)
+        t1b = numpy.zeros((nvirb,noccb), dtype=Fa.vo.dtype)
+        t2aa = numpy.zeros((nvira,nvira,nocca,nocca), dtype=Ia.vvoo.dtype)
+        t2ab = numpy.zeros((nvira,nvirb,nocca,noccb), dtype=Iabab.vvoo.dtype)
+        t2bb = numpy.zeros((nvirb,nvirb,noccb,noccb), dtype=Ib.vvoo.dtype)
         Eccn = 0.0
 
         def fRHS(var):
@@ -758,9 +758,9 @@ class TDCCSD(object):
         t1b = self._read_T1(ng - 1)
         t2b = self._read_T2(ng - 1)
         nv, no = t1b.shape
-        l1 = numpy.zeros((no,nv))
-        l2 = numpy.zeros((no,no,nv,nv))
-        pia = numpy.zeros((no,nv))
+        l1 = numpy.zeros((no,nv), dtype=t1b.dtype)
+        l2 = numpy.zeros((no,no,nv,nv), dtype=t2b.dtype)
+        pia = numpy.zeros((no,nv), dtype=l1.dtype)
         pji = g[ng - 1]*cc_equations.ccsd_1rdm_ji_opt(t1b,t2b,l1,l2)
         pba = g[ng - 1]*cc_equations.ccsd_1rdm_ba_opt(t1b,t2b,l1,l2)
         pai = g[ng - 1]*cc_equations.ccsd_1rdm_ai_opt(t1b,t2b,l1,l2)
@@ -777,10 +777,10 @@ class TDCCSD(object):
             Pklij = g[ng - 1]*cc_equations.ccsd_2rdm_klij_opt(t1b, t2b, l1, l2)
 
         if erel:
-            self.rorbo = numpy.zeros(n)
-            self.rorbv = numpy.zeros(n)
-            x1 = numpy.zeros(l1.shape)
-            x2 = numpy.zeros(l2.shape)
+            self.rorbo = numpy.zeros(n, dtype=l1.dtype)
+            self.rorbv = numpy.zeros(n, dtype=l1.dtype)
+            x1 = numpy.zeros(l1.shape, dtype=l1.dtype)
+            x2 = numpy.zeros(l2.shape, dtype=l2.dtype)
             def fXRHS(ltot,var):
                 l1,l2 = ltot
                 x1,x2 = var
@@ -1023,13 +1023,13 @@ class TDCCSD(object):
 
         t1da,t1db = self._read_T1(ng - 1)
         t2daa,t2dab,t2dbb = self._read_T2(ng - 1)
-        l1a = numpy.zeros((noa,nva))
-        l1b = numpy.zeros((nob,nvb))
-        l2aa = numpy.zeros((noa,noa,nva,nva))
-        l2ab = numpy.zeros((noa,nob,nva,nvb))
-        l2bb = numpy.zeros((nob,nob,nvb,nvb))
-        pia = numpy.zeros((noa,nva))
-        pIA = numpy.zeros((nob,nvb))
+        l1a = numpy.zeros((noa,nva), dtype=t1da.dtype)
+        l1b = numpy.zeros((nob,nvb), dtype=t1db.dtype)
+        l2aa = numpy.zeros((noa,noa,nva,nva), dtype=t2daa.dtype)
+        l2ab = numpy.zeros((noa,nob,nva,nvb), dtype=t2dab.dtype)
+        l2bb = numpy.zeros((nob,nob,nvb,nvb), dtype=t2dbb.dtype)
+        pia = numpy.zeros((noa,nva), dtype=l1a.dtype)
+        pIA = numpy.zeros((nob,nvb), dtype=l1b.dtype)
         pji,pJI = cc_equations.uccsd_1rdm_ji(
                 t1da, t1db, t2daa, t2dab, t2dbb, l1a, l1b, l2aa, l2ab, l2bb)
         pba,pBA = cc_equations.uccsd_1rdm_ba(
@@ -1044,9 +1044,9 @@ class TDCCSD(object):
         pAI *= g[ng - 1]
 
         if rdm2:
-            Pijab = numpy.zeros((noa,noa,nva,nva))
-            PiJaB = numpy.zeros((noa,nob,nva,nvb))
-            PIJAB = numpy.zeros((nob,nob,nvb,nvb))
+            Pijab = numpy.zeros((noa,noa,nva,nva), dtype=l2aa.dtype)
+            PiJaB = numpy.zeros((noa,nob,nva,nvb), dtype=l2ab.dtype)
+            PIJAB = numpy.zeros((nob,nob,nvb,nvb), dtype=l2bb.dtype)
 
             Pcdab_tot = cc_equations.uccsd_2rdm_cdab(t1da, t1db, t2daa, t2dab, t2dbb,
                     l1a, l1b, l2aa, l2ab, l2bb)
@@ -1104,15 +1104,15 @@ class TDCCSD(object):
             PkLiJ = g[ng - 1]*Pklij_tot[2]
 
         if erel:
-            rorbo_a = numpy.zeros(na)
-            rorbo_b = numpy.zeros(nb)
-            rorbv_a = numpy.zeros(na)
-            rorbv_b = numpy.zeros(nb)
-            x1a = numpy.zeros(l1a.shape)
-            x1b = numpy.zeros(l1b.shape)
-            x2aa = numpy.zeros(l2aa.shape)
-            x2ab = numpy.zeros(l2ab.shape)
-            x2bb = numpy.zeros(l2bb.shape)
+            rorbo_a = numpy.zeros(na, dtype=l1a.dtype)
+            rorbo_b = numpy.zeros(nb, dtype=l1b.dtype)
+            rorbv_a = numpy.zeros(na, dtype=l1a.dtype)
+            rorbv_b = numpy.zeros(nb, dtype=l1b.dtype)
+            x1a = numpy.zeros(l1a.shape, dtype=l1a.dtype)
+            x1b = numpy.zeros(l1b.shape, dtype=l1b.dtype)
+            x2aa = numpy.zeros(l2aa.shape, dtype=l2aa.dtype)
+            x2ab = numpy.zeros(l2ab.shape, dtype=l2ab.dtype)
+            x2bb = numpy.zeros(l2bb.shape, dtype=l2bb.dtype)
             def fXRHS(ltot,var):
                 l1a,l1b,l2aa,l2ab,l2bb = ltot
                 x1a,x1b,x2aa,x2ab,x2bb = var
@@ -1411,8 +1411,8 @@ class TDCCSD(object):
             dso = fv
             dsv = fo
         n = fo.shape[0]
-        rono = numpy.zeros(n)
-        ronv = numpy.zeros(n)
+        rono = numpy.zeros(n, dtype=self.dji.dtype)
+        ronv = numpy.zeros(n, dtype=self.dba.dtype)
 
         # perturbed ON contribution to Fock matrix
         Fd = self.sys.g_fock_d_den()
@@ -1423,8 +1423,8 @@ class TDCCSD(object):
             rono += cc_utils.g_Fd_on(Fd, self.ndia, self.ndba, self.ndji, self.ndai)
 
         # Add contributions from occupation number relaxation
-        jitemp = numpy.zeros(nocc) if self.athresh > 0.0 else numpy.zeros(n)
-        batemp = numpy.zeros(nvir) if self.athresh > 0.0 else numpy.zeros(n)
+        jitemp = numpy.zeros(nocc, dtype=self.dji.dtype) if self.athresh > 0.0 else numpy.zeros(n, dtype=self.dji.dtype)
+        batemp = numpy.zeros(nvir, dtype=self.dba.dtype) if self.athresh > 0.0 else numpy.zeros(n, dtype=self.dba.dtype)
         cc_utils.g_d_on_oo(dso, F, I, self.dia, self.dji, self.dai, self.P2, jitemp)
         cc_utils.g_d_on_vv(dsv, F, I, self.dia, self.dba, self.dai, self.P2, batemp)
 
@@ -1491,10 +1491,12 @@ class TDCCSD(object):
 
         # perturbed ON contribution to Fock matrix
         Fdaa,Fdab,Fdbb,Fdba = self.sys.u_fock_d_den()
-        ronoa = numpy.zeros(na)
-        ronva = numpy.zeros(na)
-        ronob = numpy.zeros(nb)
-        ronvb = numpy.zeros(nb)
+        dta = Fdaa.dtype
+        dtb = Fdbb.dtype
+        ronoa = numpy.zeros(na, dtype=dta)
+        ronva = numpy.zeros(na, dtype=dta)
+        ronob = numpy.zeros(nb, dtype=dtb)
+        ronvb = numpy.zeros(nb, dtype=dtb)
         if self.athresh > 0.0:
             temp = cc_utils.u_Fd_on_active(
                     Fdaa, Fdab, Fdba, Fdbb, iocca, ivira, ioccb, ivirb,
@@ -1508,10 +1510,10 @@ class TDCCSD(object):
             ronob += temp[1]
 
         # Add contributions from occupation number relaxation
-        jitempa = numpy.zeros(nocca) if self.athresh > 0.0 else numpy.zeros(na)
-        batempa = numpy.zeros(nvira) if self.athresh > 0.0 else numpy.zeros(na)
-        jitempb = numpy.zeros(noccb) if self.athresh > 0.0 else numpy.zeros(nb)
-        batempb = numpy.zeros(nvirb) if self.athresh > 0.0 else numpy.zeros(nb)
+        jitempa = numpy.zeros(nocca, dtype=dta) if self.athresh > 0.0 else numpy.zeros(na, dtype=dta)
+        batempa = numpy.zeros(nvira, dtype=dta) if self.athresh > 0.0 else numpy.zeros(na, dtype=dta)
+        jitempb = numpy.zeros(noccb, dtype=dtb) if self.athresh > 0.0 else numpy.zeros(nb, dtype=dtb)
+        batempb = numpy.zeros(nvirb, dtype=dtb) if self.athresh > 0.0 else numpy.zeros(nb, dtype=dtb)
         cc_utils.u_d_on_oo(
                 dsoa, dsob, Fa, Fb, Ia, Ib, Iabab,
                 self.dia, self.dji, self.dai, self.P2, jitempa, jitempb)
