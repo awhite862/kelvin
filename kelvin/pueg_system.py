@@ -52,6 +52,9 @@ class pueg_system(system):
     def has_u(self):
         return False
 
+    def has_r(self):
+        return False
+
     def verify(self,T,mu):
         if T > 0.0:
             s = T == self.T and mu == self.mu

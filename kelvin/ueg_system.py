@@ -69,6 +69,9 @@ class ueg_system(system):
     def has_u(self):
         return (False if self.orbtype == 'g' else True)
 
+    def has_r(self):
+        return (True if self.orbtype == 'r' else False)
+
     def verify(self,T,mu):
         if T > 0.0:
             s = T == self.T and mu == self.mu

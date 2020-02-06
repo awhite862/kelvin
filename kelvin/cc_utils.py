@@ -734,6 +734,54 @@ def uft_integrals(sys, ea, eb, beta, mu):
 
         return Fa,Fb,Ia,Ib,Iabab
 
+def rft_integrals(sys, en, beta, mu):
+        """Return one and two-electron integrals in the general spin orbital basis."""
+        fo = ft_utils.ff(beta, en, mu)
+        fv = ft_utils.ffv(beta, en, mu)
+        sfo = numpy.sqrt(fo)
+        sfv = numpy.sqrt(fv)
+
+        # get FT fock matrix
+        fmo = sys.r_fock_tot()
+        fmo = fmo - numpy.diag(en)
+
+        # get ERIs
+        eri = sys.r_int_tot()
+
+        # pre-contract with fermi factors
+        Foo = einsum('ij,i,j->ij',fmo,sfo,sfo)
+        Fov = einsum('ia,i,a->ia',fmo,sfo,sfv)
+        Fvo = einsum('ai,a,i->ai',fmo,sfv,sfo)
+        Fvv = einsum('ab,a,b->ab',fmo,sfv,sfv)
+        F = one_e_blocks(Foo,Fov,Fvo,Fvv)
+
+        Ivvvv = einsum('abcd,a,b,c,d->abcd',eri,sfv,sfv,sfv,sfv)
+        Ivvvo = einsum('abci,a,b,c,i->abci',eri,sfv,sfv,sfv,sfo)
+        Ivvov = einsum('abic,a,b,i,c->abic',eri,sfv,sfv,sfo,sfv)
+        Ivovv = einsum('aibc,a,i,b,c->aibc',eri,sfv,sfo,sfv,sfv)
+        Iovvv = einsum('iabc,i,a,b,c->iabc',eri,sfo,sfv,sfv,sfv)
+        Ivvoo = einsum('abij,a,b,i,j->abij',eri,sfv,sfv,sfo,sfo)
+        Ivovo = einsum('ajbi,a,j,b,i->ajbi',eri,sfv,sfo,sfv,sfo)
+        Iovvo = einsum('jabi,j,a,b,i->jabi',eri,sfo,sfv,sfv,sfo)
+        Ivoov = einsum('ajib,a,j,i,b->ajib',eri,sfv,sfo,sfo,sfv)
+        Iovov = einsum('jaib,j,a,i,b->jaib',eri,sfo,sfv,sfo,sfv)
+        Ioovv = einsum('ijab,i,j,a,b->ijab',eri,sfo,sfo,sfv,sfv)
+        Ivooo = einsum('akij,a,k,i,j->akij',eri,sfv,sfo,sfo,sfo)
+        Iovoo = einsum('kaij,k,a,i,j->kaij',eri,sfo,sfv,sfo,sfo)
+        Ioovo = einsum('jkai,j,k,a,i->jkai',eri,sfo,sfo,sfv,sfo)
+        Iooov = einsum('jkia,j,k,i,a->jkia',eri,sfo,sfo,sfo,sfv)
+        Ioooo = einsum('klij,k,l,i,j->klij',eri,sfo,sfo,sfo,sfo)
+        I = two_e_blocks_full(vvvv=Ivvvv,
+                vvvo=Ivvvo,vvov=Ivvov,
+                vovv=Ivovv,ovvv=Iovvv,
+                vvoo=Ivvoo,vovo=Ivovo,
+                ovvo=Iovvo,voov=Ivoov,
+                ovov=Iovov,oovv=Ioovv,
+                vooo=Ivooo,ovoo=Iovoo,
+                oovo=Ioovo,ooov=Iooov,
+                oooo=Ioooo)
+        return F,I
+
 def ft_active_integrals(sys, en, focc, fvir, iocc, ivir):
         """Return one and two-electron integrals in the general spin orbital basis
         with small occupations excluded."""
@@ -848,6 +896,53 @@ def uft_active_integrals(sys, ea, eb, foa, fva, fob, fvb, iocca, ivira, ioccb, i
                 oooo=Ioooo)
 
         return Fa,Fb,Ia,Ib,Iabab
+
+def rft_active_integrals(sys, en, focc, fvir, iocc, ivir):
+        """Return one and two-electron integrals in the general spin orbital basis."""
+        # get FT fock matrix
+        fmo = sys.r_fock_tot()
+        fmo = fmo - numpy.diag(en)
+
+        # get ERIs
+        eri = sys.r_int_tot()
+
+        # square root of occupation numbers
+        sfo = numpy.sqrt(focc)
+        sfv = numpy.sqrt(fvir)
+
+        # pre-contract with fermi factors
+        Foo = einsum('ij,i,j->ij',fmo[numpy.ix_(iocc,iocc)],sfo,sfo)
+        Fov = einsum('ia,i,a->ia',fmo[numpy.ix_(iocc,ivir)],sfo,sfv)
+        Fvo = einsum('ai,a,i->ai',fmo[numpy.ix_(ivir,iocc)],sfv,sfo)
+        Fvv = einsum('ab,a,b->ab',fmo[numpy.ix_(ivir,ivir)],sfv,sfv)
+        F = one_e_blocks(Foo,Fov,Fvo,Fvv)
+
+        Ivvvv = einsum('abcd,a,b,c,d->abcd',eri[numpy.ix_(ivir,ivir,ivir,ivir)],sfv,sfv,sfv,sfv)
+        Ivvvo = einsum('abci,a,b,c,i->abci',eri[numpy.ix_(ivir,ivir,ivir,iocc)],sfv,sfv,sfv,sfo)
+        Ivvov = einsum('abic,a,b,i,c->abic',eri[numpy.ix_(ivir,ivir,iocc,ivir)],sfv,sfv,sfo,sfv)
+        Ivovv = einsum('aibc,a,i,b,c->aibc',eri[numpy.ix_(ivir,iocc,ivir,ivir)],sfv,sfo,sfv,sfv)
+        Iovvv = einsum('iabc,i,a,b,c->iabc',eri[numpy.ix_(iocc,ivir,ivir,ivir)],sfo,sfv,sfv,sfv)
+        Ivvoo = einsum('abij,a,b,i,j->abij',eri[numpy.ix_(ivir,ivir,iocc,iocc)],sfv,sfv,sfo,sfo)
+        Ivovo = einsum('ajbi,a,j,b,i->ajbi',eri[numpy.ix_(ivir,iocc,ivir,iocc)],sfv,sfo,sfv,sfo)
+        Iovvo = einsum('jabi,j,a,b,i->jabi',eri[numpy.ix_(iocc,ivir,ivir,iocc)],sfo,sfv,sfv,sfo)
+        Ivoov = einsum('ajib,a,j,i,b->ajib',eri[numpy.ix_(ivir,iocc,iocc,ivir)],sfv,sfo,sfo,sfv)
+        Iovov = einsum('jaib,j,a,i,b->jaib',eri[numpy.ix_(iocc,ivir,iocc,ivir)],sfo,sfv,sfo,sfv)
+        Ioovv = einsum('ijab,i,j,a,b->ijab',eri[numpy.ix_(iocc,iocc,ivir,ivir)],sfo,sfo,sfv,sfv)
+        Ivooo = einsum('akij,a,k,i,j->akij',eri[numpy.ix_(ivir,iocc,iocc,iocc)],sfv,sfo,sfo,sfo)
+        Iovoo = einsum('kaij,k,a,i,j->kaij',eri[numpy.ix_(iocc,ivir,iocc,iocc)],sfo,sfv,sfo,sfo)
+        Ioovo = einsum('jkai,j,k,a,i->jkai',eri[numpy.ix_(iocc,iocc,ivir,iocc)],sfo,sfo,sfv,sfo)
+        Iooov = einsum('jkia,j,k,i,a->jkia',eri[numpy.ix_(iocc,iocc,iocc,ivir)],sfo,sfo,sfo,sfv)
+        Ioooo = einsum('klij,k,l,i,j->klij',eri[numpy.ix_(iocc,iocc,iocc,iocc)],sfo,sfo,sfo,sfo)
+        I = two_e_blocks_full(vvvv=Ivvvv,
+                vvvo=Ivvvo,vvov=Ivvov,
+                vovv=Ivovv,ovvv=Iovvv,
+                vvoo=Ivvoo,vovo=Ivovo,
+                ovvo=Iovvo,voov=Ivoov,
+                ovov=Iovov,oovv=Ioovv,
+                vooo=Ivooo,ovoo=Iovoo,
+                oovo=Ioovo,ooov=Iooov,
+                oooo=Ioooo)
+        return F,I
 
 def _form_ft_d_eris(eri, sfo, sfv, dso, dsv):
         Ivvvv = einsum('abcd,a,b,c,d->abcd',eri,dsv,sfv,sfv,sfv)\

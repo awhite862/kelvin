@@ -184,5 +184,51 @@ class TDCCSDTest(unittest.TestCase):
         error = "Expected: {}  Actual: {}".format(Eccref,Eccout)
         self.assertTrue(diff < 1e-5,error)
 
+    def test_Be_r_vs_u(self):
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+
+        m = scf.RHF(mol)
+        m.conv_tol = 1e-12
+        Escf = m.scf()
+        T = 0.5
+        mu = 0.0
+        sys = scf_system(m,T,mu,orbtype='u')
+        prop = {"tprop" : "rk4"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80)
+        Eref,Eccref = tdccsdT.run()
+        sys = scf_system(m,T,mu,orbtype='r')
+        prop = {"tprop" : "rk4"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80)
+        Eout,Eccout = tdccsdT.run()
+        diff = abs(Eccref - Eccout)
+        error = "Expected: {}  Actual: {}".format(Eccref,Eccout)
+        self.assertTrue(diff < 1e-14,error)
+
+    def test_Be_r_vs_u_active(self):
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+
+        m = scf.RHF(mol)
+        m.conv_tol = 1e-12
+        Escf = m.scf()
+        T = 0.05
+        mu = 0.0
+        sys = scf_system(m,T,mu,orbtype='u')
+        prop = {"tprop" : "rk4"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=120, athresh=1e-20)
+        Eref,Eccref = tdccsdT.run()
+        sys = scf_system(m,T,mu,orbtype='r')
+        prop = {"tprop" : "rk4"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=120, athresh=1e-20)
+        Eout,Eccout = tdccsdT.run()
+        diff = abs(Eccref - Eccout)
+        error = "Expected: {}  Actual: {}".format(Eccref,Eccout)
+        self.assertTrue(diff < 1e-5,error)
+
 if __name__ == '__main__':
     unittest.main()

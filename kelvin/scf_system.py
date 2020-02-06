@@ -45,6 +45,9 @@ class scf_system(system):
     def has_u(self):
         return (False if self.orbtype == 'g' else True)
 
+    def has_r(self):
+        return (True if self.orbtype == 'r' else False)
+
     def const_energy(self):
         return self.mf.mol.energy_nuc()
 
@@ -163,7 +166,7 @@ class scf_system(system):
 
     def g_energies_tot(self):
         return scf_utils.get_orbital_energies_gen(self.mf)
-    
+
     def r_fock(self):
         if self.T > 0.0:
             raise Exception("Undefined ov blocks at FT")
@@ -298,9 +301,14 @@ class scf_system(system):
     def g_aint_tot(self):
         return integrals.get_phys_antiu_all_gen(self.mf)
 
+    def r_int_tot(self):
+        mo_coeff = self.mf.mo_coeff
+        mo = mo_coeff
+        I = integrals.get_phys_gen(self.mf,mo,mo,mo,mo,anti=False)
+        return I
+
     def u_aint_tot(self):
         mo_coeff = self.mf.mo_coeff
-        mo_occ = self.mf.mo_occ
         if self.is_rhf:
             moa = self.mf.mo_coeff
             mob = moa
@@ -310,7 +318,6 @@ class scf_system(system):
         else:
             raise Exception("Incompatible MF type")
 
-        #mol = self.mf.mol
         mf = self.mf
         Ia = integrals.get_phys_gen(mf,moa,moa,moa,moa,anti=True)
         Ib = integrals.get_phys_gen(mf,mob,mob,mob,mob,anti=True)

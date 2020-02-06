@@ -169,6 +169,8 @@ def full_suite():
     suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_active"))
     suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_u_vs_g"))
     suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_u_vs_g_active"))
+    suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_r_vs_u"))
+    suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_r_vs_u_active"))
 
     suite.addTest(test_td_ccsd_ESN.TDCCSDESNTest("test_Be_gen"))
     suite.addTest(test_td_ccsd_ESN.TDCCSDESNTest("test_UEG_gen"))
@@ -353,6 +355,8 @@ def default_suite():
     #suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_active"))
     #suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_u_vs_g"))
     #suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_u_vs_g_active"))
+    #suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_r_vs_u"))
+    suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_r_vs_u_active"))
 
     suite.addTest(test_td_ccsd_ESN.TDCCSDESNTest("test_Be_gen"))
     #suite.addTest(test_td_ccsd_ESN.TDCCSDESNTest("test_UEG_gen"))
