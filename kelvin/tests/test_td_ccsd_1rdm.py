@@ -266,5 +266,49 @@ class TDCCSD1RDMTest(unittest.TestCase):
         self.assertTrue(eai < 1e-12,errorai)
         self.assertTrue(eai < 1e-12,errorAI)
 
+    def test_Be_r_vs_u(self):
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+
+        m = scf.RHF(mol)
+        m.conv_tol = 1e-12
+        Escf = m.scf()
+        T = 0.5
+        mu = 0.0
+
+        # compute normal-order 1-rdm from propagation
+        sys = scf_system(m,T,mu,orbtype='u')
+        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
+        Etmp,Ecctmp = tdccsdT.run()
+        Eref,Eccref = tdccsdT._uccsd_lambda()
+        dia = tdccsdT.dia
+        dji = tdccsdT.dji
+        dba = tdccsdT.dba
+        dai = tdccsdT.dai
+        # compute normal-order 1-rdm from propagation
+        sys = scf_system(m,T,mu,orbtype='r')
+        ea,eb = sys.u_energies_tot()
+        na = ea.shape[0]
+        nb = eb.shape[0]
+        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
+        Etmp,Ecctmp = tdccsdT.run()
+        Eout,Eccout = tdccsdT._rccsd_lambda()
+        eia = numpy.linalg.norm(dia[0] - tdccsdT.dia)
+        eji = numpy.linalg.norm(dji[0] - tdccsdT.dji)
+        eba = numpy.linalg.norm(dba[0] - tdccsdT.dba)
+        eai = numpy.linalg.norm(dai[0] - tdccsdT.dai)
+        erroria = "Difference in pia: {}".format(eia)
+        errorji = "Difference in pji: {}".format(eji)
+        errorba = "Difference in pba: {}".format(eba)
+        errorai = "Difference in pai: {}".format(eai)
+        self.assertTrue(eia < 1e-12,erroria)
+        self.assertTrue(eji < 1e-12,errorji)
+        self.assertTrue(eba < 1e-12,errorba)
+        self.assertTrue(eai < 1e-12,errorai)
+
 if __name__ == '__main__':
     unittest.main()
