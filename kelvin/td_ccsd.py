@@ -1551,15 +1551,16 @@ class TDCCSD(object):
         pai = g[ng - 1]*cc_equations.rccsd_1rdm_ai(t1b,t2b,l1,l2)
 
         if rdm2:
-            Pcdab = g[ng - 1]*cc_equations.rccsd_2rdm_cdab_opt(t1b, t2b, l1, l2)
-            Pciab = g[ng - 1]*cc_equations.rccsd_2rdm_ciab_opt(t1b, t2b, l1, l2)
-            Pbcai = g[ng - 1]*cc_equations.rccsd_2rdm_bcai_opt(t1b, t2b, l1, l2)
+            Pcdab = g[ng - 1]*cc_equations.rccsd_2rdm_cdab(t1b, t2b, l1, l2)
+            Pciab = g[ng - 1]*cc_equations.rccsd_2rdm_ciab(t1b, t2b, l1, l2)
+            Pbcai = g[ng - 1]*cc_equations.rccsd_2rdm_bcai(t1b, t2b, l1, l2)
             Pijab = g[ng - 1]*l2
-            Pbjai = g[ng - 1]*cc_equations.rccsd_2rdm_bjai_opt(t1b, t2b, l1, l2)
-            Pabij = g[ng - 1]*cc_equations.rccsd_2rdm_abij_opt(t1b, t2b, l1, l2)
-            Pjkai = g[ng - 1]*cc_equations.rccsd_2rdm_jkai_opt(t1b, t2b, l1, l2)
-            Pkaij = g[ng - 1]*cc_equations.rccsd_2rdm_kaij_opt(t1b, t2b, l1, l2)
-            Pklij = g[ng - 1]*cc_equations.rccsd_2rdm_klij_opt(t1b, t2b, l1, l2)
+            Pbjai = g[ng - 1]*cc_equations.rccsd_2rdm_bjai(t1b, t2b, l1, l2)
+            Pbjia = g[ng - 1]*cc_equations.rccsd_2rdm_bjia(t1b, t2b, l1, l2)
+            Pabij = g[ng - 1]*cc_equations.rccsd_2rdm_abij(t1b, t2b, l1, l2)
+            Pjkai = g[ng - 1]*cc_equations.rccsd_2rdm_jkai(t1b, t2b, l1, l2)
+            Pkaij = g[ng - 1]*cc_equations.rccsd_2rdm_kaij(t1b, t2b, l1, l2)
+            Pklij = g[ng - 1]*cc_equations.rccsd_2rdm_klij(t1b, t2b, l1, l2)
 
         if erel:
             assert(False)
@@ -1602,16 +1603,16 @@ class TDCCSD(object):
             pba += g[ng - i - 1]*cc_equations.rccsd_1rdm_ba(t1e,t2e,l1,l2)
             pai += g[ng - i - 1]*cc_equations.rccsd_1rdm_ai(t1e,t2e,l1,l2)
             if rdm2:
-                assert(False)
-                Pcdab += g[ng - 1 - i]*cc_equations.ccsd_2rdm_cdab_opt(t1e, t2e, l1, l2)
-                Pciab += g[ng - 1 - i]*cc_equations.ccsd_2rdm_ciab_opt(t1e, t2e, l1, l2)
-                Pbcai += g[ng - 1 - i]*cc_equations.ccsd_2rdm_bcai_opt(t1e, t2e, l1, l2)
-                Pijab += g[ng - 1 - i]*l2
-                Pbjai += g[ng - 1 - i]*cc_equations.ccsd_2rdm_bjai_opt(t1e, t2e, l1, l2)
-                Pabij += g[ng - 1 - i]*cc_equations.ccsd_2rdm_abij_opt(t1e, t2e, l1, l2)
-                Pjkai += g[ng - 1 - i]*cc_equations.ccsd_2rdm_jkai_opt(t1e, t2e, l1, l2)
-                Pkaij += g[ng - 1 - i]*cc_equations.ccsd_2rdm_kaij_opt(t1e, t2e, l1, l2)
-                Pklij += g[ng - 1 - i]*cc_equations.ccsd_2rdm_klij_opt(t1e, t2e, l1, l2)
+                Pcdab += g[ng - i - 1]*cc_equations.rccsd_2rdm_cdab(t1e, t2e, l1, l2)
+                Pciab += g[ng - i - 1]*cc_equations.rccsd_2rdm_ciab(t1e, t2e, l1, l2)
+                Pbcai += g[ng - i - 1]*cc_equations.rccsd_2rdm_bcai(t1e, t2e, l1, l2)
+                Pijab += g[ng - i - 1]*l2
+                Pbjai += g[ng - i - 1]*cc_equations.rccsd_2rdm_bjai(t1e, t2e, l1, l2)
+                Pbjia += g[ng - i - 1]*cc_equations.rccsd_2rdm_bjia(t1e, t2e, l1, l2)
+                Pabij += g[ng - i - 1]*cc_equations.rccsd_2rdm_abij(t1e, t2e, l1, l2)
+                Pjkai += g[ng - i - 1]*cc_equations.rccsd_2rdm_jkai(t1e, t2e, l1, l2)
+                Pkaij += g[ng - i - 1]*cc_equations.rccsd_2rdm_kaij(t1e, t2e, l1, l2)
+                Pklij += g[ng - i - 1]*cc_equations.rccsd_2rdm_klij(t1e, t2e, l1, l2)
             if erel:
                 assert(False)
                 At1i = -(1.0/beta)*einsum('ia,ai->i',x1, d1test)
@@ -1643,8 +1644,7 @@ class TDCCSD(object):
         self.ndji = numpy.einsum('ji,j,i->ji',self.dji,sfo,sfo)
         self.ndai = numpy.einsum('ai,a,i->ai',self.dai,sfv,sfo)
         if rdm2:
-            assert(False)
-            self.P2 = (Pcdab, Pciab, Pbcai, Pijab, Pbjai, Pabij, Pjkai, Pkaij, Pklij)
+            self.P2 = (Pcdab, Pciab, Pbcai, Pijab, Pbjai, Pbjia, Pabij, Pjkai, Pkaij, Pklij)
 
         return (Eccn+E01,Eccn)
 
