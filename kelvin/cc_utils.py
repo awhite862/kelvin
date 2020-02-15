@@ -1848,6 +1848,130 @@ def u_d_on_vv(dsva, dsvb, Fa, Fb, Ia, Ib, Iabab, dia, dba, dai, P2, batempa, bat
     batempa += 0.5*1.0*einsum('aBiJ,iJaB->a', P2[5][2], Iabab.oovv)*dsva
     batempb += 0.5*1.0*einsum('aBiJ,iJaB->B', P2[5][2], Iabab.oovv)*dsvb
 
+def r_Fd_on(Fdss, Fdos, ndia, ndba, ndji, ndai):
+    temp = -einsum('ia,aik->k',ndia,Fdss)
+    temp -= einsum('ba,abk->k',ndba,Fdss)
+    temp -= einsum('ji,ijk->k',ndji,Fdss)
+    temp -= einsum('ai,iak->k',ndai,Fdss)
+    temp -= einsum('ia,aik->k',ndia,Fdos)
+    temp -= einsum('ba,abk->k',ndba,Fdos)
+    temp -= einsum('ji,ijk->k',ndji,Fdos)
+    temp -= einsum('ai,iak->k',ndai,Fdos)
+
+    return temp
+
+def r_Fd_on_active(Fdss, Fdos, iocc, ivir,ndia, ndba, ndji, ndai):
+    Fdaik = Fdss[numpy.ix_(ivir,iocc)]
+    Fdabk = Fdss[numpy.ix_(ivir,ivir)]
+    Fdijk = Fdss[numpy.ix_(iocc,iocc)]
+    Fdiak = Fdss[numpy.ix_(iocc,ivir)]
+    FdaiK = Fdss[numpy.ix_(ivir,iocc)]
+    FdabK = Fdss[numpy.ix_(ivir,ivir)]
+    FdijK = Fdss[numpy.ix_(iocc,iocc)]
+    FdiaK = Fdss[numpy.ix_(iocc,ivir)]
+    FdAIK = Fdss[numpy.ix_(ivir,iocc)]
+    FdABK = Fdss[numpy.ix_(ivir,ivir)]
+    FdIJK = Fdss[numpy.ix_(iocc,iocc)]
+    FdIAK = Fdss[numpy.ix_(iocc,ivir)]
+    FdAIk = Fdos[numpy.ix_(ivir,iocc)]
+    FdABk = Fdos[numpy.ix_(ivir,ivir)]
+    FdIJk = Fdos[numpy.ix_(iocc,iocc)]
+    FdIAk = Fdos[numpy.ix_(iocc,ivir)]
+    temp = -einsum('ia,aik->k',ndia,Fdaik)
+    temp -= einsum('ba,abk->k',ndba,Fdabk)
+    temp -= einsum('ji,ijk->k',ndji,Fdijk)
+    temp -= einsum('ai,iak->k',ndai,Fdiak)
+    temp -= einsum('ia,aik->k',ndia,FdAIk)
+    temp -= einsum('ba,abk->k',ndba,FdABk)
+    temp -= einsum('ji,ijk->k',ndji,FdIJk)
+    temp -= einsum('ai,iak->k',ndai,FdIAk)
+
+    return temp
+
+def r_d_on_oo(dso, F, I, dia, dji, dai, P2, jitemp):
+    jitemp -= 0.5*einsum('ia,ai->i', dia, F.vo)*dso
+    jitemp -= 0.5*einsum('ji,ij->i', dji, F.oo)*dso
+    jitemp -= 0.5*einsum('ji,ij->j', dji, F.oo)*dso
+    jitemp -= 0.5*einsum('ai,ia->i', dai, F.ov)*dso
+
+    jitemp -= 0.5*0.5*einsum('ijab,abij->i', P2[3] - P2[3].transpose((0,1,3,2)), I.vvoo - I.vvoo.transpose((0,1,3,2)))*dso
+    jitemp -= 0.5*1.0*einsum('iJaB,aBiJ->i', P2[3], I.vvoo)*dso
+
+    jitemp -= 0.5*0.5*einsum('ciab,abci->i', P2[1] - P2[1].transpose((0,1,3,2)), I.vvvo - I.vvov.transpose((0,1,3,2)))*dso
+    jitemp -= 0.5*1.0*einsum('ciab,baic->i', P2[1], I.vvov)*dso
+
+    jitemp -= 0.5*0.5*einsum('jkai,aijk->i', P2[7] - P2[7].transpose((1,0,2,3)), I.vooo - I.vooo.transpose((0,1,3,2)))*dso
+    jitemp -= 0.5*1.0*einsum('JkAi,iAkJ->i', P2[7], I.ovoo)*dso
+    jitemp -= 0.5*1.0*einsum('jkai,aijk->j', P2[7] - P2[7].transpose((1,0,2,3)), I.vooo - I.vooo.transpose((0,1,3,2)))*dso
+    jitemp -= 0.5*1.0*einsum('jKaI,aIjK->j', P2[7], I.vooo)*dso
+    jitemp -= 0.5*1.0*einsum('JkAi,iAkJ->k', P2[7], I.ovoo)*dso
+
+    jitemp -= 0.5*1.0*einsum('bjai,aibj->i', P2[4] - P2[5].transpose((0,1,3,2)), I.vovo - I.voov.transpose((0,1,3,2)))*dso
+    jitemp -= 0.5*1.0*einsum('bjai,aibj->j', P2[4] - P2[5].transpose((0,1,3,2)), I.vovo - I.voov.transpose((0,1,3,2)))*dso
+    jitemp -= 0.5*1.0*einsum('bJAi,iAbJ->i', P2[5].transpose((0,1,3,2)), I.ovvo)*dso
+    jitemp -= 0.5*1.0*einsum('BjaI,aIjB->j', P2[5].transpose((0,1,3,2)), I.voov)*dso
+    jitemp -= 0.5*1.0*einsum('BjAi,iAjB->i', P2[4], I.ovov)*dso
+    jitemp -= 0.5*1.0*einsum('BjAi,iAjB->j', P2[4], I.ovov)*dso
+
+    jitemp -= 0.5*0.5*einsum('klij,ijkl->i', P2[9] - P2[9].transpose((0,1,3,2)), I.oooo - I.oooo.transpose((0,1,3,2)))*dso
+    jitemp -= 0.5*0.5*einsum('klij,ijkl->k', P2[9] - P2[9].transpose((0,1,3,2)), I.oooo - I.oooo.transpose((0,1,3,2)))*dso
+    jitemp -= 0.5*1.0*einsum('kLiJ,iJkL->i', P2[9], I.oooo)*dso
+    jitemp -= 0.5*1.0*einsum('kLiJ,iJkL->k', P2[9], I.oooo)*dso
+
+    jitemp -= 0.5*0.5*einsum('bcai,aibc->i', P2[2] - P2[2].transpose((1,0,2,3)), I.vovv - I.vovv.transpose((0,1,3,2)))*dso
+    jitemp -= 0.5*1.0*einsum('BcAi,iAcB->i', P2[2], I.ovvv)*dso
+
+    jitemp -= 0.5*1.0*einsum('kaij,ijka->i', P2[8] - P2[8].transpose((0,1,3,2)), I.ooov - I.oovo.transpose((0,1,3,2)))*dso
+    jitemp -= 0.5*0.5*einsum('kaij,ijka->k', P2[8] - P2[8].transpose((0,1,3,2)), I.ooov - I.oovo.transpose((0,1,3,2)))*dso
+    jitemp -= 0.5*1.0*einsum('kAiJ,iJkA->i', P2[8], I.ooov)*dso
+    jitemp -= 0.5*1.0*einsum('kAiJ,iJkA->k', P2[8], I.ooov)*dso
+    jitemp -= 0.5*1.0*einsum('KaIj,jIaK->j', P2[8], I.oovo)*dso
+
+    jitemp -= 0.5*0.5*einsum('abij,ijab->i', P2[6] - P2[6].transpose((1,0,2,3)), I.oovv - I.oovv.transpose((0,1,3,2)))*dso
+    jitemp -= 0.5*1.0*einsum('aBiJ,iJaB->i', P2[6], I.oovv)*dso
+
+def r_d_on_vv(dsv, F, I, dia, dba, dai, P2, batemp):
+    batemp += 0.5*einsum('ia,ai->a', dia, F.vo)*dsv
+    batemp += 0.5*einsum('ba,ab->a', dba, F.vv)*dsv
+    batemp += 0.5*einsum('ba,ab->b', dba, F.vv)*dsv
+    batemp += 0.5*einsum('ai,ia->a', dai, F.ov)*dsv
+
+    batemp += 0.5*0.5*einsum('ijab,abij->a', P2[3] - P2[3].transpose((0,1,3,2)), I.vvoo - I.vvoo.transpose((0,1,3,2)))*dsv
+    batemp += 0.5*1.0*einsum('iJaB,aBiJ->a', P2[3], I.vvoo)*dsv
+
+    batemp += 0.5*1.0*einsum('ciab,abci->a', P2[1] - P2[1].transpose((0,1,3,2)), I.vvvo - I.vvov.transpose((0,1,3,2)))*dsv
+    batemp += 0.5*0.5*einsum('ciab,abci->c', P2[1] - P2[1].transpose((0,1,3,2)), I.vvvo - I.vvov.transpose((0,1,3,2)))*dsv
+    batemp += 0.5*1.0*einsum('cIaB,aBcI->a', P2[1], I.vvvo)*dsv
+    batemp += 0.5*1.0*einsum('cIaB,aBcI->c', P2[1], I.vvvo)*dsv
+    batemp += 0.5*1.0*einsum('CiAb,bAiC->b', P2[1], I.vvov)*dsv
+
+    batemp += 0.5*0.5*einsum('jkai,aijk->a', P2[7] - P2[7].transpose((1,0,2,3)), I.vooo - I.vooo.transpose((0,1,3,2)))*dsv
+    batemp += 0.5*1.0*einsum('jKaI,aIjK->a', P2[7], I.vooo)*dsv
+
+    batemp += 0.5*0.5*einsum('cdab,abcd->a', P2[0] - P2[0].transpose((0,1,3,2)), I.vvvv - I.vvvv.transpose((0,1,3,2)))*dsv
+    batemp += 0.5*0.5*einsum('cdab,abcd->c', P2[0] - P2[0].transpose((0,1,3,2)), I.vvvv - I.vvvv.transpose((0,1,3,2)))*dsv
+    batemp += 0.5*1.0*einsum('cDaB,aBcD->a', P2[0], I.vvvv)*dsv
+    batemp += 0.5*1.0*einsum('cDaB,aBcD->c', P2[0], I.vvvv)*dsv
+
+    batemp += 0.5*1.0*einsum('bjai,aibj->a', P2[4] - P2[5].transpose((0,1,3,2)), I.vovo - I.voov.transpose((0,1,3,2)))*dsv
+    batemp += 0.5*1.0*einsum('bjai,aibj->b', P2[4] - P2[5].transpose((0,1,3,2)), I.vovo - I.voov.transpose((0,1,3,2)))*dsv
+    batemp += 0.5*1.0*einsum('bJaI,aIbJ->a', P2[4], I.vovo)*dsv
+    batemp += 0.5*1.0*einsum('bJaI,aIbJ->b', P2[4], I.vovo)*dsv
+    batemp += 0.5*1.0*einsum('bJAi,iAbJ->b', P2[5].transpose((0,1,3,2)), I.ovvo)*dsv
+    batemp += 0.5*1.0*einsum('BjaI,aIjB->a', P2[5].transpose((0,1,3,2)), I.voov)*dsv
+
+    batemp += 0.5*0.5*einsum('bcai,aibc->a', P2[2] - P2[2].transpose((1,0,2,3)), I.vovv - I.vovv.transpose((0,1,3,2)))*dsv
+    batemp += 0.5*1.0*einsum('bcai,aibc->b', P2[2] - P2[2].transpose((1,0,2,3)), I.vovv - I.vovv.transpose((0,1,3,2)))*dsv
+    batemp += 0.5*1.0*einsum('bCaI,aIbC->a', P2[2], I.vovv)*dsv
+    batemp += 0.5*1.0*einsum('bCaI,aIbC->b', P2[2], I.vovv)*dsv
+    batemp += 0.5*1.0*einsum('BcAi,iAcB->c', P2[2], I.ovvv)*dsv
+
+    batemp += 0.5*0.5*einsum('kaij,ijka->a', P2[8] - P2[8].transpose((0,1,3,2)), I.ooov - I.oovo.transpose((0,1,3,2)))*dsv
+    batemp += 0.5*1.0*einsum('KaIj,jIaK->a', P2[8], I.oovo)*dsv
+
+    batemp += 0.5*0.5*einsum('abij,ijab->a', P2[6] - P2[6].transpose((0,1,3,2)), I.oovv - I.oovv.transpose((0,1,3,2)))*dsv
+    batemp += 0.5*1.0*einsum('aBiJ,iJaB->a', P2[6], I.oovv)*dsv
+
 def g_full_rdm2(fo, n1rdm, rdm2):
     rdm2 += einsum('pr,qs->pqrs',numpy.diag(fo),numpy.diag(fo))
     rdm2 -= einsum('pr,qs->pqsr',numpy.diag(fo),numpy.diag(fo))

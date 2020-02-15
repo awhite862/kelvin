@@ -118,6 +118,21 @@ class ueg_system(system):
                 V = self.g_aint()
                 return 0.5*einsum('ijij->',V.oooo)
 
+    def r_mp1_den(self):
+        if self.T > 0:
+            V = self.r_int_tot()
+            beta = 1.0 / self.T
+            en = self.r_energies_tot()
+            fo = ft_utils.ff(beta, en, self.mu)
+            fv = ft_utils.ffv(beta, en, self.mu)
+            vec = fo*fv
+            Den = -beta*einsum('ijij,i,j->i',V - V.transpose((0,1,3,2)),vec,fo)
+            Den -= beta*einsum('ijij,i,j->i',V,vec,fo)
+            return Den
+        else:
+            print("WARNING: Derivative of MP1 energy is zero at OK")
+            return numpy.zeros(en.shape)
+
     def u_d_mp1(self,dveca,dvecb):
         if self.T > 0:
             Va,Vb,Vabab = self.u_aint_tot()
@@ -390,6 +405,21 @@ class ueg_system(system):
         V = self.g_aint_tot()
         JK = einsum('prqs,rs->pq',V,den)
         return T + JK
+
+    def r_fock_d_den(self):
+        d = self.r_energies_tot()
+        n = d.shape[0]
+        if self.T == 0.0:
+            print("WARNING: Occupations derivatives are zero at 0K")
+            return numpy.zeros((n,n))
+        beta = 1.0 / self.T
+        fo = ft_utils.ff(beta, d, self.mu)
+        fv = ft_utils.ffv(beta, d, self.mu)
+        vec = fo*fv
+        V = self.r_int_tot()
+        JKss = einsum('piqi,i->pqi',V - V.transpose((0,1,3,2)),vec)
+        JKos = einsum('piqi,i->pqi',V,vec)
+        return JKss,JKos
 
     def u_fock_d_tot(self,dveca,dvecb):
         da,db = self.u_energies_tot()

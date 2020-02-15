@@ -133,5 +133,103 @@ class TDCCSDReldenTest(unittest.TestCase):
         diff = numpy.linalg.norm(rorbv - urorbv)/numpy.sqrt(float(rorbv.size))
         self.assertTrue(diff < 1e-5,"Error in rorbv: {}".format(diff))
 
+    def test_Be_r_vs_u(self):
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+
+        m = scf.RHF(mol)
+        m.conv_tol = 1e-12
+        Escf = m.scf()
+        T = 1.0
+        mu = 0.0
+        sys = scf_system(m,T,mu,orbtype='r')
+
+        # compute normal-order 1-rdm from propagation
+        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80)
+        Eout,Eccout = tdccsdT.run()
+        Etmp,Ecctmp = tdccsdT._rccsd_lambda(rdm2=True, erel=True)
+        tdccsdT._r_ft_ron()
+        ron1 = tdccsdT.ron1
+        rono = tdccsdT.rono
+        ronv = tdccsdT.ronv
+        rorbo = tdccsdT.rorbo
+        rorbv = tdccsdT.rorbv
+
+        sys = scf_system(m,T,mu,orbtype='u')
+        # compute normal-order 1-rdm from propagation
+        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80)
+        Eout,Eccout = tdccsdT.run()
+        Etmp,Ecctmp = tdccsdT._uccsd_lambda(rdm2=True, erel=True)
+        tdccsdT._u_ft_ron()
+        uron1 = tdccsdT.ron1[0]
+        urono = tdccsdT.rono[0]
+        uronv = tdccsdT.ronv[0]
+        urorbo = tdccsdT.rorbo[0]
+        urorbv = tdccsdT.rorbv[0]
+
+        diff = numpy.linalg.norm(ron1 - uron1)/numpy.linalg.norm(ron1)
+        self.assertTrue(diff < 1e-12,"Error in ron1: {}".format(diff))
+        diff = numpy.linalg.norm(rono - urono)/numpy.linalg.norm(rono)
+        self.assertTrue(diff < 1e-5,"Error in rono: {}".format(diff))
+        diff = numpy.linalg.norm(ronv - uronv)/numpy.linalg.norm(ronv)
+        self.assertTrue(diff < 1e-5,"Error in ronv: {}".format(diff))
+        diff = numpy.linalg.norm(rorbo - urorbo)/numpy.sqrt(float(rorbo.size))
+        self.assertTrue(diff < 1e-5,"Error in rorbo: {}".format(diff))
+        diff = numpy.linalg.norm(rorbv - urorbv)/numpy.sqrt(float(rorbv.size))
+        self.assertTrue(diff < 1e-5,"Error in rorbv: {}".format(diff))
+
+    def test_Be_r_vs_u_active(self):
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+
+        m = scf.RHF(mol)
+        m.conv_tol = 1e-12
+        Escf = m.scf()
+        T = 0.05
+        mu = 0.0
+        athresh = 1e-20
+        sys = scf_system(m,T,mu,orbtype='r')
+
+        # compute normal-order 1-rdm from propagation
+        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160, athresh=athresh, saveT=True)
+        Eout,Eccout = tdccsdT.run()
+        Etmp,Ecctmp = tdccsdT._rccsd_lambda(rdm2=True, erel=True)
+        tdccsdT._r_ft_ron()
+        ron1 = tdccsdT.ron1
+        rono = tdccsdT.rono
+        ronv = tdccsdT.ronv
+        rorbo = tdccsdT.rorbo
+        rorbv = tdccsdT.rorbv
+
+        sys = scf_system(m,T,mu,orbtype='u')
+        # compute normal-order 1-rdm from propagation
+        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160, athresh=athresh, saveT=True)
+        Eout,Eccout = tdccsdT.run()
+        Etmp,Ecctmp = tdccsdT._uccsd_lambda(rdm2=True, erel=True)
+        tdccsdT._u_ft_ron()
+        uron1 = tdccsdT.ron1[0]
+        urono = tdccsdT.rono[0]
+        uronv = tdccsdT.ronv[0]
+        urorbo = tdccsdT.rorbo[0]
+        urorbv = tdccsdT.rorbv[0]
+
+        diff = numpy.linalg.norm(ron1 - uron1)/numpy.linalg.norm(ron1)
+        self.assertTrue(diff < 1e-12,"Error in ron1: {}".format(diff))
+        diff = numpy.linalg.norm(rono - urono)/numpy.linalg.norm(rono)
+        self.assertTrue(diff < 1e-5,"Error in rono: {}".format(diff))
+        diff = numpy.linalg.norm(ronv - uronv)/numpy.linalg.norm(ronv)
+        self.assertTrue(diff < 1e-5,"Error in ronv: {}".format(diff))
+        diff = numpy.linalg.norm(rorbo - urorbo)/numpy.sqrt(float(rorbo.size))
+        self.assertTrue(diff < 1e-5,"Error in rorbo: {}".format(diff))
+        diff = numpy.linalg.norm(rorbv - urorbv)/numpy.sqrt(float(rorbv.size))
+
 if __name__ == '__main__':
     unittest.main()

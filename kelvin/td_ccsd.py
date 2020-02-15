@@ -1563,7 +1563,6 @@ class TDCCSD(object):
             Pklij = g[ng - 1]*cc_equations.rccsd_2rdm_klij(t1b, t2b, l1, l2)
 
         if erel:
-            assert(False)
             self.rorbo = numpy.zeros(n, dtype=l1.dtype)
             self.rorbv = numpy.zeros(n, dtype=l1.dtype)
             x1 = numpy.zeros(l1.shape, dtype=l1.dtype)
@@ -1592,7 +1591,7 @@ class TDCCSD(object):
                 x2 += dx2
                 d1test = -F.vo.copy()
                 d2test = -I.vvoo.copy()
-                cc_equations._Stanton(d1test,d2test,F,I,t1e,t2e,fac=-1.0)
+                cc_equations._r_Stanton(d1test,d2test,F,I,t1e,t2e,fac=-1.0)
             l1 += ld1
             l2 += ld2
             Eccn += g[ng - i - 1]*cc_energy(t1e, t2e, F.ov, I.oovv)/beta
@@ -1614,11 +1613,12 @@ class TDCCSD(object):
                 Pkaij += g[ng - i - 1]*cc_equations.rccsd_2rdm_kaij(t1e, t2e, l1, l2)
                 Pklij += g[ng - i - 1]*cc_equations.rccsd_2rdm_klij(t1e, t2e, l1, l2)
             if erel:
-                assert(False)
                 At1i = -(1.0/beta)*einsum('ia,ai->i',x1, d1test)
                 At1a = -(1.0/beta)*einsum('ia,ai->a',x1, d1test)
-                At2i = -(1.0/beta)*0.5*einsum('ijab,abij->i',x2, d2test)
-                At2a = -(1.0/beta)*0.5*einsum('ijab,abij->a',x2, d2test)
+                At2i = -(1.0/beta)*0.5*einsum('ijab,abij->i',x2 - x2.transpose((0,1,3,2)), d2test - d2test.transpose((0,1,3,2)))
+                At2i -= (1.0/beta)*einsum('ijab,abij->i',x2, d2test)
+                At2a = -(1.0/beta)*0.5*einsum('ijab,abij->a',x2 - x2.transpose((0,1,3,2)), d2test - d2test.transpose((0,1,3,2)))
+                At2a -= (1.0/beta)*einsum('ijab,abij->a',x2, d2test)
                 if self.athresh > 0.0:
                     self.rorbo[numpy.ix_(iocc)] -= g[ng - 1 - i]*(At1i + At2i)
                     self.rorbv[numpy.ix_(ivir)] += g[ng - 1 - i]*(At1a + At2a)
@@ -1878,3 +1878,64 @@ class TDCCSD(object):
             ronvb += batempb
         self.rono = [ronoa, ronob]
         self.ronv = [ronva, ronvb]
+
+    def _r_ft_ron(self):
+        # temperature info
+        beta = self.beta
+        mu = self.mu
+
+        # get energies and occupation numbers
+        en = self.sys.r_energies_tot()
+        fo = ft_utils.ff(beta, en, mu)
+        fv = ft_utils.ffv(beta, en, mu)
+
+        # get ON correction to HF free energy
+        self.ron1 = self.sys.r_mp1_den()
+
+        # get integrals
+        if self.athresh > 0.0:
+            athresh = self.athresh
+            focc = [x for x in fo if x > athresh]
+            fvir = [x for x in fv if x > athresh]
+            iocc = [i for i,x in enumerate(fo) if x > athresh]
+            ivir = [i for i,x in enumerate(fv) if x > athresh]
+            nocc = len(focc)
+            nvir = len(fvir)
+            F,I = cc_utils.rft_active_integrals(
+                    self.sys, en, focc, fvir, iocc, ivir)
+        else:
+            focc = fo
+            fvir = fv
+            F,I = cc_utils.rft_integrals(self.sys, en, beta, mu)
+        if self.athresh > 0.0:
+            dso = fv[numpy.ix_(iocc)]
+            dsv = fo[numpy.ix_(ivir)]
+        else:
+            dso = fv
+            dsv = fo
+        n = fo.shape[0]
+        rono = numpy.zeros(n, dtype=self.dji.dtype)
+        ronv = numpy.zeros(n, dtype=self.dba.dtype)
+
+        # perturbed ON contribution to Fock matrix
+        Fdss,Fdos = self.sys.r_fock_d_den()
+        if self.athresh > 0.0:
+            rono += cc_utils.r_Fd_on_active(
+                    Fdss, Fdos, iocc, ivir, self.ndia, self.ndba, self.ndji, self.ndai)
+        else:
+            rono += cc_utils.r_Fd_on(Fdss, Fdos, self.ndia, self.ndba, self.ndji, self.ndai)
+
+        # Add contributions from occupation number relaxation
+        jitemp = numpy.zeros(nocc, dtype=self.dji.dtype) if self.athresh > 0.0 else numpy.zeros(n, dtype=self.dji.dtype)
+        batemp = numpy.zeros(nvir, dtype=self.dba.dtype) if self.athresh > 0.0 else numpy.zeros(n, dtype=self.dba.dtype)
+        cc_utils.r_d_on_oo(dso, F, I, self.dia, self.dji, self.dai, self.P2, jitemp)
+        cc_utils.r_d_on_vv(dsv, F, I, self.dia, self.dba, self.dai, self.P2, batemp)
+
+        if self.athresh > 0.0:
+            rono[numpy.ix_(iocc)] += jitemp
+            ronv[numpy.ix_(ivir)] += batemp
+        else:
+            rono += jitemp
+            ronv += batemp
+        self.rono = rono
+        self.ronv = ronv

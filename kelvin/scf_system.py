@@ -143,6 +143,21 @@ class scf_system(system):
         d2b -= numpy.einsum('ijij,i,j->j',Iabab,foa,fovb)
         return beta*(d1a + d2a),beta*(d1b + d2b)
 
+    def r_mp1_den(self):
+        assert(self.T > 0.0)
+        beta = 1.0 / self.T
+        en = self.r_energies_tot()
+        hcore = self.mf.get_hcore(self.mf.mol)
+        h = scf_utils.r_mo_tran_1e(self.mf, hcore)
+        fo = ft_utils.ff(beta, en, self.mu)
+        fv = ft_utils.ffv(beta, en, self.mu)
+        fov = fo*fv
+        I = self.r_int_tot()
+        d1 = -numpy.einsum('ii,i->i',h - numpy.diag(en),fov)
+        d2 = -numpy.einsum('ijij,i,j->i',I - I.transpose((0,1,3,2)),fov,fo)
+        d2 -= numpy.einsum('ijij,i,j->i',I,fov,fo)
+        return beta*(d1 + d2)
+
     def r_energies(self):
         if self.T > 0.0:
             raise Exception("Undefined ov blocks at FT")
@@ -204,6 +219,17 @@ class scf_system(system):
         en = self.g_energies_tot()
         fo = ft_utils.ff(beta, en, self.mu)
         return scf_utils.get_mo_ft_fock(self.mf, fo)
+
+    def r_fock_d_den(self):
+        beta = 1.0 / self.T if self.T > 0 else 1.0e20
+        en = self.r_energies_tot()
+        fo = ft_utils.ff(beta, en, self.mu)
+        fv = ft_utils.ffv(beta, en, self.mu)
+        vec = fo*fv
+        V = self.r_int_tot()
+        JKss = numpy.einsum('piqi,i->pqi',V - V.transpose((0,1,3,2)),vec)
+        JKos = numpy.einsum('piqi,i->pqi',V,vec)
+        return JKss,JKos
 
     def u_fock_d_tot(self,dveca,dvecb):
         beta = 1.0 / self.T if self.T > 0 else 1.0e20

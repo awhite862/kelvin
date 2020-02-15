@@ -173,6 +173,16 @@ def u_mo_tran_1e(mf, h):
         hb = numpy.einsum('mp,mn,nq->pq',numpy.conj(mob),h,mob)
         return ha,hb
 
+def r_mo_tran_1e(mf, h):
+    if is_rhf(mf):
+        mo = mf.mo_coeff
+        nao = mo.shape[0]
+        assert(h.shape[0] == nao)
+        hmo = numpy.einsum('mp,mn,nq->pq',numpy.conj(mo),h,mo)
+        return hmo
+    else:
+        raise Exception("r_mo_tran_1e requires a restricted reference")
+
 def get_ao_ft_fock(mf, fo):
     n = fo.shape[0]//2
     pbc = False
