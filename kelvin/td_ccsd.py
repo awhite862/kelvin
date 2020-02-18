@@ -70,6 +70,12 @@ class TDCCSD(object):
         # orbital energy response
         self.rorbo = None
         self.rorbv = None
+        # full unrelaxed 1-rdm
+        self.n1rdm = None
+        # full unrelaxed 2-rdm
+        self.n2rdm = None
+        # ON- and OE-relaxation contribution to 1-rdm
+        self.r1rdm = None
 
     def __del__(self):
         self._rmfile()
@@ -981,6 +987,15 @@ class TDCCSD(object):
         self.ndba = numpy.einsum('ba,b,a->ba',self.dba,sfv,sfv)
         self.ndji = numpy.einsum('ji,j,i->ji',self.dji,sfo,sfo)
         self.ndai = numpy.einsum('ai,a,i->ai',self.dai,sfv,sfo)
+        if self.athresh > 0.0:
+            self.n1rdm = numpy.zeros((n,n), dtype=pia.dtype)
+            self.n1rdm[numpy.ix_(iocc,ivir)] += self.ndia/beta
+            self.n1rdm[numpy.ix_(ivir,ivir)] += self.ndba/beta
+            self.n1rdm[numpy.ix_(iocc,iocc)] += self.ndji/beta
+            self.n1rdm[numpy.ix_(ivir,iocc)] += self.ndai/beta
+        else:
+            self.n1rdm = (self.ndia + self.ndba + self.ndji + self.ndai)/beta
+
         if rdm2:
             self.P2 = (Pcdab, Pciab, Pbcai, Pijab, Pbjai, Pabij, Pjkai, Pkaij, Pklij)
 
@@ -1414,6 +1429,21 @@ class TDCCSD(object):
                 numpy.einsum('ji,j,i->ji',self.dji[1],sfob,sfob))
         self.ndai = (numpy.einsum('ai,a,i->ai',self.dai[0],sfva,sfoa),
                 numpy.einsum('ai,a,i->ai',self.dai[1],sfvb,sfob))
+
+        if self.athresh > 0.0:
+            self.n1rdm = [numpy.zeros((na,na), dtype=self.ndia[0].dtype),
+                    numpy.zeros((nb,nb), dtype=self.ndia[1].dtype)]
+            self.n1rdm[0][numpy.ix_(iocca,ivira)] += self.ndia[0]/beta
+            self.n1rdm[0][numpy.ix_(ivira,ivira)] += self.ndba[0]/beta
+            self.n1rdm[0][numpy.ix_(iocca,iocca)] += self.ndji[0]/beta
+            self.n1rdm[0][numpy.ix_(ivira,iocca)] += self.ndai[0]/beta
+            self.n1rdm[1][numpy.ix_(ioccb,ivirb)] += self.ndia[1]/beta
+            self.n1rdm[1][numpy.ix_(ivirb,ivirb)] += self.ndba[1]/beta
+            self.n1rdm[1][numpy.ix_(ioccb,ioccb)] += self.ndji[1]/beta
+            self.n1rdm[1][numpy.ix_(ivirb,ioccb)] += self.ndai[1]/beta
+        else:
+            self.n1rdm = [(self.ndia[0] + self.ndba[0] + self.ndji[0] + self.ndai[0])/beta,
+                    (self.ndia[1] + self.ndba[1] + self.ndji[1] + self.ndai[1])/beta]
         if rdm2:
             self.P2 = ((Pcdab,PCDAB,PcDaB),
                     (Pciab,PCIAB,PcIaB,PCiAb),
@@ -1939,3 +1969,173 @@ class TDCCSD(object):
             ronv += batemp
         self.rono = rono
         self.ronv = ronv
+
+    def _grel_ft_1rdm(self):
+        # build unrelaxed 1RDM and 2RDM if it doesn't exist
+        if self.dia is None:
+            raise Exception("Unrelaxed 1-rdm doesn't exist")
+        if self.P2 is None:
+            raise Exception("Unrelaxed 2-rdm doesn't exist")
+
+        # temperature info
+        beta = self.beta
+        mu = self.mu
+
+        # get energies and occupation numbers
+        en = self.sys.g_energies_tot()
+        fo = ft_utils.ff(beta, en, mu)
+
+        # get occupation number and orbital response
+        self._g_ft_ron()
+        if self.rorbo is None:
+            raise Exception("Orbital energy response hasn't been computed!")
+        n = fo.shape[0]
+
+        rdji = numpy.diag(self.rono)
+        rdba = numpy.diag(self.ronv)
+        rdji += numpy.diag(self.ron1)
+        rdji += numpy.diag(self.rorbo)
+        rdba += numpy.diag(self.rorbv)
+
+        # append HF density matrix
+        rdji += numpy.diag(fo)
+
+        self.r1rdm = rdji + rdba
+
+    def _urel_ft_1rdm(self):
+        # build unrelaxed 1RDM and 2RDM if it doesn't exist
+        if self.dia is None:
+            raise Exception("Unrelaxed 1-rdm doesn't exist")
+        if self.P2 is None:
+            raise Exception("Unrelaxed 2-rdm doesn't exist")
+
+        self._u_ft_ron()
+        if self.rorbo is None:
+            raise Exception("Orbital energy response hasn't been computed!")
+
+        # temperature info
+        beta = self.beta
+        mu = self.mu
+
+        # get energies and occupation numbers
+        ea,eb = self.sys.u_energies_tot()
+        na = ea.shape[0]
+        nb = eb.shape[0]
+        foa = ft_utils.ff(beta, ea, mu)
+        fob = ft_utils.ff(beta, eb, mu)
+
+        rdba = [numpy.zeros((na,na), dtype=self.ronv[0].dtype),
+                numpy.zeros((nb,nb), dtype=self.ronv[1].dtype)]
+        rdji = [numpy.zeros((na,na), dtype=self.rono[0].dtype),
+                numpy.zeros((nb,nb), dtype=self.rono[1].dtype)]
+        rdba[0] += numpy.diag(self.ronv[0])
+        rdba[1] += numpy.diag(self.ronv[1])
+        rdji[0] += numpy.diag(self.rono[0])
+        rdji[1] += numpy.diag(self.rono[1])
+        rdji[0] += numpy.diag(self.ron1[0])
+        rdji[1] += numpy.diag(self.ron1[1])
+        rdba[0] += numpy.diag(self.rorbv[0])
+        rdba[1] += numpy.diag(self.rorbv[1])
+        rdji[0] += numpy.diag(self.rorbo[0])
+        rdji[1] += numpy.diag(self.rorbo[1])
+
+        # append HF density matrix
+        rdji[0] += numpy.diag(foa)
+        rdji[1] += numpy.diag(fob)
+
+        self.r1rdm = [rdji[0] + rdba[0],rdji[1] + rdba[1]]
+
+    def full_1rdm(self, relax=False):
+        beta = self.beta
+        mu = self.mu
+        if self.sys.orbtype == 'u':
+            if relax:
+                if self.r1rdm is None:
+                    self._urel_ft_1rdm()
+                return [self.r1rdm[0] + (self.n1rdm[0] - numpy.diag(self.n1rdm[0].diagonal())),
+                        self.r1rdm[1] + (self.n1rdm[1] - numpy.diag(self.n1rdm[1].diagonal()))]
+            if self.n1rdm is None:
+                self._u_ft_1rdm()
+            ea,eb = self.sys.u_energies_tot()
+            foa = ft_utils.ff(beta, ea, mu)
+            fob = ft_utils.ff(beta, eb, mu)
+            rdm1 = [self.n1rdm[0].copy(), self.n1rdm[1].copy()]
+            if self.athresh > 0.0:
+                athresh = self.athresh
+                focca = [x for x in foa if x > athresh]
+                iocca = [i for i,x in enumerate(foa) if x > athresh]
+                foccb = [x for x in fob if x > athresh]
+                ioccb = [i for i,x in enumerate(fob) if x > athresh]
+                nocca = len(focca)
+                rdm1[0][numpy.ix_(iocca,iocca)] += numpy.diag(focca)
+                rdm1[1][numpy.ix_(ioccb,ioccb)] += numpy.diag(foccb)
+            else:
+                rdm1[0] += numpy.diag(foa)
+                rdm1[1] += numpy.diag(fob)
+            return rdm1
+        elif self.sys.orbtype == 'g':
+            if relax:
+                if self.r1rdm is None:
+                    self._grel_ft_1rdm()
+                return self.r1rdm + (self.n1rdm - numpy.diag(self.n1rdm.diagonal()))
+            if self.n1rdm is None:
+                self._g_ft_1rdm()
+            en = self.sys.g_energies_tot()
+            fo = ft_utils.ff(beta, en, mu)
+            rdm1 = self.n1rdm.copy()
+            if self.athresh > 0.0:
+                athresh = self.athresh
+                focc = [x for x in fo if x > athresh]
+                iocc = [i for i,x in enumerate(fo) if x > athresh]
+                rdm1[numpy.ix_(iocc,iocc)] += numpy.diag(fo)
+            else:
+                rem1 += numpy.diag(fo)
+            return rdm1
+        else:
+            raise Exception("orbital type " + self.sys.orbtype + " is not implemented for 1rdm")
+
+    def full_2rdm(self, relax=False):
+        if relax:
+            raise Exception("Rexalex 2-RDM is not implemented")
+        beta = self.beta
+        mu = self.mu
+        if self.sys.orbtype == 'u':
+            if self.n1rdm is None:
+                self._u_ft_1rdm()
+            if self.n2rdm is None:
+                self._u_ft_2rdm()
+            ea,eb = self.sys.u_energies_tot()
+            foa = ft_utils.ff(beta, ea, mu)
+            fob = ft_utils.ff(beta, eb, mu)
+            rdm2 = [self.n2rdm[0].copy(), self.n2rdm[1].copy(), self.n2rdm[2].copy()]
+            if self.athresh > 0.0:
+                athresh = self.athresh
+                focca = [x for x in foa if x > athresh]
+                iocca = [i for i,x in enumerate(foa) if x > athresh]
+                ialla = [i for i in range(len(foa))]
+                foccb = [x for x in fob if x > athresh]
+                ioccb = [i for i,x in enumerate(fob) if x > athresh]
+                iallb = [i for i in range(len(fob))]
+                cc_utils.u_full_rdm2_active(focca, foccb, iocca, ioccb, ialla, iallb, self.n1rdm, rdm2)
+            else:
+                cc_utils.u_full_rdm2(foa, fob, self.n1rdm, rdm2)
+            return rdm2
+        elif self.sys.orbtype == 'g':
+            if self.n1rdm is None:
+                self._g_ft_1rdm()
+            if self.n2rdm is None:
+                self._g_ft_2rdm()
+            en = self.sys.g_energies_tot()
+            fo = ft_utils.ff(beta, en, mu)
+            rdm2 = self.n2rdm.copy()
+            if self.athresh > 0.0:
+                athresh = self.athresh
+                focc = [x for x in fo if x > athresh]
+                iocc = [i for i,x in enumerate(fo) if x > athresh]
+                iall = [i for i in range(len(fo))]
+                cc_utils.g_full_rdm2_active(focc, iocc, iall, self.n1rdm, rdm2)
+            else:
+                cc_utils.g_full_rdm2(fo, self.n1rdm, rdm2)
+            return rdm2
+        else:
+            raise Exception("orbital type " + self.sys.orbtype + " is not implemented for 1rdm")

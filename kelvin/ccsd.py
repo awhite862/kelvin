@@ -2100,43 +2100,7 @@ class ccsd(object):
         na = ea.shape[0]
         nb = eb.shape[0]
         foa = ft_utils.ff(beta, ea, mu)
-        fva = ft_utils.ffv(beta, ea, mu)
         fob = ft_utils.ff(beta, eb, mu)
-        fvb = ft_utils.ffv(beta, eb, mu)
-
-        # get integrals
-        if self.athresh > 0.0:
-            athresh = self.athresh
-            focca = [x for x in foa if x > athresh]
-            fvira = [x for x in fva if x > athresh]
-            iocca = [i for i,x in enumerate(foa) if x > athresh]
-            ivira = [i for i,x in enumerate(fva) if x > athresh]
-            foccb = [x for x in fob if x > athresh]
-            fvirb = [x for x in fvb if x > athresh]
-            ioccb = [i for i,x in enumerate(fob) if x > athresh]
-            ivirb = [i for i,x in enumerate(fvb) if x > athresh]
-            nocca = len(focca)
-            nvira = len(fvira)
-            noccb = len(foccb)
-            nvirb = len(fvirb)
-            Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
-                    self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
-        else:
-            focca = foa
-            fvira = fva
-            foccb = fob
-            fvirb = fvb
-            Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
-        if self.athresh > 0.0:
-            dsoa = fva[numpy.ix_(iocca)]
-            dsva = foa[numpy.ix_(ivira)]
-            dsob = fvb[numpy.ix_(ioccb)]
-            dsvb = fob[numpy.ix_(ivirb)]
-        else:
-            dsoa = fva
-            dsva = foa
-            dsob = fvb
-            dsvb = fob
 
         rdba = [numpy.zeros((na,na), dtype=self.ronv[0].dtype),
                 numpy.zeros((nb,nb), dtype=self.ronv[1].dtype)]
