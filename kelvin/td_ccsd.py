@@ -112,7 +112,9 @@ class TDCCSD(object):
                     self._uccsd_lambda(rdm2=True)
                 else:
                     self._ccsd_lambda(rdm2=True)
-            if self.sys.has_u():
+            if self.sys.has_r():
+                self._r_ft_ESN()
+            elif self.sys.has_u():
                 self._u_ft_ESN()
             else:
                 self._g_ft_ESN()
@@ -213,6 +215,50 @@ class TDCCSD(object):
         self.S0 = -beta*(self.G0 - self.E0 + mu*self.N0)
         self.S1 = -beta*(self.G1 - self.E1 + mu*self.N1)
         self.S = -beta*(self.Gtot - self.E + mu*self.N)
+        self.Scc = self.S - self.S0 - self.S1
+
+    def _r_ft_ESN(self):
+        # temperature info
+        beta = self.beta
+        mu = self.mu
+
+        self._r_ft_ron()
+
+        # zero order contributions
+        en = self.sys.r_energies_tot()
+        fo = ft_utils.ff(beta, en, mu)
+        B0 = ft_utils.dGP0(beta, en, mu)
+        N0 = 2.0*fo.sum()
+        E0 = 2.0*beta*B0.sum() + mu*N0 + self.G0
+
+        # higher order contributions
+        dvec = -numpy.ones(en.shape) # mu derivative
+        N1 = 2.0*numpy.einsum('i,i->',dvec, self.ron1)
+        Ncc = 2.0*numpy.einsum('i,i->',dvec, self.rono + self.ronv)
+        N1 *= -1.0 # N = - dG/dmu
+        Ncc *= -1.0
+        dvec = (en - mu)/beta # beta derivative
+        B1 = 2.0*numpy.einsum('i,i->',dvec, self.ron1)
+        Bcc = 2.0*numpy.einsum('i,i->',dvec, self.rono + self.ronv)
+
+        # compute other contributions to CC derivative
+        Bcc -= self.Gcc/(beta) # derivative from factors of 1/beta
+        Bcc += self._r_gderiv_approx()
+
+        E1 = beta*B1 + mu*N1 + self.G1
+        Ecc = beta*Bcc + mu*Ncc + self.Gcc
+
+        self.N0 = N0
+        self.N1 = N1
+        self.Ncc = Ncc
+        self.N = Ncc + N0 + N1
+        self.E0 = E0
+        self.E1 = E1
+        self.Ecc = Ecc
+        self.E = E0 + E1 + Ecc
+        self.S = -beta*(self.Gtot - self.E + mu*self.N)
+        self.S0 = -beta*(self.G0 - self.E0 + mu*self.N0)
+        self.S1 = -beta*(self.G1 - self.E1 + mu*self.N1)
         self.Scc = self.S - self.S0 - self.S1
 
     def _get_t_step(self, h, ttot, fRHS):
@@ -676,7 +722,7 @@ class TDCCSD(object):
 
             # get HF energy
             En = self.sys.const_energy()
-            E0 = zt_mp.mp0(eo) + En
+            E0 = 2.0*zt_mp.mp0(eo) + En
             E1 = self.sys.get_mp1()
             E01 = E0 + E1
 
@@ -699,7 +745,7 @@ class TDCCSD(object):
             # get 0th and 1st order contributions
             En = self.sys.const_energy()
             g0 = ft_utils.GP0(beta, en, mu)
-            E0 = ft_mp.mp0(g0) + En
+            E0 = 2.0*ft_mp.mp0(g0) + En
             E1 = self.sys.get_mp1()
             E01 = E0 + E1
             if self.athresh > 0.0:
@@ -1748,6 +1794,38 @@ class TDCCSD(object):
         Es2 = einsum('abij,ijab->',t2aa_temp,Ia.oovv)
         Es2 += einsum('abij,ijab->',t2ab_temp,Iabab.oovv)
         Es2 += einsum('abij,ijab->',t2bb_temp,Ib.oovv)
+
+        return (Es1 + Es2) / beta
+
+    def _r_gderiv_approx(self):
+        # temperature info
+        beta = self.beta
+        mu = self.mu
+
+        # get energies and occupation numbers
+        en = self.sys.r_energies_tot()
+        fo = ft_utils.ff(beta, en, mu)
+        fv = ft_utils.ffv(beta, en, mu)
+
+        if self.athresh > 0.0:
+            athresh = self.athresh
+            focc = [x for x in fo if x > athresh]
+            fvir = [x for x in fv if x > athresh]
+            iocc = [i for i,x in enumerate(fo) if x > athresh]
+            ivir = [i for i,x in enumerate(fv) if x > athresh]
+            F,I = cc_utils.rft_active_integrals(
+                    self.sys, en, focc, fvir, iocc, ivir)
+        else:
+            F,I = cc_utils.rft_integrals(self.sys, en, beta, mu)
+        ng = self.ngrid
+        T1 = self._read_T1(ng - 1)
+        T2 = self._read_T2(ng - 1)
+        t2aa_temp = 0.25*(T2 - T2.transpose((0,1,3,2))) + 0.5*einsum('ai,bj->abij',T1,T1)
+        t2ab_temp = T2 + einsum('ai,bj->abij',T1,T1)
+
+        Es1 = 2.0*einsum('ai,ia->',T1,F.ov)
+        Es2 = 2.0*einsum('abij,ijab->',t2aa_temp,I.oovv - I.oovv.transpose((0,1,3,2)))
+        Es2 += einsum('abij,ijab->',t2ab_temp,I.oovv)
 
         return (Es1 + Es2) / beta
 
