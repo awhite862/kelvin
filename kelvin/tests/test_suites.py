@@ -208,6 +208,7 @@ def full_suite():
     suite.addTest(test_td_ccsd_relden.TDCCSDReldenTest("test_Be_r_vs_u"))
     suite.addTest(test_td_ccsd_relden.TDCCSDReldenTest("test_Be_r_vs_u_active"))
     suite.addTest(test_td_ccsd_relden.TDCCSDReldenTest("test_Be_rk4_relden"))
+    suite.addTest(test_td_ccsd_relden.TDCCSDReldenTest("test_Be_rk4_relden_r_vs_u"))
 
     suite.addTest(test_scf.SCFTest("test_Be_sto3g_energy"))
     suite.addTest(test_scf.SCFTest("test_diamond_energy"))
@@ -400,6 +401,7 @@ def default_suite():
     suite.addTest(test_td_ccsd_relden.TDCCSDReldenTest("test_Be_r_vs_u"))
     #suite.addTest(test_td_ccsd_relden.TDCCSDReldenTest("test_Be_r_vs_u_active"))
     suite.addTest(test_td_ccsd_relden.TDCCSDReldenTest("test_Be_rk4_relden"))
+    #suite.addTest(test_td_ccsd_relden.TDCCSDReldenTest("test_Be_rk4_relden_r_vs_u"))
 
     suite.addTest(test_scf.SCFTest("test_Be_sto3g_energy"))
     suite.addTest(test_scf.SCFTest("test_diamond_energy"))

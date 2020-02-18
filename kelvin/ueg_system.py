@@ -89,7 +89,22 @@ class ueg_system(system):
             return 0.0
 
     def get_mp1(self):
-        if self.has_u():
+        if self.has_r():
+            if self.T > 0:
+                V = self.r_int_tot()
+                beta = 1.0 / self.T
+                en = self.r_energies_tot()
+                fo = ft_utils.ff(beta, en, self.mu)
+                E1 = einsum('ijij,i,j->',V - V.transpose((0,1,3,2)),fo,fo)
+                E1 += einsum('ijij,i,j->',V,fo,fo)
+                return E1
+            else: # TODO fix this
+                Va,Vb,Vabab = self.u_aint()
+                E1 = 0.5*numpy.einsum('ijij->',Va.oooo)
+                E1 += 0.5*numpy.einsum('ijij->',Vb.oooo)
+                E1 += numpy.einsum('ijij->',Vabab.oooo)
+                return E1
+        elif self.has_u():
             if self.T > 0:
                 Va,Vb,Vabab = self.u_aint_tot()
                 beta = 1.0 / self.T
@@ -126,8 +141,8 @@ class ueg_system(system):
             fo = ft_utils.ff(beta, en, self.mu)
             fv = ft_utils.ffv(beta, en, self.mu)
             vec = fo*fv
-            Den = -beta*einsum('ijij,i,j->i',V - V.transpose((0,1,3,2)),vec,fo)
-            Den -= beta*einsum('ijij,i,j->i',V,vec,fo)
+            Den = -beta*einsum('ijij,i,j->i',2.0*V - V.transpose((0,1,3,2)),vec,fo)
+            #Den -= beta*einsum('ijij,i,j->i',V,vec,fo)
             return Den
         else:
             print("WARNING: Derivative of MP1 energy is zero at OK")

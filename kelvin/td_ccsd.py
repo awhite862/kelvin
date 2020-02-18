@@ -1719,6 +1719,15 @@ class TDCCSD(object):
         self.ndba = numpy.einsum('ba,b,a->ba',self.dba,sfv,sfv)
         self.ndji = numpy.einsum('ji,j,i->ji',self.dji,sfo,sfo)
         self.ndai = numpy.einsum('ai,a,i->ai',self.dai,sfv,sfo)
+        if self.athresh > 0.0:
+            self.n1rdm = numpy.zeros((n,n), dtype=pia.dtype)
+            self.n1rdm[numpy.ix_(iocc,ivir)] += self.ndia/beta
+            self.n1rdm[numpy.ix_(ivir,ivir)] += self.ndba/beta
+            self.n1rdm[numpy.ix_(iocc,iocc)] += self.ndji/beta
+            self.n1rdm[numpy.ix_(ivir,iocc)] += self.ndai/beta
+        else:
+            self.n1rdm = (self.ndia + self.ndba + self.ndji + self.ndai)/beta
+
         if rdm2:
             self.P2 = (Pcdab, Pciab, Pbcai, Pijab, Pbjai, Pbjia, Pabij, Pjkai, Pkaij, Pklij)
 
@@ -2123,17 +2132,69 @@ class TDCCSD(object):
 
         self.r1rdm = [rdji[0] + rdba[0],rdji[1] + rdba[1]]
 
+    def _rrel_ft_1rdm(self):
+        # build unrelaxed 1RDM and 2RDM if it doesn't exist
+        if self.dia is None:
+            raise Exception("Unrelaxed 1-rdm doesn't exist")
+        if self.P2 is None:
+            raise Exception("Unrelaxed 2-rdm doesn't exist")
+        if self.ron1 is None:
+            self._r_ft_ron()
+        if self.rorbo is None:
+            raise Exception("Orbital energy response hasn't been computed!")
+
+        # temperature info
+        beta = self.beta
+        mu = self.mu
+
+        # get energies and occupation numbers
+        en = self.sys.r_energies_tot()
+        n = en.shape[0]
+        fo = ft_utils.ff(beta, en, mu)
+
+        rdba = numpy.zeros((n,n), dtype=self.ronv.dtype)
+        rdji = numpy.zeros((n,n), dtype=self.rono.dtype)
+        rdba += numpy.diag(self.ronv)
+        rdji += numpy.diag(self.rono)
+        rdji += numpy.diag(self.ron1)
+        rdba += numpy.diag(self.rorbv)
+        rdji += numpy.diag(self.rorbo)
+
+        # append HF density matrix
+        rdji += numpy.diag(fo)
+
+        self.r1rdm = rdji + rdba
+
     def full_1rdm(self, relax=False):
         beta = self.beta
         mu = self.mu
-        if self.sys.orbtype == 'u':
+        if self.sys.orbtype == 'r':
+            if relax:
+                if self.r1rdm is None:
+                    self._rrel_ft_1rdm()
+                return self.r1rdm + (self.n1rdm - numpy.diag(self.n1rdm.diagonal()))
+            if self.n1rdm is None:
+                raise Exception("Normal ordered 1-rdm does not exist")
+            en = self.sys.r_energies_tot()
+            fo = ft_utils.ff(beta, ea, mu)
+            rdm1 = self.n1rdm.copy()
+            if self.athresh > 0.0:
+                athresh = self.athresh
+                focc = [x for x in fo if x > athresh]
+                iocc = [i for i,x in enumerate(fo) if x > athresh]
+                nocc = len(focc)
+                rdm1[numpy.ix_(iocc,iocc)] += numpy.diag(focc)
+            else:
+                rdm1 += numpy.diag(fo)
+            return rdm1
+        elif self.sys.orbtype == 'u':
             if relax:
                 if self.r1rdm is None:
                     self._urel_ft_1rdm()
                 return [self.r1rdm[0] + (self.n1rdm[0] - numpy.diag(self.n1rdm[0].diagonal())),
                         self.r1rdm[1] + (self.n1rdm[1] - numpy.diag(self.n1rdm[1].diagonal()))]
             if self.n1rdm is None:
-                self._u_ft_1rdm()
+                raise Exception("Normal ordered 1-rdm does not exist")
             ea,eb = self.sys.u_energies_tot()
             foa = ft_utils.ff(beta, ea, mu)
             fob = ft_utils.ff(beta, eb, mu)
@@ -2157,7 +2218,7 @@ class TDCCSD(object):
                     self._grel_ft_1rdm()
                 return self.r1rdm + (self.n1rdm - numpy.diag(self.n1rdm.diagonal()))
             if self.n1rdm is None:
-                self._g_ft_1rdm()
+                raise Exception("Normal ordered 1-rdm does not exist")
             en = self.sys.g_energies_tot()
             fo = ft_utils.ff(beta, en, mu)
             rdm1 = self.n1rdm.copy()

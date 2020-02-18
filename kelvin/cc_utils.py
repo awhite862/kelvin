@@ -572,844 +572,844 @@ def ft_ulambda_iter(method, L1ain, L1bin, L2aain, L2abin, L2bbin, T1aold, T1bold
     return L1aold,L1bold,L2aaold,L2abold,L2bbold
 
 def ft_integrals(sys, en, beta, mu):
-        """Return one and two-electron integrals in the general spin orbital basis."""
-        fo = ft_utils.ff(beta, en, mu)
-        fv = ft_utils.ffv(beta, en, mu)
-        sfo = numpy.sqrt(fo)
-        sfv = numpy.sqrt(fv)
+    """Return one and two-electron integrals in the general spin orbital basis."""
+    fo = ft_utils.ff(beta, en, mu)
+    fv = ft_utils.ffv(beta, en, mu)
+    sfo = numpy.sqrt(fo)
+    sfv = numpy.sqrt(fv)
 
-        # get FT fock matrix
-        fmo = sys.g_fock_tot()
-        fmo = fmo - numpy.diag(en)
+    # get FT fock matrix
+    fmo = sys.g_fock_tot()
+    fmo = fmo - numpy.diag(en)
 
-        # get ERIs
-        eri = sys.g_aint_tot()
+    # get ERIs
+    eri = sys.g_aint_tot()
 
-        # pre-contract with fermi factors
-        Foo = einsum('ij,i,j->ij',fmo,sfo,sfo)
-        Fov = einsum('ia,i,a->ia',fmo,sfo,sfv)
-        Fvo = einsum('ai,a,i->ai',fmo,sfv,sfo)
-        Fvv = einsum('ab,a,b->ab',fmo,sfv,sfv)
-        F = one_e_blocks(Foo,Fov,Fvo,Fvv)
+    # pre-contract with fermi factors
+    Foo = einsum('ij,i,j->ij',fmo,sfo,sfo)
+    Fov = einsum('ia,i,a->ia',fmo,sfo,sfv)
+    Fvo = einsum('ai,a,i->ai',fmo,sfv,sfo)
+    Fvv = einsum('ab,a,b->ab',fmo,sfv,sfv)
+    F = one_e_blocks(Foo,Fov,Fvo,Fvv)
 
-        Ivvvv = einsum('abcd,a,b,c,d->abcd',eri,sfv,sfv,sfv,sfv)
-        Ivvvo = einsum('abci,a,b,c,i->abci',eri,sfv,sfv,sfv,sfo)
-        Ivovv = einsum('aibc,a,i,b,c->aibc',eri,sfv,sfo,sfv,sfv)
-        Ivvoo = einsum('abij,a,b,i,j->abij',eri,sfv,sfv,sfo,sfo)
-        Ivovo = einsum('ajbi,a,j,b,i->ajbi',eri,sfv,sfo,sfv,sfo)
-        Ioovv = einsum('ijab,i,j,a,b->ijab',eri,sfo,sfo,sfv,sfv)
-        Ivooo = einsum('akij,a,k,i,j->akij',eri,sfv,sfo,sfo,sfo)
-        Iooov = einsum('jkia,j,k,i,a->jkia',eri,sfo,sfo,sfo,sfv)
-        Ioooo = einsum('klij,k,l,i,j->klij',eri,sfo,sfo,sfo,sfo)
-        I = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-                vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
-        return F,I
+    Ivvvv = einsum('abcd,a,b,c,d->abcd',eri,sfv,sfv,sfv,sfv)
+    Ivvvo = einsum('abci,a,b,c,i->abci',eri,sfv,sfv,sfv,sfo)
+    Ivovv = einsum('aibc,a,i,b,c->aibc',eri,sfv,sfo,sfv,sfv)
+    Ivvoo = einsum('abij,a,b,i,j->abij',eri,sfv,sfv,sfo,sfo)
+    Ivovo = einsum('ajbi,a,j,b,i->ajbi',eri,sfv,sfo,sfv,sfo)
+    Ioovv = einsum('ijab,i,j,a,b->ijab',eri,sfo,sfo,sfv,sfv)
+    Ivooo = einsum('akij,a,k,i,j->akij',eri,sfv,sfo,sfo,sfo)
+    Iooov = einsum('jkia,j,k,i,a->jkia',eri,sfo,sfo,sfo,sfv)
+    Ioooo = einsum('klij,k,l,i,j->klij',eri,sfo,sfo,sfo,sfo)
+    I = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
+            vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+    return F,I
 
 def get_ft_integrals_neq(sys, en, beta, mu):
-        """Return one and two-electron integrals in the general spin orbital basis
-        including real-time component."""
-        fo = ft_utils.ff(beta, en, mu)
-        fv = ft_utils.ffv(beta, en, mu)
+    """Return one and two-electron integrals in the general spin orbital basis
+    including real-time component."""
+    fo = ft_utils.ff(beta, en, mu)
+    fv = ft_utils.ffv(beta, en, mu)
 
-        # get FT fock matrix
-        fmo = sys.g_fock_tot(direc='f')
-        fmo = (fmo - numpy.diag(en)).astype(complex)
+    # get FT fock matrix
+    fmo = sys.g_fock_tot(direc='f')
+    fmo = (fmo - numpy.diag(en)).astype(complex)
 
-        # pre-contract with fermi factors
-        Foo = einsum('ij,j->ij',fmo[0],fo)
-        Fvo = einsum('ai,a,i->ai',fmo[0],fv,fo)
-        Fvv = einsum('ab,a->ab',fmo[0],fv)
-        F = one_e_blocks(Foo,fmo[0],Fvo,Fvv)
+    # pre-contract with fermi factors
+    Foo = einsum('ij,j->ij',fmo[0],fo)
+    Fvo = einsum('ai,a,i->ai',fmo[0],fv,fo)
+    Fvv = einsum('ab,a->ab',fmo[0],fv)
+    F = one_e_blocks(Foo,fmo[0],Fvo,Fvv)
 
-        Foo = einsum('yij,j->yij',fmo,fo)
-        Fvo = einsum('yai,a,i->yai',fmo,fv,fo)
-        Fvv = einsum('yab,a->yab',fmo,fv)
-        Ff = one_e_blocks(Foo,fmo,Fvo,Fvv)
+    Foo = einsum('yij,j->yij',fmo,fo)
+    Fvo = einsum('yai,a,i->yai',fmo,fv,fo)
+    Fvv = einsum('yab,a->yab',fmo,fv)
+    Ff = one_e_blocks(Foo,fmo,Fvo,Fvv)
 
-        fmo = sys.g_fock_tot(direc='b')
-        fmo = (fmo - numpy.diag(en)).astype(complex)
-        Foo = einsum('yij,j->yij',fmo,fo)
-        Fvo = einsum('yai,a,i->yai',fmo,fv,fo)
-        Fvv = einsum('yab,a->yab',fmo,fv)
-        Fb = one_e_blocks(Foo,fmo,Fvo,Fvv)
+    fmo = sys.g_fock_tot(direc='b')
+    fmo = (fmo - numpy.diag(en)).astype(complex)
+    Foo = einsum('yij,j->yij',fmo,fo)
+    Fvo = einsum('yai,a,i->yai',fmo,fv,fo)
+    Fvv = einsum('yab,a->yab',fmo,fv)
+    Fb = one_e_blocks(Foo,fmo,Fvo,Fvv)
 
-        # get ERIs
-        eri = sys.g_aint_tot().astype(complex)
+    # get ERIs
+    eri = sys.g_aint_tot().astype(complex)
 
-        Ivvvv = einsum('abcd,a,b->abcd',eri,fv,fv)
-        Ivvvo = einsum('abci,a,b,i->abci',eri,fv,fv,fo)
-        Ivovv = einsum('aibc,a->aibc',eri,fv)
-        Ivvoo = einsum('abij,a,b,i,j->abij',eri,fv,fv,fo,fo)
-        Ivovo = einsum('ajbi,a,i->ajbi',eri,fv,fo)
-        Ivooo = einsum('akij,a,i,j->akij',eri,fv,fo,fo)
-        Iooov = einsum('jkia,i->jkia',eri,fo)
-        Ioooo = einsum('klij,i,j->klij',eri,fo,fo)
-        I = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-                vovo=Ivovo,oovv=eri,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
-        return F,Ff,Fb,I
+    Ivvvv = einsum('abcd,a,b->abcd',eri,fv,fv)
+    Ivvvo = einsum('abci,a,b,i->abci',eri,fv,fv,fo)
+    Ivovv = einsum('aibc,a->aibc',eri,fv)
+    Ivvoo = einsum('abij,a,b,i,j->abij',eri,fv,fv,fo,fo)
+    Ivovo = einsum('ajbi,a,i->ajbi',eri,fv,fo)
+    Ivooo = einsum('akij,a,i,j->akij',eri,fv,fo,fo)
+    Iooov = einsum('jkia,i->jkia',eri,fo)
+    Ioooo = einsum('klij,i,j->klij',eri,fo,fo)
+    I = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
+            vovo=Ivovo,oovv=eri,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+    return F,Ff,Fb,I
 
 def uft_integrals(sys, ea, eb, beta, mu):
-        """Return one and two-electron integrals in the general spin orbital basis."""
-        na = ea.shape[0]
-        nb = eb.shape[0]
-        #en = numpy.concatenate((ea,eb))
-        foa = ft_utils.ff(beta, ea, mu)
-        fva = ft_utils.ffv(beta, ea, mu)
-        fob = ft_utils.ff(beta, eb, mu)
-        fvb = ft_utils.ffv(beta, eb, mu)
-        sfoa = numpy.sqrt(foa)
-        sfva = numpy.sqrt(fva)
-        sfob = numpy.sqrt(fob)
-        sfvb = numpy.sqrt(fvb)
+    """Return one and two-electron integrals in the general spin orbital basis."""
+    na = ea.shape[0]
+    nb = eb.shape[0]
+    #en = numpy.concatenate((ea,eb))
+    foa = ft_utils.ff(beta, ea, mu)
+    fva = ft_utils.ffv(beta, ea, mu)
+    fob = ft_utils.ff(beta, eb, mu)
+    fvb = ft_utils.ffv(beta, eb, mu)
+    sfoa = numpy.sqrt(foa)
+    sfva = numpy.sqrt(fva)
+    sfob = numpy.sqrt(fob)
+    sfvb = numpy.sqrt(fvb)
 
-        # get FT fock matrix
-        fa,fb = sys.u_fock_tot()
-        fa = fa - numpy.diag(ea)
-        fb = fb - numpy.diag(eb)
+    # get FT fock matrix
+    fa,fb = sys.u_fock_tot()
+    fa = fa - numpy.diag(ea)
+    fb = fb - numpy.diag(eb)
 
-        # pre-contract with fermi factors
-        Fooa = einsum('ij,i,j->ij',fa,sfoa,sfoa)
-        Fova = einsum('ia,i,a->ia',fa,sfoa,sfva)
-        Fvoa = einsum('ai,a,i->ai',fa,sfva,sfoa)
-        Fvva = einsum('ab,a,b->ab',fa,sfva,sfva)
-        Fa = one_e_blocks(Fooa,Fova,Fvoa,Fvva)
+    # pre-contract with fermi factors
+    Fooa = einsum('ij,i,j->ij',fa,sfoa,sfoa)
+    Fova = einsum('ia,i,a->ia',fa,sfoa,sfva)
+    Fvoa = einsum('ai,a,i->ai',fa,sfva,sfoa)
+    Fvva = einsum('ab,a,b->ab',fa,sfva,sfva)
+    Fa = one_e_blocks(Fooa,Fova,Fvoa,Fvva)
 
-        Foob = einsum('ij,i,j->ij',fb,sfob,sfob)
-        Fovb = einsum('ia,i,a->ia',fb,sfob,sfvb)
-        Fvob = einsum('ai,a,i->ai',fb,sfvb,sfob)
-        Fvvb = einsum('ab,a,b->ab',fb,sfvb,sfvb)
-        Fb = one_e_blocks(Foob,Fovb,Fvob,Fvvb)
+    Foob = einsum('ij,i,j->ij',fb,sfob,sfob)
+    Fovb = einsum('ia,i,a->ia',fb,sfob,sfvb)
+    Fvob = einsum('ai,a,i->ai',fb,sfvb,sfob)
+    Fvvb = einsum('ab,a,b->ab',fb,sfvb,sfvb)
+    Fb = one_e_blocks(Foob,Fovb,Fvob,Fvvb)
 
-        # get ERIs
-        eriA,eriB,eriAB = sys.u_aint_tot()
-        Ivvvv = einsum('abcd,a,b,c,d->abcd',eriA,sfva,sfva,sfva,sfva)
-        Ivvvo = einsum('abci,a,b,c,i->abci',eriA,sfva,sfva,sfva,sfoa)
-        Ivovv = einsum('aibc,a,i,b,c->aibc',eriA,sfva,sfoa,sfva,sfva)
-        Ivvoo = einsum('abij,a,b,i,j->abij',eriA,sfva,sfva,sfoa,sfoa)
-        Ioovv = einsum('ijab,i,j,a,b->ijab',eriA,sfoa,sfoa,sfva,sfva)
-        Ivovo = einsum('ajbi,a,j,b,i->ajbi',eriA,sfva,sfoa,sfva,sfoa)
-        Ivooo = einsum('akij,a,k,i,j->akij',eriA,sfva,sfoa,sfoa,sfoa)
-        Iooov = einsum('jkia,j,k,i,a->jkia',eriA,sfoa,sfoa,sfoa,sfva)
-        Ioooo = einsum('klij,k,l,i,j->klij',eriA,sfoa,sfoa,sfoa,sfoa)
-        Ia = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-                vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+    # get ERIs
+    eriA,eriB,eriAB = sys.u_aint_tot()
+    Ivvvv = einsum('abcd,a,b,c,d->abcd',eriA,sfva,sfva,sfva,sfva)
+    Ivvvo = einsum('abci,a,b,c,i->abci',eriA,sfva,sfva,sfva,sfoa)
+    Ivovv = einsum('aibc,a,i,b,c->aibc',eriA,sfva,sfoa,sfva,sfva)
+    Ivvoo = einsum('abij,a,b,i,j->abij',eriA,sfva,sfva,sfoa,sfoa)
+    Ioovv = einsum('ijab,i,j,a,b->ijab',eriA,sfoa,sfoa,sfva,sfva)
+    Ivovo = einsum('ajbi,a,j,b,i->ajbi',eriA,sfva,sfoa,sfva,sfoa)
+    Ivooo = einsum('akij,a,k,i,j->akij',eriA,sfva,sfoa,sfoa,sfoa)
+    Iooov = einsum('jkia,j,k,i,a->jkia',eriA,sfoa,sfoa,sfoa,sfva)
+    Ioooo = einsum('klij,k,l,i,j->klij',eriA,sfoa,sfoa,sfoa,sfoa)
+    Ia = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
+            vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
 
-        Ivvvv = einsum('abcd,a,b,c,d->abcd',eriB,sfvb,sfvb,sfvb,sfvb)
-        Ivvvo = einsum('abci,a,b,c,i->abci',eriB,sfvb,sfvb,sfvb,sfob)
-        Ivovv = einsum('aibc,a,i,b,c->aibc',eriB,sfvb,sfob,sfvb,sfvb)
-        Ivvoo = einsum('abij,a,b,i,j->abij',eriB,sfvb,sfvb,sfob,sfob)
-        Ioovv = einsum('ijab,i,j,a,b->ijab',eriB,sfob,sfob,sfvb,sfvb)
-        Ivovo = einsum('ajbi,a,j,b,i->ajbi',eriB,sfvb,sfob,sfvb,sfob)
-        Ivooo = einsum('akij,a,k,i,j->akij',eriB,sfvb,sfob,sfob,sfob)
-        Iooov = einsum('jkia,j,k,i,a->jkia',eriB,sfob,sfob,sfob,sfvb)
-        Ioooo = einsum('klij,k,l,i,j->klij',eriB,sfob,sfob,sfob,sfob)
-        Ib = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-                vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+    Ivvvv = einsum('abcd,a,b,c,d->abcd',eriB,sfvb,sfvb,sfvb,sfvb)
+    Ivvvo = einsum('abci,a,b,c,i->abci',eriB,sfvb,sfvb,sfvb,sfob)
+    Ivovv = einsum('aibc,a,i,b,c->aibc',eriB,sfvb,sfob,sfvb,sfvb)
+    Ivvoo = einsum('abij,a,b,i,j->abij',eriB,sfvb,sfvb,sfob,sfob)
+    Ioovv = einsum('ijab,i,j,a,b->ijab',eriB,sfob,sfob,sfvb,sfvb)
+    Ivovo = einsum('ajbi,a,j,b,i->ajbi',eriB,sfvb,sfob,sfvb,sfob)
+    Ivooo = einsum('akij,a,k,i,j->akij',eriB,sfvb,sfob,sfob,sfob)
+    Iooov = einsum('jkia,j,k,i,a->jkia',eriB,sfob,sfob,sfob,sfvb)
+    Ioooo = einsum('klij,k,l,i,j->klij',eriB,sfob,sfob,sfob,sfob)
+    Ib = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
+            vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
 
-        Ivvvv = einsum('abcd,a,b,c,d->abcd',eriAB,sfva,sfvb,sfva,sfvb)
-        Ivvvo = einsum('abci,a,b,c,i->abci',eriAB,sfva,sfvb,sfva,sfob)
-        Ivvov = einsum('abic,a,b,i,c->abic',eriAB,sfva,sfvb,sfoa,sfvb)
-        Ivovv = einsum('aibc,a,i,b,c->aibc',eriAB,sfva,sfob,sfva,sfvb)
-        Iovvv = einsum('iabc,i,a,b,c->iabc',eriAB,sfoa,sfvb,sfva,sfvb)
-        Ivvoo = einsum('abij,a,b,i,j->abij',eriAB,sfva,sfvb,sfoa,sfob)
-        Ivovo = einsum('ajbi,a,j,b,i->ajbi',eriAB,sfva,sfob,sfva,sfob)
-        Iovvo = einsum('jabi,j,a,b,i->jabi',eriAB,sfoa,sfvb,sfva,sfob)
-        Ivoov = einsum('ajib,a,j,i,b->ajib',eriAB,sfva,sfob,sfoa,sfvb)
-        Iovov = einsum('jaib,j,a,i,b->jaib',eriAB,sfoa,sfvb,sfoa,sfvb)
-        Ioovv = einsum('ijab,i,j,a,b->ijab',eriAB,sfoa,sfob,sfva,sfvb)
-        Ivooo = einsum('akij,a,k,i,j->akij',eriAB,sfva,sfob,sfoa,sfob)
-        Iovoo = einsum('kaij,k,a,i,j->kaij',eriAB,sfoa,sfvb,sfoa,sfob)
-        Ioovo = einsum('jkai,j,k,a,i->jkai',eriAB,sfoa,sfob,sfva,sfob)
-        Iooov = einsum('jkia,j,k,i,a->jkia',eriAB,sfoa,sfob,sfoa,sfvb)
-        Ioooo = einsum('klij,k,l,i,j->klij',eriAB,sfoa,sfob,sfoa,sfob)
-        Iabab = two_e_blocks_full(vvvv=Ivvvv,
-                vvvo=Ivvvo,vvov=Ivvov,
-                vovv=Ivovv,ovvv=Iovvv,
-                vvoo=Ivvoo,vovo=Ivovo,
-                ovvo=Iovvo,voov=Ivoov,
-                ovov=Iovov,oovv=Ioovv,
-                vooo=Ivooo,ovoo=Iovoo,
-                oovo=Ioovo,ooov=Iooov,
-                oooo=Ioooo)
+    Ivvvv = einsum('abcd,a,b,c,d->abcd',eriAB,sfva,sfvb,sfva,sfvb)
+    Ivvvo = einsum('abci,a,b,c,i->abci',eriAB,sfva,sfvb,sfva,sfob)
+    Ivvov = einsum('abic,a,b,i,c->abic',eriAB,sfva,sfvb,sfoa,sfvb)
+    Ivovv = einsum('aibc,a,i,b,c->aibc',eriAB,sfva,sfob,sfva,sfvb)
+    Iovvv = einsum('iabc,i,a,b,c->iabc',eriAB,sfoa,sfvb,sfva,sfvb)
+    Ivvoo = einsum('abij,a,b,i,j->abij',eriAB,sfva,sfvb,sfoa,sfob)
+    Ivovo = einsum('ajbi,a,j,b,i->ajbi',eriAB,sfva,sfob,sfva,sfob)
+    Iovvo = einsum('jabi,j,a,b,i->jabi',eriAB,sfoa,sfvb,sfva,sfob)
+    Ivoov = einsum('ajib,a,j,i,b->ajib',eriAB,sfva,sfob,sfoa,sfvb)
+    Iovov = einsum('jaib,j,a,i,b->jaib',eriAB,sfoa,sfvb,sfoa,sfvb)
+    Ioovv = einsum('ijab,i,j,a,b->ijab',eriAB,sfoa,sfob,sfva,sfvb)
+    Ivooo = einsum('akij,a,k,i,j->akij',eriAB,sfva,sfob,sfoa,sfob)
+    Iovoo = einsum('kaij,k,a,i,j->kaij',eriAB,sfoa,sfvb,sfoa,sfob)
+    Ioovo = einsum('jkai,j,k,a,i->jkai',eriAB,sfoa,sfob,sfva,sfob)
+    Iooov = einsum('jkia,j,k,i,a->jkia',eriAB,sfoa,sfob,sfoa,sfvb)
+    Ioooo = einsum('klij,k,l,i,j->klij',eriAB,sfoa,sfob,sfoa,sfob)
+    Iabab = two_e_blocks_full(vvvv=Ivvvv,
+            vvvo=Ivvvo,vvov=Ivvov,
+            vovv=Ivovv,ovvv=Iovvv,
+            vvoo=Ivvoo,vovo=Ivovo,
+            ovvo=Iovvo,voov=Ivoov,
+            ovov=Iovov,oovv=Ioovv,
+            vooo=Ivooo,ovoo=Iovoo,
+            oovo=Ioovo,ooov=Iooov,
+            oooo=Ioooo)
 
-        return Fa,Fb,Ia,Ib,Iabab
+    return Fa,Fb,Ia,Ib,Iabab
 
 def rft_integrals(sys, en, beta, mu):
-        """Return one and two-electron integrals in the general spin orbital basis."""
-        fo = ft_utils.ff(beta, en, mu)
-        fv = ft_utils.ffv(beta, en, mu)
-        sfo = numpy.sqrt(fo)
-        sfv = numpy.sqrt(fv)
+    """Return one and two-electron integrals in the general spin orbital basis."""
+    fo = ft_utils.ff(beta, en, mu)
+    fv = ft_utils.ffv(beta, en, mu)
+    sfo = numpy.sqrt(fo)
+    sfv = numpy.sqrt(fv)
 
-        # get FT fock matrix
-        fmo = sys.r_fock_tot()
-        fmo = fmo - numpy.diag(en)
+    # get FT fock matrix
+    fmo = sys.r_fock_tot()
+    fmo = fmo - numpy.diag(en)
 
-        # get ERIs
-        eri = sys.r_int_tot()
+    # get ERIs
+    eri = sys.r_int_tot()
 
-        # pre-contract with fermi factors
-        Foo = einsum('ij,i,j->ij',fmo,sfo,sfo)
-        Fov = einsum('ia,i,a->ia',fmo,sfo,sfv)
-        Fvo = einsum('ai,a,i->ai',fmo,sfv,sfo)
-        Fvv = einsum('ab,a,b->ab',fmo,sfv,sfv)
-        F = one_e_blocks(Foo,Fov,Fvo,Fvv)
+    # pre-contract with fermi factors
+    Foo = einsum('ij,i,j->ij',fmo,sfo,sfo)
+    Fov = einsum('ia,i,a->ia',fmo,sfo,sfv)
+    Fvo = einsum('ai,a,i->ai',fmo,sfv,sfo)
+    Fvv = einsum('ab,a,b->ab',fmo,sfv,sfv)
+    F = one_e_blocks(Foo,Fov,Fvo,Fvv)
 
-        Ivvvv = einsum('abcd,a,b,c,d->abcd',eri,sfv,sfv,sfv,sfv)
-        Ivvvo = einsum('abci,a,b,c,i->abci',eri,sfv,sfv,sfv,sfo)
-        Ivvov = einsum('abic,a,b,i,c->abic',eri,sfv,sfv,sfo,sfv)
-        Ivovv = einsum('aibc,a,i,b,c->aibc',eri,sfv,sfo,sfv,sfv)
-        Iovvv = einsum('iabc,i,a,b,c->iabc',eri,sfo,sfv,sfv,sfv)
-        Ivvoo = einsum('abij,a,b,i,j->abij',eri,sfv,sfv,sfo,sfo)
-        Ivovo = einsum('ajbi,a,j,b,i->ajbi',eri,sfv,sfo,sfv,sfo)
-        Iovvo = einsum('jabi,j,a,b,i->jabi',eri,sfo,sfv,sfv,sfo)
-        Ivoov = einsum('ajib,a,j,i,b->ajib',eri,sfv,sfo,sfo,sfv)
-        Iovov = einsum('jaib,j,a,i,b->jaib',eri,sfo,sfv,sfo,sfv)
-        Ioovv = einsum('ijab,i,j,a,b->ijab',eri,sfo,sfo,sfv,sfv)
-        Ivooo = einsum('akij,a,k,i,j->akij',eri,sfv,sfo,sfo,sfo)
-        Iovoo = einsum('kaij,k,a,i,j->kaij',eri,sfo,sfv,sfo,sfo)
-        Ioovo = einsum('jkai,j,k,a,i->jkai',eri,sfo,sfo,sfv,sfo)
-        Iooov = einsum('jkia,j,k,i,a->jkia',eri,sfo,sfo,sfo,sfv)
-        Ioooo = einsum('klij,k,l,i,j->klij',eri,sfo,sfo,sfo,sfo)
-        I = two_e_blocks_full(vvvv=Ivvvv,
-                vvvo=Ivvvo,vvov=Ivvov,
-                vovv=Ivovv,ovvv=Iovvv,
-                vvoo=Ivvoo,vovo=Ivovo,
-                ovvo=Iovvo,voov=Ivoov,
-                ovov=Iovov,oovv=Ioovv,
-                vooo=Ivooo,ovoo=Iovoo,
-                oovo=Ioovo,ooov=Iooov,
-                oooo=Ioooo)
-        return F,I
+    Ivvvv = einsum('abcd,a,b,c,d->abcd',eri,sfv,sfv,sfv,sfv)
+    Ivvvo = einsum('abci,a,b,c,i->abci',eri,sfv,sfv,sfv,sfo)
+    Ivvov = einsum('abic,a,b,i,c->abic',eri,sfv,sfv,sfo,sfv)
+    Ivovv = einsum('aibc,a,i,b,c->aibc',eri,sfv,sfo,sfv,sfv)
+    Iovvv = einsum('iabc,i,a,b,c->iabc',eri,sfo,sfv,sfv,sfv)
+    Ivvoo = einsum('abij,a,b,i,j->abij',eri,sfv,sfv,sfo,sfo)
+    Ivovo = einsum('ajbi,a,j,b,i->ajbi',eri,sfv,sfo,sfv,sfo)
+    Iovvo = einsum('jabi,j,a,b,i->jabi',eri,sfo,sfv,sfv,sfo)
+    Ivoov = einsum('ajib,a,j,i,b->ajib',eri,sfv,sfo,sfo,sfv)
+    Iovov = einsum('jaib,j,a,i,b->jaib',eri,sfo,sfv,sfo,sfv)
+    Ioovv = einsum('ijab,i,j,a,b->ijab',eri,sfo,sfo,sfv,sfv)
+    Ivooo = einsum('akij,a,k,i,j->akij',eri,sfv,sfo,sfo,sfo)
+    Iovoo = einsum('kaij,k,a,i,j->kaij',eri,sfo,sfv,sfo,sfo)
+    Ioovo = einsum('jkai,j,k,a,i->jkai',eri,sfo,sfo,sfv,sfo)
+    Iooov = einsum('jkia,j,k,i,a->jkia',eri,sfo,sfo,sfo,sfv)
+    Ioooo = einsum('klij,k,l,i,j->klij',eri,sfo,sfo,sfo,sfo)
+    I = two_e_blocks_full(vvvv=Ivvvv,
+            vvvo=Ivvvo,vvov=Ivvov,
+            vovv=Ivovv,ovvv=Iovvv,
+            vvoo=Ivvoo,vovo=Ivovo,
+            ovvo=Iovvo,voov=Ivoov,
+            ovov=Iovov,oovv=Ioovv,
+            vooo=Ivooo,ovoo=Iovoo,
+            oovo=Ioovo,ooov=Iooov,
+            oooo=Ioooo)
+    return F,I
 
 def ft_active_integrals(sys, en, focc, fvir, iocc, ivir):
-        """Return one and two-electron integrals in the general spin orbital basis
-        with small occupations excluded."""
-        # get FT Fock matrix
-        fmo = sys.g_fock_tot()
-        fmo = fmo - numpy.diag(en)
+    """Return one and two-electron integrals in the general spin orbital basis
+    with small occupations excluded."""
+    # get FT Fock matrix
+    fmo = sys.g_fock_tot()
+    fmo = fmo - numpy.diag(en)
 
-        sfo = numpy.sqrt(focc)
-        sfv = numpy.sqrt(fvir)
+    sfo = numpy.sqrt(focc)
+    sfv = numpy.sqrt(fvir)
 
-        # get ERIs
-        eri = sys.g_aint_tot()
+    # get ERIs
+    eri = sys.g_aint_tot()
 
-        # pre-contract with fermi factors
-        Foo = einsum('ij,i,j->ij',fmo[numpy.ix_(iocc,iocc)],sfo,sfo)
-        Fov = einsum('ia,i,a->ia',fmo[numpy.ix_(iocc,ivir)],sfo,sfv)
-        Fvo = einsum('ai,a,i->ai',fmo[numpy.ix_(ivir,iocc)],sfv,sfo)
-        Fvv = einsum('ab,a,b->ab',fmo[numpy.ix_(ivir,ivir)],sfv,sfv)
-        F = one_e_blocks(Foo,Fov,Fvo,Fvv)
+    # pre-contract with fermi factors
+    Foo = einsum('ij,i,j->ij',fmo[numpy.ix_(iocc,iocc)],sfo,sfo)
+    Fov = einsum('ia,i,a->ia',fmo[numpy.ix_(iocc,ivir)],sfo,sfv)
+    Fvo = einsum('ai,a,i->ai',fmo[numpy.ix_(ivir,iocc)],sfv,sfo)
+    Fvv = einsum('ab,a,b->ab',fmo[numpy.ix_(ivir,ivir)],sfv,sfv)
+    F = one_e_blocks(Foo,Fov,Fvo,Fvv)
 
-        Ivvvv = einsum('abcd,a,b,c,d->abcd',eri[numpy.ix_(ivir,ivir,ivir,ivir)],sfv,sfv,sfv,sfv)
-        Ivvvo = einsum('abci,a,b,c,i->abci',eri[numpy.ix_(ivir,ivir,ivir,iocc)],sfv,sfv,sfv,sfo)
-        Ivovv = einsum('aibc,a,i,b,c->aibc',eri[numpy.ix_(ivir,iocc,ivir,ivir)],sfv,sfo,sfv,sfv)
-        Ivvoo = einsum('abij,a,b,i,j->abij',eri[numpy.ix_(ivir,ivir,iocc,iocc)],sfv,sfv,sfo,sfo)
-        Ioovv = einsum('ijab,i,j,a,b->ijab',eri[numpy.ix_(iocc,iocc,ivir,ivir)],sfo,sfo,sfv,sfv)
-        Ivovo = einsum('ajbi,a,j,b,i->ajbi',eri[numpy.ix_(ivir,iocc,ivir,iocc)],sfv,sfo,sfv,sfo)
-        Ivooo = einsum('akij,a,k,i,j->akij',eri[numpy.ix_(ivir,iocc,iocc,iocc)],sfv,sfo,sfo,sfo)
-        Iooov = einsum('jkia,j,k,i,a->jkia',eri[numpy.ix_(iocc,iocc,iocc,ivir)],sfo,sfo,sfo,sfv)
-        Ioooo = einsum('klij,k,l,i,j->klij',eri[numpy.ix_(iocc,iocc,iocc,iocc)],sfo,sfo,sfo,sfo)
-        I = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-                vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+    Ivvvv = einsum('abcd,a,b,c,d->abcd',eri[numpy.ix_(ivir,ivir,ivir,ivir)],sfv,sfv,sfv,sfv)
+    Ivvvo = einsum('abci,a,b,c,i->abci',eri[numpy.ix_(ivir,ivir,ivir,iocc)],sfv,sfv,sfv,sfo)
+    Ivovv = einsum('aibc,a,i,b,c->aibc',eri[numpy.ix_(ivir,iocc,ivir,ivir)],sfv,sfo,sfv,sfv)
+    Ivvoo = einsum('abij,a,b,i,j->abij',eri[numpy.ix_(ivir,ivir,iocc,iocc)],sfv,sfv,sfo,sfo)
+    Ioovv = einsum('ijab,i,j,a,b->ijab',eri[numpy.ix_(iocc,iocc,ivir,ivir)],sfo,sfo,sfv,sfv)
+    Ivovo = einsum('ajbi,a,j,b,i->ajbi',eri[numpy.ix_(ivir,iocc,ivir,iocc)],sfv,sfo,sfv,sfo)
+    Ivooo = einsum('akij,a,k,i,j->akij',eri[numpy.ix_(ivir,iocc,iocc,iocc)],sfv,sfo,sfo,sfo)
+    Iooov = einsum('jkia,j,k,i,a->jkia',eri[numpy.ix_(iocc,iocc,iocc,ivir)],sfo,sfo,sfo,sfv)
+    Ioooo = einsum('klij,k,l,i,j->klij',eri[numpy.ix_(iocc,iocc,iocc,iocc)],sfo,sfo,sfo,sfo)
+    I = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
+            vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
 
-        return F,I
+    return F,I
 
 def uft_active_integrals(sys, ea, eb, foa, fva, fob, fvb, iocca, ivira, ioccb, ivirb):
-        """Return one and two-electron integrals in the general spin orbital basis
-        with small occupations excluded."""
-        # get FT Fock matrix
-        fa,fb = sys.u_fock_tot()
-        fa = fa - numpy.diag(ea)
-        fb = fb - numpy.diag(eb)
+    """Return one and two-electron integrals in the general spin orbital basis
+    with small occupations excluded."""
+    # get FT Fock matrix
+    fa,fb = sys.u_fock_tot()
+    fa = fa - numpy.diag(ea)
+    fb = fb - numpy.diag(eb)
 
-        sfoa = numpy.sqrt(foa)
-        sfva = numpy.sqrt(fva)
-        sfob = numpy.sqrt(fob)
-        sfvb = numpy.sqrt(fvb)
+    sfoa = numpy.sqrt(foa)
+    sfva = numpy.sqrt(fva)
+    sfob = numpy.sqrt(fob)
+    sfvb = numpy.sqrt(fvb)
 
-        # pre-contract with fermi factors
-        Fooa = einsum('ij,i,j->ij',fa[numpy.ix_(iocca,iocca)],sfoa,sfoa)
-        Fova = einsum('ia,i,a->ia',fa[numpy.ix_(iocca,ivira)],sfoa,sfva)
-        Fvoa = einsum('ai,a,i->ai',fa[numpy.ix_(ivira,iocca)],sfva,sfoa)
-        Fvva = einsum('ab,a,b->ab',fa[numpy.ix_(ivira,ivira)],sfva,sfva)
-        Fa = one_e_blocks(Fooa,Fova,Fvoa,Fvva)
+    # pre-contract with fermi factors
+    Fooa = einsum('ij,i,j->ij',fa[numpy.ix_(iocca,iocca)],sfoa,sfoa)
+    Fova = einsum('ia,i,a->ia',fa[numpy.ix_(iocca,ivira)],sfoa,sfva)
+    Fvoa = einsum('ai,a,i->ai',fa[numpy.ix_(ivira,iocca)],sfva,sfoa)
+    Fvva = einsum('ab,a,b->ab',fa[numpy.ix_(ivira,ivira)],sfva,sfva)
+    Fa = one_e_blocks(Fooa,Fova,Fvoa,Fvva)
 
-        Foob = einsum('ij,i,j->ij',fb[numpy.ix_(ioccb,ioccb)],sfob,sfob)
-        Fovb = einsum('ia,i,a->ia',fb[numpy.ix_(ioccb,ivirb)],sfob,sfvb)
-        Fvob = einsum('ai,a,i->ai',fb[numpy.ix_(ivirb,ioccb)],sfvb,sfob)
-        Fvvb = einsum('ab,a,b->ab',fb[numpy.ix_(ivirb,ivirb)],sfvb,sfvb)
-        Fb = one_e_blocks(Foob,Fovb,Fvob,Fvvb)
+    Foob = einsum('ij,i,j->ij',fb[numpy.ix_(ioccb,ioccb)],sfob,sfob)
+    Fovb = einsum('ia,i,a->ia',fb[numpy.ix_(ioccb,ivirb)],sfob,sfvb)
+    Fvob = einsum('ai,a,i->ai',fb[numpy.ix_(ivirb,ioccb)],sfvb,sfob)
+    Fvvb = einsum('ab,a,b->ab',fb[numpy.ix_(ivirb,ivirb)],sfvb,sfvb)
+    Fb = one_e_blocks(Foob,Fovb,Fvob,Fvvb)
 
-        # get ERIs
-        eriA,eriB,eriAB = sys.u_aint_tot()
+    # get ERIs
+    eriA,eriB,eriAB = sys.u_aint_tot()
 
-        Ivvvv = einsum('abcd,a,b,c,d->abcd',eriA[numpy.ix_(ivira,ivira,ivira,ivira)],sfva,sfva,sfva,sfva)
-        Ivvvo = einsum('abci,a,b,c,i->abci',eriA[numpy.ix_(ivira,ivira,ivira,iocca)],sfva,sfva,sfva,sfoa)
-        Ivovv = einsum('aibc,a,i,b,c->aibc',eriA[numpy.ix_(ivira,iocca,ivira,ivira)],sfva,sfoa,sfva,sfva)
-        Ivvoo = einsum('abij,a,b,i,j->abij',eriA[numpy.ix_(ivira,ivira,iocca,iocca)],sfva,sfva,sfoa,sfoa)
-        Ioovv = einsum('ijab,i,j,a,b->ijab',eriA[numpy.ix_(iocca,iocca,ivira,ivira)],sfoa,sfoa,sfva,sfva)
-        Ivovo = einsum('ajbi,a,j,b,i->ajbi',eriA[numpy.ix_(ivira,iocca,ivira,iocca)],sfva,sfoa,sfva,sfoa)
-        Ivooo = einsum('akij,a,k,i,j->akij',eriA[numpy.ix_(ivira,iocca,iocca,iocca)],sfva,sfoa,sfoa,sfoa)
-        Iooov = einsum('jkia,j,k,i,a->jkia',eriA[numpy.ix_(iocca,iocca,iocca,ivira)],sfoa,sfoa,sfoa,sfva)
-        Ioooo = einsum('klij,k,l,i,j->klij',eriA[numpy.ix_(iocca,iocca,iocca,iocca)],sfoa,sfoa,sfoa,sfoa)
-        Ia = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-                vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+    Ivvvv = einsum('abcd,a,b,c,d->abcd',eriA[numpy.ix_(ivira,ivira,ivira,ivira)],sfva,sfva,sfva,sfva)
+    Ivvvo = einsum('abci,a,b,c,i->abci',eriA[numpy.ix_(ivira,ivira,ivira,iocca)],sfva,sfva,sfva,sfoa)
+    Ivovv = einsum('aibc,a,i,b,c->aibc',eriA[numpy.ix_(ivira,iocca,ivira,ivira)],sfva,sfoa,sfva,sfva)
+    Ivvoo = einsum('abij,a,b,i,j->abij',eriA[numpy.ix_(ivira,ivira,iocca,iocca)],sfva,sfva,sfoa,sfoa)
+    Ioovv = einsum('ijab,i,j,a,b->ijab',eriA[numpy.ix_(iocca,iocca,ivira,ivira)],sfoa,sfoa,sfva,sfva)
+    Ivovo = einsum('ajbi,a,j,b,i->ajbi',eriA[numpy.ix_(ivira,iocca,ivira,iocca)],sfva,sfoa,sfva,sfoa)
+    Ivooo = einsum('akij,a,k,i,j->akij',eriA[numpy.ix_(ivira,iocca,iocca,iocca)],sfva,sfoa,sfoa,sfoa)
+    Iooov = einsum('jkia,j,k,i,a->jkia',eriA[numpy.ix_(iocca,iocca,iocca,ivira)],sfoa,sfoa,sfoa,sfva)
+    Ioooo = einsum('klij,k,l,i,j->klij',eriA[numpy.ix_(iocca,iocca,iocca,iocca)],sfoa,sfoa,sfoa,sfoa)
+    Ia = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
+            vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
 
-        Ivvvv = einsum('abcd,a,b,c,d->abcd',eriB[numpy.ix_(ivirb,ivirb,ivirb,ivirb)],sfvb,sfvb,sfvb,sfvb)
-        Ivvvo = einsum('abci,a,b,c,i->abci',eriB[numpy.ix_(ivirb,ivirb,ivirb,ioccb)],sfvb,sfvb,sfvb,sfob)
-        Ivovv = einsum('aibc,a,i,b,c->aibc',eriB[numpy.ix_(ivirb,ioccb,ivirb,ivirb)],sfvb,sfob,sfvb,sfvb)
-        Ivvoo = einsum('abij,a,b,i,j->abij',eriB[numpy.ix_(ivirb,ivirb,ioccb,ioccb)],sfvb,sfvb,sfob,sfob)
-        Ioovv = einsum('ijab,i,j,a,b->ijab',eriB[numpy.ix_(ioccb,ioccb,ivirb,ivirb)],sfob,sfob,sfvb,sfvb)
-        Ivovo = einsum('ajbi,a,j,b,i->ajbi',eriB[numpy.ix_(ivirb,ioccb,ivirb,ioccb)],sfvb,sfob,sfvb,sfob)
-        Ivooo = einsum('akij,a,k,i,j->akij',eriB[numpy.ix_(ivirb,ioccb,ioccb,ioccb)],sfvb,sfob,sfob,sfob)
-        Iooov = einsum('jkia,j,k,i,a->jkia',eriB[numpy.ix_(ioccb,ioccb,ioccb,ivirb)],sfob,sfob,sfob,sfvb)
-        Ioooo = einsum('klij,k,l,i,j->klij',eriB[numpy.ix_(ioccb,ioccb,ioccb,ioccb)],sfob,sfob,sfob,sfob)
-        Ib = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-                vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+    Ivvvv = einsum('abcd,a,b,c,d->abcd',eriB[numpy.ix_(ivirb,ivirb,ivirb,ivirb)],sfvb,sfvb,sfvb,sfvb)
+    Ivvvo = einsum('abci,a,b,c,i->abci',eriB[numpy.ix_(ivirb,ivirb,ivirb,ioccb)],sfvb,sfvb,sfvb,sfob)
+    Ivovv = einsum('aibc,a,i,b,c->aibc',eriB[numpy.ix_(ivirb,ioccb,ivirb,ivirb)],sfvb,sfob,sfvb,sfvb)
+    Ivvoo = einsum('abij,a,b,i,j->abij',eriB[numpy.ix_(ivirb,ivirb,ioccb,ioccb)],sfvb,sfvb,sfob,sfob)
+    Ioovv = einsum('ijab,i,j,a,b->ijab',eriB[numpy.ix_(ioccb,ioccb,ivirb,ivirb)],sfob,sfob,sfvb,sfvb)
+    Ivovo = einsum('ajbi,a,j,b,i->ajbi',eriB[numpy.ix_(ivirb,ioccb,ivirb,ioccb)],sfvb,sfob,sfvb,sfob)
+    Ivooo = einsum('akij,a,k,i,j->akij',eriB[numpy.ix_(ivirb,ioccb,ioccb,ioccb)],sfvb,sfob,sfob,sfob)
+    Iooov = einsum('jkia,j,k,i,a->jkia',eriB[numpy.ix_(ioccb,ioccb,ioccb,ivirb)],sfob,sfob,sfob,sfvb)
+    Ioooo = einsum('klij,k,l,i,j->klij',eriB[numpy.ix_(ioccb,ioccb,ioccb,ioccb)],sfob,sfob,sfob,sfob)
+    Ib = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
+            vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
 
-        Ivvvv = einsum('abcd,a,b,c,d->abcd',eriAB[numpy.ix_(ivira,ivirb,ivira,ivirb)],sfva,sfvb,sfva,sfvb)
-        Ivvvo = einsum('abci,a,b,c,i->abci',eriAB[numpy.ix_(ivira,ivirb,ivira,ioccb)],sfva,sfvb,sfva,sfob)
-        Ivvov = einsum('abic,a,b,i,c->abic',eriAB[numpy.ix_(ivira,ivirb,iocca,ivirb)],sfva,sfvb,sfoa,sfvb)
-        Ivovv = einsum('aibc,a,i,b,c->aibc',eriAB[numpy.ix_(ivira,ioccb,ivira,ivirb)],sfva,sfob,sfva,sfvb)
-        Iovvv = einsum('iabc,i,a,b,c->iabc',eriAB[numpy.ix_(iocca,ivirb,ivira,ivirb)],sfoa,sfvb,sfva,sfvb)
-        Ivvoo = einsum('abij,a,b,i,j->abij',eriAB[numpy.ix_(ivira,ivirb,iocca,ioccb)],sfva,sfvb,sfoa,sfob)
-        Ivovo = einsum('ajbi,a,j,b,i->ajbi',eriAB[numpy.ix_(ivira,ioccb,ivira,ioccb)],sfva,sfob,sfva,sfob)
-        Iovvo = einsum('jabi,j,a,b,i->jabi',eriAB[numpy.ix_(iocca,ivirb,ivira,ioccb)],sfoa,sfvb,sfva,sfob)
-        Ivoov = einsum('ajib,a,j,i,b->ajib',eriAB[numpy.ix_(ivira,ioccb,iocca,ivirb)],sfva,sfob,sfoa,sfvb)
-        Iovov = einsum('jaib,j,a,i,b->jaib',eriAB[numpy.ix_(iocca,ivirb,iocca,ivirb)],sfoa,sfvb,sfoa,sfvb)
-        Ioovv = einsum('ijab,i,j,a,b->ijab',eriAB[numpy.ix_(iocca,ioccb,ivira,ivirb)],sfoa,sfob,sfva,sfvb)
-        Ivooo = einsum('akij,a,k,i,j->akij',eriAB[numpy.ix_(ivira,ioccb,iocca,ioccb)],sfva,sfob,sfoa,sfob)
-        Iovoo = einsum('kaij,k,a,i,j->kaij',eriAB[numpy.ix_(iocca,ivirb,iocca,ioccb)],sfoa,sfvb,sfoa,sfob)
-        Ioovo = einsum('jkai,j,k,a,i->jkai',eriAB[numpy.ix_(iocca,ioccb,ivira,ioccb)],sfoa,sfob,sfva,sfob)
-        Iooov = einsum('jkia,j,k,i,a->jkia',eriAB[numpy.ix_(iocca,ioccb,iocca,ivirb)],sfoa,sfob,sfoa,sfvb)
-        Ioooo = einsum('klij,k,l,i,j->klij',eriAB[numpy.ix_(iocca,ioccb,iocca,ioccb)],sfoa,sfob,sfoa,sfob)
-        Iabab = two_e_blocks_full(vvvv=Ivvvv,
-                vvvo=Ivvvo,vvov=Ivvov,
-                vovv=Ivovv,ovvv=Iovvv,
-                vvoo=Ivvoo,vovo=Ivovo,
-                ovvo=Iovvo,voov=Ivoov,
-                ovov=Iovov,oovv=Ioovv,
-                vooo=Ivooo,ovoo=Iovoo,
-                oovo=Ioovo,ooov=Iooov,
-                oooo=Ioooo)
+    Ivvvv = einsum('abcd,a,b,c,d->abcd',eriAB[numpy.ix_(ivira,ivirb,ivira,ivirb)],sfva,sfvb,sfva,sfvb)
+    Ivvvo = einsum('abci,a,b,c,i->abci',eriAB[numpy.ix_(ivira,ivirb,ivira,ioccb)],sfva,sfvb,sfva,sfob)
+    Ivvov = einsum('abic,a,b,i,c->abic',eriAB[numpy.ix_(ivira,ivirb,iocca,ivirb)],sfva,sfvb,sfoa,sfvb)
+    Ivovv = einsum('aibc,a,i,b,c->aibc',eriAB[numpy.ix_(ivira,ioccb,ivira,ivirb)],sfva,sfob,sfva,sfvb)
+    Iovvv = einsum('iabc,i,a,b,c->iabc',eriAB[numpy.ix_(iocca,ivirb,ivira,ivirb)],sfoa,sfvb,sfva,sfvb)
+    Ivvoo = einsum('abij,a,b,i,j->abij',eriAB[numpy.ix_(ivira,ivirb,iocca,ioccb)],sfva,sfvb,sfoa,sfob)
+    Ivovo = einsum('ajbi,a,j,b,i->ajbi',eriAB[numpy.ix_(ivira,ioccb,ivira,ioccb)],sfva,sfob,sfva,sfob)
+    Iovvo = einsum('jabi,j,a,b,i->jabi',eriAB[numpy.ix_(iocca,ivirb,ivira,ioccb)],sfoa,sfvb,sfva,sfob)
+    Ivoov = einsum('ajib,a,j,i,b->ajib',eriAB[numpy.ix_(ivira,ioccb,iocca,ivirb)],sfva,sfob,sfoa,sfvb)
+    Iovov = einsum('jaib,j,a,i,b->jaib',eriAB[numpy.ix_(iocca,ivirb,iocca,ivirb)],sfoa,sfvb,sfoa,sfvb)
+    Ioovv = einsum('ijab,i,j,a,b->ijab',eriAB[numpy.ix_(iocca,ioccb,ivira,ivirb)],sfoa,sfob,sfva,sfvb)
+    Ivooo = einsum('akij,a,k,i,j->akij',eriAB[numpy.ix_(ivira,ioccb,iocca,ioccb)],sfva,sfob,sfoa,sfob)
+    Iovoo = einsum('kaij,k,a,i,j->kaij',eriAB[numpy.ix_(iocca,ivirb,iocca,ioccb)],sfoa,sfvb,sfoa,sfob)
+    Ioovo = einsum('jkai,j,k,a,i->jkai',eriAB[numpy.ix_(iocca,ioccb,ivira,ioccb)],sfoa,sfob,sfva,sfob)
+    Iooov = einsum('jkia,j,k,i,a->jkia',eriAB[numpy.ix_(iocca,ioccb,iocca,ivirb)],sfoa,sfob,sfoa,sfvb)
+    Ioooo = einsum('klij,k,l,i,j->klij',eriAB[numpy.ix_(iocca,ioccb,iocca,ioccb)],sfoa,sfob,sfoa,sfob)
+    Iabab = two_e_blocks_full(vvvv=Ivvvv,
+            vvvo=Ivvvo,vvov=Ivvov,
+            vovv=Ivovv,ovvv=Iovvv,
+            vvoo=Ivvoo,vovo=Ivovo,
+            ovvo=Iovvo,voov=Ivoov,
+            ovov=Iovov,oovv=Ioovv,
+            vooo=Ivooo,ovoo=Iovoo,
+            oovo=Ioovo,ooov=Iooov,
+            oooo=Ioooo)
 
-        return Fa,Fb,Ia,Ib,Iabab
+    return Fa,Fb,Ia,Ib,Iabab
 
 def rft_active_integrals(sys, en, focc, fvir, iocc, ivir):
-        """Return one and two-electron integrals in the general spin orbital basis."""
-        # get FT fock matrix
-        fmo = sys.r_fock_tot()
-        fmo = fmo - numpy.diag(en)
+    """Return one and two-electron integrals in the general spin orbital basis."""
+    # get FT fock matrix
+    fmo = sys.r_fock_tot()
+    fmo = fmo - numpy.diag(en)
 
-        # get ERIs
-        eri = sys.r_int_tot()
+    # get ERIs
+    eri = sys.r_int_tot()
 
-        # square root of occupation numbers
-        sfo = numpy.sqrt(focc)
-        sfv = numpy.sqrt(fvir)
+    # square root of occupation numbers
+    sfo = numpy.sqrt(focc)
+    sfv = numpy.sqrt(fvir)
 
-        # pre-contract with fermi factors
-        Foo = einsum('ij,i,j->ij',fmo[numpy.ix_(iocc,iocc)],sfo,sfo)
-        Fov = einsum('ia,i,a->ia',fmo[numpy.ix_(iocc,ivir)],sfo,sfv)
-        Fvo = einsum('ai,a,i->ai',fmo[numpy.ix_(ivir,iocc)],sfv,sfo)
-        Fvv = einsum('ab,a,b->ab',fmo[numpy.ix_(ivir,ivir)],sfv,sfv)
-        F = one_e_blocks(Foo,Fov,Fvo,Fvv)
+    # pre-contract with fermi factors
+    Foo = einsum('ij,i,j->ij',fmo[numpy.ix_(iocc,iocc)],sfo,sfo)
+    Fov = einsum('ia,i,a->ia',fmo[numpy.ix_(iocc,ivir)],sfo,sfv)
+    Fvo = einsum('ai,a,i->ai',fmo[numpy.ix_(ivir,iocc)],sfv,sfo)
+    Fvv = einsum('ab,a,b->ab',fmo[numpy.ix_(ivir,ivir)],sfv,sfv)
+    F = one_e_blocks(Foo,Fov,Fvo,Fvv)
 
-        Ivvvv = einsum('abcd,a,b,c,d->abcd',eri[numpy.ix_(ivir,ivir,ivir,ivir)],sfv,sfv,sfv,sfv)
-        Ivvvo = einsum('abci,a,b,c,i->abci',eri[numpy.ix_(ivir,ivir,ivir,iocc)],sfv,sfv,sfv,sfo)
-        Ivvov = einsum('abic,a,b,i,c->abic',eri[numpy.ix_(ivir,ivir,iocc,ivir)],sfv,sfv,sfo,sfv)
-        Ivovv = einsum('aibc,a,i,b,c->aibc',eri[numpy.ix_(ivir,iocc,ivir,ivir)],sfv,sfo,sfv,sfv)
-        Iovvv = einsum('iabc,i,a,b,c->iabc',eri[numpy.ix_(iocc,ivir,ivir,ivir)],sfo,sfv,sfv,sfv)
-        Ivvoo = einsum('abij,a,b,i,j->abij',eri[numpy.ix_(ivir,ivir,iocc,iocc)],sfv,sfv,sfo,sfo)
-        Ivovo = einsum('ajbi,a,j,b,i->ajbi',eri[numpy.ix_(ivir,iocc,ivir,iocc)],sfv,sfo,sfv,sfo)
-        Iovvo = einsum('jabi,j,a,b,i->jabi',eri[numpy.ix_(iocc,ivir,ivir,iocc)],sfo,sfv,sfv,sfo)
-        Ivoov = einsum('ajib,a,j,i,b->ajib',eri[numpy.ix_(ivir,iocc,iocc,ivir)],sfv,sfo,sfo,sfv)
-        Iovov = einsum('jaib,j,a,i,b->jaib',eri[numpy.ix_(iocc,ivir,iocc,ivir)],sfo,sfv,sfo,sfv)
-        Ioovv = einsum('ijab,i,j,a,b->ijab',eri[numpy.ix_(iocc,iocc,ivir,ivir)],sfo,sfo,sfv,sfv)
-        Ivooo = einsum('akij,a,k,i,j->akij',eri[numpy.ix_(ivir,iocc,iocc,iocc)],sfv,sfo,sfo,sfo)
-        Iovoo = einsum('kaij,k,a,i,j->kaij',eri[numpy.ix_(iocc,ivir,iocc,iocc)],sfo,sfv,sfo,sfo)
-        Ioovo = einsum('jkai,j,k,a,i->jkai',eri[numpy.ix_(iocc,iocc,ivir,iocc)],sfo,sfo,sfv,sfo)
-        Iooov = einsum('jkia,j,k,i,a->jkia',eri[numpy.ix_(iocc,iocc,iocc,ivir)],sfo,sfo,sfo,sfv)
-        Ioooo = einsum('klij,k,l,i,j->klij',eri[numpy.ix_(iocc,iocc,iocc,iocc)],sfo,sfo,sfo,sfo)
-        I = two_e_blocks_full(vvvv=Ivvvv,
-                vvvo=Ivvvo,vvov=Ivvov,
-                vovv=Ivovv,ovvv=Iovvv,
-                vvoo=Ivvoo,vovo=Ivovo,
-                ovvo=Iovvo,voov=Ivoov,
-                ovov=Iovov,oovv=Ioovv,
-                vooo=Ivooo,ovoo=Iovoo,
-                oovo=Ioovo,ooov=Iooov,
-                oooo=Ioooo)
-        return F,I
+    Ivvvv = einsum('abcd,a,b,c,d->abcd',eri[numpy.ix_(ivir,ivir,ivir,ivir)],sfv,sfv,sfv,sfv)
+    Ivvvo = einsum('abci,a,b,c,i->abci',eri[numpy.ix_(ivir,ivir,ivir,iocc)],sfv,sfv,sfv,sfo)
+    Ivvov = einsum('abic,a,b,i,c->abic',eri[numpy.ix_(ivir,ivir,iocc,ivir)],sfv,sfv,sfo,sfv)
+    Ivovv = einsum('aibc,a,i,b,c->aibc',eri[numpy.ix_(ivir,iocc,ivir,ivir)],sfv,sfo,sfv,sfv)
+    Iovvv = einsum('iabc,i,a,b,c->iabc',eri[numpy.ix_(iocc,ivir,ivir,ivir)],sfo,sfv,sfv,sfv)
+    Ivvoo = einsum('abij,a,b,i,j->abij',eri[numpy.ix_(ivir,ivir,iocc,iocc)],sfv,sfv,sfo,sfo)
+    Ivovo = einsum('ajbi,a,j,b,i->ajbi',eri[numpy.ix_(ivir,iocc,ivir,iocc)],sfv,sfo,sfv,sfo)
+    Iovvo = einsum('jabi,j,a,b,i->jabi',eri[numpy.ix_(iocc,ivir,ivir,iocc)],sfo,sfv,sfv,sfo)
+    Ivoov = einsum('ajib,a,j,i,b->ajib',eri[numpy.ix_(ivir,iocc,iocc,ivir)],sfv,sfo,sfo,sfv)
+    Iovov = einsum('jaib,j,a,i,b->jaib',eri[numpy.ix_(iocc,ivir,iocc,ivir)],sfo,sfv,sfo,sfv)
+    Ioovv = einsum('ijab,i,j,a,b->ijab',eri[numpy.ix_(iocc,iocc,ivir,ivir)],sfo,sfo,sfv,sfv)
+    Ivooo = einsum('akij,a,k,i,j->akij',eri[numpy.ix_(ivir,iocc,iocc,iocc)],sfv,sfo,sfo,sfo)
+    Iovoo = einsum('kaij,k,a,i,j->kaij',eri[numpy.ix_(iocc,ivir,iocc,iocc)],sfo,sfv,sfo,sfo)
+    Ioovo = einsum('jkai,j,k,a,i->jkai',eri[numpy.ix_(iocc,iocc,ivir,iocc)],sfo,sfo,sfv,sfo)
+    Iooov = einsum('jkia,j,k,i,a->jkia',eri[numpy.ix_(iocc,iocc,iocc,ivir)],sfo,sfo,sfo,sfv)
+    Ioooo = einsum('klij,k,l,i,j->klij',eri[numpy.ix_(iocc,iocc,iocc,iocc)],sfo,sfo,sfo,sfo)
+    I = two_e_blocks_full(vvvv=Ivvvv,
+            vvvo=Ivvvo,vvov=Ivvov,
+            vovv=Ivovv,ovvv=Iovvv,
+            vvoo=Ivvoo,vovo=Ivovo,
+            ovvo=Iovvo,voov=Ivoov,
+            ovov=Iovov,oovv=Ioovv,
+            vooo=Ivooo,ovoo=Iovoo,
+            oovo=Ioovo,ooov=Iooov,
+            oooo=Ioooo)
+    return F,I
 
 def _form_ft_d_eris(eri, sfo, sfv, dso, dsv):
-        Ivvvv = einsum('abcd,a,b,c,d->abcd',eri,dsv,sfv,sfv,sfv)\
-              + einsum('abcd,a,b,c,d->abcd',eri,sfv,dsv,sfv,sfv)\
-              + einsum('abcd,a,b,c,d->abcd',eri,sfv,sfv,dsv,sfv)\
-              + einsum('abcd,a,b,c,d->abcd',eri,sfv,sfv,sfv,dsv)
+    Ivvvv = einsum('abcd,a,b,c,d->abcd',eri,dsv,sfv,sfv,sfv)\
+          + einsum('abcd,a,b,c,d->abcd',eri,sfv,dsv,sfv,sfv)\
+          + einsum('abcd,a,b,c,d->abcd',eri,sfv,sfv,dsv,sfv)\
+          + einsum('abcd,a,b,c,d->abcd',eri,sfv,sfv,sfv,dsv)
 
-        Ivvvo = einsum('abci,a,b,c,i->abci',eri,dsv,sfv,sfv,sfo)\
-              + einsum('abci,a,b,c,i->abci',eri,sfv,dsv,sfv,sfo)\
-              + einsum('abci,a,b,c,i->abci',eri,sfv,sfv,dsv,sfo)\
-              + einsum('abci,a,b,c,i->abci',eri,sfv,sfv,sfv,dso)
+    Ivvvo = einsum('abci,a,b,c,i->abci',eri,dsv,sfv,sfv,sfo)\
+          + einsum('abci,a,b,c,i->abci',eri,sfv,dsv,sfv,sfo)\
+          + einsum('abci,a,b,c,i->abci',eri,sfv,sfv,dsv,sfo)\
+          + einsum('abci,a,b,c,i->abci',eri,sfv,sfv,sfv,dso)
 
-        Ivovv = einsum('aibc,a,i,b,c->aibc',eri,dsv,sfo,sfv,sfv)\
-              + einsum('aibc,a,i,b,c->aibc',eri,sfv,dso,sfv,sfv)\
-              + einsum('aibc,a,i,b,c->aibc',eri,sfv,sfo,dsv,sfv)\
-              + einsum('aibc,a,i,b,c->aibc',eri,sfv,sfo,sfv,dsv)
+    Ivovv = einsum('aibc,a,i,b,c->aibc',eri,dsv,sfo,sfv,sfv)\
+          + einsum('aibc,a,i,b,c->aibc',eri,sfv,dso,sfv,sfv)\
+          + einsum('aibc,a,i,b,c->aibc',eri,sfv,sfo,dsv,sfv)\
+          + einsum('aibc,a,i,b,c->aibc',eri,sfv,sfo,sfv,dsv)
 
-        Ivvoo = einsum('abij,a,b,i,j->abij',eri,dsv,sfv,sfo,sfo)\
-              + einsum('abij,a,b,i,j->abij',eri,sfv,dsv,sfo,sfo)\
-              + einsum('abij,a,b,i,j->abij',eri,sfv,sfv,dso,sfo)\
-              + einsum('abij,a,b,i,j->abij',eri,sfv,sfv,sfo,dso)
+    Ivvoo = einsum('abij,a,b,i,j->abij',eri,dsv,sfv,sfo,sfo)\
+          + einsum('abij,a,b,i,j->abij',eri,sfv,dsv,sfo,sfo)\
+          + einsum('abij,a,b,i,j->abij',eri,sfv,sfv,dso,sfo)\
+          + einsum('abij,a,b,i,j->abij',eri,sfv,sfv,sfo,dso)
 
-        Ivovo = einsum('ajbi,a,j,b,i->ajbi',eri,dsv,sfo,sfv,sfo)\
-              + einsum('ajbi,a,j,b,i->ajbi',eri,sfv,dso,sfv,sfo)\
-              + einsum('ajbi,a,j,b,i->ajbi',eri,sfv,sfo,dsv,sfo)\
-              + einsum('ajbi,a,j,b,i->ajbi',eri,sfv,sfo,sfv,dso)
+    Ivovo = einsum('ajbi,a,j,b,i->ajbi',eri,dsv,sfo,sfv,sfo)\
+          + einsum('ajbi,a,j,b,i->ajbi',eri,sfv,dso,sfv,sfo)\
+          + einsum('ajbi,a,j,b,i->ajbi',eri,sfv,sfo,dsv,sfo)\
+          + einsum('ajbi,a,j,b,i->ajbi',eri,sfv,sfo,sfv,dso)
 
-        Ioovv = einsum('ijab,i,j,a,b->ijab',eri,dso,sfo,sfv,sfv)\
-              + einsum('ijab,i,j,a,b->ijab',eri,sfo,dso,sfv,sfv)\
-              + einsum('ijab,i,j,a,b->ijab',eri,sfo,sfo,dsv,sfv)\
-              + einsum('ijab,i,j,a,b->ijab',eri,sfo,sfo,sfv,dsv)
+    Ioovv = einsum('ijab,i,j,a,b->ijab',eri,dso,sfo,sfv,sfv)\
+          + einsum('ijab,i,j,a,b->ijab',eri,sfo,dso,sfv,sfv)\
+          + einsum('ijab,i,j,a,b->ijab',eri,sfo,sfo,dsv,sfv)\
+          + einsum('ijab,i,j,a,b->ijab',eri,sfo,sfo,sfv,dsv)
 
-        Ivooo = einsum('akij,a,k,i,j->akij',eri,dsv,sfo,sfo,sfo)\
-              + einsum('akij,a,k,i,j->akij',eri,sfv,dso,sfo,sfo)\
-              + einsum('akij,a,k,i,j->akij',eri,sfv,sfo,dso,sfo)\
-              + einsum('akij,a,k,i,j->akij',eri,sfv,sfo,sfo,dso)
+    Ivooo = einsum('akij,a,k,i,j->akij',eri,dsv,sfo,sfo,sfo)\
+          + einsum('akij,a,k,i,j->akij',eri,sfv,dso,sfo,sfo)\
+          + einsum('akij,a,k,i,j->akij',eri,sfv,sfo,dso,sfo)\
+          + einsum('akij,a,k,i,j->akij',eri,sfv,sfo,sfo,dso)
 
-        Iooov = einsum('jkia,j,k,i,a->jkia',eri,dso,sfo,sfo,sfv)\
-              + einsum('jkia,j,k,i,a->jkia',eri,sfo,dso,sfo,sfv)\
-              + einsum('jkia,j,k,i,a->jkia',eri,sfo,sfo,dso,sfv)\
-              + einsum('jkia,j,k,i,a->jkia',eri,sfo,sfo,sfo,dsv)
+    Iooov = einsum('jkia,j,k,i,a->jkia',eri,dso,sfo,sfo,sfv)\
+          + einsum('jkia,j,k,i,a->jkia',eri,sfo,dso,sfo,sfv)\
+          + einsum('jkia,j,k,i,a->jkia',eri,sfo,sfo,dso,sfv)\
+          + einsum('jkia,j,k,i,a->jkia',eri,sfo,sfo,sfo,dsv)
 
-        Ioooo = einsum('klij,k,l,i,j->klij',eri,dso,sfo,sfo,sfo)\
-              + einsum('klij,k,l,i,j->klij',eri,sfo,dso,sfo,sfo)\
-              + einsum('klij,k,l,i,j->klij',eri,sfo,sfo,dso,sfo)\
-              + einsum('klij,k,l,i,j->klij',eri,sfo,sfo,sfo,dso)
+    Ioooo = einsum('klij,k,l,i,j->klij',eri,dso,sfo,sfo,sfo)\
+          + einsum('klij,k,l,i,j->klij',eri,sfo,dso,sfo,sfo)\
+          + einsum('klij,k,l,i,j->klij',eri,sfo,sfo,dso,sfo)\
+          + einsum('klij,k,l,i,j->klij',eri,sfo,sfo,sfo,dso)
 
-        I = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-                vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
-        return I
+    I = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
+            vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+    return I
 
 def _form_ft_d_active_eris(eri, sfo, sfv, dso, dsv, iocc, ivir):
-        Ivvvv = einsum('abcd,a,b,c,d->abcd',eri[numpy.ix_(ivir,ivir,ivir,ivir)],dsv,sfv,sfv,sfv)\
-              + einsum('abcd,a,b,c,d->abcd',eri[numpy.ix_(ivir,ivir,ivir,ivir)],sfv,dsv,sfv,sfv)\
-              + einsum('abcd,a,b,c,d->abcd',eri[numpy.ix_(ivir,ivir,ivir,ivir)],sfv,sfv,dsv,sfv)\
-              + einsum('abcd,a,b,c,d->abcd',eri[numpy.ix_(ivir,ivir,ivir,ivir)],sfv,sfv,sfv,dsv)
+    Ivvvv = einsum('abcd,a,b,c,d->abcd',eri[numpy.ix_(ivir,ivir,ivir,ivir)],dsv,sfv,sfv,sfv)\
+          + einsum('abcd,a,b,c,d->abcd',eri[numpy.ix_(ivir,ivir,ivir,ivir)],sfv,dsv,sfv,sfv)\
+          + einsum('abcd,a,b,c,d->abcd',eri[numpy.ix_(ivir,ivir,ivir,ivir)],sfv,sfv,dsv,sfv)\
+          + einsum('abcd,a,b,c,d->abcd',eri[numpy.ix_(ivir,ivir,ivir,ivir)],sfv,sfv,sfv,dsv)
 
-        Ivvvo = einsum('abci,a,b,c,i->abci',eri[numpy.ix_(ivir,ivir,ivir,iocc)],dsv,sfv,sfv,sfo)\
-              + einsum('abci,a,b,c,i->abci',eri[numpy.ix_(ivir,ivir,ivir,iocc)],sfv,dsv,sfv,sfo)\
-              + einsum('abci,a,b,c,i->abci',eri[numpy.ix_(ivir,ivir,ivir,iocc)],sfv,sfv,dsv,sfo)\
-              + einsum('abci,a,b,c,i->abci',eri[numpy.ix_(ivir,ivir,ivir,iocc)],sfv,sfv,sfv,dso)
+    Ivvvo = einsum('abci,a,b,c,i->abci',eri[numpy.ix_(ivir,ivir,ivir,iocc)],dsv,sfv,sfv,sfo)\
+          + einsum('abci,a,b,c,i->abci',eri[numpy.ix_(ivir,ivir,ivir,iocc)],sfv,dsv,sfv,sfo)\
+          + einsum('abci,a,b,c,i->abci',eri[numpy.ix_(ivir,ivir,ivir,iocc)],sfv,sfv,dsv,sfo)\
+          + einsum('abci,a,b,c,i->abci',eri[numpy.ix_(ivir,ivir,ivir,iocc)],sfv,sfv,sfv,dso)
 
-        Ivovv = einsum('aibc,a,i,b,c->aibc',eri[numpy.ix_(ivir,iocc,ivir,ivir)],dsv,sfo,sfv,sfv)\
-              + einsum('aibc,a,i,b,c->aibc',eri[numpy.ix_(ivir,iocc,ivir,ivir)],sfv,dso,sfv,sfv)\
-              + einsum('aibc,a,i,b,c->aibc',eri[numpy.ix_(ivir,iocc,ivir,ivir)],sfv,sfo,dsv,sfv)\
-              + einsum('aibc,a,i,b,c->aibc',eri[numpy.ix_(ivir,iocc,ivir,ivir)],sfv,sfo,sfv,dsv)
+    Ivovv = einsum('aibc,a,i,b,c->aibc',eri[numpy.ix_(ivir,iocc,ivir,ivir)],dsv,sfo,sfv,sfv)\
+          + einsum('aibc,a,i,b,c->aibc',eri[numpy.ix_(ivir,iocc,ivir,ivir)],sfv,dso,sfv,sfv)\
+          + einsum('aibc,a,i,b,c->aibc',eri[numpy.ix_(ivir,iocc,ivir,ivir)],sfv,sfo,dsv,sfv)\
+          + einsum('aibc,a,i,b,c->aibc',eri[numpy.ix_(ivir,iocc,ivir,ivir)],sfv,sfo,sfv,dsv)
 
-        Ivvoo = einsum('abij,a,b,i,j->abij',eri[numpy.ix_(ivir,ivir,iocc,iocc)],dsv,sfv,sfo,sfo)\
-              + einsum('abij,a,b,i,j->abij',eri[numpy.ix_(ivir,ivir,iocc,iocc)],sfv,dsv,sfo,sfo)\
-              + einsum('abij,a,b,i,j->abij',eri[numpy.ix_(ivir,ivir,iocc,iocc)],sfv,sfv,dso,sfo)\
-              + einsum('abij,a,b,i,j->abij',eri[numpy.ix_(ivir,ivir,iocc,iocc)],sfv,sfv,sfo,dso)
+    Ivvoo = einsum('abij,a,b,i,j->abij',eri[numpy.ix_(ivir,ivir,iocc,iocc)],dsv,sfv,sfo,sfo)\
+          + einsum('abij,a,b,i,j->abij',eri[numpy.ix_(ivir,ivir,iocc,iocc)],sfv,dsv,sfo,sfo)\
+          + einsum('abij,a,b,i,j->abij',eri[numpy.ix_(ivir,ivir,iocc,iocc)],sfv,sfv,dso,sfo)\
+          + einsum('abij,a,b,i,j->abij',eri[numpy.ix_(ivir,ivir,iocc,iocc)],sfv,sfv,sfo,dso)
 
-        Ivovo = einsum('ajbi,a,j,b,i->ajbi',eri[numpy.ix_(ivir,iocc,ivir,iocc)],dsv,sfo,sfv,sfo)\
-              + einsum('ajbi,a,j,b,i->ajbi',eri[numpy.ix_(ivir,iocc,ivir,iocc)],sfv,dso,sfv,sfo)\
-              + einsum('ajbi,a,j,b,i->ajbi',eri[numpy.ix_(ivir,iocc,ivir,iocc)],sfv,sfo,dsv,sfo)\
-              + einsum('ajbi,a,j,b,i->ajbi',eri[numpy.ix_(ivir,iocc,ivir,iocc)],sfv,sfo,sfv,dso)
+    Ivovo = einsum('ajbi,a,j,b,i->ajbi',eri[numpy.ix_(ivir,iocc,ivir,iocc)],dsv,sfo,sfv,sfo)\
+          + einsum('ajbi,a,j,b,i->ajbi',eri[numpy.ix_(ivir,iocc,ivir,iocc)],sfv,dso,sfv,sfo)\
+          + einsum('ajbi,a,j,b,i->ajbi',eri[numpy.ix_(ivir,iocc,ivir,iocc)],sfv,sfo,dsv,sfo)\
+          + einsum('ajbi,a,j,b,i->ajbi',eri[numpy.ix_(ivir,iocc,ivir,iocc)],sfv,sfo,sfv,dso)
 
-        Ioovv = einsum('ijab,i,j,a,b->ijab',eri[numpy.ix_(iocc,iocc,ivir,ivir)],dso,sfo,sfv,sfv)\
-              + einsum('ijab,i,j,a,b->ijab',eri[numpy.ix_(iocc,iocc,ivir,ivir)],sfo,dso,sfv,sfv)\
-              + einsum('ijab,i,j,a,b->ijab',eri[numpy.ix_(iocc,iocc,ivir,ivir)],sfo,sfo,dsv,sfv)\
-              + einsum('ijab,i,j,a,b->ijab',eri[numpy.ix_(iocc,iocc,ivir,ivir)],sfo,sfo,sfv,dsv)
+    Ioovv = einsum('ijab,i,j,a,b->ijab',eri[numpy.ix_(iocc,iocc,ivir,ivir)],dso,sfo,sfv,sfv)\
+          + einsum('ijab,i,j,a,b->ijab',eri[numpy.ix_(iocc,iocc,ivir,ivir)],sfo,dso,sfv,sfv)\
+          + einsum('ijab,i,j,a,b->ijab',eri[numpy.ix_(iocc,iocc,ivir,ivir)],sfo,sfo,dsv,sfv)\
+          + einsum('ijab,i,j,a,b->ijab',eri[numpy.ix_(iocc,iocc,ivir,ivir)],sfo,sfo,sfv,dsv)
 
-        Ivooo = einsum('akij,a,k,i,j->akij',eri[numpy.ix_(ivir,iocc,iocc,iocc)],dsv,sfo,sfo,sfo)\
-              + einsum('akij,a,k,i,j->akij',eri[numpy.ix_(ivir,iocc,iocc,iocc)],sfv,dso,sfo,sfo)\
-              + einsum('akij,a,k,i,j->akij',eri[numpy.ix_(ivir,iocc,iocc,iocc)],sfv,sfo,dso,sfo)\
-              + einsum('akij,a,k,i,j->akij',eri[numpy.ix_(ivir,iocc,iocc,iocc)],sfv,sfo,sfo,dso)
+    Ivooo = einsum('akij,a,k,i,j->akij',eri[numpy.ix_(ivir,iocc,iocc,iocc)],dsv,sfo,sfo,sfo)\
+          + einsum('akij,a,k,i,j->akij',eri[numpy.ix_(ivir,iocc,iocc,iocc)],sfv,dso,sfo,sfo)\
+          + einsum('akij,a,k,i,j->akij',eri[numpy.ix_(ivir,iocc,iocc,iocc)],sfv,sfo,dso,sfo)\
+          + einsum('akij,a,k,i,j->akij',eri[numpy.ix_(ivir,iocc,iocc,iocc)],sfv,sfo,sfo,dso)
 
-        Iooov = einsum('jkia,j,k,i,a->jkia',eri[numpy.ix_(iocc,iocc,iocc,ivir)],dso,sfo,sfo,sfv)\
-              + einsum('jkia,j,k,i,a->jkia',eri[numpy.ix_(iocc,iocc,iocc,ivir)],sfo,dso,sfo,sfv)\
-              + einsum('jkia,j,k,i,a->jkia',eri[numpy.ix_(iocc,iocc,iocc,ivir)],sfo,sfo,dso,sfv)\
-              + einsum('jkia,j,k,i,a->jkia',eri[numpy.ix_(iocc,iocc,iocc,ivir)],sfo,sfo,sfo,dsv)
+    Iooov = einsum('jkia,j,k,i,a->jkia',eri[numpy.ix_(iocc,iocc,iocc,ivir)],dso,sfo,sfo,sfv)\
+          + einsum('jkia,j,k,i,a->jkia',eri[numpy.ix_(iocc,iocc,iocc,ivir)],sfo,dso,sfo,sfv)\
+          + einsum('jkia,j,k,i,a->jkia',eri[numpy.ix_(iocc,iocc,iocc,ivir)],sfo,sfo,dso,sfv)\
+          + einsum('jkia,j,k,i,a->jkia',eri[numpy.ix_(iocc,iocc,iocc,ivir)],sfo,sfo,sfo,dsv)
 
-        Ioooo = einsum('klij,k,l,i,j->klij',eri[numpy.ix_(iocc,iocc,iocc,iocc)],dso,sfo,sfo,sfo)\
-              + einsum('klij,k,l,i,j->klij',eri[numpy.ix_(iocc,iocc,iocc,iocc)],sfo,dso,sfo,sfo)\
-              + einsum('klij,k,l,i,j->klij',eri[numpy.ix_(iocc,iocc,iocc,iocc)],sfo,sfo,dso,sfo)\
-              + einsum('klij,k,l,i,j->klij',eri[numpy.ix_(iocc,iocc,iocc,iocc)],sfo,sfo,sfo,dso)
+    Ioooo = einsum('klij,k,l,i,j->klij',eri[numpy.ix_(iocc,iocc,iocc,iocc)],dso,sfo,sfo,sfo)\
+          + einsum('klij,k,l,i,j->klij',eri[numpy.ix_(iocc,iocc,iocc,iocc)],sfo,dso,sfo,sfo)\
+          + einsum('klij,k,l,i,j->klij',eri[numpy.ix_(iocc,iocc,iocc,iocc)],sfo,sfo,dso,sfo)\
+          + einsum('klij,k,l,i,j->klij',eri[numpy.ix_(iocc,iocc,iocc,iocc)],sfo,sfo,sfo,dso)
 
-        I = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-                vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
-        return I
+    I = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
+            vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+    return I
 
 def ft_d_integrals(sys, en, fo, fv, dvec):
-        """form integrals contracted with derivatives of occupation numbers in the
-        spin-orbital basis."""
+    """form integrals contracted with derivatives of occupation numbers in the
+    spin-orbital basis."""
 
-        # get FT Fock matrix
-        fmo = sys.g_fock_tot()
-        fmo = fmo - numpy.diag(en)
-        fd = sys.g_fock_d_tot(dvec)
+    # get FT Fock matrix
+    fmo = sys.g_fock_tot()
+    fmo = fmo - numpy.diag(en)
+    fd = sys.g_fock_d_tot(dvec)
 
-        # get ERIs
-        eri = sys.g_aint_tot()
-        sfo = numpy.sqrt(fo)
-        sfv = numpy.sqrt(fv)
-        dso = -0.5*sfo*fv*dvec
-        dsv = +0.5*sfv*fo*dvec
+    # get ERIs
+    eri = sys.g_aint_tot()
+    sfo = numpy.sqrt(fo)
+    sfv = numpy.sqrt(fv)
+    dso = -0.5*sfo*fv*dvec
+    dsv = +0.5*sfv*fo*dvec
 
-        # form derivative integrals
-        Foo = einsum('ij,i,j->ij',fd,sfo,sfo)\
-                + einsum('ij,i,j->ij',fmo,dso,sfo)\
-                + einsum('ij,i,j->ij',fmo,sfo,dso)
-        Fov = einsum('ia,i,a->ia',fd,sfo,sfv)\
-                + einsum('ia,i,a->ia',fmo,dso,sfv)\
-                + einsum('ia,i,a->ia',fmo,sfo,dsv)
-        Fvo = einsum('ai,a,i->ai',fd,sfv,sfo)\
-                + einsum('ai,a,i->ai',fmo,dsv,sfo)\
-                + einsum('ai,a,i->ai',fmo,sfv,dso)
-        Fvv = einsum('ab,a,b->ab',fd,sfv,sfv)\
-                + einsum('ab,a,b->ab',fmo,dsv,sfv)\
-                + einsum('ab,a,b->ab',fmo,sfv,dsv)
-        F = one_e_blocks(Foo,Fov,Fvo,Fvv)
-        
-        I = _form_ft_d_eris(eri,sfo,sfv,dso,dsv)
-        return F,I
+    # form derivative integrals
+    Foo = einsum('ij,i,j->ij',fd,sfo,sfo)\
+            + einsum('ij,i,j->ij',fmo,dso,sfo)\
+            + einsum('ij,i,j->ij',fmo,sfo,dso)
+    Fov = einsum('ia,i,a->ia',fd,sfo,sfv)\
+            + einsum('ia,i,a->ia',fmo,dso,sfv)\
+            + einsum('ia,i,a->ia',fmo,sfo,dsv)
+    Fvo = einsum('ai,a,i->ai',fd,sfv,sfo)\
+            + einsum('ai,a,i->ai',fmo,dsv,sfo)\
+            + einsum('ai,a,i->ai',fmo,sfv,dso)
+    Fvv = einsum('ab,a,b->ab',fd,sfv,sfv)\
+            + einsum('ab,a,b->ab',fmo,dsv,sfv)\
+            + einsum('ab,a,b->ab',fmo,sfv,dsv)
+    F = one_e_blocks(Foo,Fov,Fvo,Fvv)
+    
+    I = _form_ft_d_eris(eri,sfo,sfv,dso,dsv)
+    return F,I
 
 def u_ft_d_integrals(sys, ea, eb, foa, fva, fob, fvb, dveca, dvecb):
-        """form unrestricted integrals contracted with derivatives of occupation numbers."""
-        na = ea.shape[0]
-        nb = eb.shape[0]
+    """form unrestricted integrals contracted with derivatives of occupation numbers."""
+    na = ea.shape[0]
+    nb = eb.shape[0]
 
-        # get FT Fock matrices
-        fa,fb = sys.u_fock_tot()
-        fa = fa - numpy.diag(ea)
-        fb = fb - numpy.diag(eb)
-        fda,fdb = sys.u_fock_d_tot(dveca,dvecb)
+    # get FT Fock matrices
+    fa,fb = sys.u_fock_tot()
+    fa = fa - numpy.diag(ea)
+    fb = fb - numpy.diag(eb)
+    fda,fdb = sys.u_fock_d_tot(dveca,dvecb)
 
-        sfoa = numpy.sqrt(foa)
-        sfva = numpy.sqrt(fva)
-        dsoa = -0.5*sfoa*fva*dveca
-        dsva = +0.5*sfva*foa*dveca
+    sfoa = numpy.sqrt(foa)
+    sfva = numpy.sqrt(fva)
+    dsoa = -0.5*sfoa*fva*dveca
+    dsva = +0.5*sfva*foa*dveca
 
-        sfob = numpy.sqrt(fob)
-        sfvb = numpy.sqrt(fvb)
-        dsob = -0.5*sfob*fvb*dvecb
-        dsvb = +0.5*sfvb*fob*dvecb
+    sfob = numpy.sqrt(fob)
+    sfvb = numpy.sqrt(fvb)
+    dsob = -0.5*sfob*fvb*dvecb
+    dsvb = +0.5*sfvb*fob*dvecb
 
-        Fooa = einsum('ij,i,j->ij',fda,sfoa,sfoa)\
-                + einsum('ij,i,j->ij',fa,dsoa,sfoa)\
-                + einsum('ij,i,j->ij',fa,sfoa,dsoa)
-        Fova = einsum('ia,i,a->ia',fda,sfoa,sfva)\
-                + einsum('ia,i,a->ia',fa,dsoa,sfva)\
-                + einsum('ia,i,a->ia',fa,sfoa,dsva)
-        Fvoa = einsum('ai,a,i->ai',fda,sfva,sfoa)\
-                + einsum('ai,a,i->ai',fa,dsva,sfoa)\
-                + einsum('ai,a,i->ai',fa,sfva,dsoa)
-        Fvva = einsum('ab,a,b->ab',fda,sfva,sfva)\
-                + einsum('ab,a,b->ab',fa,dsva,sfva)\
-                + einsum('ab,a,b->ab',fa,sfva,dsva)
-        Fa = one_e_blocks(Fooa,Fova,Fvoa,Fvva)
+    Fooa = einsum('ij,i,j->ij',fda,sfoa,sfoa)\
+            + einsum('ij,i,j->ij',fa,dsoa,sfoa)\
+            + einsum('ij,i,j->ij',fa,sfoa,dsoa)
+    Fova = einsum('ia,i,a->ia',fda,sfoa,sfva)\
+            + einsum('ia,i,a->ia',fa,dsoa,sfva)\
+            + einsum('ia,i,a->ia',fa,sfoa,dsva)
+    Fvoa = einsum('ai,a,i->ai',fda,sfva,sfoa)\
+            + einsum('ai,a,i->ai',fa,dsva,sfoa)\
+            + einsum('ai,a,i->ai',fa,sfva,dsoa)
+    Fvva = einsum('ab,a,b->ab',fda,sfva,sfva)\
+            + einsum('ab,a,b->ab',fa,dsva,sfva)\
+            + einsum('ab,a,b->ab',fa,sfva,dsva)
+    Fa = one_e_blocks(Fooa,Fova,Fvoa,Fvva)
 
-        Foob = einsum('ij,i,j->ij',fdb,sfob,sfob)\
-                + einsum('ij,i,j->ij',fb,dsob,sfob)\
-                + einsum('ij,i,j->ij',fb,sfob,dsob)
-        Fovb = einsum('ia,i,a->ia',fdb,sfob,sfvb)\
-                + einsum('ia,i,a->ia',fb,dsob,sfvb)\
-                + einsum('ia,i,a->ia',fb,sfob,dsvb)
-        Fvob = einsum('ai,a,i->ai',fdb,sfvb,sfob)\
-                + einsum('ai,a,i->ai',fb,dsvb,sfob)\
-                + einsum('ai,a,i->ai',fb,sfvb,dsob)
-        Fvvb = einsum('ab,a,b->ab',fdb,sfvb,sfvb)\
-                + einsum('ab,a,b->ab',fb,dsvb,sfvb)\
-                + einsum('ab,a,b->ab',fb,sfvb,dsvb)
-        Fb = one_e_blocks(Foob,Fovb,Fvob,Fvvb)
+    Foob = einsum('ij,i,j->ij',fdb,sfob,sfob)\
+            + einsum('ij,i,j->ij',fb,dsob,sfob)\
+            + einsum('ij,i,j->ij',fb,sfob,dsob)
+    Fovb = einsum('ia,i,a->ia',fdb,sfob,sfvb)\
+            + einsum('ia,i,a->ia',fb,dsob,sfvb)\
+            + einsum('ia,i,a->ia',fb,sfob,dsvb)
+    Fvob = einsum('ai,a,i->ai',fdb,sfvb,sfob)\
+            + einsum('ai,a,i->ai',fb,dsvb,sfob)\
+            + einsum('ai,a,i->ai',fb,sfvb,dsob)
+    Fvvb = einsum('ab,a,b->ab',fdb,sfvb,sfvb)\
+            + einsum('ab,a,b->ab',fb,dsvb,sfvb)\
+            + einsum('ab,a,b->ab',fb,sfvb,dsvb)
+    Fb = one_e_blocks(Foob,Fovb,Fvob,Fvvb)
 
-        # get ERIs
-        Ia,Ib,Iabab = sys.u_aint_tot()
+    # get ERIs
+    Ia,Ib,Iabab = sys.u_aint_tot()
 
-        Ia = _form_ft_d_eris(Ia,sfoa,sfva,dsoa,dsva)
-        Ib = _form_ft_d_eris(Ib,sfob,sfvb,dsob,dsvb)
+    Ia = _form_ft_d_eris(Ia,sfoa,sfva,dsoa,dsva)
+    Ib = _form_ft_d_eris(Ib,sfob,sfvb,dsob,dsvb)
 
-        Ivvvv =  einsum('abcd,a,b,c,d->abcd',Iabab,dsva,sfvb,sfva,sfvb)
-        Ivvvv += einsum('abcd,a,b,c,d->abcd',Iabab,sfva,dsvb,sfva,sfvb)
-        Ivvvv += einsum('abcd,a,b,c,d->abcd',Iabab,sfva,sfvb,dsva,sfvb)
-        Ivvvv += einsum('abcd,a,b,c,d->abcd',Iabab,sfva,sfvb,sfva,dsvb)
+    Ivvvv =  einsum('abcd,a,b,c,d->abcd',Iabab,dsva,sfvb,sfva,sfvb)
+    Ivvvv += einsum('abcd,a,b,c,d->abcd',Iabab,sfva,dsvb,sfva,sfvb)
+    Ivvvv += einsum('abcd,a,b,c,d->abcd',Iabab,sfva,sfvb,dsva,sfvb)
+    Ivvvv += einsum('abcd,a,b,c,d->abcd',Iabab,sfva,sfvb,sfva,dsvb)
 
-        Ivvvo =  einsum('abci,a,b,c,i->abci',Iabab,dsva,sfvb,sfva,sfob)
-        Ivvvo += einsum('abci,a,b,c,i->abci',Iabab,sfva,dsvb,sfva,sfob)
-        Ivvvo += einsum('abci,a,b,c,i->abci',Iabab,sfva,sfvb,dsva,sfob)
-        Ivvvo += einsum('abci,a,b,c,i->abci',Iabab,sfva,sfvb,sfva,dsob)
+    Ivvvo =  einsum('abci,a,b,c,i->abci',Iabab,dsva,sfvb,sfva,sfob)
+    Ivvvo += einsum('abci,a,b,c,i->abci',Iabab,sfva,dsvb,sfva,sfob)
+    Ivvvo += einsum('abci,a,b,c,i->abci',Iabab,sfva,sfvb,dsva,sfob)
+    Ivvvo += einsum('abci,a,b,c,i->abci',Iabab,sfva,sfvb,sfva,dsob)
 
-        Ivvov =  einsum('abic,a,b,i,c->abic',Iabab,dsva,sfvb,sfoa,sfvb)
-        Ivvov += einsum('abic,a,b,i,c->abic',Iabab,sfva,dsvb,sfoa,sfvb)
-        Ivvov += einsum('abic,a,b,i,c->abic',Iabab,sfva,sfvb,dsoa,sfvb)
-        Ivvov += einsum('abic,a,b,i,c->abic',Iabab,sfva,sfvb,sfoa,dsvb)
+    Ivvov =  einsum('abic,a,b,i,c->abic',Iabab,dsva,sfvb,sfoa,sfvb)
+    Ivvov += einsum('abic,a,b,i,c->abic',Iabab,sfva,dsvb,sfoa,sfvb)
+    Ivvov += einsum('abic,a,b,i,c->abic',Iabab,sfva,sfvb,dsoa,sfvb)
+    Ivvov += einsum('abic,a,b,i,c->abic',Iabab,sfva,sfvb,sfoa,dsvb)
 
-        Ivovv =  einsum('aibc,a,i,b,c->aibc',Iabab,dsva,sfob,sfva,sfvb)
-        Ivovv += einsum('aibc,a,i,b,c->aibc',Iabab,sfva,dsob,sfva,sfvb)
-        Ivovv += einsum('aibc,a,i,b,c->aibc',Iabab,sfva,sfob,dsva,sfvb)
-        Ivovv += einsum('aibc,a,i,b,c->aibc',Iabab,sfva,sfob,sfva,dsvb)
+    Ivovv =  einsum('aibc,a,i,b,c->aibc',Iabab,dsva,sfob,sfva,sfvb)
+    Ivovv += einsum('aibc,a,i,b,c->aibc',Iabab,sfva,dsob,sfva,sfvb)
+    Ivovv += einsum('aibc,a,i,b,c->aibc',Iabab,sfva,sfob,dsva,sfvb)
+    Ivovv += einsum('aibc,a,i,b,c->aibc',Iabab,sfva,sfob,sfva,dsvb)
 
-        Iovvv =  einsum('iabc,i,a,b,c->iabc',Iabab,dsoa,sfvb,sfva,sfvb)
-        Iovvv += einsum('iabc,i,a,b,c->iabc',Iabab,sfoa,dsvb,sfva,sfvb)
-        Iovvv += einsum('iabc,i,a,b,c->iabc',Iabab,sfoa,sfvb,dsva,sfvb)
-        Iovvv += einsum('iabc,i,a,b,c->iabc',Iabab,sfoa,sfvb,sfva,dsvb)
+    Iovvv =  einsum('iabc,i,a,b,c->iabc',Iabab,dsoa,sfvb,sfva,sfvb)
+    Iovvv += einsum('iabc,i,a,b,c->iabc',Iabab,sfoa,dsvb,sfva,sfvb)
+    Iovvv += einsum('iabc,i,a,b,c->iabc',Iabab,sfoa,sfvb,dsva,sfvb)
+    Iovvv += einsum('iabc,i,a,b,c->iabc',Iabab,sfoa,sfvb,sfva,dsvb)
 
-        Ivvoo =  einsum('abij,a,b,i,j->abij',Iabab,dsva,sfvb,sfoa,sfob)
-        Ivvoo += einsum('abij,a,b,i,j->abij',Iabab,sfva,dsvb,sfoa,sfob)
-        Ivvoo += einsum('abij,a,b,i,j->abij',Iabab,sfva,sfvb,dsoa,sfob)
-        Ivvoo += einsum('abij,a,b,i,j->abij',Iabab,sfva,sfvb,sfoa,dsob)
+    Ivvoo =  einsum('abij,a,b,i,j->abij',Iabab,dsva,sfvb,sfoa,sfob)
+    Ivvoo += einsum('abij,a,b,i,j->abij',Iabab,sfva,dsvb,sfoa,sfob)
+    Ivvoo += einsum('abij,a,b,i,j->abij',Iabab,sfva,sfvb,dsoa,sfob)
+    Ivvoo += einsum('abij,a,b,i,j->abij',Iabab,sfva,sfvb,sfoa,dsob)
 
-        Ivovo =  einsum('ajbi,a,j,b,i->ajbi',Iabab,dsva,sfob,sfva,sfob)
-        Ivovo += einsum('ajbi,a,j,b,i->ajbi',Iabab,sfva,dsob,sfva,sfob)
-        Ivovo += einsum('ajbi,a,j,b,i->ajbi',Iabab,sfva,sfob,dsva,sfob)
-        Ivovo += einsum('ajbi,a,j,b,i->ajbi',Iabab,sfva,sfob,sfva,dsob)
+    Ivovo =  einsum('ajbi,a,j,b,i->ajbi',Iabab,dsva,sfob,sfva,sfob)
+    Ivovo += einsum('ajbi,a,j,b,i->ajbi',Iabab,sfva,dsob,sfva,sfob)
+    Ivovo += einsum('ajbi,a,j,b,i->ajbi',Iabab,sfva,sfob,dsva,sfob)
+    Ivovo += einsum('ajbi,a,j,b,i->ajbi',Iabab,sfva,sfob,sfva,dsob)
 
-        Iovvo =  einsum('jabi,j,a,b,i->jabi',Iabab,dsoa,sfvb,sfva,sfob)
-        Iovvo += einsum('jabi,j,a,b,i->jabi',Iabab,sfoa,dsvb,sfva,sfob)
-        Iovvo += einsum('jabi,j,a,b,i->jabi',Iabab,sfoa,sfvb,dsva,sfob)
-        Iovvo += einsum('jabi,j,a,b,i->jabi',Iabab,sfoa,sfvb,sfva,dsob)
+    Iovvo =  einsum('jabi,j,a,b,i->jabi',Iabab,dsoa,sfvb,sfva,sfob)
+    Iovvo += einsum('jabi,j,a,b,i->jabi',Iabab,sfoa,dsvb,sfva,sfob)
+    Iovvo += einsum('jabi,j,a,b,i->jabi',Iabab,sfoa,sfvb,dsva,sfob)
+    Iovvo += einsum('jabi,j,a,b,i->jabi',Iabab,sfoa,sfvb,sfva,dsob)
 
-        Ivoov =  einsum('ajib,a,j,i,b->ajib',Iabab,dsva,sfob,sfoa,sfvb)
-        Ivoov += einsum('ajib,a,j,i,b->ajib',Iabab,sfva,dsob,sfoa,sfvb)
-        Ivoov += einsum('ajib,a,j,i,b->ajib',Iabab,sfva,sfob,dsoa,sfvb)
-        Ivoov += einsum('ajib,a,j,i,b->ajib',Iabab,sfva,sfob,sfoa,dsvb)
+    Ivoov =  einsum('ajib,a,j,i,b->ajib',Iabab,dsva,sfob,sfoa,sfvb)
+    Ivoov += einsum('ajib,a,j,i,b->ajib',Iabab,sfva,dsob,sfoa,sfvb)
+    Ivoov += einsum('ajib,a,j,i,b->ajib',Iabab,sfva,sfob,dsoa,sfvb)
+    Ivoov += einsum('ajib,a,j,i,b->ajib',Iabab,sfva,sfob,sfoa,dsvb)
 
-        Iovov =  einsum('jaib,j,a,i,b->jaib',Iabab,dsoa,sfvb,sfoa,sfvb)
-        Iovov += einsum('jaib,j,a,i,b->jaib',Iabab,sfoa,dsvb,sfoa,sfvb)
-        Iovov += einsum('jaib,j,a,i,b->jaib',Iabab,sfoa,sfvb,dsoa,sfvb)
-        Iovov += einsum('jaib,j,a,i,b->jaib',Iabab,sfoa,sfvb,sfoa,dsvb)
+    Iovov =  einsum('jaib,j,a,i,b->jaib',Iabab,dsoa,sfvb,sfoa,sfvb)
+    Iovov += einsum('jaib,j,a,i,b->jaib',Iabab,sfoa,dsvb,sfoa,sfvb)
+    Iovov += einsum('jaib,j,a,i,b->jaib',Iabab,sfoa,sfvb,dsoa,sfvb)
+    Iovov += einsum('jaib,j,a,i,b->jaib',Iabab,sfoa,sfvb,sfoa,dsvb)
 
-        Ioovv =  einsum('ijab,i,j,a,b->ijab',Iabab,dsoa,sfob,sfva,sfvb)
-        Ioovv += einsum('ijab,i,j,a,b->ijab',Iabab,sfoa,dsob,sfva,sfvb)
-        Ioovv += einsum('ijab,i,j,a,b->ijab',Iabab,sfoa,sfob,dsva,sfvb)
-        Ioovv += einsum('ijab,i,j,a,b->ijab',Iabab,sfoa,sfob,sfva,dsvb)
+    Ioovv =  einsum('ijab,i,j,a,b->ijab',Iabab,dsoa,sfob,sfva,sfvb)
+    Ioovv += einsum('ijab,i,j,a,b->ijab',Iabab,sfoa,dsob,sfva,sfvb)
+    Ioovv += einsum('ijab,i,j,a,b->ijab',Iabab,sfoa,sfob,dsva,sfvb)
+    Ioovv += einsum('ijab,i,j,a,b->ijab',Iabab,sfoa,sfob,sfva,dsvb)
 
-        Ivooo =  einsum('akij,a,k,i,j->akij',Iabab,dsva,sfob,sfoa,sfob)
-        Ivooo += einsum('akij,a,k,i,j->akij',Iabab,sfva,dsob,sfoa,sfob)
-        Ivooo += einsum('akij,a,k,i,j->akij',Iabab,sfva,sfob,dsoa,sfob)
-        Ivooo += einsum('akij,a,k,i,j->akij',Iabab,sfva,sfob,sfoa,dsob)
+    Ivooo =  einsum('akij,a,k,i,j->akij',Iabab,dsva,sfob,sfoa,sfob)
+    Ivooo += einsum('akij,a,k,i,j->akij',Iabab,sfva,dsob,sfoa,sfob)
+    Ivooo += einsum('akij,a,k,i,j->akij',Iabab,sfva,sfob,dsoa,sfob)
+    Ivooo += einsum('akij,a,k,i,j->akij',Iabab,sfva,sfob,sfoa,dsob)
 
-        Iovoo =  einsum('kaij,k,a,i,j->kaij',Iabab,dsoa,sfvb,sfoa,sfob)
-        Iovoo += einsum('kaij,k,a,i,j->kaij',Iabab,sfoa,dsvb,sfoa,sfob)
-        Iovoo += einsum('kaij,k,a,i,j->kaij',Iabab,sfoa,sfvb,dsoa,sfob)
-        Iovoo += einsum('kaij,k,a,i,j->kaij',Iabab,sfoa,sfvb,sfoa,dsob)
+    Iovoo =  einsum('kaij,k,a,i,j->kaij',Iabab,dsoa,sfvb,sfoa,sfob)
+    Iovoo += einsum('kaij,k,a,i,j->kaij',Iabab,sfoa,dsvb,sfoa,sfob)
+    Iovoo += einsum('kaij,k,a,i,j->kaij',Iabab,sfoa,sfvb,dsoa,sfob)
+    Iovoo += einsum('kaij,k,a,i,j->kaij',Iabab,sfoa,sfvb,sfoa,dsob)
 
-        Ioovo =  einsum('jkai,j,k,a,i->jkai',Iabab,dsoa,sfob,sfva,sfob)
-        Ioovo += einsum('jkai,j,k,a,i->jkai',Iabab,sfoa,dsob,sfva,sfob)
-        Ioovo += einsum('jkai,j,k,a,i->jkai',Iabab,sfoa,sfob,dsva,sfob)
-        Ioovo += einsum('jkai,j,k,a,i->jkai',Iabab,sfoa,sfob,sfva,dsob)
+    Ioovo =  einsum('jkai,j,k,a,i->jkai',Iabab,dsoa,sfob,sfva,sfob)
+    Ioovo += einsum('jkai,j,k,a,i->jkai',Iabab,sfoa,dsob,sfva,sfob)
+    Ioovo += einsum('jkai,j,k,a,i->jkai',Iabab,sfoa,sfob,dsva,sfob)
+    Ioovo += einsum('jkai,j,k,a,i->jkai',Iabab,sfoa,sfob,sfva,dsob)
 
-        Iooov =  einsum('jkia,j,k,i,a->jkia',Iabab,dsoa,sfob,sfoa,sfvb)
-        Iooov += einsum('jkia,j,k,i,a->jkia',Iabab,sfoa,dsob,sfoa,sfvb)
-        Iooov += einsum('jkia,j,k,i,a->jkia',Iabab,sfoa,sfob,dsoa,sfvb)
-        Iooov += einsum('jkia,j,k,i,a->jkia',Iabab,sfoa,sfob,sfoa,dsvb)
+    Iooov =  einsum('jkia,j,k,i,a->jkia',Iabab,dsoa,sfob,sfoa,sfvb)
+    Iooov += einsum('jkia,j,k,i,a->jkia',Iabab,sfoa,dsob,sfoa,sfvb)
+    Iooov += einsum('jkia,j,k,i,a->jkia',Iabab,sfoa,sfob,dsoa,sfvb)
+    Iooov += einsum('jkia,j,k,i,a->jkia',Iabab,sfoa,sfob,sfoa,dsvb)
 
-        Ioooo =  einsum('klij,k,l,i,j->klij',Iabab,dsoa,sfob,sfoa,sfob)
-        Ioooo += einsum('klij,k,l,i,j->klij',Iabab,sfoa,dsob,sfoa,sfob)
-        Ioooo += einsum('klij,k,l,i,j->klij',Iabab,sfoa,sfob,dsoa,sfob)
-        Ioooo += einsum('klij,k,l,i,j->klij',Iabab,sfoa,sfob,sfoa,dsob)
+    Ioooo =  einsum('klij,k,l,i,j->klij',Iabab,dsoa,sfob,sfoa,sfob)
+    Ioooo += einsum('klij,k,l,i,j->klij',Iabab,sfoa,dsob,sfoa,sfob)
+    Ioooo += einsum('klij,k,l,i,j->klij',Iabab,sfoa,sfob,dsoa,sfob)
+    Ioooo += einsum('klij,k,l,i,j->klij',Iabab,sfoa,sfob,sfoa,dsob)
 
-        Iabab = two_e_blocks_full(vvvv=Ivvvv,
-                vvvo=Ivvvo,vvov=Ivvov,
-                vovv=Ivovv,ovvv=Iovvv,
-                vvoo=Ivvoo,vovo=Ivovo,
-                ovvo=Iovvo,voov=Ivoov,
-                ovov=Iovov,oovv=Ioovv,
-                vooo=Ivooo,ovoo=Iovoo,
-                oovo=Ioovo,ooov=Iooov,
-                oooo=Ioooo)
+    Iabab = two_e_blocks_full(vvvv=Ivvvv,
+            vvvo=Ivvvo,vvov=Ivvov,
+            vovv=Ivovv,ovvv=Iovvv,
+            vvoo=Ivvoo,vovo=Ivovo,
+            ovvo=Iovvo,voov=Ivoov,
+            ovov=Iovov,oovv=Ioovv,
+            vooo=Ivooo,ovoo=Iovoo,
+            oovo=Ioovo,ooov=Iooov,
+            oooo=Ioooo)
 
-        return Fa,Fb,Ia,Ib,Iabab
+    return Fa,Fb,Ia,Ib,Iabab
 
 def ft_d_active_integrals(sys, en, fo, fv, iocc, ivir, dvec):
-        """Return one and two-electron integrals in the general spin orbital basis
-        with small occupations excluded."""
-        # get FT Fock matrix
-        fmo = sys.g_fock_tot()
-        fmo = fmo - numpy.diag(en)
-        fd = sys.g_fock_d_tot(dvec)
+    """Return one and two-electron integrals in the general spin orbital basis
+    with small occupations excluded."""
+    # get FT Fock matrix
+    fmo = sys.g_fock_tot()
+    fmo = fmo - numpy.diag(en)
+    fd = sys.g_fock_d_tot(dvec)
 
-        sfo = numpy.sqrt(fo)
-        sfv = numpy.sqrt(fv)
-        dso = -0.5*sfo[numpy.ix_(iocc)]*fv[numpy.ix_(iocc)]*dvec[numpy.ix_(iocc)]
-        dsv = +0.5*sfv[numpy.ix_(ivir)]*fo[numpy.ix_(ivir)]*dvec[numpy.ix_(ivir)]
-        sfo = sfo[numpy.ix_(iocc)]
-        sfv = sfv[numpy.ix_(ivir)]
+    sfo = numpy.sqrt(fo)
+    sfv = numpy.sqrt(fv)
+    dso = -0.5*sfo[numpy.ix_(iocc)]*fv[numpy.ix_(iocc)]*dvec[numpy.ix_(iocc)]
+    dsv = +0.5*sfv[numpy.ix_(ivir)]*fo[numpy.ix_(ivir)]*dvec[numpy.ix_(ivir)]
+    sfo = sfo[numpy.ix_(iocc)]
+    sfv = sfv[numpy.ix_(ivir)]
 
-        # form derivative integrals
-        Foo = einsum('ij,i,j->ij',fd[numpy.ix_(iocc,iocc)],sfo,sfo)\
-                + einsum('ij,i,j->ij',fmo[numpy.ix_(iocc,iocc)],dso,sfo)\
-                + einsum('ij,i,j->ij',fmo[numpy.ix_(iocc,iocc)],sfo,dso)
-        Fov = einsum('ia,i,a->ia',fd[numpy.ix_(iocc,ivir)],sfo,sfv)\
-                + einsum('ia,i,a->ia',fmo[numpy.ix_(iocc,ivir)],dso,sfv)\
-                + einsum('ia,i,a->ia',fmo[numpy.ix_(iocc,ivir)],sfo,dsv)
-        Fvo = einsum('ai,a,i->ai',fd[numpy.ix_(ivir,iocc)],sfv,sfo)\
-                + einsum('ai,a,i->ai',fmo[numpy.ix_(ivir,iocc)],dsv,sfo)\
-                + einsum('ai,a,i->ai',fmo[numpy.ix_(ivir,iocc)],sfv,dso)
-        Fvv = einsum('ab,a,b->ab',fd[numpy.ix_(ivir,ivir)],sfv,sfv)\
-                + einsum('ab,a,b->ab',fmo[numpy.ix_(ivir,ivir)],dsv,sfv)\
-                + einsum('ab,a,b->ab',fmo[numpy.ix_(ivir,ivir)],sfv,dsv)
-        F = one_e_blocks(Foo,Fov,Fvo,Fvv)
+    # form derivative integrals
+    Foo = einsum('ij,i,j->ij',fd[numpy.ix_(iocc,iocc)],sfo,sfo)\
+            + einsum('ij,i,j->ij',fmo[numpy.ix_(iocc,iocc)],dso,sfo)\
+            + einsum('ij,i,j->ij',fmo[numpy.ix_(iocc,iocc)],sfo,dso)
+    Fov = einsum('ia,i,a->ia',fd[numpy.ix_(iocc,ivir)],sfo,sfv)\
+            + einsum('ia,i,a->ia',fmo[numpy.ix_(iocc,ivir)],dso,sfv)\
+            + einsum('ia,i,a->ia',fmo[numpy.ix_(iocc,ivir)],sfo,dsv)
+    Fvo = einsum('ai,a,i->ai',fd[numpy.ix_(ivir,iocc)],sfv,sfo)\
+            + einsum('ai,a,i->ai',fmo[numpy.ix_(ivir,iocc)],dsv,sfo)\
+            + einsum('ai,a,i->ai',fmo[numpy.ix_(ivir,iocc)],sfv,dso)
+    Fvv = einsum('ab,a,b->ab',fd[numpy.ix_(ivir,ivir)],sfv,sfv)\
+            + einsum('ab,a,b->ab',fmo[numpy.ix_(ivir,ivir)],dsv,sfv)\
+            + einsum('ab,a,b->ab',fmo[numpy.ix_(ivir,ivir)],sfv,dsv)
+    F = one_e_blocks(Foo,Fov,Fvo,Fvv)
 
-        # get ERIs
-        eri = sys.g_aint_tot()
-        I = _form_ft_d_active_eris(eri, sfo, sfv, dso, dsv, iocc, ivir)
-        return F,I
+    # get ERIs
+    eri = sys.g_aint_tot()
+    I = _form_ft_d_active_eris(eri, sfo, sfv, dso, dsv, iocc, ivir)
+    return F,I
 
 def uft_d_active_integrals(
-        sys, ea, eb, foa, fva, fob, fvb,
-        iocca, ivira, ioccb, ivirb, dveca, dvecb):
-        """Return derivatives of unrestricted one and two-electron integrals
-        with small occupations excluded."""
+    sys, ea, eb, foa, fva, fob, fvb,
+    iocca, ivira, ioccb, ivirb, dveca, dvecb):
+    """Return derivatives of unrestricted one and two-electron integrals
+    with small occupations excluded."""
 
-        # get FT Fock matrix
-        fa,fb = sys.u_fock_tot()
-        fa = fa - numpy.diag(ea)
-        fb = fb - numpy.diag(eb)
-        fda,fdb = sys.u_fock_d_tot(dveca,dvecb)
+    # get FT Fock matrix
+    fa,fb = sys.u_fock_tot()
+    fa = fa - numpy.diag(ea)
+    fb = fb - numpy.diag(eb)
+    fda,fdb = sys.u_fock_d_tot(dveca,dvecb)
 
-        sfoa = numpy.sqrt(foa)
-        sfva = numpy.sqrt(fva)
-        sfob = numpy.sqrt(fob)
-        sfvb = numpy.sqrt(fvb)
-        dsoa = -0.5*(sfoa*fva*dveca)[numpy.ix_(iocca)]
-        dsva = +0.5*(sfva*foa*dveca)[numpy.ix_(ivira)]
-        dsob = -0.5*(sfob*fvb*dvecb)[numpy.ix_(ioccb)]
-        dsvb = +0.5*(sfvb*fob*dvecb)[numpy.ix_(ivirb)]
-        sfoa = sfoa[numpy.ix_(iocca)]
-        sfva = sfva[numpy.ix_(ivira)]
-        sfob = sfob[numpy.ix_(ioccb)]
-        sfvb = sfvb[numpy.ix_(ivirb)]
+    sfoa = numpy.sqrt(foa)
+    sfva = numpy.sqrt(fva)
+    sfob = numpy.sqrt(fob)
+    sfvb = numpy.sqrt(fvb)
+    dsoa = -0.5*(sfoa*fva*dveca)[numpy.ix_(iocca)]
+    dsva = +0.5*(sfva*foa*dveca)[numpy.ix_(ivira)]
+    dsob = -0.5*(sfob*fvb*dvecb)[numpy.ix_(ioccb)]
+    dsvb = +0.5*(sfvb*fob*dvecb)[numpy.ix_(ivirb)]
+    sfoa = sfoa[numpy.ix_(iocca)]
+    sfva = sfva[numpy.ix_(ivira)]
+    sfob = sfob[numpy.ix_(ioccb)]
+    sfvb = sfvb[numpy.ix_(ivirb)]
 
-        # form derivative integrals
-        Foo = einsum('ij,i,j->ij',fda[numpy.ix_(iocca,iocca)],sfoa,sfoa)\
-                + einsum('ij,i,j->ij',fa[numpy.ix_(iocca,iocca)],dsoa,sfoa)\
-                + einsum('ij,i,j->ij',fa[numpy.ix_(iocca,iocca)],sfoa,dsoa)
-        Fov = einsum('ia,i,a->ia',fda[numpy.ix_(iocca,ivira)],sfoa,sfva)\
-                + einsum('ia,i,a->ia',fa[numpy.ix_(iocca,ivira)],dsoa,sfva)\
-                + einsum('ia,i,a->ia',fa[numpy.ix_(iocca,ivira)],sfoa,dsva)
-        Fvo = einsum('ai,a,i->ai',fda[numpy.ix_(ivira,iocca)],sfva,sfoa)\
-                + einsum('ai,a,i->ai',fa[numpy.ix_(ivira,iocca)],dsva,sfoa)\
-                + einsum('ai,a,i->ai',fa[numpy.ix_(ivira,iocca)],sfva,dsoa)
-        Fvv = einsum('ab,a,b->ab',fda[numpy.ix_(ivira,ivira)],sfva,sfva)\
-                + einsum('ab,a,b->ab',fa[numpy.ix_(ivira,ivira)],dsva,sfva)\
-                + einsum('ab,a,b->ab',fa[numpy.ix_(ivira,ivira)],sfva,dsva)
-        Fa = one_e_blocks(Foo,Fov,Fvo,Fvv)
+    # form derivative integrals
+    Foo = einsum('ij,i,j->ij',fda[numpy.ix_(iocca,iocca)],sfoa,sfoa)\
+            + einsum('ij,i,j->ij',fa[numpy.ix_(iocca,iocca)],dsoa,sfoa)\
+            + einsum('ij,i,j->ij',fa[numpy.ix_(iocca,iocca)],sfoa,dsoa)
+    Fov = einsum('ia,i,a->ia',fda[numpy.ix_(iocca,ivira)],sfoa,sfva)\
+            + einsum('ia,i,a->ia',fa[numpy.ix_(iocca,ivira)],dsoa,sfva)\
+            + einsum('ia,i,a->ia',fa[numpy.ix_(iocca,ivira)],sfoa,dsva)
+    Fvo = einsum('ai,a,i->ai',fda[numpy.ix_(ivira,iocca)],sfva,sfoa)\
+            + einsum('ai,a,i->ai',fa[numpy.ix_(ivira,iocca)],dsva,sfoa)\
+            + einsum('ai,a,i->ai',fa[numpy.ix_(ivira,iocca)],sfva,dsoa)
+    Fvv = einsum('ab,a,b->ab',fda[numpy.ix_(ivira,ivira)],sfva,sfva)\
+            + einsum('ab,a,b->ab',fa[numpy.ix_(ivira,ivira)],dsva,sfva)\
+            + einsum('ab,a,b->ab',fa[numpy.ix_(ivira,ivira)],sfva,dsva)
+    Fa = one_e_blocks(Foo,Fov,Fvo,Fvv)
 
-        Foo = einsum('ij,i,j->ij',fdb[numpy.ix_(ioccb,ioccb)],sfob,sfob)\
-                + einsum('ij,i,j->ij',fb[numpy.ix_(ioccb,ioccb)],dsob,sfob)\
-                + einsum('ij,i,j->ij',fb[numpy.ix_(ioccb,ioccb)],sfob,dsob)
-        Fov = einsum('ia,i,a->ia',fdb[numpy.ix_(ioccb,ivirb)],sfob,sfvb)\
-                + einsum('ia,i,a->ia',fb[numpy.ix_(ioccb,ivirb)],dsob,sfvb)\
-                + einsum('ia,i,a->ia',fb[numpy.ix_(ioccb,ivirb)],sfob,dsvb)
-        Fvo = einsum('ai,a,i->ai',fdb[numpy.ix_(ivirb,ioccb)],sfvb,sfob)\
-                + einsum('ai,a,i->ai',fb[numpy.ix_(ivirb,ioccb)],dsvb,sfob)\
-                + einsum('ai,a,i->ai',fb[numpy.ix_(ivirb,ioccb)],sfvb,dsob)
-        Fvv = einsum('ab,a,b->ab',fdb[numpy.ix_(ivirb,ivirb)],sfvb,sfvb)\
-                + einsum('ab,a,b->ab',fb[numpy.ix_(ivirb,ivirb)],dsvb,sfvb)\
-                + einsum('ab,a,b->ab',fb[numpy.ix_(ivirb,ivirb)],sfvb,dsvb)
-        Fb = one_e_blocks(Foo,Fov,Fvo,Fvv)
+    Foo = einsum('ij,i,j->ij',fdb[numpy.ix_(ioccb,ioccb)],sfob,sfob)\
+            + einsum('ij,i,j->ij',fb[numpy.ix_(ioccb,ioccb)],dsob,sfob)\
+            + einsum('ij,i,j->ij',fb[numpy.ix_(ioccb,ioccb)],sfob,dsob)
+    Fov = einsum('ia,i,a->ia',fdb[numpy.ix_(ioccb,ivirb)],sfob,sfvb)\
+            + einsum('ia,i,a->ia',fb[numpy.ix_(ioccb,ivirb)],dsob,sfvb)\
+            + einsum('ia,i,a->ia',fb[numpy.ix_(ioccb,ivirb)],sfob,dsvb)
+    Fvo = einsum('ai,a,i->ai',fdb[numpy.ix_(ivirb,ioccb)],sfvb,sfob)\
+            + einsum('ai,a,i->ai',fb[numpy.ix_(ivirb,ioccb)],dsvb,sfob)\
+            + einsum('ai,a,i->ai',fb[numpy.ix_(ivirb,ioccb)],sfvb,dsob)
+    Fvv = einsum('ab,a,b->ab',fdb[numpy.ix_(ivirb,ivirb)],sfvb,sfvb)\
+            + einsum('ab,a,b->ab',fb[numpy.ix_(ivirb,ivirb)],dsvb,sfvb)\
+            + einsum('ab,a,b->ab',fb[numpy.ix_(ivirb,ivirb)],sfvb,dsvb)
+    Fb = one_e_blocks(Foo,Fov,Fvo,Fvv)
 
-        # get ERIs
-        eriA,eriB,eriAB = sys.u_aint_tot()
-        Ia = _form_ft_d_active_eris(eriA, sfoa, sfva, dsoa, dsva, iocca, ivira)
-        Ib = _form_ft_d_active_eris(eriB, sfob, sfvb, dsob, dsvb, ioccb, ivirb)
+    # get ERIs
+    eriA,eriB,eriAB = sys.u_aint_tot()
+    Ia = _form_ft_d_active_eris(eriA, sfoa, sfva, dsoa, dsva, iocca, ivira)
+    Ib = _form_ft_d_active_eris(eriB, sfob, sfvb, dsob, dsvb, ioccb, ivirb)
 
-        Ivvvv = einsum('abcd,a,b,c,d->abcd',eriAB[numpy.ix_(ivira,ivirb,ivira,ivirb)],dsva,sfvb,sfva,sfvb)\
-              + einsum('abcd,a,b,c,d->abcd',eriAB[numpy.ix_(ivira,ivirb,ivira,ivirb)],sfva,dsvb,sfva,sfvb)\
-              + einsum('abcd,a,b,c,d->abcd',eriAB[numpy.ix_(ivira,ivirb,ivira,ivirb)],sfva,sfvb,dsva,sfvb)\
-              + einsum('abcd,a,b,c,d->abcd',eriAB[numpy.ix_(ivira,ivirb,ivira,ivirb)],sfva,sfvb,sfva,dsvb)
+    Ivvvv = einsum('abcd,a,b,c,d->abcd',eriAB[numpy.ix_(ivira,ivirb,ivira,ivirb)],dsva,sfvb,sfva,sfvb)\
+          + einsum('abcd,a,b,c,d->abcd',eriAB[numpy.ix_(ivira,ivirb,ivira,ivirb)],sfva,dsvb,sfva,sfvb)\
+          + einsum('abcd,a,b,c,d->abcd',eriAB[numpy.ix_(ivira,ivirb,ivira,ivirb)],sfva,sfvb,dsva,sfvb)\
+          + einsum('abcd,a,b,c,d->abcd',eriAB[numpy.ix_(ivira,ivirb,ivira,ivirb)],sfva,sfvb,sfva,dsvb)
 
-        Ivvvo = einsum('abci,a,b,c,i->abci',eriAB[numpy.ix_(ivira,ivirb,ivira,ioccb)],dsva,sfvb,sfva,sfob)\
-              + einsum('abci,a,b,c,i->abci',eriAB[numpy.ix_(ivira,ivirb,ivira,ioccb)],sfva,dsvb,sfva,sfob)\
-              + einsum('abci,a,b,c,i->abci',eriAB[numpy.ix_(ivira,ivirb,ivira,ioccb)],sfva,sfvb,dsva,sfob)\
-              + einsum('abci,a,b,c,i->abci',eriAB[numpy.ix_(ivira,ivirb,ivira,ioccb)],sfva,sfvb,sfva,dsob)
+    Ivvvo = einsum('abci,a,b,c,i->abci',eriAB[numpy.ix_(ivira,ivirb,ivira,ioccb)],dsva,sfvb,sfva,sfob)\
+          + einsum('abci,a,b,c,i->abci',eriAB[numpy.ix_(ivira,ivirb,ivira,ioccb)],sfva,dsvb,sfva,sfob)\
+          + einsum('abci,a,b,c,i->abci',eriAB[numpy.ix_(ivira,ivirb,ivira,ioccb)],sfva,sfvb,dsva,sfob)\
+          + einsum('abci,a,b,c,i->abci',eriAB[numpy.ix_(ivira,ivirb,ivira,ioccb)],sfva,sfvb,sfva,dsob)
 
-        Ivvov = einsum('abic,a,b,i,c->abic',eriAB[numpy.ix_(ivira,ivirb,iocca,ivirb)],dsva,sfvb,sfoa,sfvb)\
-              + einsum('abic,a,b,i,c->abic',eriAB[numpy.ix_(ivira,ivirb,iocca,ivirb)],sfva,dsvb,sfoa,sfvb)\
-              + einsum('abic,a,b,i,c->abic',eriAB[numpy.ix_(ivira,ivirb,iocca,ivirb)],sfva,sfvb,sfoa,dsvb)\
-              + einsum('abic,a,b,i,c->abic',eriAB[numpy.ix_(ivira,ivirb,iocca,ivirb)],sfva,sfvb,dsoa,sfvb)
+    Ivvov = einsum('abic,a,b,i,c->abic',eriAB[numpy.ix_(ivira,ivirb,iocca,ivirb)],dsva,sfvb,sfoa,sfvb)\
+          + einsum('abic,a,b,i,c->abic',eriAB[numpy.ix_(ivira,ivirb,iocca,ivirb)],sfva,dsvb,sfoa,sfvb)\
+          + einsum('abic,a,b,i,c->abic',eriAB[numpy.ix_(ivira,ivirb,iocca,ivirb)],sfva,sfvb,sfoa,dsvb)\
+          + einsum('abic,a,b,i,c->abic',eriAB[numpy.ix_(ivira,ivirb,iocca,ivirb)],sfva,sfvb,dsoa,sfvb)
 
-        Ivovv = einsum('aibc,a,i,b,c->aibc',eriAB[numpy.ix_(ivira,ioccb,ivira,ivirb)],dsva,sfob,sfva,sfvb)\
-              + einsum('aibc,a,i,b,c->aibc',eriAB[numpy.ix_(ivira,ioccb,ivira,ivirb)],sfva,dsob,sfva,sfvb)\
-              + einsum('aibc,a,i,b,c->aibc',eriAB[numpy.ix_(ivira,ioccb,ivira,ivirb)],sfva,sfob,dsva,sfvb)\
-              + einsum('aibc,a,i,b,c->aibc',eriAB[numpy.ix_(ivira,ioccb,ivira,ivirb)],sfva,sfob,sfva,dsvb)
+    Ivovv = einsum('aibc,a,i,b,c->aibc',eriAB[numpy.ix_(ivira,ioccb,ivira,ivirb)],dsva,sfob,sfva,sfvb)\
+          + einsum('aibc,a,i,b,c->aibc',eriAB[numpy.ix_(ivira,ioccb,ivira,ivirb)],sfva,dsob,sfva,sfvb)\
+          + einsum('aibc,a,i,b,c->aibc',eriAB[numpy.ix_(ivira,ioccb,ivira,ivirb)],sfva,sfob,dsva,sfvb)\
+          + einsum('aibc,a,i,b,c->aibc',eriAB[numpy.ix_(ivira,ioccb,ivira,ivirb)],sfva,sfob,sfva,dsvb)
 
-        Iovvv = einsum('iabc,i,a,b,c->iabc',eriAB[numpy.ix_(iocca,ivirb,ivira,ivirb)],sfoa,dsvb,sfva,sfvb)\
-              + einsum('iabc,i,a,b,c->iabc',eriAB[numpy.ix_(iocca,ivirb,ivira,ivirb)],dsoa,sfvb,sfva,sfvb)\
-              + einsum('iabc,i,a,b,c->iabc',eriAB[numpy.ix_(iocca,ivirb,ivira,ivirb)],sfoa,sfvb,dsva,sfvb)\
-              + einsum('iabc,i,a,b,c->iabc',eriAB[numpy.ix_(iocca,ivirb,ivira,ivirb)],sfoa,sfvb,sfva,dsvb)
+    Iovvv = einsum('iabc,i,a,b,c->iabc',eriAB[numpy.ix_(iocca,ivirb,ivira,ivirb)],sfoa,dsvb,sfva,sfvb)\
+          + einsum('iabc,i,a,b,c->iabc',eriAB[numpy.ix_(iocca,ivirb,ivira,ivirb)],dsoa,sfvb,sfva,sfvb)\
+          + einsum('iabc,i,a,b,c->iabc',eriAB[numpy.ix_(iocca,ivirb,ivira,ivirb)],sfoa,sfvb,dsva,sfvb)\
+          + einsum('iabc,i,a,b,c->iabc',eriAB[numpy.ix_(iocca,ivirb,ivira,ivirb)],sfoa,sfvb,sfva,dsvb)
 
-        Ivvoo = einsum('abij,a,b,i,j->abij',eriAB[numpy.ix_(ivira,ivirb,iocca,ioccb)],dsva,sfvb,sfoa,sfob)\
-              + einsum('abij,a,b,i,j->abij',eriAB[numpy.ix_(ivira,ivirb,iocca,ioccb)],sfva,dsvb,sfoa,sfob)\
-              + einsum('abij,a,b,i,j->abij',eriAB[numpy.ix_(ivira,ivirb,iocca,ioccb)],sfva,sfvb,dsoa,sfob)\
-              + einsum('abij,a,b,i,j->abij',eriAB[numpy.ix_(ivira,ivirb,iocca,ioccb)],sfva,sfvb,sfoa,dsob)
+    Ivvoo = einsum('abij,a,b,i,j->abij',eriAB[numpy.ix_(ivira,ivirb,iocca,ioccb)],dsva,sfvb,sfoa,sfob)\
+          + einsum('abij,a,b,i,j->abij',eriAB[numpy.ix_(ivira,ivirb,iocca,ioccb)],sfva,dsvb,sfoa,sfob)\
+          + einsum('abij,a,b,i,j->abij',eriAB[numpy.ix_(ivira,ivirb,iocca,ioccb)],sfva,sfvb,dsoa,sfob)\
+          + einsum('abij,a,b,i,j->abij',eriAB[numpy.ix_(ivira,ivirb,iocca,ioccb)],sfva,sfvb,sfoa,dsob)
 
-        Ivovo = einsum('ajbi,a,j,b,i->ajbi',eriAB[numpy.ix_(ivira,ioccb,ivira,ioccb)],dsva,sfob,sfva,sfob)\
-              + einsum('ajbi,a,j,b,i->ajbi',eriAB[numpy.ix_(ivira,ioccb,ivira,ioccb)],sfva,dsob,sfva,sfob)\
-              + einsum('ajbi,a,j,b,i->ajbi',eriAB[numpy.ix_(ivira,ioccb,ivira,ioccb)],sfva,sfob,dsva,sfob)\
-              + einsum('ajbi,a,j,b,i->ajbi',eriAB[numpy.ix_(ivira,ioccb,ivira,ioccb)],sfva,sfob,sfva,dsob)
+    Ivovo = einsum('ajbi,a,j,b,i->ajbi',eriAB[numpy.ix_(ivira,ioccb,ivira,ioccb)],dsva,sfob,sfva,sfob)\
+          + einsum('ajbi,a,j,b,i->ajbi',eriAB[numpy.ix_(ivira,ioccb,ivira,ioccb)],sfva,dsob,sfva,sfob)\
+          + einsum('ajbi,a,j,b,i->ajbi',eriAB[numpy.ix_(ivira,ioccb,ivira,ioccb)],sfva,sfob,dsva,sfob)\
+          + einsum('ajbi,a,j,b,i->ajbi',eriAB[numpy.ix_(ivira,ioccb,ivira,ioccb)],sfva,sfob,sfva,dsob)
 
-        Ioovv = einsum('ijab,i,j,a,b->ijab',eriAB[numpy.ix_(iocca,ioccb,ivira,ivirb)],dsoa,sfob,sfva,sfvb)\
-              + einsum('ijab,i,j,a,b->ijab',eriAB[numpy.ix_(iocca,ioccb,ivira,ivirb)],sfoa,dsob,sfva,sfvb)\
-              + einsum('ijab,i,j,a,b->ijab',eriAB[numpy.ix_(iocca,ioccb,ivira,ivirb)],sfoa,sfob,dsva,sfvb)\
-              + einsum('ijab,i,j,a,b->ijab',eriAB[numpy.ix_(iocca,ioccb,ivira,ivirb)],sfoa,sfob,sfva,dsvb)
+    Ioovv = einsum('ijab,i,j,a,b->ijab',eriAB[numpy.ix_(iocca,ioccb,ivira,ivirb)],dsoa,sfob,sfva,sfvb)\
+          + einsum('ijab,i,j,a,b->ijab',eriAB[numpy.ix_(iocca,ioccb,ivira,ivirb)],sfoa,dsob,sfva,sfvb)\
+          + einsum('ijab,i,j,a,b->ijab',eriAB[numpy.ix_(iocca,ioccb,ivira,ivirb)],sfoa,sfob,dsva,sfvb)\
+          + einsum('ijab,i,j,a,b->ijab',eriAB[numpy.ix_(iocca,ioccb,ivira,ivirb)],sfoa,sfob,sfva,dsvb)
 
-        Iovvo = einsum('jabi,j,a,b,i->jabi',eriAB[numpy.ix_(iocca,ivirb,ivira,ioccb)],sfoa,dsvb,sfva,sfob)\
-              + einsum('jabi,j,a,b,i->jabi',eriAB[numpy.ix_(iocca,ivirb,ivira,ioccb)],dsoa,sfvb,sfva,sfob)\
-              + einsum('jabi,j,a,b,i->jabi',eriAB[numpy.ix_(iocca,ivirb,ivira,ioccb)],sfoa,sfvb,dsva,sfob)\
-              + einsum('jabi,j,a,b,i->jabi',eriAB[numpy.ix_(iocca,ivirb,ivira,ioccb)],sfoa,sfvb,sfva,dsob)
+    Iovvo = einsum('jabi,j,a,b,i->jabi',eriAB[numpy.ix_(iocca,ivirb,ivira,ioccb)],sfoa,dsvb,sfva,sfob)\
+          + einsum('jabi,j,a,b,i->jabi',eriAB[numpy.ix_(iocca,ivirb,ivira,ioccb)],dsoa,sfvb,sfva,sfob)\
+          + einsum('jabi,j,a,b,i->jabi',eriAB[numpy.ix_(iocca,ivirb,ivira,ioccb)],sfoa,sfvb,dsva,sfob)\
+          + einsum('jabi,j,a,b,i->jabi',eriAB[numpy.ix_(iocca,ivirb,ivira,ioccb)],sfoa,sfvb,sfva,dsob)
 
-        Ivoov = einsum('ajib,a,j,i,b->ajib',eriAB[numpy.ix_(ivira,ioccb,iocca,ivirb)],dsva,sfob,sfoa,sfvb)\
-              + einsum('ajib,a,j,i,b->ajib',eriAB[numpy.ix_(ivira,ioccb,iocca,ivirb)],sfva,dsob,sfoa,sfvb)\
-              + einsum('ajib,a,j,i,b->ajib',eriAB[numpy.ix_(ivira,ioccb,iocca,ivirb)],sfva,sfob,sfoa,dsvb)\
-              + einsum('ajib,a,j,i,b->ajib',eriAB[numpy.ix_(ivira,ioccb,iocca,ivirb)],sfva,sfob,dsoa,sfvb)
+    Ivoov = einsum('ajib,a,j,i,b->ajib',eriAB[numpy.ix_(ivira,ioccb,iocca,ivirb)],dsva,sfob,sfoa,sfvb)\
+          + einsum('ajib,a,j,i,b->ajib',eriAB[numpy.ix_(ivira,ioccb,iocca,ivirb)],sfva,dsob,sfoa,sfvb)\
+          + einsum('ajib,a,j,i,b->ajib',eriAB[numpy.ix_(ivira,ioccb,iocca,ivirb)],sfva,sfob,sfoa,dsvb)\
+          + einsum('ajib,a,j,i,b->ajib',eriAB[numpy.ix_(ivira,ioccb,iocca,ivirb)],sfva,sfob,dsoa,sfvb)
 
-        Iovov = einsum('jaib,j,a,i,b->jaib',eriAB[numpy.ix_(iocca,ivirb,iocca,ivirb)],sfoa,dsvb,sfoa,sfvb)\
-              + einsum('jaib,j,a,i,b->jaib',eriAB[numpy.ix_(iocca,ivirb,iocca,ivirb)],dsoa,sfvb,sfoa,sfvb)\
-              + einsum('jaib,j,a,i,b->jaib',eriAB[numpy.ix_(iocca,ivirb,iocca,ivirb)],sfoa,sfvb,sfoa,dsvb)\
-              + einsum('jaib,j,a,i,b->jaib',eriAB[numpy.ix_(iocca,ivirb,iocca,ivirb)],sfoa,sfvb,dsoa,sfvb)
+    Iovov = einsum('jaib,j,a,i,b->jaib',eriAB[numpy.ix_(iocca,ivirb,iocca,ivirb)],sfoa,dsvb,sfoa,sfvb)\
+          + einsum('jaib,j,a,i,b->jaib',eriAB[numpy.ix_(iocca,ivirb,iocca,ivirb)],dsoa,sfvb,sfoa,sfvb)\
+          + einsum('jaib,j,a,i,b->jaib',eriAB[numpy.ix_(iocca,ivirb,iocca,ivirb)],sfoa,sfvb,sfoa,dsvb)\
+          + einsum('jaib,j,a,i,b->jaib',eriAB[numpy.ix_(iocca,ivirb,iocca,ivirb)],sfoa,sfvb,dsoa,sfvb)
 
-        Ivooo = einsum('akij,a,k,i,j->akij',eriAB[numpy.ix_(ivira,ioccb,iocca,ioccb)],dsva,sfob,sfoa,sfob)\
-              + einsum('akij,a,k,i,j->akij',eriAB[numpy.ix_(ivira,ioccb,iocca,ioccb)],sfva,dsob,sfoa,sfob)\
-              + einsum('akij,a,k,i,j->akij',eriAB[numpy.ix_(ivira,ioccb,iocca,ioccb)],sfva,sfob,dsoa,sfob)\
-              + einsum('akij,a,k,i,j->akij',eriAB[numpy.ix_(ivira,ioccb,iocca,ioccb)],sfva,sfob,sfoa,dsob)
+    Ivooo = einsum('akij,a,k,i,j->akij',eriAB[numpy.ix_(ivira,ioccb,iocca,ioccb)],dsva,sfob,sfoa,sfob)\
+          + einsum('akij,a,k,i,j->akij',eriAB[numpy.ix_(ivira,ioccb,iocca,ioccb)],sfva,dsob,sfoa,sfob)\
+          + einsum('akij,a,k,i,j->akij',eriAB[numpy.ix_(ivira,ioccb,iocca,ioccb)],sfva,sfob,dsoa,sfob)\
+          + einsum('akij,a,k,i,j->akij',eriAB[numpy.ix_(ivira,ioccb,iocca,ioccb)],sfva,sfob,sfoa,dsob)
  
-        Iovoo = einsum('kaij,k,a,i,j->kaij',eriAB[numpy.ix_(iocca,ivirb,iocca,ioccb)],sfoa,dsvb,sfoa,sfob)\
-              + einsum('kaij,k,a,i,j->kaij',eriAB[numpy.ix_(iocca,ivirb,iocca,ioccb)],dsoa,sfvb,sfoa,sfob)\
-              + einsum('kaij,k,a,i,j->kaij',eriAB[numpy.ix_(iocca,ivirb,iocca,ioccb)],sfoa,sfvb,dsoa,sfob)\
-              + einsum('kaij,k,a,i,j->kaij',eriAB[numpy.ix_(iocca,ivirb,iocca,ioccb)],sfoa,sfvb,sfoa,dsob)
+    Iovoo = einsum('kaij,k,a,i,j->kaij',eriAB[numpy.ix_(iocca,ivirb,iocca,ioccb)],sfoa,dsvb,sfoa,sfob)\
+          + einsum('kaij,k,a,i,j->kaij',eriAB[numpy.ix_(iocca,ivirb,iocca,ioccb)],dsoa,sfvb,sfoa,sfob)\
+          + einsum('kaij,k,a,i,j->kaij',eriAB[numpy.ix_(iocca,ivirb,iocca,ioccb)],sfoa,sfvb,dsoa,sfob)\
+          + einsum('kaij,k,a,i,j->kaij',eriAB[numpy.ix_(iocca,ivirb,iocca,ioccb)],sfoa,sfvb,sfoa,dsob)
 
-        Ioovo = einsum('jkai,j,k,a,i->jkai',eriAB[numpy.ix_(iocca,ioccb,ivira,ioccb)],dsoa,sfob,sfva,sfob)\
-              + einsum('jkai,j,k,a,i->jkai',eriAB[numpy.ix_(iocca,ioccb,ivira,ioccb)],sfoa,dsob,sfva,sfob)\
-              + einsum('jkai,j,k,a,i->jkai',eriAB[numpy.ix_(iocca,ioccb,ivira,ioccb)],sfoa,sfob,sfva,dsob)\
-              + einsum('jkai,j,k,a,i->jkai',eriAB[numpy.ix_(iocca,ioccb,ivira,ioccb)],sfoa,sfob,dsva,sfob)
+    Ioovo = einsum('jkai,j,k,a,i->jkai',eriAB[numpy.ix_(iocca,ioccb,ivira,ioccb)],dsoa,sfob,sfva,sfob)\
+          + einsum('jkai,j,k,a,i->jkai',eriAB[numpy.ix_(iocca,ioccb,ivira,ioccb)],sfoa,dsob,sfva,sfob)\
+          + einsum('jkai,j,k,a,i->jkai',eriAB[numpy.ix_(iocca,ioccb,ivira,ioccb)],sfoa,sfob,sfva,dsob)\
+          + einsum('jkai,j,k,a,i->jkai',eriAB[numpy.ix_(iocca,ioccb,ivira,ioccb)],sfoa,sfob,dsva,sfob)
 
-        Iooov = einsum('jkia,j,k,i,a->jkia',eriAB[numpy.ix_(iocca,ioccb,iocca,ivirb)],dsoa,sfob,sfoa,sfvb)\
-              + einsum('jkia,j,k,i,a->jkia',eriAB[numpy.ix_(iocca,ioccb,iocca,ivirb)],sfoa,dsob,sfoa,sfvb)\
-              + einsum('jkia,j,k,i,a->jkia',eriAB[numpy.ix_(iocca,ioccb,iocca,ivirb)],sfoa,sfob,dsoa,sfvb)\
-              + einsum('jkia,j,k,i,a->jkia',eriAB[numpy.ix_(iocca,ioccb,iocca,ivirb)],sfoa,sfob,sfoa,dsvb)
+    Iooov = einsum('jkia,j,k,i,a->jkia',eriAB[numpy.ix_(iocca,ioccb,iocca,ivirb)],dsoa,sfob,sfoa,sfvb)\
+          + einsum('jkia,j,k,i,a->jkia',eriAB[numpy.ix_(iocca,ioccb,iocca,ivirb)],sfoa,dsob,sfoa,sfvb)\
+          + einsum('jkia,j,k,i,a->jkia',eriAB[numpy.ix_(iocca,ioccb,iocca,ivirb)],sfoa,sfob,dsoa,sfvb)\
+          + einsum('jkia,j,k,i,a->jkia',eriAB[numpy.ix_(iocca,ioccb,iocca,ivirb)],sfoa,sfob,sfoa,dsvb)
 
-        Ioooo = einsum('klij,k,l,i,j->klij',eriAB[numpy.ix_(iocca,ioccb,iocca,ioccb)],dsoa,sfob,sfoa,sfob)\
-              + einsum('klij,k,l,i,j->klij',eriAB[numpy.ix_(iocca,ioccb,iocca,ioccb)],sfoa,dsob,sfoa,sfob)\
-              + einsum('klij,k,l,i,j->klij',eriAB[numpy.ix_(iocca,ioccb,iocca,ioccb)],sfoa,sfob,dsoa,sfob)\
-              + einsum('klij,k,l,i,j->klij',eriAB[numpy.ix_(iocca,ioccb,iocca,ioccb)],sfoa,sfob,sfoa,dsob)
+    Ioooo = einsum('klij,k,l,i,j->klij',eriAB[numpy.ix_(iocca,ioccb,iocca,ioccb)],dsoa,sfob,sfoa,sfob)\
+          + einsum('klij,k,l,i,j->klij',eriAB[numpy.ix_(iocca,ioccb,iocca,ioccb)],sfoa,dsob,sfoa,sfob)\
+          + einsum('klij,k,l,i,j->klij',eriAB[numpy.ix_(iocca,ioccb,iocca,ioccb)],sfoa,sfob,dsoa,sfob)\
+          + einsum('klij,k,l,i,j->klij',eriAB[numpy.ix_(iocca,ioccb,iocca,ioccb)],sfoa,sfob,sfoa,dsob)
 
-        Iabab = two_e_blocks_full(vvvv=Ivvvv,
-                vvvo=Ivvvo,vvov=Ivvov,
-                vovv=Ivovv,ovvv=Iovvv,
-                vvoo=Ivvoo,vovo=Ivovo,
-                ovvo=Iovvo,voov=Ivoov,
-                ovov=Iovov,oovv=Ioovv,
-                vooo=Ivooo,ovoo=Iovoo,
-                oovo=Ioovo,ooov=Iooov,
-                oooo=Ioooo)
+    Iabab = two_e_blocks_full(vvvv=Ivvvv,
+            vvvo=Ivvvo,vvov=Ivvov,
+            vovv=Ivovv,ovvv=Iovvv,
+            vvoo=Ivvoo,vovo=Ivovo,
+            ovvo=Iovvo,voov=Ivoov,
+            ovov=Iovov,oovv=Ioovv,
+            vooo=Ivooo,ovoo=Iovoo,
+            oovo=Ioovo,ooov=Iooov,
+            oooo=Ioooo)
 
-        return Fa,Fb,Ia,Ib,Iabab
+    return Fa,Fb,Ia,Ib,Iabab
 
 def g_n2rdm_full(beta, sfo, sfv, P2):
     n2rdm = (1.0/beta)*einsum('cdab,c,d,a,b->cdab',P2[0],sfv,sfv,sfv,sfv)

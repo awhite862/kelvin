@@ -14,7 +14,7 @@ class TDCCSDTest(unittest.TestCase):
             verbose = 0,
             atom = 'Be 0 0 0',
             basis = 'sto-3G')
- 
+
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
         Escf = m.scf()

@@ -12,7 +12,7 @@ class CCUtilsTest(unittest.TestCase):
 
     def _test_fd(self, F, B, D, delta, name, thresh):
         fd = (F - B)/(2.0*delta)
-        diff = numpy.linalg.norm(fd - D) 
+        diff = numpy.linalg.norm(fd - D)
         self.assertTrue(diff < thresh,"Difference in " + name + ": {}".format(diff))
 
     def test_Be_active(self):
@@ -185,7 +185,7 @@ class CCUtilsTest(unittest.TestCase):
             verbose = 0,
             atom = 'Be 0 0 0',
             basis = 'sto-3G')
-        
+
         m = scf.RHF(mol)
         T = 1.0
         mu = 0.0
@@ -228,7 +228,7 @@ class CCUtilsTest(unittest.TestCase):
             verbose = 0,
             atom = 'Be 0 0 0',
             basis = 'sto-3G')
-        
+
         m = scf.RHF(mol)
         T = 1.0
         mu = 0.0

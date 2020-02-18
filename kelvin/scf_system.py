@@ -154,8 +154,8 @@ class scf_system(system):
         fov = fo*fv
         I = self.r_int_tot()
         d1 = -numpy.einsum('ii,i->i',h - numpy.diag(en),fov)
-        d2 = -numpy.einsum('ijij,i,j->i',I - I.transpose((0,1,3,2)),fov,fo)
-        d2 -= numpy.einsum('ijij,i,j->i',I,fov,fo)
+        d2 = -numpy.einsum('ijij,i,j->i',2.0*I - I.transpose((0,1,3,2)),fov,fo)
+        #d2 -= numpy.einsum('ijij,i,j->i',I,fov,fo)
         return beta*(d1 + d2)
 
     def r_energies(self):

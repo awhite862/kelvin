@@ -58,7 +58,7 @@ class TDCCSDReldenTest(unittest.TestCase):
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
 
-        # compute normal-ordered 1-rdm 
+        # compute normal-ordered 1-rdm
         ccsdT = ccsd(sys,T=T,mu=mu,ngrid=120,iprint=0,athresh=1e-20)
         Eref,Eccref = ccsdT.run()
         ccsdT._g_ft_1rdm()
@@ -265,6 +265,37 @@ class TDCCSDReldenTest(unittest.TestCase):
 
         self.assertTrue(d1 < 1e-6,"Error in alpha 1-rdm: {}".format(d1))
         self.assertTrue(d2 < 1e-6,"Error in alpha 1-rdm: {}".format(d2))
+
+    def test_Be_rk4_relden_r_vs_u(self):
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+
+        m = scf.RHF(mol)
+        m.conv_tol = 1e-12
+        Escf = m.scf()
+        T = 1.0
+        mu = 0.0
+
+        # compute normal-ordered 1-rdm (U)
+        sys = scf_system(m,T,mu,orbtype='u')
+        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
+        Eout,Eccout = tdccsdT.run()
+        Etmp,Ecctmp = tdccsdT._uccsd_lambda(rdm2=True, erel=True)
+        rdm1_ref = tdccsdT.full_1rdm(relax=True)
+
+        # compute normal-order 1-rdm (R)
+        sys = scf_system(m,T,mu,orbtype='r')
+        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
+        Eout,Eccout = tdccsdT.run()
+        Etmp,Ecctmp = tdccsdT._rccsd_lambda(rdm2=True, erel=True)
+        rdm1_out = tdccsdT.full_1rdm(relax=True)
+        diff = numpy.linalg.norm(rdm1_ref[0] - rdm1_out)
+
+        self.assertTrue(diff < 1e-12,"Error in 1-rdm: {}".format(diff))
 
 if __name__ == '__main__':
     unittest.main()
