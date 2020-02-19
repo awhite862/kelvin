@@ -381,7 +381,7 @@ class TDCCSD(object):
             h5f = h5py.File(filename, 'r')
             n = len(h5f.keys())
             if n == 1:
-                t1 = h5f["t2"][:]
+                t2 = h5f["t2"][:]
                 h5f.close()
                 return t2
             elif n == 3:
