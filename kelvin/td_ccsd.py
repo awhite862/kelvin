@@ -5,8 +5,6 @@ from cqcpy import cc_equations
 from cqcpy import ft_utils
 from cqcpy.cc_energy import cc_energy, ucc_energy, rcc_energy
 from . import cc_utils
-#from . import ft_cc_energy
-#from . import ft_cc_equations
 from . import ft_mp
 from . import quadrature
 from . import propagation
@@ -17,8 +15,7 @@ class TDCCSD(object):
     """Real-time coupled cluster singles and doubles (CCSD) driver.
     """
     def __init__(self, sys, prop, T=0.0, mu=0.0, iprint=0,
-        singles=True, econv=1e-8, tconv=None, max_iter=40,
-        damp=0.0, ngrid=10, athresh=0.0, quad='lin', saveT=False,
+        singles=True, ngrid=10, athresh=0.0, fthresh=0.0, quad='lin', saveT=False,
         tmem="mem", scratch=""):
 
         self.T = T
@@ -26,12 +23,10 @@ class TDCCSD(object):
         self.finite_T = False if T == 0 else True
         self.iprint = iprint
         self.singles = singles
-        self.econv = econv
-        self.tconv = tconv if tconv is not None else 1000.0*econv
-        self.max_iter = max_iter
-        self.damp = damp
         self.ngrid = ngrid
         self.athresh = athresh
+        self.fthresh = fthresh
+        self.active = (self.athresh > 0.0 or self.fthresh > 0.0)
         self.quad = quad
         self.prop = prop
         self.saveT = saveT
@@ -47,6 +42,84 @@ class TDCCSD(object):
         ng = self.ngrid
         self.ti,self.g,G = quadrature.ft_quad(self.ngrid,beta,self.quad)
         self.sys = sys
+
+        if self.active:
+            athresh = self.athresh
+            fthresh = self.fthresh
+            if self.sys.has_r():
+                en = self.sys.r_energies_tot()
+                n = len(en)
+                fo = ft_utils.ff(beta, en, mu)
+                fv = ft_utils.ffv(beta, en, mu)
+                self.focc = [x for x,y in zip(fo, fv) if x > athresh and y > fthresh]
+                self.fvir = [x for x,y in zip(fv, fo) if x > athresh and y > fthresh]
+                self.iocc = [i for i,x in enumerate(fo) if x > athresh and fv[i] > fthresh]
+                self.ivir = [i for i,x in enumerate(fv) if x > athresh and fo[i] > fthresh]
+                nocc = len(self.focc)
+                nvir = len(self.fvir)
+                nact = nocc + nvir - n
+                ncor = nocc - nact
+                nvvv = nvir - nact
+                if self.iprint > 0:
+                    print("FT-CCSD orbital info:")
+                    print('  nocc: {:d}'.format(nocc))
+                    print('  nvir: {:d}'.format(nvir))
+                    #print('  nact: {:d}'.format(nact))
+            elif self.sys.has_u():
+                ea,eb = self.sys.u_energies_tot()
+                na = len(ea)
+                nb = len(eb)
+                foa = ft_utils.ff(beta, ea, mu)
+                fva = ft_utils.ffv(beta, ea, mu)
+                fob = ft_utils.ff(beta, eb, mu)
+                fvb = ft_utils.ffv(beta, eb, mu)
+                focca = [x for x,y in zip(foa,fva) if x > athresh and y > fthresh]
+                fvira = [x for x,y in zip(fva,foa) if x > athresh and y > fthresh]
+                iocca = [i for i,x in enumerate(foa) if x > athresh and fva[i] > fthresh]
+                ivira = [i for i,x in enumerate(fva) if x > athresh and foa[i] > fthresh]
+                foccb = [x for x,y in zip(fob, fvb) if x > athresh and y > fthresh]
+                fvirb = [x for x,y in zip(fvb, fob) if x > athresh and y > fthresh]
+                ioccb = [i for i,x in enumerate(fob) if x > athresh and fvb[i] > fthresh]
+                ivirb = [i for i,x in enumerate(fvb) if x > athresh and fob[i] > fthresh]
+                self.focc = (focca,foccb)
+                self.fvir = (fvira,fvirb)
+                self.iocc = (iocca,ioccb)
+                self.ivir = (ivira,ivirb)
+                nocca = len(focca)
+                nvira = len(fvira)
+                noccb = len(foccb)
+                nvirb = len(fvirb)
+                nacta = nocca + nvira - na
+                nactb = noccb + nvirb - nb
+                if self.iprint > 0:
+                    print("FT-UCCSD orbital info:")
+                    print('  nocca: {:d}'.format(nocca))
+                    print('  nvira: {:d}'.format(nvira))
+                    print('  noccb: {:d}'.format(nocca))
+                    print('  nvirb: {:d}'.format(nvira))
+            else:
+                en = self.sys.g_energies_tot()
+                fo = ft_utils.ff(beta, en, mu)
+                fv = ft_utils.ffv(beta, en, mu)
+                n = len(en)
+                self.focc = [x for x,y in zip(fo, fv) if x > athresh and y > fthresh]
+                self.fvir = [x for x,y in zip(fv, fo) if x > athresh and y > fthresh]
+                self.iocc = [i for i,x in enumerate(fo) if x > athresh and fv[i] > fthresh]
+                self.ivir = [i for i,x in enumerate(fv) if x > athresh and fo[i] > fthresh]
+                #self.focc = [x for x in fo if x > athresh and x < fthresh]
+                #self.fvir = [x for x in fv if x > athresh and x < fthresh]
+                #self.iocc = [i for i,x in enumerate(fo) if x > athresh and x < fthresh]
+                #self.ivir = [i for i,x in enumerate(fv) if x > athresh and x < fthresh]
+                nocc = len(self.focc)
+                nvir = len(self.fvir)
+                nact = nocc + nvir - n
+                ncor = nocc - nact
+                nvvv = nvir - nact
+                if self.iprint > 0:
+                    print("FT-CCSD orbital info:")
+                    print('  nocc: {:d}'.format(nocc))
+                    print('  nvir: {:d}'.format(nvir))
+
         self.T1 = [None]*ng
         self.T2 = [None]*ng
         self.L1 = None
@@ -452,32 +525,19 @@ class TDCCSD(object):
             E0 = ft_mp.mp0(g0) + En
             E1 = self.sys.get_mp1()
             E01 = E0 + E1
-            if self.athresh > 0.0:
-                athresh = self.athresh
-                focc = [x for x in fo if x > athresh]
-                fvir = [x for x in fv if x > athresh]
-                iocc = [i for i,x in enumerate(fo) if x > athresh]
-                ivir = [i for i,x in enumerate(fv) if x > athresh]
-                nocc = len(focc)
-                nvir = len(fvir)
-                nact = nocc + nvir - n
-                ncor = nocc - nact
-                nvvv = nvir - nact
-                if self.iprint > 0:
-                    print("FT-CCSD orbital info:")
-                    print('  nocc: {:d}'.format(nocc))
-                    print('  nvir: {:d}'.format(nvir))
-                    print('  nact: {:d}'.format(nact))
+            if self.active:
+                nocc = len(self.focc)
+                nvir = len(self.fvir)
 
                 # get scaled active space integrals
-                F,I = cc_utils.ft_active_integrals(self.sys, en, focc, fvir, iocc, ivir)
+                F,I = cc_utils.ft_active_integrals(self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
 
                 # get exponentials
                 D1 = en[:,None] - en[None,:]
                 D2 = en[:,None,None,None] + en[None,:,None,None] \
                         - en[None,None,:,None] - en[None,None,None,:]
-                D1 = D1[numpy.ix_(ivir,iocc)]
-                D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
+                D1 = D1[numpy.ix_(self.ivir,self.iocc)]
+                D2 = D2[numpy.ix_(self.ivir,self.ivir,self.iocc,self.iocc)]
                 t1shape = (nvir,nocc)
                 t2shape = (nvir,nvir,nocc,nocc)
 
@@ -583,34 +643,11 @@ class TDCCSD(object):
 
             beta = self.beta
             mu = self.mu
-            if self.athresh > 0.0:
-                athresh = self.athresh
-                foa = ft_utils.ff(beta, ea, mu)
-                fva = ft_utils.ffv(beta, ea, mu)
-                fob = ft_utils.ff(beta, eb, mu)
-                fvb = ft_utils.ffv(beta, eb, mu)
-                focca = [x for x in foa if x > athresh]
-                fvira = [x for x in fva if x > athresh]
-                iocca = [i for i,x in enumerate(foa) if x > athresh]
-                ivira = [i for i,x in enumerate(fva) if x > athresh]
-                foccb = [x for x in fob if x > athresh]
-                fvirb = [x for x in fvb if x > athresh]
-                ioccb = [i for i,x in enumerate(fob) if x > athresh]
-                ivirb = [i for i,x in enumerate(fvb) if x > athresh]
-                nocca = len(focca)
-                nvira = len(fvira)
-                noccb = len(foccb)
-                nvirb = len(fvirb)
-                nacta = nocca + nvira - na
-                nactb = noccb + nvirb - nb
-                if self.iprint > 0:
-                    print("FT-UCCSD orbital info:")
-                    print('  nocca: {:d}'.format(nocca))
-                    print('  nvira: {:d}'.format(nvira))
-                    print('  nacta: {:d}'.format(nacta))
-                    print('  noccb: {:d}'.format(nocca))
-                    print('  nvirb: {:d}'.format(nvira))
-                    print('  nactb: {:d}'.format(nacta))
+            if self.active:
+                nocca = len(self.focc[0])
+                nvira = len(self.fvir[0])
+                noccb = len(self.focc[1])
+                nvirb = len(self.fvir[1])
 
                 # get energy differences
                 D1a = ea[:,None] - ea[None,:]
@@ -621,15 +658,16 @@ class TDCCSD(object):
                         - ea[None,None,:,None] - eb[None,None,None,:]
                 D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
                         - eb[None,None,:,None] - eb[None,None,None,:]
-                D1a = D1a[numpy.ix_(ivira,iocca)]
-                D1b = D1b[numpy.ix_(ivirb,ioccb)]
-                D2aa = D2aa[numpy.ix_(ivira,ivira,iocca,iocca)]
-                D2ab = D2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)]
-                D2bb = D2bb[numpy.ix_(ivirb,ivirb,ioccb,ioccb)]
+                D1a = D1a[numpy.ix_(self.ivir[0],self.iocc[0])]
+                D1b = D1b[numpy.ix_(self.ivir[1],self.iocc[1])]
+                D2aa = D2aa[numpy.ix_(self.ivir[0],self.ivir[0],self.iocc[0],self.iocc[0])]
+                D2ab = D2ab[numpy.ix_(self.ivir[0],self.ivir[1],self.iocc[0],self.iocc[1])]
+                D2bb = D2bb[numpy.ix_(self.ivir[1],self.ivir[1],self.iocc[1],self.iocc[1])]
 
                 # get scaled integrals
                 Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
-                        self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
+                        self.sys, ea, eb, self.focc[0], self.fvir[0], self.focc[1], self.fvir[1],
+                        self.iocc[0], self.ivir[0], self.iocc[1], self.ivir[1])
 
             else:
                 # get scaled integrals
@@ -748,32 +786,19 @@ class TDCCSD(object):
             E0 = 2.0*ft_mp.mp0(g0) + En
             E1 = self.sys.get_mp1()
             E01 = E0 + E1
-            if self.athresh > 0.0:
-                athresh = self.athresh
-                focc = [x for x in fo if x > athresh]
-                fvir = [x for x in fv if x > athresh]
-                iocc = [i for i,x in enumerate(fo) if x > athresh]
-                ivir = [i for i,x in enumerate(fv) if x > athresh]
-                nocc = len(focc)
-                nvir = len(fvir)
-                nact = nocc + nvir - n
-                ncor = nocc - nact
-                nvvv = nvir - nact
-                if self.iprint > 0:
-                    print("FT-CCSD orbital info:")
-                    print('  nocc: {:d}'.format(nocc))
-                    print('  nvir: {:d}'.format(nvir))
-                    print('  nact: {:d}'.format(nact))
+            if self.active:
+                nocc = len(self.focc)
+                nvir = len(self.fvir)
 
                 # get scaled active space integrals
-                F,I = cc_utils.rft_active_integrals(self.sys, en, focc, fvir, iocc, ivir)
+                F,I = cc_utils.rft_active_integrals(self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
 
                 # get exponentials
                 D1 = en[:,None] - en[None,:]
                 D2 = en[:,None,None,None] + en[None,:,None,None] \
                         - en[None,None,:,None] - en[None,None,None,:]
-                D1 = D1[numpy.ix_(ivir,iocc)]
-                D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
+                D1 = D1[numpy.ix_(self.ivir,self.iocc)]
+                D2 = D2[numpy.ix_(self.ivir,self.ivir,self.iocc,self.iocc)]
                 t1shape = (nvir,nocc)
                 t2shape = (nvir,nvir,nocc,nocc)
 
@@ -873,36 +898,23 @@ class TDCCSD(object):
             E0 = ft_mp.mp0(g0) + En
             E1 = self.sys.get_mp1()
             E01 = E0 + E1
-            if self.athresh > 0.0:
-                athresh = self.athresh
-                focc = [x for x in fo if x > athresh]
-                fvir = [x for x in fv if x > athresh]
-                iocc = [i for i,x in enumerate(fo) if x > athresh]
-                ivir = [i for i,x in enumerate(fv) if x > athresh]
-                nocc = len(focc)
-                nvir = len(fvir)
-                nact = nocc + nvir - n
-                ncor = nocc - nact
-                nvvv = nvir - nact
-                if self.iprint > 0:
-                    print("FT-CCSD orbital info:")
-                    print('  nocc: {:d}'.format(nocc))
-                    print('  nvir: {:d}'.format(nvir))
-                    print('  nact: {:d}'.format(nact))
+            if self.active:
+                nocc = len(self.focc)
+                nvir = len(self.fvir)
 
                 # get scaled active space integrals
-                F,I = cc_utils.ft_active_integrals(self.sys, en, focc, fvir, iocc, ivir)
+                F,I = cc_utils.ft_active_integrals(self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
 
                 # get exponentials
                 D1 = en[:,None] - en[None,:]
                 D2 = en[:,None,None,None] + en[None,:,None,None] \
                         - en[None,None,:,None] - en[None,None,None,:]
-                D1 = D1[numpy.ix_(ivir,iocc)]
-                D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
+                D1 = D1[numpy.ix_(self.ivir,self.iocc)]
+                D2 = D2[numpy.ix_(self.ivir,self.ivir,self.iocc,self.iocc)]
                 t1shape = (nvir,nocc)
                 t1shape = (nvir,nvir,nocc,nocc)
-                sfo = numpy.sqrt(focc)
-                sfv = numpy.sqrt(fvir)
+                sfo = numpy.sqrt(self.focc)
+                sfv = numpy.sqrt(self.fvir)
 
             else:
                 # get scaled integrals
@@ -1009,9 +1021,9 @@ class TDCCSD(object):
                 At1a = -(1.0/beta)*einsum('ia,ai->a',x1, d1test)
                 At2i = -(1.0/beta)*0.5*einsum('ijab,abij->i',x2, d2test)
                 At2a = -(1.0/beta)*0.5*einsum('ijab,abij->a',x2, d2test)
-                if self.athresh > 0.0:
-                    self.rorbo[numpy.ix_(iocc)] -= g[ng - 1 - i]*(At1i + At2i)
-                    self.rorbv[numpy.ix_(ivir)] += g[ng - 1 - i]*(At1a + At2a)
+                if self.active:
+                    self.rorbo[numpy.ix_(self.iocc)] -= g[ng - 1 - i]*(At1i + At2i)
+                    self.rorbv[numpy.ix_(self.ivir)] += g[ng - 1 - i]*(At1a + At2a)
                 else:
                     self.rorbo -= g[ng - 1 - i]*(At1i + At2i)
                     self.rorbv += g[ng - 1 - i]*(At1a + At2a)
@@ -1033,12 +1045,12 @@ class TDCCSD(object):
         self.ndba = numpy.einsum('ba,b,a->ba',self.dba,sfv,sfv)
         self.ndji = numpy.einsum('ji,j,i->ji',self.dji,sfo,sfo)
         self.ndai = numpy.einsum('ai,a,i->ai',self.dai,sfv,sfo)
-        if self.athresh > 0.0:
+        if self.active:
             self.n1rdm = numpy.zeros((n,n), dtype=pia.dtype)
-            self.n1rdm[numpy.ix_(iocc,ivir)] += self.ndia/beta
-            self.n1rdm[numpy.ix_(ivir,ivir)] += self.ndba/beta
-            self.n1rdm[numpy.ix_(iocc,iocc)] += self.ndji/beta
-            self.n1rdm[numpy.ix_(ivir,iocc)] += self.ndai/beta
+            self.n1rdm[numpy.ix_(self.iocc,self.ivir)] += self.ndia/beta
+            self.n1rdm[numpy.ix_(self.ivir,self.ivir)] += self.ndba/beta
+            self.n1rdm[numpy.ix_(self.iocc,self.iocc)] += self.ndji/beta
+            self.n1rdm[numpy.ix_(self.ivir,self.iocc)] += self.ndai/beta
         else:
             self.n1rdm = (self.ndia + self.ndba + self.ndji + self.ndai)/beta
 
@@ -1110,30 +1122,11 @@ class TDCCSD(object):
 
             beta = self.beta
             mu = self.mu
-            if self.athresh > 0.0:
-                athresh = self.athresh
-                focca = [x for x in foa if x > athresh]
-                fvira = [x for x in fva if x > athresh]
-                iocca = [i for i,x in enumerate(foa) if x > athresh]
-                ivira = [i for i,x in enumerate(fva) if x > athresh]
-                foccb = [x for x in fob if x > athresh]
-                fvirb = [x for x in fvb if x > athresh]
-                ioccb = [i for i,x in enumerate(fob) if x > athresh]
-                ivirb = [i for i,x in enumerate(fvb) if x > athresh]
-                noa = len(focca)
-                nva = len(fvira)
-                nob = len(foccb)
-                nvb = len(fvirb)
-                nacta = noa + nva - na
-                nactb = nob + nvb - nb
-                if self.iprint > 0:
-                    print("FT-UCCSD orbital info:")
-                    print('  nocca: {:d}'.format(noa))
-                    print('  nvira: {:d}'.format(nva))
-                    print('  nacta: {:d}'.format(nacta))
-                    print('  noccb: {:d}'.format(noa))
-                    print('  nvirb: {:d}'.format(nva))
-                    print('  nactb: {:d}'.format(nacta))
+            if self.active:
+                noa = len(self.focc[0])
+                nva = len(self.fvir[0])
+                nob = len(self.focc[1])
+                nvb = len(self.fvir[1])
 
                 # get energy differences
                 D1a = ea[:,None] - ea[None,:]
@@ -1144,19 +1137,20 @@ class TDCCSD(object):
                         - ea[None,None,:,None] - eb[None,None,None,:]
                 D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
                         - eb[None,None,:,None] - eb[None,None,None,:]
-                D1a = D1a[numpy.ix_(ivira,iocca)]
-                D1b = D1b[numpy.ix_(ivirb,ioccb)]
-                D2aa = D2aa[numpy.ix_(ivira,ivira,iocca,iocca)]
-                D2ab = D2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)]
-                D2bb = D2bb[numpy.ix_(ivirb,ivirb,ioccb,ioccb)]
+                D1a = D1a[numpy.ix_(self.ivir[0],self.iocc[0])]
+                D1b = D1b[numpy.ix_(self.ivir[1],self.iocc[1])]
+                D2aa = D2aa[numpy.ix_(self.ivir[0],self.ivir[0],self.iocc[0],self.iocc[0])]
+                D2ab = D2ab[numpy.ix_(self.ivir[0],self.ivir[1],self.iocc[0],self.iocc[1])]
+                D2bb = D2bb[numpy.ix_(self.ivir[1],self.ivir[1],self.iocc[1],self.iocc[1])]
 
                 # get scaled integrals
                 Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
-                        self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
-                sfoa = numpy.sqrt(focca)
-                sfob = numpy.sqrt(foccb)
-                sfva = numpy.sqrt(fvira)
-                sfvb = numpy.sqrt(fvirb)
+                        self.sys, ea, eb, self.focc[0], self.fvir[0], self.focc[1], self.fvir[1],
+                        self.iocc[0], self.ivir[0], self.iocc[1], self.ivir[1])
+                sfoa = numpy.sqrt(self.focc[0])
+                sfob = numpy.sqrt(self.focc[1])
+                sfva = numpy.sqrt(self.fvir[0])
+                sfvb = numpy.sqrt(self.fvir[1])
 
             else:
                 # get scaled integrals
@@ -1440,11 +1434,11 @@ class TDCCSD(object):
                 At2a_b = -(1.0/beta)*0.5*einsum('ijab,abij->a',x2bb, d2bbtest)
                 At2a_a -= (1.0/beta)*einsum('ijab,abij->a',x2ab, d2abtest)
                 At2a_b -= (1.0/beta)*einsum('ijab,abij->b',x2ab, d2abtest)
-                if self.athresh > 0.0:
-                    rorbo_a[numpy.ix_(iocca)] -= g[ng - 1 - i]*(At1i_a + At2i_a)
-                    rorbo_b[numpy.ix_(ioccb)] -= g[ng - 1 - i]*(At1i_b + At2i_b)
-                    rorbv_a[numpy.ix_(ivira)] += g[ng - 1 - i]*(At1a_a + At2a_a)
-                    rorbv_b[numpy.ix_(ivirb)] += g[ng - 1 - i]*(At1a_b + At2a_b)
+                if self.active:
+                    rorbo_a[numpy.ix_(self.iocc[0])] -= g[ng - 1 - i]*(At1i_a + At2i_a)
+                    rorbo_b[numpy.ix_(self.iocc[1])] -= g[ng - 1 - i]*(At1i_b + At2i_b)
+                    rorbv_a[numpy.ix_(self.ivir[0])] += g[ng - 1 - i]*(At1a_a + At2a_a)
+                    rorbv_b[numpy.ix_(self.ivir[1])] += g[ng - 1 - i]*(At1a_b + At2a_b)
                 else:
                     rorbo_a -= g[ng - 1 - i]*(At1i_a + At2i_a)
                     rorbo_b -= g[ng - 1 - i]*(At1i_b + At2i_b)
@@ -1476,17 +1470,17 @@ class TDCCSD(object):
         self.ndai = (numpy.einsum('ai,a,i->ai',self.dai[0],sfva,sfoa),
                 numpy.einsum('ai,a,i->ai',self.dai[1],sfvb,sfob))
 
-        if self.athresh > 0.0:
+        if self.active:
             self.n1rdm = [numpy.zeros((na,na), dtype=self.ndia[0].dtype),
                     numpy.zeros((nb,nb), dtype=self.ndia[1].dtype)]
-            self.n1rdm[0][numpy.ix_(iocca,ivira)] += self.ndia[0]/beta
-            self.n1rdm[0][numpy.ix_(ivira,ivira)] += self.ndba[0]/beta
-            self.n1rdm[0][numpy.ix_(iocca,iocca)] += self.ndji[0]/beta
-            self.n1rdm[0][numpy.ix_(ivira,iocca)] += self.ndai[0]/beta
-            self.n1rdm[1][numpy.ix_(ioccb,ivirb)] += self.ndia[1]/beta
-            self.n1rdm[1][numpy.ix_(ivirb,ivirb)] += self.ndba[1]/beta
-            self.n1rdm[1][numpy.ix_(ioccb,ioccb)] += self.ndji[1]/beta
-            self.n1rdm[1][numpy.ix_(ivirb,ioccb)] += self.ndai[1]/beta
+            self.n1rdm[0][numpy.ix_(self.iocc[0],self.ivir[0])] += self.ndia[0]/beta
+            self.n1rdm[0][numpy.ix_(self.ivir[0],self.ivir[0])] += self.ndba[0]/beta
+            self.n1rdm[0][numpy.ix_(self.iocc[0],self.iocc[0])] += self.ndji[0]/beta
+            self.n1rdm[0][numpy.ix_(self.ivir[0],self.iocc[0])] += self.ndai[0]/beta
+            self.n1rdm[1][numpy.ix_(self.iocc[1],self.ivir[1])] += self.ndia[1]/beta
+            self.n1rdm[1][numpy.ix_(self.ivir[1],self.ivir[1])] += self.ndba[1]/beta
+            self.n1rdm[1][numpy.ix_(self.iocc[1],self.iocc[1])] += self.ndji[1]/beta
+            self.n1rdm[1][numpy.ix_(self.ivir[1],self.iocc[1])] += self.ndai[1]/beta
         else:
             self.n1rdm = [(self.ndia[0] + self.ndba[0] + self.ndji[0] + self.ndai[0])/beta,
                     (self.ndia[1] + self.ndba[1] + self.ndji[1] + self.ndai[1])/beta]
@@ -1554,36 +1548,23 @@ class TDCCSD(object):
             E0 = ft_mp.mp0(g0) + En
             E1 = self.sys.get_mp1()
             E01 = E0 + E1
-            if self.athresh > 0.0:
-                athresh = self.athresh
-                focc = [x for x in fo if x > athresh]
-                fvir = [x for x in fv if x > athresh]
-                iocc = [i for i,x in enumerate(fo) if x > athresh]
-                ivir = [i for i,x in enumerate(fv) if x > athresh]
-                nocc = len(focc)
-                nvir = len(fvir)
-                nact = nocc + nvir - n
-                ncor = nocc - nact
-                nvvv = nvir - nact
-                if self.iprint > 0:
-                    print("FT-CCSD orbital info:")
-                    print('  nocc: {:d}'.format(nocc))
-                    print('  nvir: {:d}'.format(nvir))
-                    print('  nact: {:d}'.format(nact))
+            if self.active:
+                nocc = len(self.focc)
+                nvir = len(self.fvir)
 
                 # get scaled active space integrals
-                F,I = cc_utils.rft_active_integrals(self.sys, en, focc, fvir, iocc, ivir)
+                F,I = cc_utils.rft_active_integrals(self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
 
                 # get exponentials
                 D1 = en[:,None] - en[None,:]
                 D2 = en[:,None,None,None] + en[None,:,None,None] \
                         - en[None,None,:,None] - en[None,None,None,:]
-                D1 = D1[numpy.ix_(ivir,iocc)]
-                D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
+                D1 = D1[numpy.ix_(self.ivir,self.iocc)]
+                D2 = D2[numpy.ix_(self.ivir,self.ivir,self.iocc,self.iocc)]
                 t1shape = (nvir,nocc)
                 t1shape = (nvir,nvir,nocc,nocc)
-                sfo = numpy.sqrt(focc)
-                sfv = numpy.sqrt(fvir)
+                sfo = numpy.sqrt(self.focc)
+                sfv = numpy.sqrt(self.fvir)
 
             else:
                 # get scaled integrals
@@ -1695,9 +1676,9 @@ class TDCCSD(object):
                 At2i -= (1.0/beta)*einsum('ijab,abij->i',x2, d2test)
                 At2a = -(1.0/beta)*0.5*einsum('ijab,abij->a',x2 - x2.transpose((0,1,3,2)), d2test - d2test.transpose((0,1,3,2)))
                 At2a -= (1.0/beta)*einsum('ijab,abij->a',x2, d2test)
-                if self.athresh > 0.0:
-                    self.rorbo[numpy.ix_(iocc)] -= g[ng - 1 - i]*(At1i + At2i)
-                    self.rorbv[numpy.ix_(ivir)] += g[ng - 1 - i]*(At1a + At2a)
+                if self.active:
+                    self.rorbo[numpy.ix_(self.iocc)] -= g[ng - 1 - i]*(At1i + At2i)
+                    self.rorbv[numpy.ix_(self.ivir)] += g[ng - 1 - i]*(At1a + At2a)
                 else:
                     self.rorbo -= g[ng - 1 - i]*(At1i + At2i)
                     self.rorbv += g[ng - 1 - i]*(At1a + At2a)
@@ -1719,12 +1700,12 @@ class TDCCSD(object):
         self.ndba = numpy.einsum('ba,b,a->ba',self.dba,sfv,sfv)
         self.ndji = numpy.einsum('ji,j,i->ji',self.dji,sfo,sfo)
         self.ndai = numpy.einsum('ai,a,i->ai',self.dai,sfv,sfo)
-        if self.athresh > 0.0:
+        if self.active:
             self.n1rdm = numpy.zeros((n,n), dtype=pia.dtype)
-            self.n1rdm[numpy.ix_(iocc,ivir)] += self.ndia/beta
-            self.n1rdm[numpy.ix_(ivir,ivir)] += self.ndba/beta
-            self.n1rdm[numpy.ix_(iocc,iocc)] += self.ndji/beta
-            self.n1rdm[numpy.ix_(ivir,iocc)] += self.ndai/beta
+            self.n1rdm[numpy.ix_(self.iocc,self.ivir)] += self.ndia/beta
+            self.n1rdm[numpy.ix_(self.ivir,self.ivir)] += self.ndba/beta
+            self.n1rdm[numpy.ix_(self.iocc,self.iocc)] += self.ndji/beta
+            self.n1rdm[numpy.ix_(self.ivir,self.iocc)] += self.ndai/beta
         else:
             self.n1rdm = (self.ndia + self.ndba + self.ndji + self.ndai)/beta
 
@@ -1743,14 +1724,9 @@ class TDCCSD(object):
         fo = ft_utils.ff(beta, en, mu)
         fv = ft_utils.ffv(beta, en, mu)
 
-        if self.athresh > 0.0:
-            athresh = self.athresh
-            focc = [x for x in fo if x > athresh]
-            fvir = [x for x in fv if x > athresh]
-            iocc = [i for i,x in enumerate(fo) if x > athresh]
-            ivir = [i for i,x in enumerate(fv) if x > athresh]
+        if self.active:
             F,I = cc_utils.ft_active_integrals(
-                    self.sys, en, focc, fvir, iocc, ivir)
+                    self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
         else:
             F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
         ng = self.ngrid
@@ -1773,22 +1749,10 @@ class TDCCSD(object):
         nb = eb.shape[0]
 
         ng = self.ngrid
-        if self.athresh > 0.0:
-            athresh = self.athresh
-            foa = ft_utils.ff(beta, ea, mu)
-            fva = ft_utils.ffv(beta, ea, mu)
-            fob = ft_utils.ff(beta, eb, mu)
-            fvb = ft_utils.ffv(beta, eb, mu)
-            focca = [x for x in foa if x > athresh]
-            fvira = [x for x in fva if x > athresh]
-            iocca = [i for i,x in enumerate(foa) if x > athresh]
-            ivira = [i for i,x in enumerate(fva) if x > athresh]
-            foccb = [x for x in fob if x > athresh]
-            fvirb = [x for x in fvb if x > athresh]
-            ioccb = [i for i,x in enumerate(fob) if x > athresh]
-            ivirb = [i for i,x in enumerate(fvb) if x > athresh]
+        if self.active:
             Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
-                    self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
+                    self.sys, ea, eb, self.focc[0], self.fvir[0], self.focc[1], self.fvir[1], 
+                    self.iocc[0], self.ivir[0], self.iocc[1], self.ivir[1])
         else:
             Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
 
@@ -1816,14 +1780,9 @@ class TDCCSD(object):
         fo = ft_utils.ff(beta, en, mu)
         fv = ft_utils.ffv(beta, en, mu)
 
-        if self.athresh > 0.0:
-            athresh = self.athresh
-            focc = [x for x in fo if x > athresh]
-            fvir = [x for x in fv if x > athresh]
-            iocc = [i for i,x in enumerate(fo) if x > athresh]
-            ivir = [i for i,x in enumerate(fv) if x > athresh]
+        if self.active:
             F,I = cc_utils.rft_active_integrals(
-                    self.sys, en, focc, fvir, iocc, ivir)
+                    self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
         else:
             F,I = cc_utils.rft_integrals(self.sys, en, beta, mu)
         ng = self.ngrid
@@ -1852,23 +1811,18 @@ class TDCCSD(object):
         self.ron1 = self.sys.g_mp1_den()
 
         # get integrals
-        if self.athresh > 0.0:
-            athresh = self.athresh
-            focc = [x for x in fo if x > athresh]
-            fvir = [x for x in fv if x > athresh]
-            iocc = [i for i,x in enumerate(fo) if x > athresh]
-            ivir = [i for i,x in enumerate(fv) if x > athresh]
-            nocc = len(focc)
-            nvir = len(fvir)
+        if self.active:
+            nocc = len(self.focc)
+            nvir = len(self.fvir)
             F,I = cc_utils.ft_active_integrals(
-                    self.sys, en, focc, fvir, iocc, ivir)
+                    self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
         else:
             focc = fo
             fvir = fv
             F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
-        if self.athresh > 0.0:
-            dso = fv[numpy.ix_(iocc)]
-            dsv = fo[numpy.ix_(ivir)]
+        if self.active:
+            dso = fv[numpy.ix_(self.iocc)]
+            dsv = fo[numpy.ix_(self.ivir)]
         else:
             dso = fv
             dsv = fo
@@ -1878,21 +1832,21 @@ class TDCCSD(object):
 
         # perturbed ON contribution to Fock matrix
         Fd = self.sys.g_fock_d_den()
-        if self.athresh > 0.0:
+        if self.active:
             rono += cc_utils.g_Fd_on_active(
-                    Fd, iocc, ivir, self.ndia, self.ndba, self.ndji, self.ndai)
+                    Fd, self.iocc, self.ivir, self.ndia, self.ndba, self.ndji, self.ndai)
         else:
             rono += cc_utils.g_Fd_on(Fd, self.ndia, self.ndba, self.ndji, self.ndai)
 
         # Add contributions from occupation number relaxation
-        jitemp = numpy.zeros(nocc, dtype=self.dji.dtype) if self.athresh > 0.0 else numpy.zeros(n, dtype=self.dji.dtype)
-        batemp = numpy.zeros(nvir, dtype=self.dba.dtype) if self.athresh > 0.0 else numpy.zeros(n, dtype=self.dba.dtype)
+        jitemp = numpy.zeros(nocc, dtype=self.dji.dtype) if self.active > 0.0 else numpy.zeros(n, dtype=self.dji.dtype)
+        batemp = numpy.zeros(nvir, dtype=self.dba.dtype) if self.active > 0.0 else numpy.zeros(n, dtype=self.dba.dtype)
         cc_utils.g_d_on_oo(dso, F, I, self.dia, self.dji, self.dai, self.P2, jitemp)
         cc_utils.g_d_on_vv(dsv, F, I, self.dia, self.dba, self.dai, self.P2, batemp)
 
-        if self.athresh > 0.0:
-            rono[numpy.ix_(iocc)] += jitemp
-            ronv[numpy.ix_(ivir)] += batemp
+        if self.active:
+            rono[numpy.ix_(self.iocc)] += jitemp
+            ronv[numpy.ix_(self.ivir)] += batemp
         else:
             rono += jitemp
             ronv += batemp
@@ -1918,33 +1872,25 @@ class TDCCSD(object):
         fvb = ft_utils.ffv(beta, eb, mu)
 
         # get integrals
-        if self.athresh > 0.0:
-            athresh = self.athresh
-            focca = [x for x in foa if x > athresh]
-            fvira = [x for x in fva if x > athresh]
-            iocca = [i for i,x in enumerate(foa) if x > athresh]
-            ivira = [i for i,x in enumerate(fva) if x > athresh]
-            foccb = [x for x in fob if x > athresh]
-            fvirb = [x for x in fvb if x > athresh]
-            ioccb = [i for i,x in enumerate(fob) if x > athresh]
-            ivirb = [i for i,x in enumerate(fvb) if x > athresh]
-            nocca = len(focca)
-            nvira = len(fvira)
-            noccb = len(foccb)
-            nvirb = len(fvirb)
+        if self.active:
+            nocca = len(self.focc[0])
+            nvira = len(self.fvir[0])
+            noccb = len(self.focc[1])
+            nvirb = len(self.fvir[1])
             Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
-                    self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
+                    self.sys, ea, eb, self.focc[0], self.fvir[0], self.focc[1], self.fvir[1],
+                    self.iocc[0], self.ivir[0], self.iocc[1], self.ivir[1])
         else:
             focca = foa
             fvira = fva
             foccb = fob
             fvirb = fvb
             Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
-        if self.athresh > 0.0:
-            dsoa = fva[numpy.ix_(iocca)]
-            dsva = foa[numpy.ix_(ivira)]
-            dsob = fvb[numpy.ix_(ioccb)]
-            dsvb = fob[numpy.ix_(ivirb)]
+        if self.active:
+            dsoa = fva[numpy.ix_(self.iocc[0])]
+            dsva = foa[numpy.ix_(self.ivir[0])]
+            dsob = fvb[numpy.ix_(self.iocc[1])]
+            dsvb = fob[numpy.ix_(self.ivir[1])]
         else:
             dsoa = fva
             dsva = foa
@@ -1959,10 +1905,10 @@ class TDCCSD(object):
         ronva = numpy.zeros(na, dtype=dta)
         ronob = numpy.zeros(nb, dtype=dtb)
         ronvb = numpy.zeros(nb, dtype=dtb)
-        if self.athresh > 0.0:
+        if self.active:
             temp = cc_utils.u_Fd_on_active(
-                    Fdaa, Fdab, Fdba, Fdbb, iocca, ivira, ioccb, ivirb,
-                    self.ndia, self.ndba, self.ndji, self.ndai)
+                    Fdaa, Fdab, Fdba, Fdbb, self.iocc[0], self.ivir[0],
+                    self.iocc[1], self.ivir[1], self.ndia, self.ndba, self.ndji, self.ndai)
             ronoa += temp[0]
             ronob += temp[1]
         else:
@@ -1972,10 +1918,10 @@ class TDCCSD(object):
             ronob += temp[1]
 
         # Add contributions from occupation number relaxation
-        jitempa = numpy.zeros(nocca, dtype=dta) if self.athresh > 0.0 else numpy.zeros(na, dtype=dta)
-        batempa = numpy.zeros(nvira, dtype=dta) if self.athresh > 0.0 else numpy.zeros(na, dtype=dta)
-        jitempb = numpy.zeros(noccb, dtype=dtb) if self.athresh > 0.0 else numpy.zeros(nb, dtype=dtb)
-        batempb = numpy.zeros(nvirb, dtype=dtb) if self.athresh > 0.0 else numpy.zeros(nb, dtype=dtb)
+        jitempa = numpy.zeros(nocca, dtype=dta) if self.active > 0.0 else numpy.zeros(na, dtype=dta)
+        batempa = numpy.zeros(nvira, dtype=dta) if self.active > 0.0 else numpy.zeros(na, dtype=dta)
+        jitempb = numpy.zeros(noccb, dtype=dtb) if self.active > 0.0 else numpy.zeros(nb, dtype=dtb)
+        batempb = numpy.zeros(nvirb, dtype=dtb) if self.active > 0.0 else numpy.zeros(nb, dtype=dtb)
         cc_utils.u_d_on_oo(
                 dsoa, dsob, Fa, Fb, Ia, Ib, Iabab,
                 self.dia, self.dji, self.dai, self.P2, jitempa, jitempb)
@@ -1983,11 +1929,11 @@ class TDCCSD(object):
                 dsva, dsvb, Fa, Fb, Ia, Ib, Iabab,
                 self.dia, self.dba, self.dai, self.P2, batempa, batempb)
 
-        if self.athresh > 0.0:
-            ronoa[numpy.ix_(iocca)] += jitempa
-            ronob[numpy.ix_(ioccb)] += jitempb
-            ronva[numpy.ix_(ivira)] += batempa
-            ronvb[numpy.ix_(ivirb)] += batempb
+        if self.active:
+            ronoa[numpy.ix_(self.iocc[0])] += jitempa
+            ronob[numpy.ix_(self.iocc[1])] += jitempb
+            ronva[numpy.ix_(self.ivir[0])] += batempa
+            ronvb[numpy.ix_(self.ivir[1])] += batempb
         else:
             ronoa += jitempa
             ronob += jitempb
@@ -2010,23 +1956,18 @@ class TDCCSD(object):
         self.ron1 = self.sys.r_mp1_den()
 
         # get integrals
-        if self.athresh > 0.0:
-            athresh = self.athresh
-            focc = [x for x in fo if x > athresh]
-            fvir = [x for x in fv if x > athresh]
-            iocc = [i for i,x in enumerate(fo) if x > athresh]
-            ivir = [i for i,x in enumerate(fv) if x > athresh]
-            nocc = len(focc)
-            nvir = len(fvir)
+        if self.active:
+            nocc = len(self.focc)
+            nvir = len(self.fvir)
             F,I = cc_utils.rft_active_integrals(
-                    self.sys, en, focc, fvir, iocc, ivir)
+                    self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
         else:
             focc = fo
             fvir = fv
             F,I = cc_utils.rft_integrals(self.sys, en, beta, mu)
-        if self.athresh > 0.0:
-            dso = fv[numpy.ix_(iocc)]
-            dsv = fo[numpy.ix_(ivir)]
+        if self.active:
+            dso = fv[numpy.ix_(self.iocc)]
+            dsv = fo[numpy.ix_(self.ivir)]
         else:
             dso = fv
             dsv = fo
@@ -2036,21 +1977,21 @@ class TDCCSD(object):
 
         # perturbed ON contribution to Fock matrix
         Fdss,Fdos = self.sys.r_fock_d_den()
-        if self.athresh > 0.0:
+        if self.active:
             rono += cc_utils.r_Fd_on_active(
-                    Fdss, Fdos, iocc, ivir, self.ndia, self.ndba, self.ndji, self.ndai)
+                    Fdss, Fdos, self.iocc, self.ivir, self.ndia, self.ndba, self.ndji, self.ndai)
         else:
             rono += cc_utils.r_Fd_on(Fdss, Fdos, self.ndia, self.ndba, self.ndji, self.ndai)
 
         # Add contributions from occupation number relaxation
-        jitemp = numpy.zeros(nocc, dtype=self.dji.dtype) if self.athresh > 0.0 else numpy.zeros(n, dtype=self.dji.dtype)
-        batemp = numpy.zeros(nvir, dtype=self.dba.dtype) if self.athresh > 0.0 else numpy.zeros(n, dtype=self.dba.dtype)
+        jitemp = numpy.zeros(nocc, dtype=self.dji.dtype) if self.active > 0.0 else numpy.zeros(n, dtype=self.dji.dtype)
+        batemp = numpy.zeros(nvir, dtype=self.dba.dtype) if self.active > 0.0 else numpy.zeros(n, dtype=self.dba.dtype)
         cc_utils.r_d_on_oo(dso, F, I, self.dia, self.dji, self.dai, self.P2, jitemp)
         cc_utils.r_d_on_vv(dsv, F, I, self.dia, self.dba, self.dai, self.P2, batemp)
 
-        if self.athresh > 0.0:
-            rono[numpy.ix_(iocc)] += jitemp
-            ronv[numpy.ix_(ivir)] += batemp
+        if self.active:
+            rono[numpy.ix_(self.iocc)] += jitemp
+            ronv[numpy.ix_(self.ivir)] += batemp
         else:
             rono += jitemp
             ronv += batemp
@@ -2178,12 +2119,9 @@ class TDCCSD(object):
             en = self.sys.r_energies_tot()
             fo = ft_utils.ff(beta, ea, mu)
             rdm1 = self.n1rdm.copy()
-            if self.athresh > 0.0:
-                athresh = self.athresh
-                focc = [x for x in fo if x > athresh]
-                iocc = [i for i,x in enumerate(fo) if x > athresh]
+            if self.active:
                 nocc = len(focc)
-                rdm1[numpy.ix_(iocc,iocc)] += numpy.diag(focc)
+                rdm1[numpy.ix_(self.iocc,self.iocc)] += numpy.diag(self.focc)
             else:
                 rdm1 += numpy.diag(fo)
             return rdm1
@@ -2199,15 +2137,10 @@ class TDCCSD(object):
             foa = ft_utils.ff(beta, ea, mu)
             fob = ft_utils.ff(beta, eb, mu)
             rdm1 = [self.n1rdm[0].copy(), self.n1rdm[1].copy()]
-            if self.athresh > 0.0:
-                athresh = self.athresh
-                focca = [x for x in foa if x > athresh]
-                iocca = [i for i,x in enumerate(foa) if x > athresh]
-                foccb = [x for x in fob if x > athresh]
-                ioccb = [i for i,x in enumerate(fob) if x > athresh]
-                nocca = len(focca)
-                rdm1[0][numpy.ix_(iocca,iocca)] += numpy.diag(focca)
-                rdm1[1][numpy.ix_(ioccb,ioccb)] += numpy.diag(foccb)
+            if self.active:
+                nocca = len(self.focca)
+                rdm1[0][numpy.ix_(self.iocc[0],self.iocc[0])] += numpy.diag(self.focc[0])
+                rdm1[1][numpy.ix_(self.iocc[1],self.iocc[1])] += numpy.diag(self.focc[1])
             else:
                 rdm1[0] += numpy.diag(foa)
                 rdm1[1] += numpy.diag(fob)
@@ -2222,11 +2155,8 @@ class TDCCSD(object):
             en = self.sys.g_energies_tot()
             fo = ft_utils.ff(beta, en, mu)
             rdm1 = self.n1rdm.copy()
-            if self.athresh > 0.0:
-                athresh = self.athresh
-                focc = [x for x in fo if x > athresh]
-                iocc = [i for i,x in enumerate(fo) if x > athresh]
-                rdm1[numpy.ix_(iocc,iocc)] += numpy.diag(fo)
+            if self.active:
+                rdm1[numpy.ix_(self.iocc,self.iocc)] += numpy.diag(self.focc)
             else:
                 rem1 += numpy.diag(fo)
             return rdm1
@@ -2247,15 +2177,10 @@ class TDCCSD(object):
             foa = ft_utils.ff(beta, ea, mu)
             fob = ft_utils.ff(beta, eb, mu)
             rdm2 = [self.n2rdm[0].copy(), self.n2rdm[1].copy(), self.n2rdm[2].copy()]
-            if self.athresh > 0.0:
-                athresh = self.athresh
-                focca = [x for x in foa if x > athresh]
-                iocca = [i for i,x in enumerate(foa) if x > athresh]
+            if self.active:
                 ialla = [i for i in range(len(foa))]
-                foccb = [x for x in fob if x > athresh]
-                ioccb = [i for i,x in enumerate(fob) if x > athresh]
                 iallb = [i for i in range(len(fob))]
-                cc_utils.u_full_rdm2_active(focca, foccb, iocca, ioccb, ialla, iallb, self.n1rdm, rdm2)
+                cc_utils.u_full_rdm2_active(self.focc[0], self.focc[1], self.iocc[0], self.iocc[1], ialla, iallb, self.n1rdm, rdm2)
             else:
                 cc_utils.u_full_rdm2(foa, fob, self.n1rdm, rdm2)
             return rdm2
@@ -2267,12 +2192,9 @@ class TDCCSD(object):
             en = self.sys.g_energies_tot()
             fo = ft_utils.ff(beta, en, mu)
             rdm2 = self.n2rdm.copy()
-            if self.athresh > 0.0:
-                athresh = self.athresh
-                focc = [x for x in fo if x > athresh]
-                iocc = [i for i,x in enumerate(fo) if x > athresh]
+            if self.active:
                 iall = [i for i in range(len(fo))]
-                cc_utils.g_full_rdm2_active(focc, iocc, iall, self.n1rdm, rdm2)
+                cc_utils.g_full_rdm2_active(self.focc, self.iocc, iall, self.n1rdm, rdm2)
             else:
                 cc_utils.g_full_rdm2(fo, self.n1rdm, rdm2)
             return rdm2
