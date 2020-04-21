@@ -1817,8 +1817,6 @@ class TDCCSD(object):
             F,I = cc_utils.ft_active_integrals(
                     self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
         else:
-            focc = fo
-            fvir = fv
             F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
         if self.active:
             dso = fv[numpy.ix_(self.iocc)]
@@ -1839,8 +1837,8 @@ class TDCCSD(object):
             rono += cc_utils.g_Fd_on(Fd, self.ndia, self.ndba, self.ndji, self.ndai)
 
         # Add contributions from occupation number relaxation
-        jitemp = numpy.zeros(nocc, dtype=self.dji.dtype) if self.active > 0.0 else numpy.zeros(n, dtype=self.dji.dtype)
-        batemp = numpy.zeros(nvir, dtype=self.dba.dtype) if self.active > 0.0 else numpy.zeros(n, dtype=self.dba.dtype)
+        jitemp = numpy.zeros(nocc, dtype=self.dji.dtype) if self.active else numpy.zeros(n, dtype=self.dji.dtype)
+        batemp = numpy.zeros(nvir, dtype=self.dba.dtype) if self.active else numpy.zeros(n, dtype=self.dba.dtype)
         cc_utils.g_d_on_oo(dso, F, I, self.dia, self.dji, self.dai, self.P2, jitemp)
         cc_utils.g_d_on_vv(dsv, F, I, self.dia, self.dba, self.dai, self.P2, batemp)
 

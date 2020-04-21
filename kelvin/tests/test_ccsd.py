@@ -104,7 +104,7 @@ class CCSDTest(unittest.TestCase):
                       C     0.8917  2.6751  2.6751'''
         cell.basis = 'gth-szv'
         cell.pseudo = 'gth-pade'
-        cell.verbose = 4
+        cell.verbose = 0
         cell.build()
 
         mf = scf.RHF(cell,exxdiv=None)
@@ -140,7 +140,7 @@ class CCSDTest(unittest.TestCase):
                       C     0.8917  2.6751  2.6751'''
         cell.basis = 'gth-szv'
         cell.pseudo = 'gth-pade'
-        cell.verbose = 4
+        cell.verbose = 0
         cell.build()
 
         mf = scf.RHF(cell,exxdiv=None)
