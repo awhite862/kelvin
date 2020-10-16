@@ -16,7 +16,7 @@ class TDCCSD(object):
     """
     def __init__(self, sys, prop, T=0.0, mu=0.0, iprint=0,
         singles=True, ngrid=10, athresh=0.0, fthresh=0.0, quad='lin', saveT=False,
-        tmem="mem", scratch=""):
+        saveL=False, tmem="mem", scratch=""):
 
         self.T = T
         self.mu = mu
@@ -30,6 +30,7 @@ class TDCCSD(object):
         self.quad = quad
         self.prop = prop
         self.saveT = saveT
+        self.saveL = saveL
         self.tmem = tmem
         self.scratch = scratch
         if not sys.verify(self.T,self.mu):
@@ -122,8 +123,8 @@ class TDCCSD(object):
 
         self.T1 = [None]*ng
         self.T2 = [None]*ng
-        self.L1 = None
-        self.L2 = None
+        self.L1 = [None]*ng 
+        self.L2 = [None]*ng 
         # pieces of normal-ordered 1-rdm
         self.dia = None
         self.dba = None
@@ -178,7 +179,7 @@ class TDCCSD(object):
             print('  S = {}'.format(0.0))
             print('  N = {}'.format(N))
         else:
-            if self.L1 is None:
+            if self.L1[0] is None:
                 if self.sys.has_r():
                     self._rccsd_lambda(rdm2=True)
                 elif self.sys.has_u():
@@ -466,6 +467,22 @@ class TDCCSD(object):
             else:
                 h5f.close()
                 raise Exception("Wrong number of T2 amplitudes in " + filename)
+        else:
+            raise Exception("Unrecognized memory option for amplitudes!")
+
+    def _save_L1(self, i, L1):
+        if self.tmem == "mem":
+            self.L1[i] = L1
+        elif self.tmem == "hdf5":
+            raise Exception("Saving Lambda to disk is not implemented")
+        else:
+            raise Exception("Unrecognized memory option for amplitudes!")
+
+    def _save_L2(self, i, L2):
+        if self.tmem == "mem":
+            self.L2[i] = L2
+        elif self.tmem == "hdf5":
+            raise Exception("Saving Lambda to disk is not implemented")
         else:
             raise Exception("Unrecognized memory option for amplitudes!")
 
@@ -955,6 +972,9 @@ class TDCCSD(object):
         pji = g[ng - 1]*cc_equations.ccsd_1rdm_ji_opt(t1b,t2b,l1,l2)
         pba = g[ng - 1]*cc_equations.ccsd_1rdm_ba_opt(t1b,t2b,l1,l2)
         pai = g[ng - 1]*cc_equations.ccsd_1rdm_ai_opt(t1b,t2b,l1,l2)
+        if self.saveL:
+            self._save_L1(ng - 1, l1.copy())
+            self._save_L2(ng - 1, l2.copy())
 
         if rdm2:
             Pcdab = g[ng - 1]*cc_equations.ccsd_2rdm_cdab_opt(t1b, t2b, l1, l2)
@@ -999,6 +1019,9 @@ class TDCCSD(object):
                 cc_equations._Stanton(d1test,d2test,F,I,t1e,t2e,fac=-1.0)
             l1 += ld1
             l2 += ld2
+            if self.saveL:
+                self._save_L1(ng - i - 1, l1.copy())
+                self._save_L2(ng - i - 1, l2.copy())
             Eccn += g[ng - i - 1]*cc_energy(t1e, t2e, F.ov, I.oovv)/beta
 
             # increment the RDMs
@@ -1035,8 +1058,9 @@ class TDCCSD(object):
         G1 = E1
         Gcc = Eccn
         Gtot = E0 + E1 + Eccn
-        self.L1 = l1
-        self.L2 = l2
+        if not self.saveL:
+            self.L1 = l1
+            self.L2 = l2
         self.dia = pia
         self.dji = pji
         self.dba = pba
@@ -1224,6 +1248,9 @@ class TDCCSD(object):
         pBA *= g[ng - 1]
         pai *= g[ng - 1]
         pAI *= g[ng - 1]
+        if self.saveL:
+            self._save_L1(ng - 1, (l1a.copy(),l1b.copy()))
+            self._save_L2(ng - 1, (l2aa.copy(),l2ab.copy(),l2bb.copy()))
 
         if rdm2:
             Pijab = numpy.zeros((noa,noa,nva,nva), dtype=l2aa.dtype)
@@ -1343,6 +1370,9 @@ class TDCCSD(object):
             l2bb += ld2bb
             Eccn += g[ng - i - 1]*ucc_energy((t1ea,t1eb), (t2eaa,t2eab,t2ebb),
                     Fa.ov, Fb.ov, Ia.oovv, Ib.oovv, Iabab.oovv)/beta
+            if self.saveL:
+                self._save_L1(ng - i - 1, (l1a.copy(),l1b.copy()))
+                self._save_L2(ng - i - 1, (l2aa.copy(),l2ab.copy(),l2bb.copy()))
 
             # increment the RDMs
             pia += g[ng - i - 1]*l1a
@@ -1455,8 +1485,9 @@ class TDCCSD(object):
         G1 = E1
         Gcc = Eccn
         Gtot = E0 + E1 + Eccn
-        self.L1 = (l1a,l1b)
-        self.L2 = (l2aa,l2ab,l2bb)
+        if not self.saveL:
+            self.L1 = (l1a,l1b)
+            self.L2 = (l2aa,l2ab,l2bb)
         self.dia = (pia,pIA)
         self.dji = (pji,pJI)
         self.dba = (pba,pBA)
@@ -1606,6 +1637,9 @@ class TDCCSD(object):
         pji = g[ng - 1]*cc_equations.rccsd_1rdm_ji(t1b,t2b,l1,l2)
         pba = g[ng - 1]*cc_equations.rccsd_1rdm_ba(t1b,t2b,l1,l2)
         pai = g[ng - 1]*cc_equations.rccsd_1rdm_ai(t1b,t2b,l1,l2)
+        if self.saveL:
+            self._save_L1(ng - 1, l1.copy())
+            self._save_L2(ng - 1, l2.copy())
 
         if rdm2:
             Pcdab = g[ng - 1]*cc_equations.rccsd_2rdm_cdab(t1b, t2b, l1, l2)
@@ -1652,6 +1686,9 @@ class TDCCSD(object):
             l1 += ld1
             l2 += ld2
             Eccn += g[ng - i - 1]*cc_energy(t1e, t2e, F.ov, I.oovv)/beta
+            if self.saveL:
+                self._save_L1(ng - i - 1, l1.copy())
+                self._save_L2(ng - i - 1, l2.copy())
 
             # increment the RDMs
             pia += g[ng - i - 1]*l1
@@ -1690,8 +1727,9 @@ class TDCCSD(object):
         G1 = E1
         Gcc = Eccn
         Gtot = E0 + E1 + Eccn
-        self.L1 = l1
-        self.L2 = l2
+        if not self.saveL:
+            self.L1 = l1
+            self.L2 = l2
         self.dia = pia
         self.dji = pji
         self.dba = pba

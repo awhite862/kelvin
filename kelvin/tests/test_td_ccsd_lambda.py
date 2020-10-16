@@ -289,5 +289,32 @@ class TDCCSDLambdaTest(unittest.TestCase):
         self.assertTrue(d2ab < 1e-13, e2ab)
         self.assertTrue(d2bb < 1e-13, e2bb)
 
+    def test_Be_Lsave(self):
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+
+        m = scf.RHF(mol)
+        m.conv_tol = 1e-12
+        Escf = m.scf()
+        T = 0.5
+        mu = 0.0
+        sys = scf_system(m,T,mu,orbtype='g')
+
+        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        ccP = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80)
+        Eout,Eccout = ccP.run()
+        Etmp,Ecctmp = ccP._ccsd_lambda()
+        piaref = ccP.dia
+        ccS = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80, saveL=True)
+        Eout,Eccout = ccS.run()
+        Etmp,Ecctmp = ccS._ccsd_lambda()
+        g = ccS.g
+        piaout = numpy.einsum('xia,x->ia', numpy.asarray(ccS.L1), g)
+        d1 = numpy.linalg.norm(piaout - piaref)/numpy.sqrt(piaout.size)
+        error1 = "Difference in 1-4 L1: {}".format(d1)
+        self.assertTrue(d1 < 1e-8,error1)
+
 if __name__ == '__main__':
     unittest.main()
