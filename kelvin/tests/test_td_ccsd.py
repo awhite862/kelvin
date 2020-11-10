@@ -230,5 +230,26 @@ class TDCCSDTest(unittest.TestCase):
         error = "Expected: {}  Actual: {}".format(Eccref,Eccout)
         self.assertTrue(diff < 1e-5,error)
 
+    def test_Be_ccd(self):
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+
+        m = scf.RHF(mol)
+        m.conv_tol = 1e-12
+        Escf = m.scf()
+        T = 0.5
+        mu = 0.0
+        sys = scf_system(m,T,mu,orbtype='g')
+        ccsdT = ccsd(sys,T=T,mu=mu,ngrid=80,iprint=0,singles=False)
+        Eref,Eccref = ccsdT.run()
+        prop = {"tprop" : "rk4"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80, singles=False)
+        Eout,Eccout = tdccsdT.run()
+        diff = abs(Eccref - Eccout)
+        error = "Expected: {}  Actual: {}".format(Eccref,Eccout)
+        self.assertTrue(diff < 1e-6,error)
+
 if __name__ == '__main__':
     unittest.main()

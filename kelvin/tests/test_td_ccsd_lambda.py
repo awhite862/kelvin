@@ -316,5 +316,41 @@ class TDCCSDLambdaTest(unittest.TestCase):
         error1 = "Difference in 1-4 L1: {}".format(d1)
         self.assertTrue(d1 < 1e-8,error1)
 
+    def test_Be_ccd(self):
+        mol = gto.M(
+            verbose = 0,
+            atom = 'Be 0 0 0',
+            basis = 'sto-3G')
+
+        m = scf.RHF(mol)
+        m.conv_tol = 1e-12
+        Escf = m.scf()
+        T = 2.0
+        mu = 0.0
+        sys = scf_system(m,T,mu,orbtype='g')
+
+        # compute \bar{Lambda} at \tau = 0
+        ccsdT = ccsd(sys,T=T,mu=mu,ngrid=320,iprint=0,quad="mid",singles=False)
+        Eref,Eccref = ccsdT.run()
+        ccsdT._ft_ccsd_lambda()
+        ng = ccsdT.ngrid
+        L2 = ccsdT.L2
+        ti = ccsdT.ti
+        g = ccsdT.g
+        G = ccsdT.G
+        en = sys.g_energies_tot()
+        D2 = en[:,None,None,None] + en[None,:,None,None] \
+                - en[None,None,:,None] - en[None,None,None,:]
+        L2new = quadrature.int_L2(ng,L2,ti,D2,g,G)
+
+        # compute \bar{Lambda} from propagation using rk1
+        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80, singles=False)
+        Eout,Eccout = tdccsdT.run()
+        Etmp,Ecctmp = tdccsdT._ccsd_lambda()
+        d2 = numpy.linalg.norm(tdccsdT.L2 - L2new[0])/numpy.sqrt(L2new[0].size)
+        error2 = "Difference in L2: {}".format(d2)
+        self.assertTrue(d2 < 5e-5,error2)
+
 if __name__ == '__main__':
     unittest.main()

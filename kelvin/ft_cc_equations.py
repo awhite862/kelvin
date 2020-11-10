@@ -499,7 +499,7 @@ def ccsd_lambda_opt_int(F,I,T1old,T2old,L1old,L2old,intor,D1,D2,ti,ng,g,G,beta):
 
     return L1,L2
 
-def ccd_lambda_guess(F,I,beta):
+def ccd_lambda_guess(I,beta,ng):
     Id = numpy.ones((ng))
     L2 = (1.0/beta)*einsum('v,ijab->vijab',Id,I.oovv)
     return L2

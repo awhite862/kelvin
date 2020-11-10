@@ -1017,6 +1017,7 @@ class ccsd(object):
             if self.singles:
                 L1old,L2old = ft_cc_equations.ccsd_lambda_guess(F,I,self.T1,self.beta_max,ng)
             else:
+                L1old = numpy.zeros(F.ov.shape, dtype=F.ov.dtype)
                 L2old = ft_cc_equations.ccd_lambda_guess(I,self.beta_max,ng)
         elif L2 is not None and L1 is None:
             L2old = L2

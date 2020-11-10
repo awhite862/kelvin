@@ -178,6 +178,7 @@ def get_suite(full):
 
     suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_rk4"))
     suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_r_vs_u_active"))
+    suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_ccd"))
     if full:
         suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_rk1"))
         suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_rk2"))
@@ -208,6 +209,7 @@ def get_suite(full):
         suite.addTest(test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_rk124"))
         suite.addTest(test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_tsave"))
         suite.addTest(test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_Lsave"))
+        suite.addTest(test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_ccd"))
 
     suite.addTest(test_td_ccsd_1rdm.TDCCSD1RDMTest("test_Be_rk1"))
     suite.addTest(test_td_ccsd_1rdm.TDCCSD1RDMTest("test_Be_rk4"))
