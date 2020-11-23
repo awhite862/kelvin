@@ -59,9 +59,9 @@ class HubbardSystem(system):
         Va = V - V.transpose((0,1,3,2))
         Fa = self.r_hcore()
         Fb = self.r_hcore()
-        Fa += numpy.einsum('pqrs,qs->pq',Va,Pa)
-        Fa += numpy.einsum('pqrs,qs->pq',V,Pb)
-        Fb += numpy.einsum('pqrs,qs->pq',Va,Pb)
+        Fa += numpy.einsum('pqrs,qs->pr',Va,Pa)
+        Fa += numpy.einsum('pqrs,qs->pr',V,Pb)
+        Fb += numpy.einsum('pqrs,qs->pr',Va,Pb)
         Fb += numpy.einsum('pqrs,pr->qs',V,Pa)
         self.Fa = Fa
         self.Fb = Fb
