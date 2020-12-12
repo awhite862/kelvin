@@ -154,6 +154,7 @@ def get_suite(full):
 
     if full:
         suite.addTest(test_neq_ccsd.NEQ_CCSDTest("test_h2_field"))
+        suite.addTest(test_neq_ccsd.NEQ_CCSDTest("test_h2_fiel2"))
         suite.addTest(test_neq_lambda.NEQLambdaTest("test_h2_null_field"))
         suite.addTest(test_neq_lambda.NEQLambdaTest("test_h2_field"))
 

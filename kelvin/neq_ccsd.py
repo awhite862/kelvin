@@ -29,6 +29,11 @@ class neq_ccsd(object):
             raise Exception("Sytem temperature inconsistent with CC temp")
         self.sys = sys
 
+        self.dia = None
+        self.dba = None
+        self.dji = None
+        self.dai = None
+
     def run(self,T1=None,T2=None):
         """Run CCSD calculation."""
         return self._neq_ccsd(T1in=T1,T2in=T2)
@@ -309,8 +314,9 @@ class neq_ccsd(object):
         self.dai = pai
 
     def _neq_2rdm(self, t):
-        if self.L2f is None or self.T2f is None:
-            raise Exception("Cannot compute density without Lambda!")
+        if self.L2f is None:
+            self._neq_ccsd_lambda()
+            #raise Exception("Cannot compute density without Lambda!")
 
         beta = self.beta
         mu = self.mu
@@ -389,12 +395,23 @@ class neq_ccsd(object):
         A7 = 0.5*einsum('jkai,aijk,j,k,a->',P2[6],A,fo,fo,fv)
         A8 = 0.5*einsum('kaij,ijka,k->',P2[7],A,fo)
         A9 = 0.25*einsum('klij,ijkl,k,l->',P2[8],A,fo,fo)
-        E2 = A1 + A2 + A3 + A4 + A5 + A6 + A7 + A8 + A9
-        print(A1,A4,A6,A9)
-        print(A2,A3,A7,A8)
-        print(A5)
-        print("")
-        prop += E2
+
+        # product terms
+        if self.dia is None: self._neq_1rdm()
+        A5 += 1.0*einsum('ba,ajbj,j,a->',self.dba[t],A,fo,fv)
+
+        A7 += 0.5*einsum('ja,aiji,j,i,a->',self.dia[t],A,fo,fo,fv)
+        A7 -= 0.5*einsum('ka,aiik,i,k,a->',self.dia[t],A,fo,fo,fv)
+
+        A8 += 0.5*einsum('aj,ijia,i->',self.dai[t],A,fo)
+        A8 -= 0.5*einsum('ai,ijja,j->',self.dai[t],A,fo)
+
+        A9 += 0.25*einsum('ki,ijkj,k,j->',self.dji[t],A,fo,fo)
+        A9 -= 0.25*einsum('kj,ijki,k,i->',self.dji[t],A,fo,fo)
+        A9 += 0.25*einsum('lj,ijil,i,l->',self.dji[t],A,fo,fo)
+        A9 -= 0.25*einsum('li,ijjl,j,l->',self.dji[t],A,fo,fo)
+        prop += A1 + A2 + A3 + A4 + A5 + A6 + A7 + A8 + A9
+
         return prop
 
     def compute_1rdm(self):
