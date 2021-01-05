@@ -11,8 +11,80 @@ from . import propagation
 
 einsum = numpy.einsum
 
+def _get_active(athresh, fthresh, beta, mu, sys, iprint):
+    if sys.has_r():
+        en = sys.r_energies_tot()
+        n = len(en)
+        fo = ft_utils.ff(beta, en, mu)
+        fv = ft_utils.ffv(beta, en, mu)
+        focc = [x for x,y in zip(fo, fv) if x > athresh and y > fthresh]
+        fvir = [x for x,y in zip(fv, fo) if x > athresh and y > fthresh]
+        iocc = [i for i,x in enumerate(fo) if x > athresh and fv[i] > fthresh]
+        ivir = [i for i,x in enumerate(fv) if x > athresh and fo[i] > fthresh]
+        nocc = len(focc)
+        nvir = len(fvir)
+        nact = nocc + nvir - n
+        ncor = nocc - nact
+        nvvv = nvir - nact
+        if iprint > 0:
+            print("FT-CCSD orbital info:")
+            print('  nocc: {:d}'.format(nocc))
+            print('  nvir: {:d}'.format(nvir))
+            #print('  nact: {:d}'.format(nact))
+    elif sys.has_u():
+        ea,eb = sys.u_energies_tot()
+        na = len(ea)
+        nb = len(eb)
+        foa = ft_utils.ff(beta, ea, mu)
+        fva = ft_utils.ffv(beta, ea, mu)
+        fob = ft_utils.ff(beta, eb, mu)
+        fvb = ft_utils.ffv(beta, eb, mu)
+        focca = [x for x,y in zip(foa,fva) if x > athresh and y > fthresh]
+        fvira = [x for x,y in zip(fva,foa) if x > athresh and y > fthresh]
+        iocca = [i for i,x in enumerate(foa) if x > athresh and fva[i] > fthresh]
+        ivira = [i for i,x in enumerate(fva) if x > athresh and foa[i] > fthresh]
+        foccb = [x for x,y in zip(fob, fvb) if x > athresh and y > fthresh]
+        fvirb = [x for x,y in zip(fvb, fob) if x > athresh and y > fthresh]
+        ioccb = [i for i,x in enumerate(fob) if x > athresh and fvb[i] > fthresh]
+        ivirb = [i for i,x in enumerate(fvb) if x > athresh and fob[i] > fthresh]
+        focc = (focca,foccb)
+        fvir = (fvira,fvirb)
+        iocc = (iocca,ioccb)
+        ivir = (ivira,ivirb)
+        nocca = len(focca)
+        nvira = len(fvira)
+        noccb = len(foccb)
+        nvirb = len(fvirb)
+        nacta = nocca + nvira - na
+        nactb = noccb + nvirb - nb
+        if iprint > 0:
+            print("FT-UCCSD orbital info:")
+            print('  nocca: {:d}'.format(nocca))
+            print('  nvira: {:d}'.format(nvira))
+            print('  noccb: {:d}'.format(nocca))
+            print('  nvirb: {:d}'.format(nvira))
+    else:
+        en = sys.g_energies_tot()
+        fo = ft_utils.ff(beta, en, mu)
+        fv = ft_utils.ffv(beta, en, mu)
+        n = len(en)
+        focc = [x for x,y in zip(fo, fv) if x > athresh and y > fthresh]
+        fvir = [x for x,y in zip(fv, fo) if x > athresh and y > fthresh]
+        iocc = [i for i,x in enumerate(fo) if x > athresh and fv[i] > fthresh]
+        ivir = [i for i,x in enumerate(fv) if x > athresh and fo[i] > fthresh]
+        nocc = len(focc)
+        nvir = len(fvir)
+        nact = nocc + nvir - n
+        ncor = nocc - nact
+        nvvv = nvir - nact
+        if iprint > 0:
+            print("FT-CCSD orbital info:")
+            print('  nocc: {:d}'.format(nocc))
+            print('  nvir: {:d}'.format(nvir))
+    return focc,fvir,iocc,ivir
+
 class TDCCSD(object):
-    """Real-time coupled cluster singles and doubles (CCSD) driver.
+    """Time-dependent coupled cluster singles and doubles (CCSD) driver.
     """
     def __init__(self, sys, prop, T=0.0, mu=0.0, iprint=0,
         singles=True, ngrid=10, athresh=0.0, fthresh=0.0, quad='lin', saveT=False,
@@ -45,81 +117,11 @@ class TDCCSD(object):
         self.sys = sys
 
         if self.active:
-            athresh = self.athresh
-            fthresh = self.fthresh
-            if self.sys.has_r():
-                en = self.sys.r_energies_tot()
-                n = len(en)
-                fo = ft_utils.ff(beta, en, mu)
-                fv = ft_utils.ffv(beta, en, mu)
-                self.focc = [x for x,y in zip(fo, fv) if x > athresh and y > fthresh]
-                self.fvir = [x for x,y in zip(fv, fo) if x > athresh and y > fthresh]
-                self.iocc = [i for i,x in enumerate(fo) if x > athresh and fv[i] > fthresh]
-                self.ivir = [i for i,x in enumerate(fv) if x > athresh and fo[i] > fthresh]
-                nocc = len(self.focc)
-                nvir = len(self.fvir)
-                nact = nocc + nvir - n
-                ncor = nocc - nact
-                nvvv = nvir - nact
-                if self.iprint > 0:
-                    print("FT-CCSD orbital info:")
-                    print('  nocc: {:d}'.format(nocc))
-                    print('  nvir: {:d}'.format(nvir))
-                    #print('  nact: {:d}'.format(nact))
-            elif self.sys.has_u():
-                ea,eb = self.sys.u_energies_tot()
-                na = len(ea)
-                nb = len(eb)
-                foa = ft_utils.ff(beta, ea, mu)
-                fva = ft_utils.ffv(beta, ea, mu)
-                fob = ft_utils.ff(beta, eb, mu)
-                fvb = ft_utils.ffv(beta, eb, mu)
-                focca = [x for x,y in zip(foa,fva) if x > athresh and y > fthresh]
-                fvira = [x for x,y in zip(fva,foa) if x > athresh and y > fthresh]
-                iocca = [i for i,x in enumerate(foa) if x > athresh and fva[i] > fthresh]
-                ivira = [i for i,x in enumerate(fva) if x > athresh and foa[i] > fthresh]
-                foccb = [x for x,y in zip(fob, fvb) if x > athresh and y > fthresh]
-                fvirb = [x for x,y in zip(fvb, fob) if x > athresh and y > fthresh]
-                ioccb = [i for i,x in enumerate(fob) if x > athresh and fvb[i] > fthresh]
-                ivirb = [i for i,x in enumerate(fvb) if x > athresh and fob[i] > fthresh]
-                self.focc = (focca,foccb)
-                self.fvir = (fvira,fvirb)
-                self.iocc = (iocca,ioccb)
-                self.ivir = (ivira,ivirb)
-                nocca = len(focca)
-                nvira = len(fvira)
-                noccb = len(foccb)
-                nvirb = len(fvirb)
-                nacta = nocca + nvira - na
-                nactb = noccb + nvirb - nb
-                if self.iprint > 0:
-                    print("FT-UCCSD orbital info:")
-                    print('  nocca: {:d}'.format(nocca))
-                    print('  nvira: {:d}'.format(nvira))
-                    print('  noccb: {:d}'.format(nocca))
-                    print('  nvirb: {:d}'.format(nvira))
-            else:
-                en = self.sys.g_energies_tot()
-                fo = ft_utils.ff(beta, en, mu)
-                fv = ft_utils.ffv(beta, en, mu)
-                n = len(en)
-                self.focc = [x for x,y in zip(fo, fv) if x > athresh and y > fthresh]
-                self.fvir = [x for x,y in zip(fv, fo) if x > athresh and y > fthresh]
-                self.iocc = [i for i,x in enumerate(fo) if x > athresh and fv[i] > fthresh]
-                self.ivir = [i for i,x in enumerate(fv) if x > athresh and fo[i] > fthresh]
-                #self.focc = [x for x in fo if x > athresh and x < fthresh]
-                #self.fvir = [x for x in fv if x > athresh and x < fthresh]
-                #self.iocc = [i for i,x in enumerate(fo) if x > athresh and x < fthresh]
-                #self.ivir = [i for i,x in enumerate(fv) if x > athresh and x < fthresh]
-                nocc = len(self.focc)
-                nvir = len(self.fvir)
-                nact = nocc + nvir - n
-                ncor = nocc - nact
-                nvvv = nvir - nact
-                if self.iprint > 0:
-                    print("FT-CCSD orbital info:")
-                    print('  nocc: {:d}'.format(nocc))
-                    print('  nvir: {:d}'.format(nvir))
+            focc,fvir,iocc,ivir = _get_active(self.athresh, self.fthresh, beta, mu, self.sys, iprint)
+            self.focc = focc
+            self.fvir = fvir
+            self.iocc = iocc
+            self.ivir = ivir
 
         self.T1 = [None]*ng
         self.T2 = [None]*ng
