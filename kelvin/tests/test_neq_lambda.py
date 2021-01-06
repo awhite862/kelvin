@@ -120,7 +120,7 @@ class NEQLambdaTest(unittest.TestCase):
         ccsdT = neq_ccsd(sys,T,mu=mu,tmax=tmax,econv=1e-12,max_iter=40,damp=0.0,ngr=ngr,ngi=ngi,iprint=0)
         E = ccsdT.run()
         ccsdT._neq_ccsd_lambda()
-        
+
         # Check that L is zero
         beta = 1.0/T
         tii,gi,Gi = quadrature.simpsons(ngi, beta)
@@ -136,7 +136,7 @@ class NEQLambdaTest(unittest.TestCase):
         self.assertTrue(abs(L - E[1]) < self.thresh, "Lagrangian does not equal the Energy: {}".format(L))
 
         out = test_L1(ccsdT, self.thresh)
-        self.assertTrue(out[1],out[0]) 
+        self.assertTrue(out[1],out[0])
 
     def test_h2_field(self):
         beta = 1.0
@@ -155,7 +155,7 @@ class NEQLambdaTest(unittest.TestCase):
         ccsdT = neq_ccsd(sys,T,mu=mu,tmax=tmax,econv=1e-12,max_iter=40,damp=0.0,ngr=ngr,ngi=ngi,iprint=0)
         E = ccsdT.run()
         ccsdT._neq_ccsd_lambda()
-        
+
         # Check that L is zero
         en = ccsdT.sys.g_energies_tot()
         D1 = en[:,None] - en[None,:]
@@ -168,7 +168,7 @@ class NEQLambdaTest(unittest.TestCase):
         self.assertTrue(abs(L - E[1]) < self.thresh, "Lagrangian does not equal the Energy: {}  {}".format(L,E[1]))
 
         out = test_L1(ccsdT, self.thresh)
-        self.assertTrue(out[1],out[0]) 
+        self.assertTrue(out[1],out[0])
 
 if __name__ == '__main__':
     unittest.main()

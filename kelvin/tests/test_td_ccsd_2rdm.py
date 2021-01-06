@@ -19,7 +19,7 @@ class TDCCSD2RDMTest(unittest.TestCase):
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
 
-        # compute normal-ordered 1-rdm 
+        # compute normal-ordered 1-rdm
         ccsdT = ccsd(sys,T=T,mu=mu,ngrid=220,iprint=0)
         Eref,Eccref = ccsdT.run()
         ccsdT._g_ft_2rdm()
@@ -33,7 +33,7 @@ class TDCCSD2RDMTest(unittest.TestCase):
         diffs = [numpy.linalg.norm(r - o)/numpy.linalg.norm(r) for r,o in zip(ccsdT.P2, tdccsdT.P2)]
         errs = ["Difference in {}: {}".format(n,d) for n,d in zip(names, diffs)]
         for d,e in zip(diffs,errs):
-            self.assertTrue(d < 5e-5, e) 
+            self.assertTrue(d < 5e-5, e)
 
     def test_Be_rk4_active(self):
         mol = gto.M(
@@ -48,7 +48,7 @@ class TDCCSD2RDMTest(unittest.TestCase):
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
 
-        # compute normal-ordered 1-rdm 
+        # compute normal-ordered 1-rdm
         ccsdT = ccsd(sys,T=T,mu=mu,ngrid=220,iprint=0,athresh=1e-20)
         Eref,Eccref = ccsdT.run()
         ccsdT._g_ft_2rdm()
@@ -62,7 +62,7 @@ class TDCCSD2RDMTest(unittest.TestCase):
         diffs = [numpy.linalg.norm(r - o)/numpy.linalg.norm(r) for r,o in zip(ccsdT.P2, tdccsdT.P2)]
         errs = ["Difference in {}: {}".format(n,d) for n,d in zip(names, diffs)]
         for d,e in zip(diffs,errs):
-            self.assertTrue(d < 1e-4, e) 
+            self.assertTrue(d < 1e-4, e)
 
     def test_Be_u_vs_g(self):
         mol = gto.M(

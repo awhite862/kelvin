@@ -105,7 +105,7 @@ class FTCCReldenTest(unittest.TestCase):
         sys = scf_system(m,T,mu,orbtype='g')
         ccsdT = ccsd(sys,T=T,mu=mu,damp=0.1,ngrid=80,athresh=1e-30,iprint=0)
         cc = ccsdT.run()
-        ccsdT.compute_ESN() 
+        ccsdT.compute_ESN()
         Nref = ccsdT.N
         ccsdT._grel_ft_1rdm()
         Nout = numpy.trace(ccsdT.r1rdm)

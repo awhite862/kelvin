@@ -129,7 +129,7 @@ class HubbardFieldTest(unittest.TestCase):
         N[ 3,3] = 1.0
         N[ 4,4] = 1.0
         N[ 5,5] = 2.0
-        N[ 6,6] = 2.0 
+        N[ 6,6] = 2.0
         N[ 7,7] = 2.0
         N[ 8,8] = 2.0
         N[ 9, 9] = 2.0
@@ -145,7 +145,7 @@ class HubbardFieldTest(unittest.TestCase):
         M[ 3,3] = 1.0
         M[ 4,4] = 0.0
         M[ 5,5] = 2.0
-        M[ 6,6] = 1.0 
+        M[ 6,6] = 1.0
         M[ 7,7] = 1.0
         M[ 8,8] = 0.0
         M[ 9, 9] = 1.0
@@ -183,7 +183,7 @@ class HubbardFieldTest(unittest.TestCase):
             #P = numpy.einsum('sp,pq,qr->sr',numpy.conj(U),P,U)
             P = numpy.einsum('sp,pq,qr->sr',U,P,U2)
 
-            # measure M 
+            # measure M
             Ms.append(numpy.einsum('ij,ji->',P,M))
 
         Pa = numpy.zeros((2,2))

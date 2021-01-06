@@ -138,7 +138,7 @@ class FTLambdaTest(unittest.TestCase):
         Etot,Ecc = ccsdT.run()
         ccsdT._ft_ccsd_lambda()
         out = test_L1(ccsdT, self.thresh)
-        self.assertTrue(out[1],out[0]) 
+        self.assertTrue(out[1],out[0])
 
     def test_Be_sto3g_gen_active(self):
         mol = gto.M(
@@ -155,7 +155,7 @@ class FTLambdaTest(unittest.TestCase):
         Etot,Ecc = ccsdT.run()
         ccsdT._ft_ccsd_lambda()
         out = test_L1(ccsdT, 1e-7)
-        self.assertTrue(out[1],out[0]) 
+        self.assertTrue(out[1],out[0])
 
     def test_Be_sto3g(self):
         mol = gto.M(

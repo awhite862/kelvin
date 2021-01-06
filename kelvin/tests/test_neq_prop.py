@@ -1,7 +1,7 @@
 import unittest
 import numpy
 from pyscf import gto, scf
-from cqcpy import ft_utils 
+from cqcpy import ft_utils
 from cqcpy.ov_blocks import one_e_blocks
 from cqcpy.ov_blocks import two_e_blocks
 from cqcpy import integrals
@@ -56,7 +56,7 @@ class NEQPropTest(unittest.TestCase):
             basis = 'STO-3G',
             charge = 1,
             spin = 1)
-        
+
         m = scf.UHF(mol)
         Escf = m.scf()
         mos = m.mo_coeff[0]
@@ -66,7 +66,7 @@ class NEQPropTest(unittest.TestCase):
         E[2] = 1.0
         field = numpy.einsum('x,xij->ij', E, mol.intor('cint1e_r_sph', comp=3))
         field = numpy.einsum('mp,mn,nq->pq',mos,field,mos)
-        nuc_e = m.mol.energy_nuc() 
+        nuc_e = m.mol.energy_nuc()
 
         # compute property from finite differences
         deltat = 0.5
@@ -87,7 +87,7 @@ class NEQPropTest(unittest.TestCase):
         t2fp = cc.T2f
         t2bp = cc.T2b
         t2ip = cc.T2i
-     
+
         sys = h2_field_system(T,mu,omega,tir,O=(-d*field),ot=ng - 1)
         en = sys.g_energies_tot()
         F_b,Ff_b,Fb_b,I_b = cc_utils.get_ft_integrals_neq(sys, en, beta, mu)
@@ -162,7 +162,7 @@ class NEQPropTest(unittest.TestCase):
         # get actual integrals
         F,Ff,Fb,I = cc_utils.get_ft_integrals_neq(sys, en, beta, mu)
 
-        # compute the singles 
+        # compute the singles
         dT1i = numpy.zeros((ngi,n,n),dtype=complex)
         dT1b = numpy.zeros((ngr,n,n),dtype=complex)
         dT1f = numpy.zeros((ngr,n,n),dtype=complex)
@@ -322,21 +322,21 @@ class NEQPropTest(unittest.TestCase):
             basis = 'STO-3G',
             charge = 1,
             spin = 1)
-        
+
         m = scf.UHF(mol)
         Escf = m.scf()
         mos = m.mo_coeff[0]
-        
+
         eri = integrals.get_phys(mol, mos, mos, mos, mos)
         hcore = numpy.einsum('mp,mn,nq->pq',mos,m.get_hcore(m.mol),mos)
         F = hcore + eri[:,0,:,0] - eri[:,0,0,:]
         en,vvvvv = numpy.linalg.eigh(F)
-        
+
         E = numpy.zeros((3))
         E[2] = 1.0
         field = numpy.einsum('x,xij->ij', E, mol.intor('cint1e_r_sph', comp=3))
         field = numpy.einsum('mp,mn,nq->pq',mos,field,mos)
-        nuc_e = m.mol.energy_nuc() 
+        nuc_e = m.mol.energy_nuc()
 
         # Neq-CCSD reference with FD
         Aref = []
@@ -354,7 +354,7 @@ class NEQPropTest(unittest.TestCase):
             sys = h2_field_system(T,mu,omega,ti,O=(d*PT),ot=gf - 1)
             cc = neq_ccsd(sys,T,mu=mu,tmax=tmax,econv=1e-10,max_iter=40,damp=0.0,ngr=ng,ngi=40,iprint=0)
             Ef = cc.run()
-        
+
             sys = h2_field_system(T,mu,omega,ti,O=(-d*PT),ot=gf - 1)
             cc = neq_ccsd(sys,T,mu=mu,tmax=tmax,econv=1e-10,max_iter=40,damp=0.0,ngr=ng,ngi=40,iprint=0)
             Eb = cc.run()
@@ -391,19 +391,19 @@ class NEQPropTest(unittest.TestCase):
             basis = 'STO-3G',
             charge = 1,
             spin = 1)
-        
+
         m = scf.UHF(mol)
         Escf = m.scf()
         mos = m.mo_coeff[0]
-        
+
         eri = integrals.get_phys(mol, mos, mos, mos, mos)
         hcore = numpy.einsum('mp,mn,nq->pq',mos,m.get_hcore(m.mol),mos)
-        
+
         E = numpy.zeros((3))
         E[2] = 1.0
         field = numpy.einsum('x,xij->ij', E, mol.intor('cint1e_r_sph', comp=3))
         field = numpy.einsum('mp,mn,nq->pq',mos,field,mos)
-        nuc_e = m.mol.energy_nuc() 
+        nuc_e = m.mol.energy_nuc()
         H = numpy.zeros((4,4))
         H[1,1] += hcore[0,0]
         H[2,2] += hcore[1,1]
@@ -412,9 +412,9 @@ class NEQPropTest(unittest.TestCase):
         H[3,3] = hcore[0,0] + hcore[1,1] + eri[0,1,0,1] - eri[0,1,1,0]
         Hint = numpy.zeros((4,4))
         Hint[1,1] = field[0,0]
-        Hint[2,2] = field[1,1] 
-        Hint[1,2] = field[0,1] 
-        Hint[2,1] = field[1,0] 
+        Hint[2,2] = field[1,1]
+        Hint[1,2] = field[0,1]
+        Hint[2,1] = field[1,0]
         Hint[3,3] = field[0,0] + field[1,1]
 
         e0,v0 = numpy.linalg.eigh(H)
@@ -424,7 +424,7 @@ class NEQPropTest(unittest.TestCase):
         p = p0.copy()
         ti = numpy.zeros(ngrid_ref)
         Aref = []
-        
+
         for i in range(ngrid_ref):
             t = i*deltat
             ti[i] = t
@@ -471,21 +471,21 @@ class NEQPropTest(unittest.TestCase):
     #        basis = 'STO-3G',
     #        charge = 1,
     #        spin = 1)
-    #    
+
     #    m = scf.UHF(mol)
     #    Escf = m.scf()
     #    mos = m.mo_coeff[0]
-    #    
+
     #    eri = integrals.get_phys(mol, mos, mos, mos, mos)
     #    hcore = numpy.einsum('mp,mn,nq->pq',mos,m.get_hcore(m.mol),mos)
     #    F = hcore + eri[:,0,:,0] - eri[:,0,0,:]
     #    en,vvvvv = numpy.linalg.eigh(F)
-    #    
+
     #    E = numpy.zeros((3))
     #    E[2] = 1.0
     #    field = numpy.einsum('x,xij->ij', E, mol.intor('cint1e_r_sph', comp=3))
     #    field = numpy.einsum('mp,mn,nq->pq',mos,field,mos)
-    #    nuc_e = m.mol.energy_nuc() 
+    #    nuc_e = m.mol.energy_nuc()
 
     #    # Neq-CCSD reference with FD
     #    ngi = 10
@@ -507,7 +507,7 @@ class NEQPropTest(unittest.TestCase):
     #        sys = h2_field_system(T,mu,omega,ti,O=(d*PT),ot=gf - 1)
     #        cc = neq_ccsd(sys,T,mu=mu,tmax=tmax,econv=1e-10,max_iter=40,damp=0.0,ngr=ng,ngi=40,iprint=0)
     #        Ef = cc.run()
-    #    
+
     #        sys = h2_field_system(T,mu,omega,ti,O=(-d*PT),ot=gf - 1)
     #        cc = neq_ccsd(sys,T,mu=mu,tmax=tmax,econv=1e-10,max_iter=40,damp=0.0,ngr=ng,ngi=40,iprint=0)
     #        Eb = cc.run()

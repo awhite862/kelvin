@@ -164,7 +164,7 @@ class LambdaTest(unittest.TestCase):
         Etot,Ecc = ccsd0.run()
         ccsd0._ccsd_lambda()
         out = test_L2(ccsd0, self.thresh)
-        self.assertTrue(out[1],out[0]) 
+        self.assertTrue(out[1],out[0])
 
     def test_N2p_sto3g_gen(self):
         mol = gto.M(
@@ -181,9 +181,9 @@ class LambdaTest(unittest.TestCase):
         Etot,Ecc = ccsd0.run()
         ccsd0._ccsd_lambda()
         outs = test_L1(ccsd0, self.thresh)
-        self.assertTrue(outs[1],outs[0]) 
+        self.assertTrue(outs[1],outs[0])
         outd = test_L2(ccsd0, self.thresh)
-        self.assertTrue(outd[1],outd[0]) 
+        self.assertTrue(outd[1],outd[0])
 
     def test_Be_sto3g(self):
         mol = gto.M(
@@ -198,7 +198,7 @@ class LambdaTest(unittest.TestCase):
         Etot,Ecc = ccsd0.run()
         ccsd0._uccsd_lambda()
         out = test_L2(ccsd0, self.thresh)
-        self.assertTrue(out[1],out[0]) 
+        self.assertTrue(out[1],out[0])
 
     def test_N2p_sto3g(self):
         mol = gto.M(
@@ -215,9 +215,9 @@ class LambdaTest(unittest.TestCase):
         Etot,Ecc = ccsd0.run()
         ccsd0._uccsd_lambda()
         outs = test_L1(ccsd0, self.thresh)
-        self.assertTrue(outs[1],outs[0]) 
+        self.assertTrue(outs[1],outs[0])
         outd = test_L2(ccsd0, self.thresh)
-        self.assertTrue(outd[1],outd[0]) 
+        self.assertTrue(outd[1],outd[0])
 
 if __name__ == '__main__':
     unittest.main()

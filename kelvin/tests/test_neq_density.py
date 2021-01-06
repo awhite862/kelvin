@@ -4,7 +4,7 @@ from cqcpy import test_utils
 from cqcpy.ov_blocks import one_e_blocks
 from cqcpy.ov_blocks import two_e_blocks
 from cqcpy import integrals
-from cqcpy import utils 
+from cqcpy import utils
 from cqcpy import spin_utils
 from kelvin import quadrature
 from kelvin import ft_cc_equations
@@ -41,8 +41,8 @@ class NEQDensityTest(unittest.TestCase):
 
     def test_den(self):
 
-        ngr = 4 
-        ngi = 4 
+        ngr = 4
+        ngi = 4
         n = 5
         beta = 1.0
         tmax = 0.1

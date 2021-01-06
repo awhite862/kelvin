@@ -51,7 +51,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
 
         # compute the trace from the CC equations
         ref = compute_ref(T1old,T2old,L1old,L2old,F,I,D1,D2,ti,ng,g,G,beta)
-        # compute the trace from the rdms 
+        # compute the trace from the rdms
         pia,pba,pji,pai = ft_cc_equations.ccsd_1rdm(T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G)
         out = (1.0/beta)*numpy.einsum('ia,ai->',pia,F.vo)
 
@@ -84,7 +84,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
 
         # compute the trace from the CC equations
         ref = compute_ref(T1old,T2old,L1old,L2old,F,I,D1,D2,ti,ng,g,G,beta)
-        # compute the trace from the rdms 
+        # compute the trace from the rdms
         pia,pba,pji,pai = ft_cc_equations.ccsd_1rdm(T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G)
         out = (1.0/beta)*numpy.einsum('ba,ab->',pba,F.vv)
 
@@ -117,7 +117,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
 
         # compute the trace from the CC equations
         ref = compute_ref(T1old,T2old,L1old,L2old,F,I,D1,D2,ti,ng,g,G,beta)
-        # compute the trace from the rdms 
+        # compute the trace from the rdms
         pia,pba,pji,pai = ft_cc_equations.ccsd_1rdm(T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G)
         out = (1.0/beta)*numpy.einsum('ji,ij->',pji,F.oo)
 
@@ -150,7 +150,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
 
         # compute the trace from the CC equations
         ref = compute_ref(T1old,T2old,L1old,L2old,F,I,D1,D2,ti,ng,g,G,beta)
-        # compute the trace from the rdms 
+        # compute the trace from the rdms
         pia,pba,pji,pai = ft_cc_equations.ccsd_1rdm(T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G)
         out = (1.0/beta)*numpy.einsum('ai,ia->',pai,F.ov)
 
@@ -184,7 +184,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
 
         # compute the trace from the CC equations
         ref = compute_ref(T1old,T2old,L1old,L2old,F,I,D1,D2,ti,ng,g,G,beta)
-        # compute the trace from the rdms 
+        # compute the trace from the rdms
         Pcdab = ft_cc_equations.ccsd_2rdm(T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G)[0]
         out = (0.25/beta)*numpy.einsum('cdab,abcd->',Pcdab,I.vvvv)
 
@@ -218,7 +218,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
 
         # compute the trace from the CC equations
         ref = compute_ref(T1old,T2old,L1old,L2old,F,I,D1,D2,ti,ng,g,G,beta)
-        # compute the trace from the rdms 
+        # compute the trace from the rdms
         Pciab = ft_cc_equations.ccsd_2rdm(T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G)[1]
         out = (0.5/beta)*numpy.einsum('ciab,abci->',Pciab,I.vvvo)
 
@@ -252,7 +252,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
 
         # compute the trace from the CC equations
         ref = compute_ref(T1old,T2old,L1old,L2old,F,I,D1,D2,ti,ng,g,G,beta)
-        # compute the trace from the rdms 
+        # compute the trace from the rdms
         Pbcai = ft_cc_equations.ccsd_2rdm(T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G)[2]
         out = (0.5/beta)*numpy.einsum('bcai,aibc->',Pbcai,I.vovv)
 
@@ -286,7 +286,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
 
         # compute the trace from the CC equations
         ref = compute_ref(T1old,T2old,L1old,L2old,F,I,D1,D2,ti,ng,g,G,beta)
-        # compute the trace from the rdms 
+        # compute the trace from the rdms
         Pijab = ft_cc_equations.ccsd_2rdm(T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G)[3]
         out = (0.25/beta)*numpy.einsum('ijab,abij->',Pijab,I.vvoo)
 
@@ -320,7 +320,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
 
         # compute the trace from the CC equations
         ref = compute_ref(T1old,T2old,L1old,L2old,F,I,D1,D2,ti,ng,g,G,beta)
-        # compute the trace from the rdms 
+        # compute the trace from the rdms
         Pbjai = ft_cc_equations.ccsd_2rdm(T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G)[4]
         out = (1.0/beta)*numpy.einsum('bjai,aibj->',Pbjai,I.vovo)
 
@@ -354,7 +354,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
 
         # compute the trace from the CC equations
         ref = compute_ref(T1old,T2old,L1old,L2old,F,I,D1,D2,ti,ng,g,G,beta)
-        # compute the trace from the rdms 
+        # compute the trace from the rdms
         Pabij = ft_cc_equations.ccsd_2rdm(T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G)[5]
         out = (0.25/beta)*numpy.einsum('abij,ijab->',Pabij,I.oovv)
 
@@ -388,7 +388,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
 
         # compute the trace from the CC equations
         ref = compute_ref(T1old,T2old,L1old,L2old,F,I,D1,D2,ti,ng,g,G,beta)
-        # compute the trace from the rdms 
+        # compute the trace from the rdms
         Pjkai = ft_cc_equations.ccsd_2rdm(T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G)[6]
         out = (0.5/beta)*numpy.einsum('jkai,aijk->',Pjkai,I.vooo)
 
@@ -422,7 +422,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
 
         # compute the trace from the CC equations
         ref = compute_ref(T1old,T2old,L1old,L2old,F,I,D1,D2,ti,ng,g,G,beta)
-        # compute the trace from the rdms 
+        # compute the trace from the rdms
         Pkaij = ft_cc_equations.ccsd_2rdm(T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G)[7]
         out = (0.5/beta)*numpy.einsum('kaij,ijka->',Pkaij,I.ooov)
 
@@ -456,7 +456,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
 
         # compute the trace from the CC equations
         ref = compute_ref(T1old,T2old,L1old,L2old,F,I,D1,D2,ti,ng,g,G,beta)
-        # compute the trace from the rdms 
+        # compute the trace from the rdms
         Pklij = ft_cc_equations.ccsd_2rdm(T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G)[8]
         out = (0.25/beta)*numpy.einsum('klij,ijkl->',Pklij,I.oooo)
 

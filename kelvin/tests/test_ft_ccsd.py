@@ -37,7 +37,7 @@ class FTCCSDTest(unittest.TestCase):
         sys = scf_system(m,T,mu)
         ccsdT = ccsd(sys,iprint=0,T=T,mu=mu,max_iter=24,econv=1e-11,ngrid=320)
         Ecc = ccsdT.run()
-        
+
         fciT = fci(sys,T=T,mu=mu)
         Efci = fciT.run()
         error = "Expected: {}  Actual: {}".format(Efci[1],Ecc[1])
@@ -49,7 +49,7 @@ class FTCCSDTest(unittest.TestCase):
             verbose = 0,
             atom = 'Be 0 0 0',
             basis = 'sto-3G')
-        
+
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
         Escf = m.scf()
@@ -63,7 +63,7 @@ class FTCCSDTest(unittest.TestCase):
             verbose = 0,
             atom = 'Be 0 0 0',
             basis = 'sto-3G')
-        
+
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
         Escf = m.scf()
@@ -73,13 +73,13 @@ class FTCCSDTest(unittest.TestCase):
         diff = abs(self.Be_ref_rt - cc[1])
         error = "Expected: {}  Actual: {}".format(self.Be_ref_rt,cc[1])
         self.assertTrue(diff < self.thresh,error)
-    
+
     def test_Be_active(self):
         mol = gto.M(
             verbose = 0,
             atom = 'Be 0 0 0',
             basis = 'sto-3G')
-        
+
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
         Escf = m.scf()

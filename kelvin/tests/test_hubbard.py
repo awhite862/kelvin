@@ -66,7 +66,7 @@ class HubbardTest(unittest.TestCase):
         diff = abs(Es - Ec)
         msg = "Expected: {}  Actual: {}".format(Es,Ec)
         self.assertTrue(diff < self.thresh,msg)
- 
+
     def test_4_1_open(self):
         nelec = 4
         L = 4
