@@ -32,7 +32,7 @@ class KelCCSDTest(unittest.TestCase):
 
         eri = integrals.get_phys(mol, mos, mos, mos, mos)
         hcore = numpy.einsum('mp,mn,nq->pq',mos,m.get_hcore(m.mol),mos)
-        thresh = 1e-3
+        thresh = 1e-5
 
         E = numpy.zeros((3))
         E[2] = 1.0
@@ -71,14 +71,10 @@ class KelCCSDTest(unittest.TestCase):
             if i%(ngrid_ref//10) == 0:
                 A_ref.append(numpy.einsum('ij,ji->',p,Hint))
 
-        #del A_ref[0]
-        # Neq-CCSD
-        ng = 640
-        ngi = 80
         A = []
         sys = H2FieldSystem(T, mu, omega)
         prop = {"tprop" : "rk4", "lprop" : "rk4"}
-        mycc = TDCCSD(sys, prop, T=T, mu=mu, iprint=0, ngrid=40, saveT=True, saveL=True)
+        mycc = TDCCSD(sys, prop, T=T, mu=mu, iprint=0, ngrid=80, saveT=True, saveL=True)
         mycc.run()
         mycc._ccsd_lambda()
 
@@ -89,7 +85,6 @@ class KelCCSDTest(unittest.TestCase):
         A = []
         for i,p in enumerate(kccsd.P):
             if i%20 == 0:
-                #print(kccsd.ti[i])
                 A.append(numpy.einsum('ij,ji->', field, p))
 
         for i,out in enumerate(A):

@@ -83,7 +83,15 @@ class KelCCSD(object):
         self.L1 = tdccsd._read_L1(itime)
         self.L2 = tdccsd._read_L2(itime)
 
-    #def step(self, ):
+    def _step(self, prop, t0, var, h, func):
+        if prop == "rk1":
+            return propagation.rk1_gen(t0, var, h, func)
+        elif prop == "rk2":
+            return propagation.rk2_gen(t0, var, h, func)
+        elif prop == "rk4":
+            return propagation.rk4_gen(t0, var, h, func)
+        else:
+            raise Exception("Unrecognized propagation scheme: " + prop)
 
     def _ccsd(self, nstep, rdm2=False, step=0.1):
         mu = self.mu
@@ -173,7 +181,8 @@ class KelCCSD(object):
                 cc_equations._Stanton(k1s,k1d,F,I,t1,t2,fac=-1.j)
                 return [k1s,k1d]
 
-            dT = propagation.rk1_gen(t0, [self.T1,self.T2], h, fRHSt)
+            #dT = propagation.rk1_gen(t0, [self.T1,self.T2], h, fRHSt)
+            dT = self._step(self.prop["tprop"], t0, [self.T1,self.T2], h, fRHSt)
             T1 = self.T1 + dT[0]
             T2 = self.T2 + dT[1]
 
@@ -191,7 +200,8 @@ class KelCCSD(object):
                 cc_equations._LS_TS(l1s,I,t1,fac=1.j)
                 return [l1s,l1d]
 
-            dL = propagation.rk1_gen(t0, [self.L1,self.L2], h, fLRHSt)
+            #dL = propagation.rk1_gen(t0, [self.L1,self.L2], h, fLRHSt)
+            dL = self._step(self.prop["lprop"], t0, [self.L1,self.L2], h, fLRHSt)
             L1 = self.L1 + dL[0]
             L2 = self.L2 + dL[1]
 

@@ -16,8 +16,8 @@ def rk2(h, var, RHS):
 
 def rk2_gen(t0, y0, dt, func):
     k1 = func(t0, y0)
-    k2 = func(t0 + 0.5*dt, y0 + 0.5*dt*k1)
-    return 0.5*dt*(k1 + k2)
+    k2 = func(t0 + 0.5*dt, [y + 0.5*dt*x for y,x in zip(y0, k1)])
+    return [0.5*dt*(x + y) for x,y in zip(k1,k2)]
 
 def rk4(h, var, RHS):
     k1 = RHS[0](var)
@@ -39,10 +39,10 @@ def rk4(h, var, RHS):
 
 def rk4_gen(t0, y0, dt, func):
     k1 = func(t0, y0)
-    k2 = func(t0 + 0.5*dt, y0 + 0.5*dt*k1)
-    k3 = func(t0 + 0.5*dt, y0 + 0.5*dt*k2)
-    k4 = func(t0 + dt, y0 + dt*k3)
-    return dt*(k1 + 2*k2 + 2*k3 + k4)/6.0
+    k2 = func(t0 + 0.5*dt, [a + 0.5*dt*b for a,b in zip(y0, k1)])
+    k3 = func(t0 + 0.5*dt, [a + 0.5*dt*b for a,b in zip(y0, k2)])
+    k4 = func(t0 + dt, [a + dt*b for a,b in zip(y0, k3)])
+    return [dt*(a + 2*b + 2*c + d)/6.0 for a,b,c,d in zip(k1,k2,k3,k4)]
 
 def ab2(h, var, k2, RHS):
     k1 = RHS(var)
