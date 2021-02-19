@@ -488,6 +488,53 @@ class TDCCSD(object):
         else:
             raise Exception("Unrecognized memory option for amplitudes!")
 
+    def _read_L1(self, i):
+        if self.tmem == "mem":
+            return self.L1[i]
+        elif self.tmem == "hdf5":
+            #import h5py
+            #filename = self.T1[i]
+            #h5f = h5py.File(filename, 'r')
+            #n = len(h5f.keys())
+            #if n == 1:
+            #    t1 = h5f["t1"][:]
+            #    h5f.close()
+            #    return t1
+            #elif n == 2:
+            #    t1a = h5f["t1a"][:]
+            #    t1b = h5f["t1b"][:]
+            #    h5f.close()
+            #    return (t1a,t1b)
+            #else:
+            #    h5f.close()
+            #    raise Exception("Wrong number of T1 amplitudes in " + filename)
+        else:
+            raise Exception("Unrecognized memory option for amplitudes!")
+
+    def _read_L2(self, i):
+        if self.tmem == "mem":
+            return self.L2[i]
+        elif self.tmem == "hdf5":
+            #import h5py
+            #filename = self.T2[i]
+            #h5f = h5py.File(filename, 'r')
+            #n = len(h5f.keys())
+            #if n == 1:
+            #    t2 = h5f["t2"][:]
+            #    h5f.close()
+            #    return t2
+            #elif n == 3:
+            #    t2aa = h5f["t2aa"][:]
+            #    t2ab = h5f["t2ab"][:]
+            #    t2bb = h5f["t2bb"][:]
+            #    h5f.close()
+            #    return (t2aa,t2ab,t2bb)
+            #else:
+            #    h5f.close()
+            #    raise Exception("Wrong number of T2 amplitudes in " + filename)
+        else:
+            raise Exception("Unrecognized memory option for amplitudes!")
+
     def _rmfile(self):
         if self.tmem == "hdf5":
             import os

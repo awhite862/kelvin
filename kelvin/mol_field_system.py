@@ -11,7 +11,7 @@ from .system import *
 from .neq_system import *
 
 class mol_field_system(system):
-    """Object representing a molecular system in a TD field.
+    """Object representing a molecular system in a TD field (deprecated).
 
     Attributes:
         mf (pyscf.scf): SCF object (not necessarily converged).

@@ -605,6 +605,50 @@ def ft_integrals(sys, en, beta, mu):
             vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
     return F,I
 
+def ft_integrals_2e(sys, en, beta, mu):
+    """Return one and two-electron integrals in the general spin orbital basis."""
+    fo = ft_utils.ff(beta, en, mu)
+    fv = ft_utils.ffv(beta, en, mu)
+    sfo = numpy.sqrt(fo)
+    sfv = numpy.sqrt(fv)
+
+    # get ERIs
+    eri = sys.g_aint_tot()
+
+    Ivvvv = einsum('abcd,a,b,c,d->abcd',eri,sfv,sfv,sfv,sfv)
+    Ivvvo = einsum('abci,a,b,c,i->abci',eri,sfv,sfv,sfv,sfo)
+    Ivovv = einsum('aibc,a,i,b,c->aibc',eri,sfv,sfo,sfv,sfv)
+    Ivvoo = einsum('abij,a,b,i,j->abij',eri,sfv,sfv,sfo,sfo)
+    Ivovo = einsum('ajbi,a,j,b,i->ajbi',eri,sfv,sfo,sfv,sfo)
+    Ioovv = einsum('ijab,i,j,a,b->ijab',eri,sfo,sfo,sfv,sfv)
+    Ivooo = einsum('akij,a,k,i,j->akij',eri,sfv,sfo,sfo,sfo)
+    Iooov = einsum('jkia,j,k,i,a->jkia',eri,sfo,sfo,sfo,sfv)
+    Ioooo = einsum('klij,k,l,i,j->klij',eri,sfo,sfo,sfo,sfo)
+    I = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
+            vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+    return I
+
+def ft_integrals_neq_1e(sys, en, beta, mu, t):
+    """Return one and two-electron integrals in the general spin orbital basis."""
+    fo = ft_utils.ff(beta, en, mu)
+    fv = ft_utils.ffv(beta, en, mu)
+    sfo = numpy.sqrt(fo)
+    sfv = numpy.sqrt(fv)
+
+    # get FT fock matrix
+    fmo = sys.g_fock_tot(t=t)
+    fmo = fmo - numpy.diag(en)
+
+    # pre-contract with fermi factors
+    Foo = einsum('ij,i,j->ij',fmo,sfo,sfo)
+    Fov = einsum('ia,i,a->ia',fmo,sfo,sfv)
+    Fvo = einsum('ai,a,i->ai',fmo,sfv,sfo)
+    Fvv = einsum('ab,a,b->ab',fmo,sfv,sfv)
+    F = one_e_blocks(Foo,Fov,Fvo,Fvv)
+
+    return F
+
+
 def get_ft_integrals_neq(sys, en, beta, mu):
     """Return one and two-electron integrals in the general spin orbital basis
     including real-time component."""
