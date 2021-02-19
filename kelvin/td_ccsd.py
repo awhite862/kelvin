@@ -492,6 +492,7 @@ class TDCCSD(object):
         if self.tmem == "mem":
             return self.L1[i]
         elif self.tmem == "hdf5":
+            pass
             #import h5py
             #filename = self.T1[i]
             #h5f = h5py.File(filename, 'r')
@@ -515,6 +516,7 @@ class TDCCSD(object):
         if self.tmem == "mem":
             return self.L2[i]
         elif self.tmem == "hdf5":
+            pass
             #import h5py
             #filename = self.T2[i]
             #h5f = h5py.File(filename, 'r')
