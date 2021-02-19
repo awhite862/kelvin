@@ -48,6 +48,21 @@ class NeqSystem(object):
         err = "Base class function verify()"
         raise Exception(err)
 
+    def has_g(self):
+        """Implementation of generalized orbital quantities"""
+        err = "Base class function has_g()"
+        raise Exception(err)
+
+    def has_u(self):
+        """Implementation of unrestricted orbital quantities"""
+        err = "Base class function has_u()"
+        raise Exception(err)
+
+    def has_r(self):
+        """Implementation of restricted orbital quantities"""
+        err = "Base class function has_r()"
+        raise Exception(err)
+
     def const_energy(self):
         """Return the constant energy shift if there is one."""
         err = "Base class function const_energy()"

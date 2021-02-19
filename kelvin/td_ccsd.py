@@ -621,7 +621,7 @@ class TDCCSD(object):
                 t2shape = (n,n,n,n)
 
         t1 = numpy.zeros(t1shape, dtype=F.vo.dtype)
-        t2 = numpy.zeros(t2shape, dtype=I.vvoo.dtype)
+        t2 = numpy.zeros(t2shape, dtype=F.vo.dtype)
         Eccn = 0.0
 
         singles = self.singles
@@ -777,9 +777,9 @@ class TDCCSD(object):
 
         t1a = numpy.zeros((nvira,nocca), dtype=Fa.vo.dtype)
         t1b = numpy.zeros((nvirb,noccb), dtype=Fa.vo.dtype)
-        t2aa = numpy.zeros((nvira,nvira,nocca,nocca), dtype=Ia.vvoo.dtype)
-        t2ab = numpy.zeros((nvira,nvirb,nocca,noccb), dtype=Iabab.vvoo.dtype)
-        t2bb = numpy.zeros((nvirb,nvirb,noccb,noccb), dtype=Ib.vvoo.dtype)
+        t2aa = numpy.zeros((nvira,nvira,nocca,nocca), dtype=Fa.vo.dtype)
+        t2ab = numpy.zeros((nvira,nvirb,nocca,noccb), dtype=Fa.vo.dtype)
+        t2bb = numpy.zeros((nvirb,nvirb,noccb,noccb), dtype=Fa.vo.dtype)
         Eccn = 0.0
 
         def fRHS(var):
@@ -899,7 +899,7 @@ class TDCCSD(object):
                 t1shape = (n,n)
                 t2shape = (n,n,n,n)
         t1 = numpy.zeros(t1shape, dtype=F.vo.dtype)
-        t2 = numpy.zeros(t2shape, dtype=I.vvoo.dtype)
+        t2 = numpy.zeros(t2shape, dtype=F.vo.dtype)
         Eccn = 0.0
 
         def fRHS(var):

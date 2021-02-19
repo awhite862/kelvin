@@ -128,6 +128,10 @@ class H2FieldSystem(NeqSystem):
         else:
             return True
 
+    def has_g(self): return True
+    def has_u(self): return False
+    def has_r(self): return False
+
     def const_energy(self):
         return self.m.mol.energy_nuc()
 
@@ -157,26 +161,9 @@ class H2FieldSystem(NeqSystem):
         F = self.hcore + \
             (self.eri[:,0,:,0] - self.eri[:,0,0,:])*fo[0] +\
             (self.eri[:,1,:,1] - self.eri[:,1,1,:])*fo[1]
-        #ng = len(self.ti)
-        #I = numpy.ones(ng)
         Fock = F.astype(complex)
-        #ot = self.ot
-        #ti = self.ti
         temp = field*numpy.sin(self.omega*t)
         Fock += temp
-        #if self.O is not None:
-        #    delta = ti[ot] - ti[ot - 1] #if ot > 0 else ti[ot + 1] - ti[ot]
-        #if direc == 'f' and self.O is not None:
-        #    Fock[self.ot,:,:] += -1.j*self.beta*self.O/delta
-        #elif direc == 'b'and self.O is not None:
-        #    Fock[self.ot,:,:] -= -0.j*self.beta*self.O/delta
-
-        #if direc == 'b':
-        #    temp = Fock.copy()
-        #    for i in range(ng):
-        #        Fock[i] = temp[ng - i - 1]
-        #    return Fock
-        #else:
         return Fock
 
     def g_aint_tot(self):
