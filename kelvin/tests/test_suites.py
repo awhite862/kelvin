@@ -13,6 +13,7 @@ from kelvin.tests import test_ft_lambda_equations
 from kelvin.tests import test_ft_mp2
 from kelvin.tests import test_hubbard
 from kelvin.tests import test_hubbard_field
+from kelvin.tests import test_kel_ccsd
 from kelvin.tests import test_lambda
 from kelvin.tests import test_mp2
 from kelvin.tests import test_neq_ccsd
@@ -141,6 +142,8 @@ def get_suite(full):
     suite.addTest(test_hubbard_field.HubbardFieldTest("test_null_cc"))
     if full:
         suite.addTest(test_hubbard_field.HubbardFieldTest("test_cc_vs_fci"))
+
+    suite.addTest(test_kel_ccsd.KelCCSDTest("test_h2_field"))
 
     suite.addTest(test_lambda.LambdaTest("test_Be_sto3g"))
     suite.addTest(test_lambda.LambdaTest("test_Be_sto3g_gen"))
