@@ -142,6 +142,7 @@ def get_suite(full):
     suite.addTest(test_hubbard_field.HubbardFieldTest("test_null_cc"))
     if full:
         suite.addTest(test_hubbard_field.HubbardFieldTest("test_cc_vs_fci"))
+        suite.addTest(test_hubbard_field.HubbardFieldTest("test_kel_cc"))
 
     suite.addTest(test_kel_ccsd.KelCCSDTest("test_h2_field"))
 
