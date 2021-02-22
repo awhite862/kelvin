@@ -12,7 +12,7 @@ from kelvin.kel_ccsd import KelCCSD
 
 class KelCCSDTest(unittest.TestCase):
     def test_h2_field(self):
-        beta = 1.0
+        beta = 0.6
         T = 1./beta
         mu = 0.0
         omega = 0.5
