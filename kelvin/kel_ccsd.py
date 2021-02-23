@@ -93,7 +93,7 @@ class KelCCSD(object):
         else:
             raise Exception("Unrecognized propagation scheme: " + prop)
 
-    def _ccsd(self, nstep, rdm2=False, step=0.1):
+    def _ccsd(self, nstep, rdm2=False, step=0.1, save=1):
         mu = self.mu
 
         # get time-grid
@@ -170,6 +170,8 @@ class KelCCSD(object):
         self.P.append(n1rdm)
         self.ti.append(t0)
 
+        if rdm2: raise Exception("2-rdm is not implemented!")
+
         for i in range(1,nstep):
             t = t0 + step
             h = step
@@ -232,6 +234,7 @@ class KelCCSD(object):
                 n1rdm[numpy.ix_(self.iocc,self.iocc)] += numpy.diag(self.focc)
             else:
                 n1rdm = ndji + ndia + ndai + ndba + numpy.diag(fo)
-            self.P.append(n1rdm)
-            self.ti.append(t)
+            if i%save == 0:
+                self.P.append(n1rdm)
+                self.ti.append(t)
             t0 = t

@@ -94,5 +94,56 @@ class KelCCSDTest(unittest.TestCase):
             #print(diff)
             self.assertTrue(diff < thresh,msg)
 
+    def test_h2_field_save(self):
+        beta = 0.6
+        T = 1./beta
+        mu = 0.0
+        omega = 0.5
+
+        mol = gto.M(
+            verbose = 0,
+            atom = 'H 0 0 -0.6; H 0 0 0.0',
+            basis = 'STO-3G',
+            charge = 1,
+            spin = 1)
+
+        m = scf.UHF(mol)
+        Escf = m.scf()
+        mos = m.mo_coeff[0]
+
+        E = numpy.zeros((3))
+        E[2] = 1.0
+        field = numpy.einsum('x,xij->ij', E, mol.intor('cint1e_r_sph', comp=3))
+        field = numpy.einsum('mp,mn,nq->pq',mos,field,mos)
+
+        sys = H2FieldSystem(T, mu, omega)
+        prop = {"tprop" : "rk1", "lprop" : "rk1"}
+        mycc = TDCCSD(sys, prop, T=T, mu=mu, iprint=0, ngrid=80, saveT=True, saveL=True)
+        mycc.run()
+        mycc._ccsd_lambda()
+
+        kccsd = KelCCSD(sys, prop, T=T, mu=mu, iprint=0)
+        kccsd.init_from_ftccsd(mycc, contour="keldysh")
+        kccsd._ccsd(nstep=200, step=0.005)
+        Aref = []
+        for i,p in enumerate(kccsd.P):
+            if i%20 == 0:
+                Aref.append(numpy.einsum('ij,ji->', field, p))
+
+        kccsd2 = KelCCSD(sys, prop, T=T, mu=mu, iprint=0)
+        kccsd2.init_from_ftccsd(mycc, contour="keldysh")
+        kccsd2._ccsd(nstep=200, step=0.005, save=20)
+        A = []
+        for i,p in enumerate(kccsd2.P):
+            A.append(numpy.einsum('ij,ji->', field, p))
+
+        thresh = 1e-12
+        for i,out in enumerate(A):
+            ref = Aref[i]
+            diff = abs(ref - out)
+            msg = "{} -- Expected: {}  Actual: {} ".format(i,ref,out)
+            #print(diff)
+            self.assertTrue(diff < thresh,msg)
+
 if __name__ == '__main__':
     unittest.main()

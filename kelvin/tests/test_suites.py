@@ -145,6 +145,7 @@ def get_suite(full):
         suite.addTest(test_hubbard_field.HubbardFieldTest("test_kel_cc"))
 
     suite.addTest(test_kel_ccsd.KelCCSDTest("test_h2_field"))
+    suite.addTest(test_kel_ccsd.KelCCSDTest("test_h2_field_save"))
 
     suite.addTest(test_lambda.LambdaTest("test_Be_sto3g"))
     suite.addTest(test_lambda.LambdaTest("test_Be_sto3g_gen"))
