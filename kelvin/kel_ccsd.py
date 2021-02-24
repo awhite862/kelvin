@@ -25,17 +25,15 @@ class KelCCSD(object):
         self.singles = singles
         self.athresh = athresh
         self.fthresh = fthresh
-        self.active = (self.athresh > 0.0 or self.fthresh > 0.0)
         self.prop = prop
         if not sys.verify(self.T,self.mu):
             raise Exception("Sytem temperature inconsistent with CC temp")
         self.beta = 1.0/T if T > 0.0 else None
-        if self.active:
-            focc,fvir,iocc,ivir = _get_active(self.athresh, self.fthresh, self.beta, mu, self.sys, iprint)
-            self.focc = focc
-            self.fvir = fvir
-            self.iocc = iocc
-            self.ivir = ivir
+        focc,fvir,iocc,ivir = _get_active(self.athresh, self.fthresh, self.beta, mu, self.sys, iprint)
+        self.focc = focc
+        self.fvir = fvir
+        self.iocc = iocc
+        self.ivir = ivir
 
         self.tcur = 0.0
         self.T1 = None
@@ -112,36 +110,22 @@ class KelCCSD(object):
         E0 = ft_mp.mp0(g0) + En
         E1 = self.sys.get_mp1()
         E01 = E0 + E1
-        if self.active:
-            nocc = len(self.focc)
-            nvir = len(self.fvir)
+        nocc = len(self.focc)
+        nvir = len(self.fvir)
 
-            # get scaled active space integrals
-            F,I = cc_utils.ft_active_integrals(self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
+        # get scaled integrals
+        F,I = cc_utils.ft_active_integrals(self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
 
-            # get exponentials
-            D1 = en[:,None] - en[None,:]
-            D2 = en[:,None,None,None] + en[None,:,None,None] \
-                    - en[None,None,:,None] - en[None,None,None,:]
-            D1 = D1[numpy.ix_(self.ivir,self.iocc)]
-            D2 = D2[numpy.ix_(self.ivir,self.ivir,self.iocc,self.iocc)]
-            t1shape = (nvir,nocc)
-            t2shape = (nvir,nvir,nocc,nocc)
-            sfo = numpy.sqrt(self.focc)
-            sfv = numpy.sqrt(self.fvir)
-
-        else:
-            # get scaled integrals
-            I = cc_utils.ft_integrals_2e(self.sys, en, beta, mu)
-
-            # get energy differences
-            D1 = en[:,None] - en[None,:]
-            D2 = en[:,None,None,None] + en[None,:,None,None] \
-                    - en[None,None,:,None] - en[None,None,None,:]
-            t1shape = (n,n)
-            t2shape = (n,n,n,n)
-            sfo = numpy.sqrt(fo)
-            sfv = numpy.sqrt(fv)
+        # get exponentials
+        D1 = en[:,None] - en[None,:]
+        D2 = en[:,None,None,None] + en[None,:,None,None] \
+                - en[None,None,:,None] - en[None,None,None,:]
+        D1 = D1[numpy.ix_(self.ivir,self.iocc)]
+        D2 = D2[numpy.ix_(self.ivir,self.ivir,self.iocc,self.iocc)]
+        t1shape = (nvir,nocc)
+        t2shape = (nvir,nvir,nocc,nocc)
+        sfo = numpy.sqrt(self.focc)
+        sfv = numpy.sqrt(self.fvir)
 
         Eccn = 0.0
 
@@ -159,14 +143,11 @@ class KelCCSD(object):
         ndai = numpy.einsum('ai,a,i->ai',pai,sfv,sfo)
 
         n1rdm = numpy.zeros((n,n), dtype=complex)
-        if self.active:
-            n1rdm[numpy.ix_(self.iocc,self.iocc)] += ndji
-            n1rdm[numpy.ix_(self.iocc,self.ivir)] += ndia
-            n1rdm[numpy.ix_(self.ivir,self.iocc)] += ndai
-            n1rdm[numpy.ix_(self.ivir,self.ivir)] += ndba
-            n1rdm[numpy.ix_(self.iocc,self.iocc)] += numpy.diag(self.focc)
-        else:
-            n1rdm = ndji + ndia + ndba + ndai + numpy.diag(fo)
+        n1rdm[numpy.ix_(self.iocc,self.iocc)] += ndji
+        n1rdm[numpy.ix_(self.iocc,self.ivir)] += ndia
+        n1rdm[numpy.ix_(self.ivir,self.iocc)] += ndai
+        n1rdm[numpy.ix_(self.ivir,self.ivir)] += ndba
+        n1rdm[numpy.ix_(self.iocc,self.iocc)] += numpy.diag(self.focc)
         self.P.append(n1rdm)
         self.ti.append(t0)
 
@@ -183,7 +164,6 @@ class KelCCSD(object):
                 cc_equations._Stanton(k1s,k1d,F,I,t1,t2,fac=-1.j)
                 return [k1s,k1d]
 
-            #dT = propagation.rk1_gen(t0, [self.T1,self.T2], h, fRHSt)
             dT = self._step(self.prop["tprop"], t0, [self.T1,self.T2], h, fRHSt)
             T1 = self.T1 + dT[0]
             T2 = self.T2 + dT[1]
@@ -202,7 +182,6 @@ class KelCCSD(object):
                 cc_equations._LS_TS(l1s,I,t1,fac=1.j)
                 return [l1s,l1d]
 
-            #dL = propagation.rk1_gen(t0, [self.L1,self.L2], h, fLRHSt)
             dL = self._step(self.prop["lprop"], t0, [self.L1,self.L2], h, fLRHSt)
             L1 = self.L1 + dL[0]
             L2 = self.L2 + dL[1]
@@ -226,14 +205,11 @@ class KelCCSD(object):
 
             # save density matrix
             n1rdm = numpy.zeros((n,n), dtype=complex)
-            if self.active:
-                n1rdm[numpy.ix_(self.iocc,self.iocc)] += ndji
-                n1rdm[numpy.ix_(self.iocc,self.ivir)] += ndia
-                n1rdm[numpy.ix_(self.ivir,self.iocc)] += ndai
-                n1rdm[numpy.ix_(self.ivir,self.ivir)] += ndba
-                n1rdm[numpy.ix_(self.iocc,self.iocc)] += numpy.diag(self.focc)
-            else:
-                n1rdm = ndji + ndia + ndai + ndba + numpy.diag(fo)
+            n1rdm[numpy.ix_(self.iocc,self.iocc)] += ndji
+            n1rdm[numpy.ix_(self.iocc,self.ivir)] += ndia
+            n1rdm[numpy.ix_(self.ivir,self.iocc)] += ndai
+            n1rdm[numpy.ix_(self.ivir,self.ivir)] += ndba
+            n1rdm[numpy.ix_(self.iocc,self.iocc)] += numpy.diag(self.focc)
             if i%save == 0:
                 self.P.append(n1rdm)
                 self.ti.append(t)

@@ -30,7 +30,6 @@ def _get_active(athresh, fthresh, beta, mu, sys, iprint):
             print("FT-CCSD orbital info:")
             print('  nocc: {:d}'.format(nocc))
             print('  nvir: {:d}'.format(nvir))
-            #print('  nact: {:d}'.format(nact))
     elif sys.has_u():
         ea,eb = sys.u_energies_tot()
         na = len(ea)
@@ -98,7 +97,6 @@ class TDCCSD(object):
         self.ngrid = ngrid
         self.athresh = athresh
         self.fthresh = fthresh
-        self.active = (self.athresh > 0.0 or self.fthresh > 0.0)
         self.quad = quad
         self.prop = prop
         self.saveT = saveT
@@ -116,12 +114,11 @@ class TDCCSD(object):
         self.ti,self.g,G = quadrature.ft_quad(self.ngrid,beta,self.quad)
         self.sys = sys
 
-        if self.active:
-            focc,fvir,iocc,ivir = _get_active(self.athresh, self.fthresh, beta, mu, self.sys, iprint)
-            self.focc = focc
-            self.fvir = fvir
-            self.iocc = iocc
-            self.ivir = ivir
+        focc,fvir,iocc,ivir = _get_active(self.athresh, self.fthresh, beta, mu, self.sys, iprint)
+        self.focc = focc
+        self.fvir = fvir
+        self.iocc = iocc
+        self.ivir = ivir
 
         self.T1 = [None]*ng
         self.T2 = [None]*ng
@@ -576,7 +573,7 @@ class TDCCSD(object):
             F.oo = F.oo - numpy.diag(eo) # subtract diagonal
             F.vv = F.vv - numpy.diag(ev) # subtract diagonal
             t1shape = (nv,no)
-            t1shape = (nv,nv,no,no)
+            t2shape = (nv,nv,no,no)
 
             # get ERIs
             I = self.sys.g_aint()
@@ -593,32 +590,21 @@ class TDCCSD(object):
             E0 = ft_mp.mp0(g0) + En
             E1 = self.sys.get_mp1()
             E01 = E0 + E1
-            if self.active:
-                nocc = len(self.focc)
-                nvir = len(self.fvir)
 
-                # get scaled active space integrals
-                F,I = cc_utils.ft_active_integrals(self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
+            nocc = len(self.focc)
+            nvir = len(self.fvir)
 
-                # get exponentials
-                D1 = en[:,None] - en[None,:]
-                D2 = en[:,None,None,None] + en[None,:,None,None] \
-                        - en[None,None,:,None] - en[None,None,None,:]
-                D1 = D1[numpy.ix_(self.ivir,self.iocc)]
-                D2 = D2[numpy.ix_(self.ivir,self.ivir,self.iocc,self.iocc)]
-                t1shape = (nvir,nocc)
-                t2shape = (nvir,nvir,nocc,nocc)
+            # get scaled active space integrals
+            F,I = cc_utils.ft_active_integrals(self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
 
-            else:
-                # get scaled integrals
-                F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
-
-                # get energy differences
-                D1 = en[:,None] - en[None,:]
-                D2 = en[:,None,None,None] + en[None,:,None,None] \
-                        - en[None,None,:,None] - en[None,None,None,:]
-                t1shape = (n,n)
-                t2shape = (n,n,n,n)
+            # get exponentials
+            D1 = en[:,None] - en[None,:]
+            D2 = en[:,None,None,None] + en[None,:,None,None] \
+                    - en[None,None,:,None] - en[None,None,None,:]
+            D1 = D1[numpy.ix_(self.ivir,self.iocc)]
+            D2 = D2[numpy.ix_(self.ivir,self.ivir,self.iocc,self.iocc)]
+            t1shape = (nvir,nocc)
+            t2shape = (nvir,nvir,nocc,nocc)
 
         t1 = numpy.zeros(t1shape, dtype=F.vo.dtype)
         t2 = numpy.zeros(t2shape, dtype=F.vo.dtype)
@@ -727,53 +713,31 @@ class TDCCSD(object):
 
             beta = self.beta
             mu = self.mu
-            if self.active:
-                nocca = len(self.focc[0])
-                nvira = len(self.fvir[0])
-                noccb = len(self.focc[1])
-                nvirb = len(self.fvir[1])
 
-                # get energy differences
-                D1a = ea[:,None] - ea[None,:]
-                D1b = eb[:,None] - eb[None,:]
-                D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
-                        - ea[None,None,:,None] - ea[None,None,None,:]
-                D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
-                        - ea[None,None,:,None] - eb[None,None,None,:]
-                D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
-                        - eb[None,None,:,None] - eb[None,None,None,:]
-                D1a = D1a[numpy.ix_(self.ivir[0],self.iocc[0])]
-                D1b = D1b[numpy.ix_(self.ivir[1],self.iocc[1])]
-                D2aa = D2aa[numpy.ix_(self.ivir[0],self.ivir[0],self.iocc[0],self.iocc[0])]
-                D2ab = D2ab[numpy.ix_(self.ivir[0],self.ivir[1],self.iocc[0],self.iocc[1])]
-                D2bb = D2bb[numpy.ix_(self.ivir[1],self.ivir[1],self.iocc[1],self.iocc[1])]
+            nocca = len(self.focc[0])
+            nvira = len(self.fvir[0])
+            noccb = len(self.focc[1])
+            nvirb = len(self.fvir[1])
 
-                # get scaled integrals
-                Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
-                        self.sys, ea, eb, self.focc[0], self.fvir[0], self.focc[1], self.fvir[1],
-                        self.iocc[0], self.ivir[0], self.iocc[1], self.ivir[1])
+            # get energy differences
+            D1a = ea[:,None] - ea[None,:]
+            D1b = eb[:,None] - eb[None,:]
+            D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
+                    - ea[None,None,:,None] - ea[None,None,None,:]
+            D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
+                    - ea[None,None,:,None] - eb[None,None,None,:]
+            D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
+                    - eb[None,None,:,None] - eb[None,None,None,:]
+            D1a = D1a[numpy.ix_(self.ivir[0],self.iocc[0])]
+            D1b = D1b[numpy.ix_(self.ivir[1],self.iocc[1])]
+            D2aa = D2aa[numpy.ix_(self.ivir[0],self.ivir[0],self.iocc[0],self.iocc[0])]
+            D2ab = D2ab[numpy.ix_(self.ivir[0],self.ivir[1],self.iocc[0],self.iocc[1])]
+            D2bb = D2bb[numpy.ix_(self.ivir[1],self.ivir[1],self.iocc[1],self.iocc[1])]
 
-            else:
-                # get scaled integrals
-                Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
-
-                # get energy differences
-                D1a = ea[:,None] - ea[None,:]
-                D1b = eb[:,None] - eb[None,:]
-                D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
-                        - ea[None,None,:,None] - ea[None,None,None,:]
-                D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
-                        - ea[None,None,:,None] - eb[None,None,None,:]
-                D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
-                        - eb[None,None,:,None] - eb[None,None,None,:]
-                T1ashape = (na,na)
-                T1bshape = (nb,nb)
-                T2ashape = (na,na,na,na)
-                T2bshape = (nb,nb,nb,nb)
-                nocca = na
-                nvira = na
-                noccb = nb
-                nvirb = nb
+            # get scaled integrals
+            Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
+                    self.sys, ea, eb, self.focc[0], self.fvir[0], self.focc[1], self.fvir[1],
+                    self.iocc[0], self.ivir[0], self.iocc[1], self.ivir[1])
 
         t1a = numpy.zeros((nvira,nocca), dtype=Fa.vo.dtype)
         t1b = numpy.zeros((nvirb,noccb), dtype=Fa.vo.dtype)
@@ -855,7 +819,7 @@ class TDCCSD(object):
             F.oo = F.oo - numpy.diag(eo) # subtract diagonal
             F.vv = F.vv - numpy.diag(ev) # subtract diagonal
             t1shape = (nv,no)
-            t1shape = (nv,nv,no,no)
+            t2shape = (nv,nv,no,no)
 
             # get ERIs
             I = self.sys.r_int()
@@ -872,32 +836,21 @@ class TDCCSD(object):
             E0 = 2.0*ft_mp.mp0(g0) + En
             E1 = self.sys.get_mp1()
             E01 = E0 + E1
-            if self.active:
-                nocc = len(self.focc)
-                nvir = len(self.fvir)
+            nocc = len(self.focc)
+            nvir = len(self.fvir)
 
-                # get scaled active space integrals
-                F,I = cc_utils.rft_active_integrals(self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
+            # get scaled active space integrals
+            F,I = cc_utils.rft_active_integrals(self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
 
-                # get exponentials
-                D1 = en[:,None] - en[None,:]
-                D2 = en[:,None,None,None] + en[None,:,None,None] \
-                        - en[None,None,:,None] - en[None,None,None,:]
-                D1 = D1[numpy.ix_(self.ivir,self.iocc)]
-                D2 = D2[numpy.ix_(self.ivir,self.ivir,self.iocc,self.iocc)]
-                t1shape = (nvir,nocc)
-                t2shape = (nvir,nvir,nocc,nocc)
+            # get exponentials
+            D1 = en[:,None] - en[None,:]
+            D2 = en[:,None,None,None] + en[None,:,None,None] \
+                    - en[None,None,:,None] - en[None,None,None,:]
+            D1 = D1[numpy.ix_(self.ivir,self.iocc)]
+            D2 = D2[numpy.ix_(self.ivir,self.ivir,self.iocc,self.iocc)]
+            t1shape = (nvir,nocc)
+            t2shape = (nvir,nvir,nocc,nocc)
 
-            else:
-                # get scaled integrals
-                F,I = cc_utils.rft_integrals(self.sys, en, beta, mu)
-
-                # get energy differences
-                D1 = en[:,None] - en[None,:]
-                D2 = en[:,None,None,None] + en[None,:,None,None] \
-                        - en[None,None,:,None] - en[None,None,None,:]
-                t1shape = (n,n)
-                t2shape = (n,n,n,n)
         t1 = numpy.zeros(t1shape, dtype=F.vo.dtype)
         t2 = numpy.zeros(t2shape, dtype=F.vo.dtype)
         Eccn = 0.0
@@ -965,7 +918,7 @@ class TDCCSD(object):
             F.oo = F.oo - numpy.diag(eo) # subtract diagonal
             F.vv = F.vv - numpy.diag(ev) # subtract diagonal
             t1shape = (nv,no)
-            t1shape = (nv,nv,no,no)
+            t2shape = (nv,nv,no,no)
 
             # get ERIs
             I = self.sys.g_aint()
@@ -984,36 +937,23 @@ class TDCCSD(object):
             E0 = ft_mp.mp0(g0) + En
             E1 = self.sys.get_mp1()
             E01 = E0 + E1
-            if self.active:
-                nocc = len(self.focc)
-                nvir = len(self.fvir)
 
-                # get scaled active space integrals
-                F,I = cc_utils.ft_active_integrals(self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
+            nocc = len(self.focc)
+            nvir = len(self.fvir)
 
-                # get exponentials
-                D1 = en[:,None] - en[None,:]
-                D2 = en[:,None,None,None] + en[None,:,None,None] \
-                        - en[None,None,:,None] - en[None,None,None,:]
-                D1 = D1[numpy.ix_(self.ivir,self.iocc)]
-                D2 = D2[numpy.ix_(self.ivir,self.ivir,self.iocc,self.iocc)]
-                t1shape = (nvir,nocc)
-                t1shape = (nvir,nvir,nocc,nocc)
-                sfo = numpy.sqrt(self.focc)
-                sfv = numpy.sqrt(self.fvir)
+            # get scaled active space integrals
+            F,I = cc_utils.ft_active_integrals(self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
 
-            else:
-                # get scaled integrals
-                F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
-
-                # get energy differences
-                D1 = en[:,None] - en[None,:]
-                D2 = en[:,None,None,None] + en[None,:,None,None] \
-                        - en[None,None,:,None] - en[None,None,None,:]
-                t1shape = (n,n)
-                t2shape = (n,n,n,n)
-                sfo = numpy.sqrt(fo)
-                sfv = numpy.sqrt(fv)
+            # get exponentials
+            D1 = en[:,None] - en[None,:]
+            D2 = en[:,None,None,None] + en[None,:,None,None] \
+                    - en[None,None,:,None] - en[None,None,None,:]
+            D1 = D1[numpy.ix_(self.ivir,self.iocc)]
+            D2 = D2[numpy.ix_(self.ivir,self.ivir,self.iocc,self.iocc)]
+            t1shape = (nvir,nocc)
+            t2shape = (nvir,nvir,nocc,nocc)
+            sfo = numpy.sqrt(self.focc)
+            sfv = numpy.sqrt(self.fvir)
 
         singles = self.singles
 
@@ -1146,12 +1086,8 @@ class TDCCSD(object):
                 At1a = -(1.0/beta)*einsum('ia,ai->a',x1, d1test)
                 At2i = -(1.0/beta)*0.5*einsum('ijab,abij->i',x2, d2test)
                 At2a = -(1.0/beta)*0.5*einsum('ijab,abij->a',x2, d2test)
-                if self.active:
-                    self.rorbo[numpy.ix_(self.iocc)] -= g[ng - 1 - i]*(At1i + At2i)
-                    self.rorbv[numpy.ix_(self.ivir)] += g[ng - 1 - i]*(At1a + At2a)
-                else:
-                    self.rorbo -= g[ng - 1 - i]*(At1i + At2i)
-                    self.rorbv += g[ng - 1 - i]*(At1a + At2a)
+                self.rorbo[numpy.ix_(self.iocc)] -= g[ng - 1 - i]*(At1i + At2i)
+                self.rorbv[numpy.ix_(self.ivir)] += g[ng - 1 - i]*(At1a + At2a)
 
             t1b = t1e
             t2b = t2e
@@ -1171,14 +1107,11 @@ class TDCCSD(object):
         self.ndba = numpy.einsum('ba,b,a->ba',self.dba,sfv,sfv)
         self.ndji = numpy.einsum('ji,j,i->ji',self.dji,sfo,sfo)
         self.ndai = numpy.einsum('ai,a,i->ai',self.dai,sfv,sfo)
-        if self.active:
-            self.n1rdm = numpy.zeros((n,n), dtype=pia.dtype)
-            self.n1rdm[numpy.ix_(self.iocc,self.ivir)] += self.ndia/beta
-            self.n1rdm[numpy.ix_(self.ivir,self.ivir)] += self.ndba/beta
-            self.n1rdm[numpy.ix_(self.iocc,self.iocc)] += self.ndji/beta
-            self.n1rdm[numpy.ix_(self.ivir,self.iocc)] += self.ndai/beta
-        else:
-            self.n1rdm = (self.ndia + self.ndba + self.ndji + self.ndai)/beta
+        self.n1rdm = numpy.zeros((n,n), dtype=pia.dtype)
+        self.n1rdm[numpy.ix_(self.iocc,self.ivir)] += self.ndia/beta
+        self.n1rdm[numpy.ix_(self.ivir,self.ivir)] += self.ndba/beta
+        self.n1rdm[numpy.ix_(self.iocc,self.iocc)] += self.ndji/beta
+        self.n1rdm[numpy.ix_(self.ivir,self.iocc)] += self.ndai/beta
 
         if rdm2:
             self.P2 = (Pcdab, Pciab, Pbcai, Pijab, Pbjai, Pabij, Pjkai, Pkaij, Pklij)
@@ -1250,61 +1183,35 @@ class TDCCSD(object):
 
             beta = self.beta
             mu = self.mu
-            if self.active:
-                noa = len(self.focc[0])
-                nva = len(self.fvir[0])
-                nob = len(self.focc[1])
-                nvb = len(self.fvir[1])
 
-                # get energy differences
-                D1a = ea[:,None] - ea[None,:]
-                D1b = eb[:,None] - eb[None,:]
-                D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
-                        - ea[None,None,:,None] - ea[None,None,None,:]
-                D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
-                        - ea[None,None,:,None] - eb[None,None,None,:]
-                D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
-                        - eb[None,None,:,None] - eb[None,None,None,:]
-                D1a = D1a[numpy.ix_(self.ivir[0],self.iocc[0])]
-                D1b = D1b[numpy.ix_(self.ivir[1],self.iocc[1])]
-                D2aa = D2aa[numpy.ix_(self.ivir[0],self.ivir[0],self.iocc[0],self.iocc[0])]
-                D2ab = D2ab[numpy.ix_(self.ivir[0],self.ivir[1],self.iocc[0],self.iocc[1])]
-                D2bb = D2bb[numpy.ix_(self.ivir[1],self.ivir[1],self.iocc[1],self.iocc[1])]
+            noa = len(self.focc[0])
+            nva = len(self.fvir[0])
+            nob = len(self.focc[1])
+            nvb = len(self.fvir[1])
 
-                # get scaled integrals
-                Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
-                        self.sys, ea, eb, self.focc[0], self.fvir[0], self.focc[1], self.fvir[1],
-                        self.iocc[0], self.ivir[0], self.iocc[1], self.ivir[1])
-                sfoa = numpy.sqrt(self.focc[0])
-                sfob = numpy.sqrt(self.focc[1])
-                sfva = numpy.sqrt(self.fvir[0])
-                sfvb = numpy.sqrt(self.fvir[1])
+            # get energy differences
+            D1a = ea[:,None] - ea[None,:]
+            D1b = eb[:,None] - eb[None,:]
+            D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
+                    - ea[None,None,:,None] - ea[None,None,None,:]
+            D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
+                    - ea[None,None,:,None] - eb[None,None,None,:]
+            D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
+                    - eb[None,None,:,None] - eb[None,None,None,:]
+            D1a = D1a[numpy.ix_(self.ivir[0],self.iocc[0])]
+            D1b = D1b[numpy.ix_(self.ivir[1],self.iocc[1])]
+            D2aa = D2aa[numpy.ix_(self.ivir[0],self.ivir[0],self.iocc[0],self.iocc[0])]
+            D2ab = D2ab[numpy.ix_(self.ivir[0],self.ivir[1],self.iocc[0],self.iocc[1])]
+            D2bb = D2bb[numpy.ix_(self.ivir[1],self.ivir[1],self.iocc[1],self.iocc[1])]
 
-            else:
-                # get scaled integrals
-                Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
-
-                # get energy differences
-                D1a = ea[:,None] - ea[None,:]
-                D1b = eb[:,None] - eb[None,:]
-                D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
-                        - ea[None,None,:,None] - ea[None,None,None,:]
-                D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
-                        - ea[None,None,:,None] - eb[None,None,None,:]
-                D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
-                        - eb[None,None,:,None] - eb[None,None,None,:]
-                T1ashape = (na,na)
-                T1bshape = (nb,nb)
-                T2ashape = (na,na,na,na)
-                T2bshape = (nb,nb,nb,nb)
-                noa = na
-                nva = na
-                nob = nb
-                nvb = nb
-                sfoa = numpy.sqrt(foa)
-                sfob = numpy.sqrt(fob)
-                sfva = numpy.sqrt(fva)
-                sfvb = numpy.sqrt(fvb)
+            # get scaled integrals
+            Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
+                    self.sys, ea, eb, self.focc[0], self.fvir[0], self.focc[1], self.fvir[1],
+                    self.iocc[0], self.ivir[0], self.iocc[1], self.ivir[1])
+            sfoa = numpy.sqrt(self.focc[0])
+            sfob = numpy.sqrt(self.focc[1])
+            sfva = numpy.sqrt(self.fvir[0])
+            sfvb = numpy.sqrt(self.fvir[1])
 
         def fRHS(var):
             t1a,t1b,t2aa,t2ab,t2bb = var
@@ -1568,16 +1475,10 @@ class TDCCSD(object):
                 At2a_b = -(1.0/beta)*0.5*einsum('ijab,abij->a',x2bb, d2bbtest)
                 At2a_a -= (1.0/beta)*einsum('ijab,abij->a',x2ab, d2abtest)
                 At2a_b -= (1.0/beta)*einsum('ijab,abij->b',x2ab, d2abtest)
-                if self.active:
-                    rorbo_a[numpy.ix_(self.iocc[0])] -= g[ng - 1 - i]*(At1i_a + At2i_a)
-                    rorbo_b[numpy.ix_(self.iocc[1])] -= g[ng - 1 - i]*(At1i_b + At2i_b)
-                    rorbv_a[numpy.ix_(self.ivir[0])] += g[ng - 1 - i]*(At1a_a + At2a_a)
-                    rorbv_b[numpy.ix_(self.ivir[1])] += g[ng - 1 - i]*(At1a_b + At2a_b)
-                else:
-                    rorbo_a -= g[ng - 1 - i]*(At1i_a + At2i_a)
-                    rorbo_b -= g[ng - 1 - i]*(At1i_b + At2i_b)
-                    rorbv_a += g[ng - 1 - i]*(At1a_a + At2a_a)
-                    rorbv_b += g[ng - 1 - i]*(At1a_b + At2a_b)
+                rorbo_a[numpy.ix_(self.iocc[0])] -= g[ng - 1 - i]*(At1i_a + At2i_a)
+                rorbo_b[numpy.ix_(self.iocc[1])] -= g[ng - 1 - i]*(At1i_b + At2i_b)
+                rorbv_a[numpy.ix_(self.ivir[0])] += g[ng - 1 - i]*(At1a_a + At2a_a)
+                rorbv_b[numpy.ix_(self.ivir[1])] += g[ng - 1 - i]*(At1a_b + At2a_b)
 
             t1da = t1ea
             t1db = t1eb
@@ -1605,20 +1506,16 @@ class TDCCSD(object):
         self.ndai = (numpy.einsum('ai,a,i->ai',self.dai[0],sfva,sfoa),
                 numpy.einsum('ai,a,i->ai',self.dai[1],sfvb,sfob))
 
-        if self.active:
-            self.n1rdm = [numpy.zeros((na,na), dtype=self.ndia[0].dtype),
-                    numpy.zeros((nb,nb), dtype=self.ndia[1].dtype)]
-            self.n1rdm[0][numpy.ix_(self.iocc[0],self.ivir[0])] += self.ndia[0]/beta
-            self.n1rdm[0][numpy.ix_(self.ivir[0],self.ivir[0])] += self.ndba[0]/beta
-            self.n1rdm[0][numpy.ix_(self.iocc[0],self.iocc[0])] += self.ndji[0]/beta
-            self.n1rdm[0][numpy.ix_(self.ivir[0],self.iocc[0])] += self.ndai[0]/beta
-            self.n1rdm[1][numpy.ix_(self.iocc[1],self.ivir[1])] += self.ndia[1]/beta
-            self.n1rdm[1][numpy.ix_(self.ivir[1],self.ivir[1])] += self.ndba[1]/beta
-            self.n1rdm[1][numpy.ix_(self.iocc[1],self.iocc[1])] += self.ndji[1]/beta
-            self.n1rdm[1][numpy.ix_(self.ivir[1],self.iocc[1])] += self.ndai[1]/beta
-        else:
-            self.n1rdm = [(self.ndia[0] + self.ndba[0] + self.ndji[0] + self.ndai[0])/beta,
-                    (self.ndia[1] + self.ndba[1] + self.ndji[1] + self.ndai[1])/beta]
+        self.n1rdm = [numpy.zeros((na,na), dtype=self.ndia[0].dtype),
+                numpy.zeros((nb,nb), dtype=self.ndia[1].dtype)]
+        self.n1rdm[0][numpy.ix_(self.iocc[0],self.ivir[0])] += self.ndia[0]/beta
+        self.n1rdm[0][numpy.ix_(self.ivir[0],self.ivir[0])] += self.ndba[0]/beta
+        self.n1rdm[0][numpy.ix_(self.iocc[0],self.iocc[0])] += self.ndji[0]/beta
+        self.n1rdm[0][numpy.ix_(self.ivir[0],self.iocc[0])] += self.ndai[0]/beta
+        self.n1rdm[1][numpy.ix_(self.iocc[1],self.ivir[1])] += self.ndia[1]/beta
+        self.n1rdm[1][numpy.ix_(self.ivir[1],self.ivir[1])] += self.ndba[1]/beta
+        self.n1rdm[1][numpy.ix_(self.iocc[1],self.iocc[1])] += self.ndji[1]/beta
+        self.n1rdm[1][numpy.ix_(self.ivir[1],self.iocc[1])] += self.ndai[1]/beta
         if rdm2:
             self.P2 = ((Pcdab,PCDAB,PcDaB),
                     (Pciab,PCIAB,PcIaB,PCiAb),
@@ -1666,7 +1563,7 @@ class TDCCSD(object):
             F.oo = F.oo - numpy.diag(eo) # subtract diagonal
             F.vv = F.vv - numpy.diag(ev) # subtract diagonal
             t1shape = (nv,no)
-            t1shape = (nv,nv,no,no)
+            t2shape = (nv,nv,no,no)
 
             # get ERIs
             I = self.sys.r_int()
@@ -1685,36 +1582,23 @@ class TDCCSD(object):
             E0 = ft_mp.mp0(g0) + En
             E1 = self.sys.get_mp1()
             E01 = E0 + E1
-            if self.active:
-                nocc = len(self.focc)
-                nvir = len(self.fvir)
 
-                # get scaled active space integrals
-                F,I = cc_utils.rft_active_integrals(self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
+            nocc = len(self.focc)
+            nvir = len(self.fvir)
 
-                # get exponentials
-                D1 = en[:,None] - en[None,:]
-                D2 = en[:,None,None,None] + en[None,:,None,None] \
-                        - en[None,None,:,None] - en[None,None,None,:]
-                D1 = D1[numpy.ix_(self.ivir,self.iocc)]
-                D2 = D2[numpy.ix_(self.ivir,self.ivir,self.iocc,self.iocc)]
-                t1shape = (nvir,nocc)
-                t1shape = (nvir,nvir,nocc,nocc)
-                sfo = numpy.sqrt(self.focc)
-                sfv = numpy.sqrt(self.fvir)
+            # get scaled active space integrals
+            F,I = cc_utils.rft_active_integrals(self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
 
-            else:
-                # get scaled integrals
-                F,I = cc_utils.rft_integrals(self.sys, en, beta, mu)
-
-                # get energy differences
-                D1 = en[:,None] - en[None,:]
-                D2 = en[:,None,None,None] + en[None,:,None,None] \
-                        - en[None,None,:,None] - en[None,None,None,:]
-                t1shape = (n,n)
-                t2shape = (n,n,n,n)
-                sfo = numpy.sqrt(fo)
-                sfv = numpy.sqrt(fv)
+            # get exponentials
+            D1 = en[:,None] - en[None,:]
+            D2 = en[:,None,None,None] + en[None,:,None,None] \
+                    - en[None,None,:,None] - en[None,None,None,:]
+            D1 = D1[numpy.ix_(self.ivir,self.iocc)]
+            D2 = D2[numpy.ix_(self.ivir,self.ivir,self.iocc,self.iocc)]
+            t1shape = (nvir,nocc)
+            t2shape = (nvir,nvir,nocc,nocc)
+            sfo = numpy.sqrt(self.focc)
+            sfv = numpy.sqrt(self.fvir)
 
         def fRHS(var):
             t1,t2 = var
@@ -1819,12 +1703,8 @@ class TDCCSD(object):
                 At2i -= (1.0/beta)*einsum('ijab,abij->i',x2, d2test)
                 At2a = -(1.0/beta)*0.5*einsum('ijab,abij->a',x2 - x2.transpose((0,1,3,2)), d2test - d2test.transpose((0,1,3,2)))
                 At2a -= (1.0/beta)*einsum('ijab,abij->a',x2, d2test)
-                if self.active:
-                    self.rorbo[numpy.ix_(self.iocc)] -= g[ng - 1 - i]*(At1i + At2i)
-                    self.rorbv[numpy.ix_(self.ivir)] += g[ng - 1 - i]*(At1a + At2a)
-                else:
-                    self.rorbo -= g[ng - 1 - i]*(At1i + At2i)
-                    self.rorbv += g[ng - 1 - i]*(At1a + At2a)
+                self.rorbo[numpy.ix_(self.iocc)] -= g[ng - 1 - i]*(At1i + At2i)
+                self.rorbv[numpy.ix_(self.ivir)] += g[ng - 1 - i]*(At1a + At2a)
 
             t1b = t1e
             t2b = t2e
@@ -1844,14 +1724,11 @@ class TDCCSD(object):
         self.ndba = numpy.einsum('ba,b,a->ba',self.dba,sfv,sfv)
         self.ndji = numpy.einsum('ji,j,i->ji',self.dji,sfo,sfo)
         self.ndai = numpy.einsum('ai,a,i->ai',self.dai,sfv,sfo)
-        if self.active:
-            self.n1rdm = numpy.zeros((n,n), dtype=pia.dtype)
-            self.n1rdm[numpy.ix_(self.iocc,self.ivir)] += self.ndia/beta
-            self.n1rdm[numpy.ix_(self.ivir,self.ivir)] += self.ndba/beta
-            self.n1rdm[numpy.ix_(self.iocc,self.iocc)] += self.ndji/beta
-            self.n1rdm[numpy.ix_(self.ivir,self.iocc)] += self.ndai/beta
-        else:
-            self.n1rdm = (self.ndia + self.ndba + self.ndji + self.ndai)/beta
+        self.n1rdm = numpy.zeros((n,n), dtype=pia.dtype)
+        self.n1rdm[numpy.ix_(self.iocc,self.ivir)] += self.ndia/beta
+        self.n1rdm[numpy.ix_(self.ivir,self.ivir)] += self.ndba/beta
+        self.n1rdm[numpy.ix_(self.iocc,self.iocc)] += self.ndji/beta
+        self.n1rdm[numpy.ix_(self.ivir,self.iocc)] += self.ndai/beta
 
         if rdm2:
             self.P2 = (Pcdab, Pciab, Pbcai, Pijab, Pbjai, Pbjia, Pabij, Pjkai, Pkaij, Pklij)
@@ -1868,11 +1745,8 @@ class TDCCSD(object):
         fo = ft_utils.ff(beta, en, mu)
         fv = ft_utils.ffv(beta, en, mu)
 
-        if self.active:
-            F,I = cc_utils.ft_active_integrals(
-                    self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
-        else:
-            F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
+        F,I = cc_utils.ft_active_integrals(
+                self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
         ng = self.ngrid
         t1 = self._read_T1(ng - 1)
         t2 = self._read_T2(ng - 1)
@@ -1893,12 +1767,9 @@ class TDCCSD(object):
         nb = eb.shape[0]
 
         ng = self.ngrid
-        if self.active:
-            Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
-                    self.sys, ea, eb, self.focc[0], self.fvir[0], self.focc[1], self.fvir[1],
-                    self.iocc[0], self.ivir[0], self.iocc[1], self.ivir[1])
-        else:
-            Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
+        Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
+                self.sys, ea, eb, self.focc[0], self.fvir[0], self.focc[1], self.fvir[1],
+                self.iocc[0], self.ivir[0], self.iocc[1], self.ivir[1])
 
         T1a,T1b = self._read_T1(ng - 1)
         T2aa,T2ab,T2bb = self._read_T2(ng - 1)
@@ -1924,11 +1795,8 @@ class TDCCSD(object):
         fo = ft_utils.ff(beta, en, mu)
         fv = ft_utils.ffv(beta, en, mu)
 
-        if self.active:
-            F,I = cc_utils.rft_active_integrals(
-                    self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
-        else:
-            F,I = cc_utils.rft_integrals(self.sys, en, beta, mu)
+        F,I = cc_utils.rft_active_integrals(
+                self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
         ng = self.ngrid
         T1 = self._read_T1(ng - 1)
         T2 = self._read_T2(ng - 1)
@@ -1955,43 +1823,30 @@ class TDCCSD(object):
         self.ron1 = self.sys.g_mp1_den()
 
         # get integrals
-        if self.active:
-            nocc = len(self.focc)
-            nvir = len(self.fvir)
-            F,I = cc_utils.ft_active_integrals(
-                    self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
-        else:
-            F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
-        if self.active:
-            dso = fv[numpy.ix_(self.iocc)]
-            dsv = fo[numpy.ix_(self.ivir)]
-        else:
-            dso = fv
-            dsv = fo
+        nocc = len(self.focc)
+        nvir = len(self.fvir)
+        F,I = cc_utils.ft_active_integrals(
+                self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
+        dso = fv[numpy.ix_(self.iocc)]
+        dsv = fo[numpy.ix_(self.ivir)]
+
         n = fo.shape[0]
         rono = numpy.zeros(n, dtype=self.dji.dtype)
         ronv = numpy.zeros(n, dtype=self.dba.dtype)
 
         # perturbed ON contribution to Fock matrix
         Fd = self.sys.g_fock_d_den()
-        if self.active:
-            rono += cc_utils.g_Fd_on_active(
-                    Fd, self.iocc, self.ivir, self.ndia, self.ndba, self.ndji, self.ndai)
-        else:
-            rono += cc_utils.g_Fd_on(Fd, self.ndia, self.ndba, self.ndji, self.ndai)
+        rono += cc_utils.g_Fd_on_active(
+                Fd, self.iocc, self.ivir, self.ndia, self.ndba, self.ndji, self.ndai)
 
         # Add contributions from occupation number relaxation
-        jitemp = numpy.zeros(nocc, dtype=self.dji.dtype) if self.active else numpy.zeros(n, dtype=self.dji.dtype)
-        batemp = numpy.zeros(nvir, dtype=self.dba.dtype) if self.active else numpy.zeros(n, dtype=self.dba.dtype)
+        jitemp = numpy.zeros(nocc, dtype=self.dji.dtype)
+        batemp = numpy.zeros(nvir, dtype=self.dba.dtype)
         cc_utils.g_d_on_oo(dso, F, I, self.dia, self.dji, self.dai, self.P2, jitemp)
         cc_utils.g_d_on_vv(dsv, F, I, self.dia, self.dba, self.dai, self.P2, batemp)
 
-        if self.active:
-            rono[numpy.ix_(self.iocc)] += jitemp
-            ronv[numpy.ix_(self.ivir)] += batemp
-        else:
-            rono += jitemp
-            ronv += batemp
+        rono[numpy.ix_(self.iocc)] += jitemp
+        ronv[numpy.ix_(self.ivir)] += batemp
         self.rono = rono
         self.ronv = ronv
 
@@ -2014,30 +1869,18 @@ class TDCCSD(object):
         fvb = ft_utils.ffv(beta, eb, mu)
 
         # get integrals
-        if self.active:
-            nocca = len(self.focc[0])
-            nvira = len(self.fvir[0])
-            noccb = len(self.focc[1])
-            nvirb = len(self.fvir[1])
-            Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
-                    self.sys, ea, eb, self.focc[0], self.fvir[0], self.focc[1], self.fvir[1],
-                    self.iocc[0], self.ivir[0], self.iocc[1], self.ivir[1])
-        else:
-            focca = foa
-            fvira = fva
-            foccb = fob
-            fvirb = fvb
-            Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
-        if self.active:
-            dsoa = fva[numpy.ix_(self.iocc[0])]
-            dsva = foa[numpy.ix_(self.ivir[0])]
-            dsob = fvb[numpy.ix_(self.iocc[1])]
-            dsvb = fob[numpy.ix_(self.ivir[1])]
-        else:
-            dsoa = fva
-            dsva = foa
-            dsob = fvb
-            dsvb = fob
+        nocca = len(self.focc[0])
+        nvira = len(self.fvir[0])
+        noccb = len(self.focc[1])
+        nvirb = len(self.fvir[1])
+        Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
+                self.sys, ea, eb, self.focc[0], self.fvir[0], self.focc[1], self.fvir[1],
+                self.iocc[0], self.ivir[0], self.iocc[1], self.ivir[1])
+
+        dsoa = fva[numpy.ix_(self.iocc[0])]
+        dsva = foa[numpy.ix_(self.ivir[0])]
+        dsob = fvb[numpy.ix_(self.iocc[1])]
+        dsvb = fob[numpy.ix_(self.ivir[1])]
 
         # perturbed ON contribution to Fock matrix
         Fdaa,Fdab,Fdbb,Fdba = self.sys.u_fock_d_den()
@@ -2047,23 +1890,17 @@ class TDCCSD(object):
         ronva = numpy.zeros(na, dtype=dta)
         ronob = numpy.zeros(nb, dtype=dtb)
         ronvb = numpy.zeros(nb, dtype=dtb)
-        if self.active:
-            temp = cc_utils.u_Fd_on_active(
-                    Fdaa, Fdab, Fdba, Fdbb, self.iocc[0], self.ivir[0],
-                    self.iocc[1], self.ivir[1], self.ndia, self.ndba, self.ndji, self.ndai)
-            ronoa += temp[0]
-            ronob += temp[1]
-        else:
-            temp = cc_utils.u_Fd_on(
-                    Fdaa, Fdab, Fdba, Fdbb, self.ndia, self.ndba, self.ndji, self.ndai)
-            ronoa += temp[0]
-            ronob += temp[1]
+        temp = cc_utils.u_Fd_on_active(
+                Fdaa, Fdab, Fdba, Fdbb, self.iocc[0], self.ivir[0],
+                self.iocc[1], self.ivir[1], self.ndia, self.ndba, self.ndji, self.ndai)
+        ronoa += temp[0]
+        ronob += temp[1]
 
         # Add contributions from occupation number relaxation
-        jitempa = numpy.zeros(nocca, dtype=dta) if self.active > 0.0 else numpy.zeros(na, dtype=dta)
-        batempa = numpy.zeros(nvira, dtype=dta) if self.active > 0.0 else numpy.zeros(na, dtype=dta)
-        jitempb = numpy.zeros(noccb, dtype=dtb) if self.active > 0.0 else numpy.zeros(nb, dtype=dtb)
-        batempb = numpy.zeros(nvirb, dtype=dtb) if self.active > 0.0 else numpy.zeros(nb, dtype=dtb)
+        jitempa = numpy.zeros(nocca, dtype=dta)
+        batempa = numpy.zeros(nvira, dtype=dta)
+        jitempb = numpy.zeros(noccb, dtype=dtb)
+        batempb = numpy.zeros(nvirb, dtype=dtb)
         cc_utils.u_d_on_oo(
                 dsoa, dsob, Fa, Fb, Ia, Ib, Iabab,
                 self.dia, self.dji, self.dai, self.P2, jitempa, jitempb)
@@ -2071,16 +1908,10 @@ class TDCCSD(object):
                 dsva, dsvb, Fa, Fb, Ia, Ib, Iabab,
                 self.dia, self.dba, self.dai, self.P2, batempa, batempb)
 
-        if self.active:
-            ronoa[numpy.ix_(self.iocc[0])] += jitempa
-            ronob[numpy.ix_(self.iocc[1])] += jitempb
-            ronva[numpy.ix_(self.ivir[0])] += batempa
-            ronvb[numpy.ix_(self.ivir[1])] += batempb
-        else:
-            ronoa += jitempa
-            ronob += jitempb
-            ronva += batempa
-            ronvb += batempb
+        ronoa[numpy.ix_(self.iocc[0])] += jitempa
+        ronob[numpy.ix_(self.iocc[1])] += jitempb
+        ronva[numpy.ix_(self.ivir[0])] += batempa
+        ronvb[numpy.ix_(self.ivir[1])] += batempb
         self.rono = [ronoa, ronob]
         self.ronv = [ronva, ronvb]
 
@@ -2098,45 +1929,31 @@ class TDCCSD(object):
         self.ron1 = self.sys.r_mp1_den()
 
         # get integrals
-        if self.active:
-            nocc = len(self.focc)
-            nvir = len(self.fvir)
-            F,I = cc_utils.rft_active_integrals(
-                    self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
-        else:
-            focc = fo
-            fvir = fv
-            F,I = cc_utils.rft_integrals(self.sys, en, beta, mu)
-        if self.active:
-            dso = fv[numpy.ix_(self.iocc)]
-            dsv = fo[numpy.ix_(self.ivir)]
-        else:
-            dso = fv
-            dsv = fo
+        nocc = len(self.focc)
+        nvir = len(self.fvir)
+        F,I = cc_utils.rft_active_integrals(
+                self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
+
+        dso = fv[numpy.ix_(self.iocc)]
+        dsv = fo[numpy.ix_(self.ivir)]
+
         n = fo.shape[0]
         rono = numpy.zeros(n, dtype=self.dji.dtype)
         ronv = numpy.zeros(n, dtype=self.dba.dtype)
 
         # perturbed ON contribution to Fock matrix
         Fdss,Fdos = self.sys.r_fock_d_den()
-        if self.active:
-            rono += cc_utils.r_Fd_on_active(
-                    Fdss, Fdos, self.iocc, self.ivir, self.ndia, self.ndba, self.ndji, self.ndai)
-        else:
-            rono += cc_utils.r_Fd_on(Fdss, Fdos, self.ndia, self.ndba, self.ndji, self.ndai)
+        rono += cc_utils.r_Fd_on_active(
+                Fdss, Fdos, self.iocc, self.ivir, self.ndia, self.ndba, self.ndji, self.ndai)
 
         # Add contributions from occupation number relaxation
-        jitemp = numpy.zeros(nocc, dtype=self.dji.dtype) if self.active > 0.0 else numpy.zeros(n, dtype=self.dji.dtype)
-        batemp = numpy.zeros(nvir, dtype=self.dba.dtype) if self.active > 0.0 else numpy.zeros(n, dtype=self.dba.dtype)
+        jitemp = numpy.zeros(nocc, dtype=self.dji.dtype)
+        batemp = numpy.zeros(nvir, dtype=self.dba.dtype)
         cc_utils.r_d_on_oo(dso, F, I, self.dia, self.dji, self.dai, self.P2, jitemp)
         cc_utils.r_d_on_vv(dsv, F, I, self.dia, self.dba, self.dai, self.P2, batemp)
 
-        if self.active:
-            rono[numpy.ix_(self.iocc)] += jitemp
-            ronv[numpy.ix_(self.ivir)] += batemp
-        else:
-            rono += jitemp
-            ronv += batemp
+        rono[numpy.ix_(self.iocc)] += jitemp
+        ronv[numpy.ix_(self.ivir)] += batemp
         self.rono = rono
         self.ronv = ronv
 
@@ -2261,11 +2078,7 @@ class TDCCSD(object):
             en = self.sys.r_energies_tot()
             fo = ft_utils.ff(beta, ea, mu)
             rdm1 = self.n1rdm.copy()
-            if self.active:
-                nocc = len(focc)
-                rdm1[numpy.ix_(self.iocc,self.iocc)] += numpy.diag(self.focc)
-            else:
-                rdm1 += numpy.diag(fo)
+            rdm1[numpy.ix_(self.iocc,self.iocc)] += numpy.diag(self.focc)
             return rdm1
         elif self.sys.orbtype == 'u':
             if relax:
@@ -2279,13 +2092,8 @@ class TDCCSD(object):
             foa = ft_utils.ff(beta, ea, mu)
             fob = ft_utils.ff(beta, eb, mu)
             rdm1 = [self.n1rdm[0].copy(), self.n1rdm[1].copy()]
-            if self.active:
-                nocca = len(self.focca)
-                rdm1[0][numpy.ix_(self.iocc[0],self.iocc[0])] += numpy.diag(self.focc[0])
-                rdm1[1][numpy.ix_(self.iocc[1],self.iocc[1])] += numpy.diag(self.focc[1])
-            else:
-                rdm1[0] += numpy.diag(foa)
-                rdm1[1] += numpy.diag(fob)
+            rdm1[0][numpy.ix_(self.iocc[0],self.iocc[0])] += numpy.diag(self.focc[0])
+            rdm1[1][numpy.ix_(self.iocc[1],self.iocc[1])] += numpy.diag(self.focc[1])
             return rdm1
         elif self.sys.orbtype == 'g':
             if relax:
@@ -2297,10 +2105,7 @@ class TDCCSD(object):
             en = self.sys.g_energies_tot()
             fo = ft_utils.ff(beta, en, mu)
             rdm1 = self.n1rdm.copy()
-            if self.active:
-                rdm1[numpy.ix_(self.iocc,self.iocc)] += numpy.diag(self.focc)
-            else:
-                rem1 += numpy.diag(fo)
+            rdm1[numpy.ix_(self.iocc,self.iocc)] += numpy.diag(self.focc)
             return rdm1
         else:
             raise Exception("orbital type " + self.sys.orbtype + " is not implemented for 1rdm")
@@ -2319,12 +2124,9 @@ class TDCCSD(object):
             foa = ft_utils.ff(beta, ea, mu)
             fob = ft_utils.ff(beta, eb, mu)
             rdm2 = [self.n2rdm[0].copy(), self.n2rdm[1].copy(), self.n2rdm[2].copy()]
-            if self.active:
-                ialla = [i for i in range(len(foa))]
-                iallb = [i for i in range(len(fob))]
-                cc_utils.u_full_rdm2_active(self.focc[0], self.focc[1], self.iocc[0], self.iocc[1], ialla, iallb, self.n1rdm, rdm2)
-            else:
-                cc_utils.u_full_rdm2(foa, fob, self.n1rdm, rdm2)
+            ialla = [i for i in range(len(foa))]
+            iallb = [i for i in range(len(fob))]
+            cc_utils.u_full_rdm2_active(self.focc[0], self.focc[1], self.iocc[0], self.iocc[1], ialla, iallb, self.n1rdm, rdm2)
             return rdm2
         elif self.sys.orbtype == 'g':
             if self.n1rdm is None:
@@ -2334,11 +2136,8 @@ class TDCCSD(object):
             en = self.sys.g_energies_tot()
             fo = ft_utils.ff(beta, en, mu)
             rdm2 = self.n2rdm.copy()
-            if self.active:
-                iall = [i for i in range(len(fo))]
-                cc_utils.g_full_rdm2_active(self.focc, self.iocc, iall, self.n1rdm, rdm2)
-            else:
-                cc_utils.g_full_rdm2(fo, self.n1rdm, rdm2)
+            iall = [i for i in range(len(fo))]
+            cc_utils.g_full_rdm2_active(self.focc, self.iocc, iall, self.n1rdm, rdm2)
             return rdm2
         else:
             raise Exception("orbital type " + self.sys.orbtype + " is not implemented for 1rdm")
