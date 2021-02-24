@@ -612,21 +612,13 @@ class TDCCSD(object):
 
         singles = self.singles
 
-        if singles:
-            def fRHS(var):
-                t1,t2 = var
-                k1s = -D1*t1 - F.vo.copy()
-                k1d = -D2*t2 - I.vvoo.copy()
-                cc_equations._Stanton(k1s,k1d,F,I,t1,t2,fac=-1.0)
-                return [k1s,k1d]
-        else:
-            def fRHS(var):
-                t2 = var[0]
-                t1 = numpy.zeros(t1shape, dtype=F.vo.dtype)
-                k1s = -D1*t1
-                k1d = -D2*t2 - I.vvoo.copy()
-                cc_equations._Stanton(k1s,k1d,F,I,t1,t2,fac=-1.0)
-                return [k1d]
+        def fRHS(var):
+            t1,t2 = var
+            k1s = -D1*t1 - F.vo.copy()
+            k1d = -D2*t2 - I.vvoo.copy()
+            cc_equations._Stanton(k1s,k1d,F,I,t1,t2,fac=-1.0)
+            if not singles: k1s = numpy.zeros(k1s.shape, k1s.dtype)
+            return [k1s,k1d]
 
         if self.saveT:
             self._save_T1(0, t1.copy())
@@ -635,13 +627,9 @@ class TDCCSD(object):
         for i in range(1,ng):
             # propagate
             h = self.ti[i] - self.ti[i - 1]
-            if singles:
-                d1,d2 = self._get_t_step(h, [t1,t2], fRHS)
-                t1 += d1
-                t2 += d2
-            else:
-                d2 = self._get_t_step(h, [t2], fRHS)[0]
-                t2 += d2
+            d1,d2 = self._get_t_step(h, [t1,t2], fRHS)
+            if singles: t1 += d1
+            t2 += d2
 
             # compute free energy contribution
             Eccn += g[i]*cc_energy(t1, t2, F.ov, I.oovv)/beta
@@ -792,7 +780,7 @@ class TDCCSD(object):
         beta = self.beta
         mu = self.mu if self.finite_T else None
 
-        if not self.singles: raise Exception("This is not implemented for CCD")
+        if not self.singles: raise Exception("Restricted CCD is not implemented")
 
         # get time-grid
         ng = self.ngrid
@@ -957,43 +945,24 @@ class TDCCSD(object):
 
         singles = self.singles
 
-        if singles: # CCSD
-            def fRHS(var):
-                t1,t2 = var
-                k1s = -D1*t1 - F.vo.copy()
-                k1d = -D2*t2 - I.vvoo.copy()
-                cc_equations._Stanton(k1s,k1d,F,I,t1,t2,fac=-1.0)
-                return [(-1.0)*k1s,(-1.0)*k1d]
+        def fRHS(var):
+            t1,t2 = var
+            k1s = -D1*t1 - F.vo.copy()
+            k1d = -D2*t2 - I.vvoo.copy()
+            cc_equations._Stanton(k1s,k1d,F,I,t1,t2,fac=-1.0)
+            if not singles: k1s = numpy.zeros(k1s.shape, k1s.dtype)
+            return [(-1.0)*k1s,(-1.0)*k1d]
 
-            def fLRHS(ttot,var):
-                l1,l2 = var
-                t1,t2 = ttot
-                l1s = -D1.transpose((1,0))*l1 - F.ov.copy()
-                l1d = -D2.transpose((2,3,0,1))*l2 - I.oovv.copy()
-                cc_equations._Lambda_opt(l1s, l1d, F, I,
-                        l1, l2, t1, t2, fac=-1.0)
-                cc_equations._LS_TS(l1s,I,t1,fac=-1.0)
-                return [l1s,l1d]
-        else: # CCD
-            def fRHS(var):
-                t2 = var[0]
-                t1 = numpy.zeros(t1shape, dtype=F.vo.dtype)
-                k1s = -D1*t1
-                k1d = -D2*t2 - I.vvoo.copy()
-                cc_equations._Stanton(k1s,k1d,F,I,t1,t2,fac=-1.0)
-                return [(-1.0)*k1d]
-
-            def fLRHS(ttot,var):
-                l2 = var[0]
-                t2 = ttot[0]
-                t1 = numpy.zeros(F.vo.shape, dtype=F.vo.dtype)
-                l1 = numpy.zeros(F.ov.shape, dtype=F.ov.dtype)
-                l1s = -D1.transpose((1,0))*l1
-                l1d = -D2.transpose((2,3,0,1))*l2 - I.oovv.copy()
-                cc_equations._Lambda_opt(l1s, l1d, F, I,
-                        l1, l2, t1, t2, fac=-1.0)
-                cc_equations._LS_TS(l1s,I,t1,fac=-1.0)
-                return [l1d]
+        def fLRHS(ttot,var):
+            l1,l2 = var
+            t1,t2 = ttot
+            l1s = -D1.transpose((1,0))*l1 - F.ov.copy()
+            l1d = -D2.transpose((2,3,0,1))*l2 - I.oovv.copy()
+            cc_equations._Lambda_opt(l1s, l1d, F, I,
+                    l1, l2, t1, t2, fac=-1.0)
+            cc_equations._LS_TS(l1s,I,t1,fac=-1.0)
+            if not singles: l1s = numpy.zeros(l1s.shape, l1s.dtype)
+            return [l1s,l1d]
 
         t1b = self._read_T1(ng - 1)
         t2b = self._read_T2(ng - 1)
@@ -1035,24 +1004,16 @@ class TDCCSD(object):
         for i in range(1,ng):
             h = self.ti[ng - i] - self.ti[ng - i - 1]
             if not self.saveT:
-                if singles:
-                    d1,d2 = self._get_t_step(h, [t1b,t2b], fRHS)
-                    t1e = t1b + d1
-                    t2e = t2b + d2
-                else:
-                    d2 = self._get_t_step(h, [t2b], fRHS)[0]
-                    t1e = numpy.zeros(F.vo.shape, F.vo.dtype)
-                    t2e = t2b + d2
+                d1,d2 = self._get_t_step(h, [t1b,t2b], fRHS)
+                t1e = t1b + d1 if singles else t1b
+                t2e = t2b + d2
             else:
                 t1e = self._read_T1(ng - i - 1)
                 t2e = self._read_T2(ng - i - 1)
-            if singles:
-                ld1, ld2 = self._get_l_step(h, (l1,l2), (t1b,t2b), (t1e,t2e), fLRHS)
-            else:
-                ld2 = self._get_l_step(h, [l2], [t2b], [t2e], fLRHS)[0]
+            ld1, ld2 = self._get_l_step(h, (l1,l2), (t1b,t2b), (t1e,t2e), fLRHS)
             if erel:
                 if not singles:
-                    raise Exception("This is not yet implemented for CCD")
+                    raise Exception("Relaxed density is only available for CCD")
                 dx1, dx2 = self._get_l_step(h, (x1,x2), (l1,l2), (l1 + ld1, l2 + ld2), fXRHS)
                 x1 += dx1
                 x2 += dx2
