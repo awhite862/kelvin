@@ -158,7 +158,7 @@ class TDCCSDESNTest(unittest.TestCase):
         Sref = ccsdT.S
         Nref = ccsdT.N
         prop = {"tprop" : "rk4", "lprop" : "rk4"}
-        tdccsdT = TDCCSD(ueg, prop, T=T, mu=mu, ngrid=40, saveT=True, tmem="hdf5")
+        tdccsdT = TDCCSD(ueg, prop, T=T, mu=mu, ngrid=40, saveT=True, tmem="hdf5", saveL=True)
         Eout,Eccout = tdccsdT.run()
         tdccsdT.compute_ESN()
         E = tdccsdT.E

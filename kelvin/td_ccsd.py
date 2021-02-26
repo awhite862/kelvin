@@ -473,7 +473,17 @@ class TDCCSD(object):
         if self.tmem == "mem":
             self.L1[i] = L1
         elif self.tmem == "hdf5":
-            raise Exception("Saving Lambda to disk is not implemented")
+            import h5py
+            filename = self.scratch + "L1_" + "{:05d}".format(i)
+            self.L1[i] = filename
+            h5f = h5py.File(filename, 'w')
+            if type(L1) is tuple:
+                l1a,l1b = L1
+                h5f.create_dataset("l1a", data=l1a)
+                h5f.create_dataset("l1b", data=l1b)
+            else:
+                h5f.create_dataset("l1", data=L1)
+            h5f.close()
         else:
             raise Exception("Unrecognized memory option for amplitudes!")
 
@@ -481,7 +491,18 @@ class TDCCSD(object):
         if self.tmem == "mem":
             self.L2[i] = L2
         elif self.tmem == "hdf5":
-            raise Exception("Saving Lambda to disk is not implemented")
+            import h5py
+            filename = self.scratch + "L2_" + "{:05d}".format(i)
+            self.L2[i] = filename
+            h5f = h5py.File(filename, 'w')
+            if type(L2) is tuple:
+                l2aa,l2ab,l2bb = L2
+                h5f.create_dataset("l2aa", data=l2aa)
+                h5f.create_dataset("l2ab", data=l2ab)
+                h5f.create_dataset("l2bb", data=l2bb)
+            else:
+                h5f.create_dataset("l2", data=T2)
+            h5f.close()
         else:
             raise Exception("Unrecognized memory option for amplitudes!")
 
@@ -489,23 +510,22 @@ class TDCCSD(object):
         if self.tmem == "mem":
             return self.L1[i]
         elif self.tmem == "hdf5":
-            pass
-            #import h5py
-            #filename = self.T1[i]
-            #h5f = h5py.File(filename, 'r')
-            #n = len(h5f.keys())
-            #if n == 1:
-            #    t1 = h5f["t1"][:]
-            #    h5f.close()
-            #    return t1
-            #elif n == 2:
-            #    t1a = h5f["t1a"][:]
-            #    t1b = h5f["t1b"][:]
-            #    h5f.close()
-            #    return (t1a,t1b)
-            #else:
-            #    h5f.close()
-            #    raise Exception("Wrong number of T1 amplitudes in " + filename)
+            import h5py
+            filename = self.L1[i]
+            h5f = h5py.File(filename, 'r')
+            n = len(h5f.keys())
+            if n == 1:
+                t1 = h5f["l1"][:]
+                h5f.close()
+                return t1
+            elif n == 2:
+                t1a = h5f["l1a"][:]
+                t1b = h5f["l1b"][:]
+                h5f.close()
+                return (l1a,l1b)
+            else:
+                h5f.close()
+                raise Exception("Wrong number of T1 amplitudes in " + filename)
         else:
             raise Exception("Unrecognized memory option for amplitudes!")
 
@@ -513,24 +533,23 @@ class TDCCSD(object):
         if self.tmem == "mem":
             return self.L2[i]
         elif self.tmem == "hdf5":
-            pass
-            #import h5py
-            #filename = self.T2[i]
-            #h5f = h5py.File(filename, 'r')
-            #n = len(h5f.keys())
-            #if n == 1:
-            #    t2 = h5f["t2"][:]
-            #    h5f.close()
-            #    return t2
-            #elif n == 3:
-            #    t2aa = h5f["t2aa"][:]
-            #    t2ab = h5f["t2ab"][:]
-            #    t2bb = h5f["t2bb"][:]
-            #    h5f.close()
-            #    return (t2aa,t2ab,t2bb)
-            #else:
-            #    h5f.close()
-            #    raise Exception("Wrong number of T2 amplitudes in " + filename)
+            import h5py
+            filename = self.L2[i]
+            h5f = h5py.File(filename, 'r')
+            n = len(h5f.keys())
+            if n == 1:
+                l2 = h5f["l2"][:]
+                h5f.close()
+                return l2
+            elif n == 3:
+                l2aa = h5f["l2aa"][:]
+                l2ab = h5f["l2ab"][:]
+                l2bb = h5f["l2bb"][:]
+                h5f.close()
+                return (l2aa,l2ab,l2bb)
+            else:
+                h5f.close()
+                raise Exception("Wrong number of L2 amplitudes in " + filename)
         else:
             raise Exception("Unrecognized memory option for amplitudes!")
 
@@ -540,6 +559,10 @@ class TDCCSD(object):
             for f in self.T1:
                 os.remove(f)
             for f in self.T2:
+                os.remove(f)
+            for f in self.L1:
+                os.remove(f)
+            for f in self.L2:
                 os.remove(f)
         else:
             return
