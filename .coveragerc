@@ -1,0 +1,12 @@
+[run]
+branch = True
+source = kelvin
+omit = kelvin/tests/*.py
+
+[report]
+exclude_lines = 
+    return NotImplemented
+
+omit = 
+    kelvin/lambda_stanton.py
+    kelvin/dm_ccsd.py

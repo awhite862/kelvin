@@ -87,6 +87,7 @@ class CCSDTest(unittest.TestCase):
         error = "Expected: {}  Actual: {}".format(res[0],res[1])
         self.assertTrue(diff < self.thresh,error)
 
+    @unittest.skip("Skipped for time")
     def test_diamond_g(self):
         from pyscf.pbc import gto, scf, dft
         cell = gto.Cell()
@@ -123,6 +124,7 @@ class CCSDTest(unittest.TestCase):
         self.assertTrue(diff < self.thresh)
         #print(Ecc[0],Ecc2)
 
+    @unittest.skip("Skipped for time")
     def test_diamond_u(self):
         from pyscf.pbc import gto, scf, dft
         cell = gto.Cell()
@@ -157,6 +159,7 @@ class CCSDTest(unittest.TestCase):
         diff = abs(Ecc[0] - Ecc2)
         self.assertTrue(diff < self.thresh)
 
+    @unittest.skip("Skipped for time")
     def test_diamond_uk(self):
         from pyscf.pbc import gto, scf, dft
         cell = gto.Cell()
