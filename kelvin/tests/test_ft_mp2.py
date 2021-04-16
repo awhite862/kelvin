@@ -38,9 +38,9 @@ class FTMP2Test(unittest.TestCase):
     def _test_Be_vs_fd(self, T, mu):
         from pyscf import gto, scf, mp
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
         Escf = m.scf()
@@ -68,9 +68,9 @@ class FTMP2Test(unittest.TestCase):
     def test_0T_Be_sto3g(self):
         from pyscf import gto, scf, mp
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
         Escf = m.scf()

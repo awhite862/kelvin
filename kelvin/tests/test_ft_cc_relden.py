@@ -24,9 +24,9 @@ class FTCCReldenTest(unittest.TestCase):
         T = 0.8
         mu = 0.04
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -50,9 +50,9 @@ class FTCCReldenTest(unittest.TestCase):
         damp = 0.1
         mi = 100
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -95,9 +95,9 @@ class FTCCReldenTest(unittest.TestCase):
         T = 0.02
         mu = 0.0
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -120,9 +120,9 @@ class FTCCReldenTest(unittest.TestCase):
         ngrid = 80
         mi = 100
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -141,8 +141,8 @@ class FTCCReldenTest(unittest.TestCase):
         ccsdT = ccsd(sys,T=T,mu=mu,iprint=0,
                 damp=0.1,ngrid=ngrid,athresh=1e-30,econv=1e-10,max_iter=mi)
         ccf = ccsdT.run()
-        G0f = ccsdT.G0
-        G1f = ccsdT.G1
+        #G0f = ccsdT.G0
+        #G1f = ccsdT.G1
 
         m.get_hcore = lambda *args: h - alpha*field
         m.mo_energy -= 2.0*alpha*fdiag[:na]
@@ -150,14 +150,14 @@ class FTCCReldenTest(unittest.TestCase):
         ccsdT = ccsd(sys,T=T,mu=mu,iprint=0,
                 damp=0.1,ngrid=ngrid,athresh=1e-30,econv=1e-10,max_iter=mi)
         ccb = ccsdT.run()
-        G0b = ccsdT.G0
-        G1b = ccsdT.G1
+        #G0b = ccsdT.G0
+        #G1b = ccsdT.G1
 
         ref = (ccf[0] - ccb[0])/(2*alpha)
-        Acc = (ccf[1] - ccb[1])/(2*alpha)
-        A01 = (ccf[0] - ccf[1] - ccb[0] + ccb[1])/(2*alpha)
-        A0 = (G0f - G0b)/(2*alpha)
-        A1 = (G1f - G1b)/(2*alpha)
+        #Acc = (ccf[1] - ccb[1])/(2*alpha)
+        #A01 = (ccf[0] - ccf[1] - ccb[0] + ccb[1])/(2*alpha)
+        #A0 = (G0f - G0b)/(2*alpha)
+        #A1 = (G1f - G1b)/(2*alpha)
 
         m.get_hcore = lambda *args: h
         m.mo_energy += alpha*fdiag[:na]
@@ -307,9 +307,9 @@ class FTCCReldenTest(unittest.TestCase):
         T = 0.02
         mu = 0.0
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         thresh = 1e-11
         ethresh = 1e-12
@@ -350,9 +350,9 @@ class FTCCReldenTest(unittest.TestCase):
         T = 0.5
         mu = 0.0
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
         mol.charge = 1
         mol.spin = 1
 

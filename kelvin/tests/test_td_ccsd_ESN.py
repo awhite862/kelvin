@@ -9,9 +9,9 @@ from kelvin.ueg_system import ueg_system
 class TDCCSDESNTest(unittest.TestCase):
     def test_Be_gen(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
         Escf = m.scf()
@@ -22,7 +22,7 @@ class TDCCSDESNTest(unittest.TestCase):
         ccsdT = ccsd(sys,iprint=0,T=T,mu=mu,max_iter=35,damp=0.0,ngrid=ng,econv=1e-10,singles=True)
         Ecctot,Ecc = ccsdT.run()
         ccsdT.compute_ESN()
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=40)
         Eout,Eccout = tdccsdT.run()
         tdccsdT.compute_ESN()
@@ -53,7 +53,7 @@ class TDCCSDESNTest(unittest.TestCase):
         Eref = ccsdT.E
         Sref = ccsdT.S
         Nref = ccsdT.N
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(ueg, prop, T=T, mu=mu, ngrid=40)
         Eout,Eccout = tdccsdT.run()
         tdccsdT.compute_ESN()
@@ -73,9 +73,9 @@ class TDCCSDESNTest(unittest.TestCase):
 
     def test_Be_gen_active(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
         Escf = m.scf()
@@ -90,7 +90,7 @@ class TDCCSDESNTest(unittest.TestCase):
         Eref = ccsdT.E
         Sref = ccsdT.S
         Nref = ccsdT.N
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=560, athresh=1e-20, saveT=True)
         Eout,Eccout = tdccsdT.run()
         tdccsdT.compute_ESN()
@@ -123,7 +123,7 @@ class TDCCSDESNTest(unittest.TestCase):
         Eref = ccsdT.E
         Sref = ccsdT.S
         Nref = ccsdT.N
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(ueg, prop, T=T, mu=mu, ngrid=40)
         Eout,Eccout = tdccsdT.run()
         tdccsdT.compute_ESN()
@@ -157,7 +157,7 @@ class TDCCSDESNTest(unittest.TestCase):
         Eref = ccsdT.E
         Sref = ccsdT.S
         Nref = ccsdT.N
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(ueg, prop, T=T, mu=mu, ngrid=40, saveT=True, tmem="hdf5", saveL=True)
         Eout,Eccout = tdccsdT.run()
         tdccsdT.compute_ESN()
@@ -177,9 +177,9 @@ class TDCCSDESNTest(unittest.TestCase):
 
     def test_Be_active(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
         Escf = m.scf()
@@ -194,7 +194,7 @@ class TDCCSDESNTest(unittest.TestCase):
         Eref = ccsdT.E
         Sref = ccsdT.S
         Nref = ccsdT.N
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=560, athresh=1e-20, saveT=True)
         Eout,Eccout = tdccsdT.run()
         tdccsdT.compute_ESN()
@@ -217,20 +217,18 @@ class TDCCSDESNTest(unittest.TestCase):
         L = 2*numpy.pi/numpy.sqrt(1.0)
         norb = 7
         cut = 1.2
-        damp = 0.2
-        mi = 50
-        ng = 30
+        ng = 40
         ueg = ueg_system(T,L,cut,mu=mu,norb=norb,orbtype='u')
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
-        tdccsdT = TDCCSD(ueg, prop, T=T, mu=mu, ngrid=40)
+        prop = {"tprop": "rk4", "lprop": "rk4"}
+        tdccsdT = TDCCSD(ueg, prop, T=T, mu=mu, ngrid=ng)
         Ecctot,Ecc = tdccsdT.run()
         tdccsdT.compute_ESN()
         Eref = tdccsdT.E
         Sref = tdccsdT.S
         Nref = tdccsdT.N
         ueg = ueg_system(T,L,cut,mu=mu,norb=norb,orbtype='r')
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
-        tdccsdT = TDCCSD(ueg, prop, T=T, mu=mu, ngrid=40)
+        prop = {"tprop": "rk4", "lprop": "rk4"}
+        tdccsdT = TDCCSD(ueg, prop, T=T, mu=mu, ngrid=ng)
         Eout,Eccout = tdccsdT.run()
         tdccsdT.compute_ESN()
         E = tdccsdT.E
@@ -249,27 +247,27 @@ class TDCCSDESNTest(unittest.TestCase):
 
     def test_Be_active_r_vs_u(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
         Escf = m.scf()
         T = 0.02
         mu = 0.0
-        ng = 200
+        ng = 280
         athresh = 1e-20
         sys = scf_system(m,T,mu,orbtype='u')
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
-        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=280, athresh=1e-20, saveT=True)
+        prop = {"tprop": "rk4", "lprop": "rk4"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=ng, athresh=athresh, saveT=True)
         Ecctot,Ecc = tdccsdT.run()
         tdccsdT.compute_ESN()
         Eref = tdccsdT.E
         Sref = tdccsdT.S
         Nref = tdccsdT.N
         sys = scf_system(m,T,mu,orbtype='r')
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
-        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=280, athresh=1e-20, saveT=True)
+        prop = {"tprop": "rk4", "lprop": "rk4"}
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=ng, athresh=athresh, saveT=True)
         Eout,Eccout = tdccsdT.run()
         tdccsdT.compute_ESN()
         E = tdccsdT.E

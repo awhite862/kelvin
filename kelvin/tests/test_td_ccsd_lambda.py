@@ -12,9 +12,9 @@ class TDCCSDLambdaTest(unittest.TestCase):
 
     def test_Be_rk4_omega(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -22,7 +22,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         T = 0.5
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=120)
         Eref,Eccref = tdccsdT.run()
         Eout,Eccout = tdccsdT._ccsd_lambda()
@@ -32,9 +32,9 @@ class TDCCSDLambdaTest(unittest.TestCase):
 
     def test_Be_omega_active(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -42,7 +42,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         T = 0.05
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160, athresh=1e-20, iprint=0, saveT=True)
         Eref,Eccref = tdccsdT.run()
         Eout,Eccout = tdccsdT._ccsd_lambda()
@@ -52,9 +52,9 @@ class TDCCSDLambdaTest(unittest.TestCase):
 
     def test_Be_rk1(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -81,7 +81,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         L2new = quadrature.int_L2(ng,L2,ti,D2,g,G)
 
         # compute \bar{Lambda} from propagation using rk1
-        prop = {"tprop" : "rk1", "lprop" : "rk1"}
+        prop = {"tprop": "rk1", "lprop": "rk1"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
         Eout,Eccout = tdccsdT.run()
         Etmp,Ecctmp = tdccsdT._ccsd_lambda()
@@ -94,9 +94,9 @@ class TDCCSDLambdaTest(unittest.TestCase):
 
     def test_Be_rk4(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -123,7 +123,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         L2new = quadrature.int_L2(ng,L2,ti,D2,g,G)
 
         # compute \bar{Lambda} from propagation using rk1
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80)
         Eout,Eccout = tdccsdT.run()
         Etmp,Ecctmp = tdccsdT._ccsd_lambda()
@@ -136,9 +136,9 @@ class TDCCSDLambdaTest(unittest.TestCase):
 
     def test_Be_cn(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -165,7 +165,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         L2new = quadrature.int_L2(ng,L2,ti,D2,g,G)
 
         # compute \bar{Lambda} from propagation using rk1
-        prop = {"tprop" : "cn", "lprop" : "cn", "max_iter" : 200, "damp" : 0.3, "thresh" : 1e-5}
+        prop = {"tprop": "cn", "lprop": "cn", "max_iter": 200, "damp": 0.3, "thresh": 1e-5}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80)
         Eout,Eccout = tdccsdT.run()
         Etmp,Ecctmp = tdccsdT._ccsd_lambda()
@@ -174,12 +174,13 @@ class TDCCSDLambdaTest(unittest.TestCase):
         error1 = "Difference in L1: {}".format(d1)
         error2 = "Difference in L2: {}".format(d2)
         self.assertTrue(d1 < 5e-5,error1)
+        self.assertTrue(d2 < 2e-4,error2)
 
     def test_Be_rk124(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -188,15 +189,15 @@ class TDCCSDLambdaTest(unittest.TestCase):
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
 
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT4 = TDCCSD(sys, prop, T=T, mu=mu, ngrid=320)
         Eout,Eccout = tdccsdT4.run()
         Etmp,Ecctmp = tdccsdT4._ccsd_lambda()
-        prop = {"tprop" : "rk2", "lprop" : "rk2"}
+        prop = {"tprop": "rk2", "lprop": "rk2"}
         tdccsdT2 = TDCCSD(sys, prop, T=T, mu=mu, ngrid=2400)
         Eout,Eccout = tdccsdT2.run()
         Etmp,Ecctmp = tdccsdT2._ccsd_lambda()
-        prop = {"tprop" : "rk1", "lprop" : "rk1"}
+        prop = {"tprop": "rk1", "lprop": "rk1"}
         tdccsdT1 = TDCCSD(sys, prop, T=T, mu=mu, ngrid=2400)
         Eout,Eccout = tdccsdT1.run()
         Etmp,Ecctmp = tdccsdT1._ccsd_lambda()
@@ -216,9 +217,9 @@ class TDCCSDLambdaTest(unittest.TestCase):
 
     def test_Be_tsave(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -227,7 +228,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
 
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        prop = {"tprop": "rk4", "lprop": "rk4"}
         ccP = TDCCSD(sys, prop, T=T, mu=mu, ngrid=320)
         Eout,Eccout = ccP.run()
         Etmp,Ecctmp = ccP._ccsd_lambda()
@@ -243,9 +244,9 @@ class TDCCSDLambdaTest(unittest.TestCase):
 
     def test_Be_u_vs_g(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -257,8 +258,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         sys = scf_system(m,T,mu,orbtype='g')
         ea,eb = sys.u_energies_tot()
         na = ea.shape[0]
-        nb = eb.shape[0]
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
         Etmp,Ecctmp = tdccsdT.run()
         Eref,Eccref = tdccsdT._ccsd_lambda()
@@ -269,7 +269,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         l2bbref = tdccsdT.L2[na:,na:,na:,na:]
         # compute normal-order 1-rdm from propagation
         sys = scf_system(m,T,mu,orbtype='u')
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
         Etmp,Ecctmp = tdccsdT.run()
         Eout,Eccout = tdccsdT._uccsd_lambda()
@@ -291,9 +291,9 @@ class TDCCSDLambdaTest(unittest.TestCase):
 
     def test_Be_Lsave(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -302,7 +302,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
 
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        prop = {"tprop": "rk4", "lprop": "rk4"}
         ccP = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80)
         Eout,Eccout = ccP.run()
         Etmp,Ecctmp = ccP._ccsd_lambda()
@@ -318,9 +318,9 @@ class TDCCSDLambdaTest(unittest.TestCase):
 
     def test_Be_ccd(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -344,7 +344,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         L2new = quadrature.int_L2(ng,L2,ti,D2,g,G)
 
         # compute \bar{Lambda} from propagation using rk1
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80, singles=False)
         Eout,Eccout = tdccsdT.run()
         Etmp,Ecctmp = tdccsdT._ccsd_lambda()

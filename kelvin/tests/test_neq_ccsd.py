@@ -21,11 +21,11 @@ class NEQ_CCSDTest(unittest.TestCase):
         ngrid_ref = 4000
         deltat = 0.00025
         mol = gto.M(
-            verbose = 0,
-            atom = 'H 0 0 -0.6; H 0 0 0.0',
-            basis = 'STO-3G',
-            charge = 1,
-            spin = 1)
+            verbose=0,
+            atom='H 0 0 -0.6; H 0 0 0.0',
+            basis='STO-3G',
+            charge=1,
+            spin=1)
 
         m = scf.UHF(mol)
         Escf = m.scf()
@@ -38,7 +38,6 @@ class NEQ_CCSDTest(unittest.TestCase):
         E[2] = 1.0
         field = numpy.einsum('x,xij->ij', E, mol.intor('cint1e_r_sph', comp=3))
         field = numpy.einsum('mp,mn,nq->pq',mos,field,mos)
-        nuc_e = m.mol.energy_nuc()
         H = numpy.zeros((4,4))
         H[1,1] += hcore[0,0]
         H[2,2] += hcore[1,1]
@@ -108,11 +107,11 @@ class NEQ_CCSDTest(unittest.TestCase):
         ngrid_ref = 4000
         deltat = 0.00025
         mol = gto.M(
-            verbose = 0,
-            atom = 'H 0 0 -0.6; H 0 0 0.0',
-            basis = 'STO-3G',
-            charge = 1,
-            spin = 1)
+            verbose=0,
+            atom='H 0 0 -0.6; H 0 0 0.0',
+            basis='STO-3G',
+            charge=1,
+            spin=1)
 
         m = scf.UHF(mol)
         Escf = m.scf()
@@ -125,7 +124,6 @@ class NEQ_CCSDTest(unittest.TestCase):
         E[2] = 1.0
         field = numpy.einsum('x,xij->ij', E, mol.intor('cint1e_r_sph', comp=3))
         field = numpy.einsum('mp,mn,nq->pq',mos,field,mos)
-        nuc_e = m.mol.energy_nuc()
         H = numpy.zeros((4,4))
         H[1,1] += hcore[0,0]
         H[2,2] += hcore[1,1]
@@ -170,7 +168,6 @@ class NEQ_CCSDTest(unittest.TestCase):
         A = []
         tmax = 10*0.1
         deltat = tmax / (ng)
-        d = 1e-4
         ti = numpy.asarray([deltat/2 + float(j)*deltat for j in range(ng)])
         sys = h2_field_system(T,mu,omega,ti)
         cc = neq_ccsd(sys,T,mu=mu,tmax=tmax,econv=1e-10,max_iter=40,damp=0.0,ngr=ng,ngi=ngi,iprint=0)

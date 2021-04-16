@@ -153,9 +153,9 @@ class LambdaTest(unittest.TestCase):
     # T1 is zero in this case, so only test T2
     def test_Be_sto3g_gen(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
         Escf = m.scf()
@@ -168,11 +168,11 @@ class LambdaTest(unittest.TestCase):
 
     def test_N2p_sto3g_gen(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'N 0 0 0; N 0 0 1.1',
-            basis = 'sto-3g',
-            charge = 1,
-            spin = 1)
+            verbose=0,
+            atom='N 0 0 0; N 0 0 1.1',
+            basis='sto-3g',
+            charge=1,
+            spin=1)
         m = scf.UHF(mol)
         m.conv_tol = 1e-13
         Escf = m.scf()
@@ -187,9 +187,9 @@ class LambdaTest(unittest.TestCase):
 
     def test_Be_sto3g(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
         Escf = m.scf()
@@ -202,11 +202,11 @@ class LambdaTest(unittest.TestCase):
 
     def test_N2p_sto3g(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'N 0 0 0; N 0 0 1.1',
-            basis = 'sto-3g',
-            charge = 1,
-            spin = 1)
+            verbose=0,
+            atom='N 0 0 0; N 0 0 1.1',
+            basis='sto-3g',
+            charge=1,
+            spin=1)
         m = scf.UHF(mol)
         m.conv_tol = 1e-13
         Escf = m.scf()

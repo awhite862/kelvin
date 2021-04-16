@@ -14,7 +14,7 @@ try:
 except:
     has_lattice = False
 
-def fd_ESN(m, T, mu, ng, Ecctot, athresh = 0.0, quad = 'lin', damp=0.0, mi=35, delta=5e-4):
+def fd_ESN(m, T, mu, ng, Ecctot, athresh=0.0, quad='lin', damp=0.0, mi=35, delta=5e-4):
     muf = mu + delta
     mub = mu - delta
     sys = scf_system(m,T,muf,orbtype='g')
@@ -48,9 +48,9 @@ class FTDerivTest(unittest.TestCase):
 
     def test_Be_sto3g_gen(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
         Escf = m.scf()
@@ -74,9 +74,9 @@ class FTDerivTest(unittest.TestCase):
 
     def test_Be_sto3g(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
         Escf = m.scf()
@@ -100,9 +100,9 @@ class FTDerivTest(unittest.TestCase):
 
     def test_Be_sto3g_gen_active(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
         Escf = m.scf()
@@ -127,9 +127,9 @@ class FTDerivTest(unittest.TestCase):
 
     def test_Be_sto3g_active(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
         Escf = m.scf()
@@ -154,9 +154,9 @@ class FTDerivTest(unittest.TestCase):
 
     def test_Be_sto3g_ln(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
         Escf = m.scf()
@@ -180,9 +180,9 @@ class FTDerivTest(unittest.TestCase):
 
     def test_Be_sto3g_sin(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
         Escf = m.scf()
@@ -431,13 +431,9 @@ class FTDerivTest(unittest.TestCase):
         sys = HubbardSystem(T, model, Pa=Pa, Pb=Pb, mu=muf)
         cc = ccsd(sys,T=T,mu=muf,iprint=0)
         Ef,Ecf = cc.run()
-        E1f = cc.G1
-        E0f = cc.G0
         sys = HubbardSystem(T, model, Pa=Pa, Pb=Pb, mu=mub)
         cc = ccsd(sys,T=T,mu=mub,iprint=0)
         Eb,Ecb = cc.run()
-        E1b = cc.G1
-        E0b = cc.G0
         Nx = -(Ef - Eb)/(2*delta)
 
         Tf = T + delta

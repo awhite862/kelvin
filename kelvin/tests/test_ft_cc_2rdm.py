@@ -43,7 +43,6 @@ class FakeHubbardSystem(object):
         mu = self.sys.mu
         en = self.sys.g_energies_tot()
         fo = ft_utils.ff(beta, en, mu)
-        fv = ft_utils.ffv(beta, en, mu)
         extra = 0.5*numpy.einsum('ijij,i,j->',self.M,fo,fo)
         return E1 + extra
 
@@ -69,7 +68,6 @@ class FTCC2RDMTest(unittest.TestCase):
     def test_hubbard(self):
         U = 1.0
         T = 1.0
-        beta = 1./T
         L = 2
         mu = 0.5
         Mg = numpy.zeros((2*L,2*L,2*L,2*L))
@@ -87,16 +85,10 @@ class FTCC2RDMTest(unittest.TestCase):
         Mg = sys._transform1(Mg,cmat)
         cc = ccsd(sys,T=T,mu=mu,iprint=0,max_iter=80,econv=1e-11)
         E,Ecc = cc.run()
-        en = sys.g_energies_tot()
-        fo = ft_utils.ff(beta, en, mu)
-        fv = ft_utils.ffv(beta, en, mu)
-        sfo = numpy.sqrt(fo)
-        sfv = numpy.sqrt(fv)
         cc._ft_ccsd_lambda()
         cc._g_ft_1rdm()
         cc._g_ft_2rdm()
         P2tot = cc.full_2rdm()
-        n = sfo.shape[0]
         E2 = 0.25*numpy.einsum('pqrs,rspq->',P2tot, Mg)
         out = E2
 
@@ -117,9 +109,9 @@ class FTCC2RDMTest(unittest.TestCase):
         beta = 1.0/T
         mu = 0.04
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -153,9 +145,9 @@ class FTCC2RDMTest(unittest.TestCase):
         beta = 1.0/T
         mu = 0.04
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -194,12 +186,11 @@ class FTCC2RDMTest(unittest.TestCase):
 
     def test_Be(self):
         T = 0.8
-        beta = 1.0/T
         mu = 0.04
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -234,12 +225,11 @@ class FTCC2RDMTest(unittest.TestCase):
 
     def test_Be_active(self):
         T = 0.05
-        beta = 1.0/T
         mu = 0.04
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         athresh = 1e-20
@@ -276,12 +266,11 @@ class FTCC2RDMTest(unittest.TestCase):
 
     def test_Be_active_full(self):
         T = 0.05
-        beta = 1.0/T
         mu = 0.04
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         athresh = 1e-20

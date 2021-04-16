@@ -6,9 +6,9 @@ from kelvin.scf_system import scf_system
 def get_Be_sto3g():
     from pyscf import gto, scf, cc
     mol = gto.M(
-        verbose = 0,
-        atom = 'Be 0 0 0',
-        basis = 'sto-3G')
+        verbose=0,
+        atom='Be 0 0 0',
+        basis='sto-3G')
     m = scf.RHF(mol)
     m.conv_tol = 1e-13
     return m
@@ -176,6 +176,8 @@ class SCFTest(unittest.TestCase):
         dMP1d = 0.5*(MP1f - MP1b)/delta
         diff = abs(dMP1a - dMP1d)
         self.assertTrue(diff < 1e-6)
+        diff2 = abs(dMP1a - dMP1au)
+        self.assertTrue(diff2 < 1e-6)
 
     def test_diamond_ft_mp_deriv_k(self):
         T = 0.5
@@ -202,6 +204,8 @@ class SCFTest(unittest.TestCase):
         dMP1d = 0.5*(MP1f - MP1b)/delta
         diff = abs(dMP1a - dMP1d)
         self.assertTrue(diff < 1e-6)
+        diff2 = abs(dMP1a - dMP1au)
+        self.assertTrue(diff2 < 1e-6)
 
 if __name__ == '__main__':
     unittest.main()

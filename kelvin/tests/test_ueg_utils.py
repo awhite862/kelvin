@@ -12,9 +12,6 @@ class UEGUtilsTest(unittest.TestCase):
         pass
 
     def test_integral_sym(self):
-        na = 7
-        nb = 7
-        N = na + nb
         L = 3.8855
         mu = 2.0
         ueg = ueg_system(0.0,L,7.4,mu=mu,norb=19,orbtype='g')
@@ -25,9 +22,6 @@ class UEGUtilsTest(unittest.TestCase):
         self.assertTrue(Preal < 1e-12)
 
     def test_ft_uint(self):
-        na = 7
-        nb = 7
-        N = na + nb
         L = 3.8855
         mu = 2.0
         ueg = ueg_system(0.0,L,7.4,mu=mu,norb=19,orbtype='u')
@@ -47,9 +41,6 @@ class UEGUtilsTest(unittest.TestCase):
         self.assertTrue(dab < 1e-12)
 
     def test_ufock(self):
-        na = 1
-        nb = 1
-        N = na + nb
         L = 3.8855
         mu = 0.01
         ueg = ueg_system(0.0,L,7.4,mu=mu,norb=7,orbtype='u')

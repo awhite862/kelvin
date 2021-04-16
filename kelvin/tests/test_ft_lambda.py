@@ -127,9 +127,9 @@ class FTLambdaTest(unittest.TestCase):
 
     def test_Be_sto3g_gen(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
         Escf = m.scf()
@@ -142,9 +142,9 @@ class FTLambdaTest(unittest.TestCase):
 
     def test_Be_sto3g_gen_active(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
         Escf = m.scf()
@@ -159,9 +159,9 @@ class FTLambdaTest(unittest.TestCase):
 
     def test_Be_sto3g(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
         Escf = m.scf()
@@ -185,7 +185,6 @@ class FTLambdaTest(unittest.TestCase):
             L2[y] = spin_utils.T2_to_spin(ccsdT.L2[0][y],ccsdT.L2[1][y],ccsdT.L2[2][y],na,na,nb,nb)
             T1[y] = spin_utils.T1_to_spin(ccsdT.T1[0][y],ccsdT.T1[1][y],na,na,nb,nb)
             T2[y] = spin_utils.T2_to_spin(ccsdT.T2[0][y],ccsdT.T2[1][y],ccsdT.T2[2][y],na,na,nb,nb)
-        nsys = scf_system(m,self.T,self.mu,orbtype='g')
         nccsdT = ccsd(sys,T=self.T,mu=self.mu,iprint=0,max_iter=44,econv=1e-12)
         nccsdT.L1 = L1
         nccsdT.L2 = L2
@@ -196,9 +195,9 @@ class FTLambdaTest(unittest.TestCase):
 
     def test_Be_deriv(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
         Escf = m.scf()

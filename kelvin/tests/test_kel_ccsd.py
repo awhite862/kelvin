@@ -20,11 +20,11 @@ class KelCCSDTest(unittest.TestCase):
         ngrid_ref = 4000
         deltat = 0.00025
         mol = gto.M(
-            verbose = 0,
-            atom = 'H 0 0 -0.6; H 0 0 0.0',
-            basis = 'STO-3G',
-            charge = 1,
-            spin = 1)
+            verbose=0,
+            atom='H 0 0 -0.6; H 0 0 0.0',
+            basis='STO-3G',
+            charge=1,
+            spin=1)
 
         m = scf.UHF(mol)
         Escf = m.scf()
@@ -38,7 +38,6 @@ class KelCCSDTest(unittest.TestCase):
         E[2] = 1.0
         field = numpy.einsum('x,xij->ij', E, mol.intor('cint1e_r_sph', comp=3))
         field = numpy.einsum('mp,mn,nq->pq',mos,field,mos)
-        nuc_e = m.mol.energy_nuc()
         H = numpy.zeros((4,4))
         H[1,1] += hcore[0,0]
         H[2,2] += hcore[1,1]
@@ -73,7 +72,7 @@ class KelCCSDTest(unittest.TestCase):
 
         A = []
         sys = H2FieldSystem(T, mu, omega)
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        prop = {"tprop": "rk4", "lprop": "rk4"}
         mycc = TDCCSD(sys, prop, T=T, mu=mu, iprint=0, ngrid=80, saveT=True, saveL=True)
         mycc.run()
         mycc._ccsd_lambda()
@@ -101,11 +100,11 @@ class KelCCSDTest(unittest.TestCase):
         omega = 0.5
 
         mol = gto.M(
-            verbose = 0,
-            atom = 'H 0 0 -0.6; H 0 0 0.0',
-            basis = 'STO-3G',
-            charge = 1,
-            spin = 1)
+            verbose=0,
+            atom='H 0 0 -0.6; H 0 0 0.0',
+            basis='STO-3G',
+            charge=1,
+            spin=1)
 
         m = scf.UHF(mol)
         Escf = m.scf()
@@ -117,7 +116,7 @@ class KelCCSDTest(unittest.TestCase):
         field = numpy.einsum('mp,mn,nq->pq',mos,field,mos)
 
         sys = H2FieldSystem(T, mu, omega)
-        prop = {"tprop" : "rk1", "lprop" : "rk1"}
+        prop = {"tprop": "rk1", "lprop": "rk1"}
         mycc = TDCCSD(sys, prop, T=T, mu=mu, iprint=0, ngrid=80, saveT=True, saveL=True)
         mycc.run()
         mycc._ccsd_lambda()

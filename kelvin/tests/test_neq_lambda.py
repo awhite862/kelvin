@@ -1,6 +1,6 @@
 import unittest
 import numpy
-from pyscf import gto, scf, cc
+from pyscf import gto, scf
 from cqcpy import integrals
 from kelvin import cc_utils
 from kelvin import ft_cc_energy
@@ -117,25 +117,24 @@ class NEQLambdaTest(unittest.TestCase):
         tmax = (ngr)*deltat
         tir = numpy.asarray([deltat/2.0 + float(j)*deltat for j in range(ngr)])
         sys = h2_field_system(T,mu,omega,tir,O=None,ot=None)
-        ccsdT = neq_ccsd(sys,T,mu=mu,tmax=tmax,econv=1e-12,max_iter=40,damp=0.0,ngr=ngr,ngi=ngi,iprint=0)
-        E = ccsdT.run()
-        ccsdT._neq_ccsd_lambda()
+        cc = neq_ccsd(sys,T,mu=mu,tmax=tmax,econv=1e-12,max_iter=40,damp=0.0,ngr=ngr,ngi=ngi,iprint=0)
+        E = cc.run()
+        cc._neq_ccsd_lambda()
 
         # Check that L is zero
         beta = 1.0/T
         tii,gi,Gi = quadrature.simpsons(ngi, beta)
         tir,gr,Gr = quadrature.midpoint(ngr, tmax)
-        en = ccsdT.sys.g_energies_tot()
+        en = cc.sys.g_energies_tot()
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
                 - en[None,None,:,None] - en[None,None,None,:]
-        cc = ccsdT
         F,Ff,Fb,I = cc_utils.get_ft_integrals_neq(cc.sys, en, beta, mu)
         L = evalL(cc.T1f,cc.T1b,cc.T1i,cc.T2f,cc.T2b,cc.T2i,cc.L1f,cc.L1b,cc.L1i,cc.L2f,cc.L2b,cc.L2i,
             Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta)
         self.assertTrue(abs(L - E[1]) < self.thresh, "Lagrangian does not equal the Energy: {}".format(L))
 
-        out = test_L1(ccsdT, self.thresh)
+        out = test_L1(cc, self.thresh)
         self.assertTrue(out[1],out[0])
 
     def test_h2_field(self):

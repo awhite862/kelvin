@@ -17,9 +17,9 @@ class CCUtilsTest(unittest.TestCase):
 
     def test_Be_active(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         T = 0.02
@@ -182,9 +182,9 @@ class CCUtilsTest(unittest.TestCase):
 
     def test_Be_gen_deriv(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         T = 1.0
@@ -225,9 +225,9 @@ class CCUtilsTest(unittest.TestCase):
 
     def test_Be_deriv(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         T = 1.0
@@ -304,9 +304,9 @@ class CCUtilsTest(unittest.TestCase):
 
     def test_Be_gen_active_deriv(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         T = 0.02
@@ -322,8 +322,6 @@ class CCUtilsTest(unittest.TestCase):
         dvec = -beta*numpy.ones(en.shape)
         fo = ft_utils.ff(beta, en, mu)
         fv = ft_utils.ffv(beta, en, mu)
-        focc = [x for x in fo if x > athresh]
-        fvir = [x for x in fv if x > athresh]
         iocc = [i for i,x in enumerate(fo) if x > athresh]
         ivir = [i for i,x in enumerate(fv) if x > athresh]
         F,I = cc_utils.ft_d_active_integrals(sys, en, fo, fv, iocc, ivir, dvec)
@@ -374,9 +372,9 @@ class CCUtilsTest(unittest.TestCase):
 
     def test_Be_active_deriv(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         T = 0.05

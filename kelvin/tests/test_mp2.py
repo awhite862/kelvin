@@ -19,9 +19,9 @@ class MP2Test(unittest.TestCase):
 
     def test_Be_sto3g(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
         Escf = m.scf()
@@ -31,11 +31,11 @@ class MP2Test(unittest.TestCase):
 
     def test_N2p_631G(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'N 0 0 0; N 0 0 1.1',
-            basis = '6-31G',
-            charge = 1,
-            spin = 1)
+            verbose=0,
+            atom='N 0 0 0; N 0 0 1.1',
+            basis='6-31G',
+            charge=1,
+            spin=1)
         m = scf.UHF(mol)
         m.conv_tol = 1e-12
         Escf = m.scf()
@@ -43,6 +43,7 @@ class MP2Test(unittest.TestCase):
         diff = abs(res[1] - res[0])
         self.assertTrue(diff < self.thresh)
 
+    @unittest.skip("Skipped for time")
     def test_diamond(self):
         from pyscf.pbc import gto, scf
         cell = gto.Cell()

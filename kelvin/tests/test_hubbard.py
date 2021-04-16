@@ -135,7 +135,6 @@ class HubbardTest(unittest.TestCase):
         self.assertTrue(diff < self.thresh,msg)
 
     def test_ft_ccsd(self):
-        nelec = 2
         L = 2
         U = 1.0
         T = 1.0
@@ -157,7 +156,6 @@ class HubbardTest(unittest.TestCase):
         self.assertTrue(diff < 1e-4,msg)
 
     def test_ccsd_u_g(self):
-        nelec = 2
         L = 2
         U = 1.0
         hub = Hubbard1D(L,1.0,U,boundary='c')
@@ -178,13 +176,11 @@ class HubbardTest(unittest.TestCase):
         self.assertTrue(diff < self.thresh,msg)
 
     def test_ft_ccsd_u_g(self):
-        nelec = 2
         L = 2
         U = 1.0
         T = 1.0
         mu = 0.0
         hub = Hubbard1D(L,1.0,U,boundary='c')
-        Eref = compute_fci_kelvinT(hub,T,mu)
 
         Oa = numpy.zeros((2))
         Ob = numpy.zeros((2))

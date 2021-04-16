@@ -86,8 +86,8 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         dT1i = numpy.zeros((ngi,n,n),dtype=complex)
         dT1b = numpy.zeros((ngr,n,n),dtype=complex)
         dT1f = numpy.zeros((ngr,n,n),dtype=complex)
-        Ltest = evalL(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
-            Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta)
+        #Ltest = evalL(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
+        #    Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta)
         for y in range(ngi):
             for i in range(n):
                 for a in range(n):
@@ -194,8 +194,8 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         dT2i = numpy.zeros((ngi,n,n,n,n),dtype=complex)
         dT2b = numpy.zeros((ngr,n,n,n,n),dtype=complex)
         dT2f = numpy.zeros((ngr,n,n,n,n),dtype=complex)
-        Ltest = evalL(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
-            Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta)
+        #Ltest = evalL(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
+        #    Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta)
         for y in range(ngi):
             for i in range(n):
                 for j in range(n):

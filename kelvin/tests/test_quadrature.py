@@ -85,6 +85,7 @@ class QuadTest(unittest.TestCase):
         s1 = diff1 < self.thresh
         s2 = diff2 < self.thresh
         self.assertTrue(s1,"Difference in L1: {}".format(diff1))
+        self.assertTrue(s2,"Difference in L2: {}".format(diff2))
 
     def test_d_simpson(self):
         ng = 10

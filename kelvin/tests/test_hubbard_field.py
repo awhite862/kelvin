@@ -19,15 +19,15 @@ except:
 
 def buildH(hub, phase=None):
     dim = 16
-    myfci = FCISimple(hub, 1, m_s = 1)
+    myfci = FCISimple(hub, 1, m_s=1)
     H1 = myfci.getH(phase=phase)
-    myfci = FCISimple(hub, 2, m_s = 0)
+    myfci = FCISimple(hub, 2, m_s=0)
     H20 = myfci.getH(phase=phase)
-    myfci = FCISimple(hub, 2, m_s = 2)
+    myfci = FCISimple(hub, 2, m_s=2)
     H22 = myfci.getH(phase=phase)
-    myfci = FCISimple(hub, 3, m_s = 1)
+    myfci = FCISimple(hub, 3, m_s=1)
     H31 = myfci.getH(phase=phase)
-    myfci = FCISimple(hub, 4, m_s = 0)
+    myfci = FCISimple(hub, 4, m_s=0)
     H4 = myfci.getH(phase=phase)
     H = numpy.zeros((dim,dim),dtype=complex)
     x = 1
@@ -69,7 +69,6 @@ class HubbardFieldTest(unittest.TestCase):
         t0 = 1.0
         sigma = 0.25
         omega = 4.4
-        phi = 0.0
         tmax = 0.5
         ng = 400
         ngi = 10
@@ -77,7 +76,6 @@ class HubbardFieldTest(unittest.TestCase):
 
         T = 1.0
         mu = 0.0
-        beta = 1.0/T
         L = 2
         U = 1.0
         hub = Hubbard1D(L,1.0,U,boundary='c')
@@ -88,7 +86,6 @@ class HubbardFieldTest(unittest.TestCase):
         Pa[0,0] = 1.0
         Pb[1,1] = 1.0
         sys = hubbard_field_system(T,hub,ti,A0,t0,sigma,omega,mu=mu,Pa=Pa,Pb=Pb)
-        m = numpy.zeros((2,2))
         cc = neq_ccsd(sys,T,mu=mu,tmax=tmax,econv=1e-9,max_iter=40,damp=0.1,ngr=ng,ngi=ngi,iprint=0)
         E,Ecc = cc.run()
 
@@ -126,15 +123,15 @@ class HubbardFieldTest(unittest.TestCase):
         H = buildH(hub)
         E,U = numpy.linalg.eigh(H)
         N = numpy.zeros((dim,dim))
-        N[ 1,1] = 1.0
-        N[ 2,2] = 1.0
-        N[ 3,3] = 1.0
-        N[ 4,4] = 1.0
-        N[ 5,5] = 2.0
-        N[ 6,6] = 2.0
-        N[ 7,7] = 2.0
-        N[ 8,8] = 2.0
-        N[ 9, 9] = 2.0
+        N[1,1] = 1.0
+        N[2,2] = 1.0
+        N[3,3] = 1.0
+        N[4,4] = 1.0
+        N[5,5] = 2.0
+        N[6,6] = 2.0
+        N[7,7] = 2.0
+        N[8,8] = 2.0
+        N[9,9] = 2.0
         N[10,10] = 2.0
         N[11,11] = 3.0
         N[12,12] = 3.0
@@ -142,15 +139,15 @@ class HubbardFieldTest(unittest.TestCase):
         N[14,14] = 3.0
         N[15,15] = 4.0
         M = numpy.zeros((dim,dim))
-        M[ 1,1] = 1.0
-        M[ 2,2] = 0.0
-        M[ 3,3] = 1.0
-        M[ 4,4] = 0.0
-        M[ 5,5] = 2.0
-        M[ 6,6] = 1.0
-        M[ 7,7] = 1.0
-        M[ 8,8] = 0.0
-        M[ 9, 9] = 1.0
+        M[1,1] = 1.0
+        M[2,2] = 0.0
+        M[3,3] = 1.0
+        M[4,4] = 0.0
+        M[5,5] = 2.0
+        M[6,6] = 1.0
+        M[7,7] = 1.0
+        M[8,8] = 0.0
+        M[9,9] = 1.0
         M[10,10] = 1.0
         M[11,11] = 2.0
         M[12,12] = 1.0
@@ -163,13 +160,11 @@ class HubbardFieldTest(unittest.TestCase):
         exp = numpy.exp(-beta*(E - mu*Ns))
         Z = exp.sum()
         P = numpy.einsum('mi,i,ni->mn',U,exp,U) / Z
-        G = -numpy.log(Z)/beta
 
         Ms = []
         # propagate density and measure M
         for i,t in enumerate(ti):
             # propagate the density
-            ddd = deltat/2.0 if i == 0 else deltat
             dt = t - t0
             ex = dt*dt/(2*sigma*sigma)
             phase = A0*numpy.exp(-ex)*numpy.cos(omega*dt + phi)
@@ -229,7 +224,7 @@ class HubbardFieldTest(unittest.TestCase):
         phi = 0.0
         tmax = 0.5
         ng = 400
-        ngi = 20
+        ngi = 80
         deltat = tmax / ng
 
         T = 1.5
@@ -248,15 +243,15 @@ class HubbardFieldTest(unittest.TestCase):
         H = buildH(hub)
         E,U = numpy.linalg.eigh(H)
         N = numpy.zeros((dim,dim))
-        N[ 1,1] = 1.0
-        N[ 2,2] = 1.0
-        N[ 3,3] = 1.0
-        N[ 4,4] = 1.0
-        N[ 5,5] = 2.0
-        N[ 6,6] = 2.0
-        N[ 7,7] = 2.0
-        N[ 8,8] = 2.0
-        N[ 9, 9] = 2.0
+        N[1,1] = 1.0
+        N[2,2] = 1.0
+        N[3,3] = 1.0
+        N[4,4] = 1.0
+        N[5,5] = 2.0
+        N[6,6] = 2.0
+        N[7,7] = 2.0
+        N[8,8] = 2.0
+        N[9,9] = 2.0
         N[10,10] = 2.0
         N[11,11] = 3.0
         N[12,12] = 3.0
@@ -264,15 +259,15 @@ class HubbardFieldTest(unittest.TestCase):
         N[14,14] = 3.0
         N[15,15] = 4.0
         M = numpy.zeros((dim,dim))
-        M[ 1,1] = 1.0
-        M[ 2,2] = 0.0
-        M[ 3,3] = 1.0
-        M[ 4,4] = 0.0
-        M[ 5,5] = 2.0
-        M[ 6,6] = 1.0
-        M[ 7,7] = 1.0
-        M[ 8,8] = 0.0
-        M[ 9, 9] = 1.0
+        M[1,1] = 1.0
+        M[2,2] = 0.0
+        M[3,3] = 1.0
+        M[4,4] = 0.0
+        M[5,5] = 2.0
+        M[6,6] = 1.0
+        M[7,7] = 1.0
+        M[8,8] = 0.0
+        M[9,9] = 1.0
         M[10,10] = 1.0
         M[11,11] = 2.0
         M[12,12] = 1.0
@@ -285,13 +280,11 @@ class HubbardFieldTest(unittest.TestCase):
         exp = numpy.exp(-beta*(E - mu*Ns))
         Z = exp.sum()
         P = numpy.einsum('mi,i,ni->mn',U,exp,U) / Z
-        G = -numpy.log(Z)/beta
 
         Ms = [numpy.einsum('ij,ji->',P,M)]
         # propagate density and measure M
         for i,t in enumerate(ti):
             # propagate the density
-            ddd = deltat
             dt = (i)*deltat - t0
             ex = dt*dt/(2*sigma*sigma)
             phase = A0*numpy.exp(-ex)*numpy.cos(omega*dt + phi)
@@ -319,12 +312,12 @@ class HubbardFieldTest(unittest.TestCase):
 
         Mscc2 = []
         sys = HubbardFieldSystem(T,hub,A0,t0,sigma,omega,mu=mu,Pa=Pa,Pb=Pb)
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
-        mycc = TDCCSD(sys, prop, T=T, mu=mu, iprint=0, ngrid=80, saveT=True, saveL=True)
+        prop = {"tprop": "rk4", "lprop": "rk4"}
+        mycc = TDCCSD(sys, prop, T=T, mu=mu, iprint=0, ngrid=ngi, saveT=True, saveL=True)
         mycc.run()
         mycc._ccsd_lambda()
 
-        prop = {"tprop" : "rk1", "lprop" : "rk1"}
+        prop = {"tprop": "rk1", "lprop": "rk1"}
         kccsd = KelCCSD(sys, prop, T=T, mu=mu, iprint=0)
         kccsd.init_from_ftccsd(mycc, contour="keldysh")
         kccsd._ccsd(nstep=400, step=0.00125)

@@ -8,9 +8,9 @@ from kelvin.scf_system import scf_system
 class TDCCSDReldenTest(unittest.TestCase):
     def test_Be_rk4(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -28,7 +28,7 @@ class TDCCSDReldenTest(unittest.TestCase):
         ccsdT._g_ft_rorb()
 
         # compute normal-order 1-rdm from propagation
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
         Eout,Eccout = tdccsdT.run()
         Etmp,Ecctmp = tdccsdT._ccsd_lambda(rdm2=True, erel=True)
@@ -47,9 +47,9 @@ class TDCCSDReldenTest(unittest.TestCase):
 
     def test_Be_rk4_active(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -67,7 +67,7 @@ class TDCCSDReldenTest(unittest.TestCase):
         ccsdT._g_ft_rorb()
 
         # compute normal-order 1-rdm from propagation
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=440, athresh=1e-20, saveT=True)
         Eout,Eccout = tdccsdT.run()
         Etmp,Ecctmp = tdccsdT._ccsd_lambda(rdm2=True,erel=True)
@@ -86,9 +86,9 @@ class TDCCSDReldenTest(unittest.TestCase):
 
     def test_Be_u_vs_g(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -98,7 +98,7 @@ class TDCCSDReldenTest(unittest.TestCase):
         sys = scf_system(m,T,mu,orbtype='g')
 
         # compute normal-order 1-rdm from propagation
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
         Eout,Eccout = tdccsdT.run()
         Etmp,Ecctmp = tdccsdT._ccsd_lambda(rdm2=True, erel=True)
@@ -111,7 +111,7 @@ class TDCCSDReldenTest(unittest.TestCase):
 
         sys = scf_system(m,T,mu,orbtype='u')
         # compute normal-order 1-rdm from propagation
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
         Eout,Eccout = tdccsdT.run()
         Etmp,Ecctmp = tdccsdT._uccsd_lambda(rdm2=True, erel=True)
@@ -135,9 +135,9 @@ class TDCCSDReldenTest(unittest.TestCase):
 
     def test_Be_r_vs_u(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -147,7 +147,7 @@ class TDCCSDReldenTest(unittest.TestCase):
         sys = scf_system(m,T,mu,orbtype='r')
 
         # compute normal-order 1-rdm from propagation
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80)
         Eout,Eccout = tdccsdT.run()
         Etmp,Ecctmp = tdccsdT._rccsd_lambda(rdm2=True, erel=True)
@@ -160,7 +160,7 @@ class TDCCSDReldenTest(unittest.TestCase):
 
         sys = scf_system(m,T,mu,orbtype='u')
         # compute normal-order 1-rdm from propagation
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80)
         Eout,Eccout = tdccsdT.run()
         Etmp,Ecctmp = tdccsdT._uccsd_lambda(rdm2=True, erel=True)
@@ -184,9 +184,9 @@ class TDCCSDReldenTest(unittest.TestCase):
 
     def test_Be_r_vs_u_active(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -197,7 +197,7 @@ class TDCCSDReldenTest(unittest.TestCase):
         sys = scf_system(m,T,mu,orbtype='r')
 
         # compute normal-order 1-rdm from propagation
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160, athresh=athresh, saveT=True)
         Eout,Eccout = tdccsdT.run()
         Etmp,Ecctmp = tdccsdT._rccsd_lambda(rdm2=True, erel=True)
@@ -210,7 +210,7 @@ class TDCCSDReldenTest(unittest.TestCase):
 
         sys = scf_system(m,T,mu,orbtype='u')
         # compute normal-order 1-rdm from propagation
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160, athresh=athresh, saveT=True)
         Eout,Eccout = tdccsdT.run()
         Etmp,Ecctmp = tdccsdT._uccsd_lambda(rdm2=True, erel=True)
@@ -234,9 +234,9 @@ class TDCCSDReldenTest(unittest.TestCase):
 
     def test_Be_rk4_relden(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -255,7 +255,7 @@ class TDCCSDReldenTest(unittest.TestCase):
         rdm1_ref = ccsdT.full_1rdm(relax=True)
 
         # compute normal-order 1-rdm from propagation
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
         Eout,Eccout = tdccsdT.run()
         Etmp,Ecctmp = tdccsdT._uccsd_lambda(rdm2=True, erel=True)
@@ -268,9 +268,9 @@ class TDCCSDReldenTest(unittest.TestCase):
 
     def test_Be_rk4_relden_r_vs_u(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -280,7 +280,7 @@ class TDCCSDReldenTest(unittest.TestCase):
 
         # compute normal-ordered 1-rdm (U)
         sys = scf_system(m,T,mu,orbtype='u')
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
         Eout,Eccout = tdccsdT.run()
         Etmp,Ecctmp = tdccsdT._uccsd_lambda(rdm2=True, erel=True)
@@ -288,7 +288,7 @@ class TDCCSDReldenTest(unittest.TestCase):
 
         # compute normal-order 1-rdm (R)
         sys = scf_system(m,T,mu,orbtype='r')
-        prop = {"tprop" : "rk4", "lprop" : "rk4"}
+        prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
         Eout,Eccout = tdccsdT.run()
         Etmp,Ecctmp = tdccsdT._rccsd_lambda(rdm2=True, erel=True)

@@ -24,9 +24,9 @@ class FTCCSDTest(unittest.TestCase):
 
     def test_2orb(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'He 0 0 0',
-            basis = 'sto-3g')
+            verbose=0,
+            atom='He 0 0 0',
+            basis='sto-3g')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -46,9 +46,9 @@ class FTCCSDTest(unittest.TestCase):
 
     def test_Be(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -60,9 +60,9 @@ class FTCCSDTest(unittest.TestCase):
 
     def test_Be_rt(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -76,9 +76,9 @@ class FTCCSDTest(unittest.TestCase):
 
     def test_Be_active(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -96,9 +96,9 @@ class FTCCSDTest(unittest.TestCase):
 
     def test_Be_uactive(self):
         mol = gto.M(
-            verbose = 0,
-            atom = 'Be 0 0 0',
-            basis = 'sto-3G')
+            verbose=0,
+            atom='Be 0 0 0',
+            basis='sto-3G')
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
@@ -155,8 +155,9 @@ class FTCCSDTest(unittest.TestCase):
         ueg = pueg_system(T,L,cut,mu=mu,norb=norb)
         ccsdT = ccsd(ueg,T=T,mu=mu,iprint=0,max_iter=mi,damp=damp,ngrid=10)
         Ecctot,Ecc = ccsdT.run()
-        diff = abs(self.ueg_ref - Ecc)
+        diff = abs(self.pueg_ref - Ecc)
         error = "Expected: {}  Actual: {}".format(self.pueg_ref,Ecc)
+        self.assertTrue(diff < 1e-8,error)
 
     def test_ueg_gen_conv(self):
         T = 0.1
