@@ -1,6 +1,6 @@
 import unittest
 import numpy
-from pyscf import gto, scf, cc
+from pyscf import gto, scf
 from kelvin.ccsd import ccsd
 from kelvin.scf_system import scf_system
 from kelvin.ueg_system import ueg_system
@@ -53,7 +53,7 @@ class FTDerivTest(unittest.TestCase):
             basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
-        Escf = m.scf()
+        m.scf()
         T = 2.0
         mu = 0.0
         ng = 10
@@ -79,7 +79,7 @@ class FTDerivTest(unittest.TestCase):
             basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
-        Escf = m.scf()
+        m.scf()
         T = 2.0
         mu = 0.0
         ng = 10
@@ -105,7 +105,7 @@ class FTDerivTest(unittest.TestCase):
             basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
-        Escf = m.scf()
+        m.scf()
         T = 0.02
         mu = 0.0
         ng = 40
@@ -132,7 +132,7 @@ class FTDerivTest(unittest.TestCase):
             basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
-        Escf = m.scf()
+        m.scf()
         T = 0.02
         mu = 0.0
         ng = 40
@@ -159,7 +159,7 @@ class FTDerivTest(unittest.TestCase):
             basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
-        Escf = m.scf()
+        m.scf()
         T = 2.0
         mu = 0.0
         ng = 10
@@ -185,7 +185,7 @@ class FTDerivTest(unittest.TestCase):
             basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
-        Escf = m.scf()
+        m.scf()
         T = 2.0
         mu = 0.0
         ng = 10

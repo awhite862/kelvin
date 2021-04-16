@@ -24,7 +24,7 @@ class MP2Test(unittest.TestCase):
             basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         res = test_mp2(m)
         diff = abs(res[1] - res[0])
         self.assertTrue(diff < self.thresh)
@@ -38,7 +38,7 @@ class MP2Test(unittest.TestCase):
             spin=1)
         m = scf.UHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         res = test_mp2(m)
         diff = abs(res[1] - res[0])
         self.assertTrue(diff < self.thresh)
@@ -67,7 +67,7 @@ class MP2Test(unittest.TestCase):
         mf = scf.RHF(cell)
         mf.conv_tol_grad = 1e-8
         mf.conv_tol = 1e-12
-        Escf = mf.kernel()
+        mf.kernel()
         pt = mp.MP2(mf)
         Emp, temp = pt.kernel()
         #sys = scf_system(mf,0.0,0.0)

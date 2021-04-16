@@ -1,6 +1,6 @@
 import unittest
 import numpy
-from pyscf import gto, scf, cc
+from pyscf import gto, scf
 from cqcpy import ft_utils
 from cqcpy import spin_utils
 from cqcpy import test_utils
@@ -132,7 +132,7 @@ class FTLambdaTest(unittest.TestCase):
             basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
-        Escf = m.scf()
+        m.scf()
         sys = scf_system(m,self.T,self.mu,orbtype='g')
         ccsdT = ccsd(sys,T=self.T,mu=self.mu,iprint=0,max_iter=44,econv=1e-12)
         Etot,Ecc = ccsdT.run()
@@ -147,7 +147,7 @@ class FTLambdaTest(unittest.TestCase):
             basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
-        Escf = m.scf()
+        m.scf()
         T = 0.03
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
@@ -164,7 +164,7 @@ class FTLambdaTest(unittest.TestCase):
             basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
-        Escf = m.scf()
+        m.scf()
         ng = 10
         sys = scf_system(m,self.T,self.mu,orbtype='u')
         ccsdT = ccsd(sys,T=self.T,mu=self.mu,ngrid=ng,iprint=0,max_iter=44,econv=1e-12)
@@ -200,7 +200,7 @@ class FTLambdaTest(unittest.TestCase):
             basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
-        Escf = m.scf()
+        m.scf()
         ng = 10
         T = self.T
         mu = self.mu

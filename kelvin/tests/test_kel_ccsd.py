@@ -1,14 +1,10 @@
 import unittest
 import numpy
 from pyscf import gto, scf
-from cqcpy import ft_utils
 from cqcpy import integrals
 from kelvin.h2_field_system import H2FieldSystem
 from kelvin.td_ccsd import TDCCSD
 from kelvin.kel_ccsd import KelCCSD
-#from kelvin.neq_ccsd import neq_ccsd
-#from kelvin.ccsd import ccsd
-#from kelvin.h2_pol_system import h2_pol_system
 
 class KelCCSDTest(unittest.TestCase):
     def test_h2_field(self):
@@ -27,7 +23,7 @@ class KelCCSDTest(unittest.TestCase):
             spin=1)
 
         m = scf.UHF(mol)
-        Escf = m.scf()
+        m.scf()
         mos = m.mo_coeff[0]
 
         eri = integrals.get_phys(mol, mos, mos, mos, mos)
@@ -107,7 +103,7 @@ class KelCCSDTest(unittest.TestCase):
             spin=1)
 
         m = scf.UHF(mol)
-        Escf = m.scf()
+        m.scf()
         mos = m.mo_coeff[0]
 
         E = numpy.zeros((3))

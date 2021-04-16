@@ -1,5 +1,4 @@
 import unittest
-import numpy
 
 class TestTest(unittest.TestCase):
     def setUp(self):

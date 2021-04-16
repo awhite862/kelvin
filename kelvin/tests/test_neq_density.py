@@ -3,14 +3,9 @@ import numpy
 from cqcpy import test_utils
 from cqcpy.ov_blocks import one_e_blocks
 from cqcpy.ov_blocks import two_e_blocks
-from cqcpy import integrals
-from cqcpy import utils
-from cqcpy import spin_utils
 from kelvin import quadrature
-from kelvin import ft_cc_equations
 from kelvin import ft_cc_energy
 from kelvin import ft_cc_equations
-from kelvin import system
 
 def evalL(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
         Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta):

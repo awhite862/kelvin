@@ -14,7 +14,7 @@ class TDCCSDESNTest(unittest.TestCase):
             basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
-        Escf = m.scf()
+        m.scf()
         T = 2.0
         mu = 0.0
         ng = 30
@@ -78,7 +78,7 @@ class TDCCSDESNTest(unittest.TestCase):
             basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
-        Escf = m.scf()
+        m.scf()
         T = 0.02
         mu = 0.0
         ng = 200
@@ -182,7 +182,7 @@ class TDCCSDESNTest(unittest.TestCase):
             basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
-        Escf = m.scf()
+        m.scf()
         T = 0.02
         mu = 0.0
         ng = 200
@@ -252,7 +252,7 @@ class TDCCSDESNTest(unittest.TestCase):
             basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
-        Escf = m.scf()
+        m.scf()
         T = 0.02
         mu = 0.0
         ng = 280

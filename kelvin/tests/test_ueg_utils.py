@@ -1,11 +1,8 @@
 import unittest
 import numpy
 
-from cqcpy import spin_utils
-
 from kelvin.ueg_system import ueg_system
 from kelvin.ueg_scf_system import ueg_scf_system
-from kelvin import ueg_utils
 
 class UEGUtilsTest(unittest.TestCase):
     def setUp(self):

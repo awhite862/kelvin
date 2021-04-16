@@ -1,7 +1,6 @@
 import unittest
 import numpy
 from cqcpy.utils import block_diag
-from kelvin.fci import fci
 from kelvin.ccsd import ccsd
 from kelvin.neq_ccsd import neq_ccsd
 from kelvin.td_ccsd import TDCCSD
@@ -9,7 +8,6 @@ from kelvin.kel_ccsd import KelCCSD
 try:
     from lattice.hubbard import Hubbard1D
     from lattice.fci import FCISimple
-    from kelvin.hubbard_site_system import hubbard_site_system
     from kelvin.hubbard_system import HubbardSystem
     from kelvin.hubbard_field_system import hubbard_field_system, HubbardFieldSystem
     has_lattice = True

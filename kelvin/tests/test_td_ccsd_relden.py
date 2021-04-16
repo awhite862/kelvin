@@ -14,7 +14,7 @@ class TDCCSDReldenTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 1.0
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
@@ -53,7 +53,7 @@ class TDCCSDReldenTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 0.05
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
@@ -92,7 +92,7 @@ class TDCCSDReldenTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 1.0
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
@@ -141,7 +141,7 @@ class TDCCSDReldenTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 1.0
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='r')
@@ -190,7 +190,7 @@ class TDCCSDReldenTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 0.05
         mu = 0.0
         athresh = 1e-20
@@ -240,7 +240,7 @@ class TDCCSDReldenTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 1.0
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='u')
@@ -274,7 +274,7 @@ class TDCCSDReldenTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 1.0
         mu = 0.0
 

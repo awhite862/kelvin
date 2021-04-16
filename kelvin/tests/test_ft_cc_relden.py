@@ -1,7 +1,6 @@
 import unittest
 import numpy
 from pyscf import gto, scf
-from cqcpy import utils
 from kelvin.ccsd import ccsd
 from kelvin.scf_system import scf_system
 from kelvin.ueg_system import ueg_system
@@ -30,10 +29,10 @@ class FTCCReldenTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         sys = scf_system(m,T,mu,orbtype='g')
         ccsdT = ccsd(sys,T=T,mu=mu,iprint=0)
-        cc = ccsdT.run()
+        ccsdT.run()
         ccsdT.compute_ESN()
         Nref = ccsdT.N
         ccsdT._grel_ft_1rdm()
@@ -56,7 +55,7 @@ class FTCCReldenTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         h = m.get_hcore()
         field = numpy.random.random(h.shape)
         field = 0.1*(field + field.transpose((1,0)))
@@ -83,7 +82,7 @@ class FTCCReldenTest(unittest.TestCase):
         m.mo_energy += alpha*fdiag[:na]
         sys = scf_system(m,T,mu,orbtype='g')
         ccsdT = ccsd(sys,T=T,mu=mu,iprint=0,econv=1e-9,ngrid=ngrid,damp=damp,max_iter=mi)
-        cc = ccsdT.run()
+        ccsdT.run()
         Dm = ccsdT.full_1rdm(relax=True)
         out = numpy.einsum('ij,ji->',Dm,fmo)
         diff = abs(out - ref)
@@ -101,10 +100,10 @@ class FTCCReldenTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         sys = scf_system(m,T,mu,orbtype='g')
         ccsdT = ccsd(sys,T=T,mu=mu,damp=0.1,ngrid=80,athresh=1e-30,iprint=0)
-        cc = ccsdT.run()
+        ccsdT.run()
         ccsdT.compute_ESN()
         Nref = ccsdT.N
         ccsdT._grel_ft_1rdm()
@@ -126,7 +125,7 @@ class FTCCReldenTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         h = m.get_hcore()
         field = numpy.random.random(h.shape)
         field = 0.1*(field + field.transpose((1,0)))
@@ -164,7 +163,7 @@ class FTCCReldenTest(unittest.TestCase):
         sys = scf_system(m,T,mu,orbtype='g')
         ccsdT = ccsd(sys,T=T,mu=mu,iprint=0,
                 damp=0.1,ngrid=ngrid,athresh=1e-30,econv=1e-10,max_iter=mi)
-        cc = ccsdT.run()
+        ccsdT.run()
         Dm = ccsdT.full_1rdm(relax=True)
         out = numpy.einsum('ij,ji->',Dm,fmo)
         diff = abs(out - ref)
@@ -316,15 +315,15 @@ class FTCCReldenTest(unittest.TestCase):
         mi = 100
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         sys = scf_system(m,T,mu,orbtype='g')
         ccsdT = ccsd(sys,T=T,mu=mu,damp=0.1,ngrid=80,athresh=1e-30,iprint=0,econv=ethresh,max_iter=mi)
-        cc = ccsdT.run()
+        ccsdT.run()
         ccsdT._grel_ft_1rdm()
 
         sys = scf_system(m,T,mu,orbtype='u')
         uccsdT = ccsd(sys,T=T,mu=mu,damp=0.1,ngrid=80,athresh=1e-30,iprint=0,econv=ethresh,max_iter=mi)
-        ucc = uccsdT.run()
+        uccsdT.run()
         uccsdT._urel_ft_1rdm()
 
         # compare relaxed 1rdm
@@ -361,15 +360,15 @@ class FTCCReldenTest(unittest.TestCase):
         mi = 100
         m = scf.UHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         sys = scf_system(m,T,mu,orbtype='g')
         ccsdT = ccsd(sys,T=T,mu=mu,damp=0.1,ngrid=40,iprint=0,econv=ethresh,max_iter=mi)
-        cc = ccsdT.run()
+        ccsdT.run()
         ccsdT._grel_ft_1rdm()
 
         sys = scf_system(m,T,mu,orbtype='u')
         uccsdT = ccsd(sys,T=T,mu=mu,damp=0.1,ngrid=40,iprint=0,econv=ethresh,max_iter=mi)
-        ucc = uccsdT.run()
+        uccsdT.run()
         uccsdT._urel_ft_1rdm()
 
         # compare relaxed 1rdm
@@ -437,12 +436,12 @@ class FTCCReldenTest(unittest.TestCase):
         hub = Hubbard1D(L,1.0,U,boundary='c')
         sys = HubbardSystem(T,hub,Pa,Pb,mu=mu,orbtype='g')
         ccsdT = ccsd(sys,T=T,mu=mu,iprint=0,damp=damp,ngrid=10,econv=ethresh,max_iter=mi)
-        cc = ccsdT.run()
+        ccsdT.run()
         ccsdT._grel_ft_1rdm()
 
         sys = HubbardSystem(T,hub,Pa,Pb,mu=mu,orbtype='u')
         uccsdT = ccsd(sys,T=T,mu=mu,damp=0.1,ngrid=10,iprint=0,econv=ethresh,max_iter=mi)
-        ucc = uccsdT.run()
+        uccsdT.run()
         uccsdT._urel_ft_1rdm()
 
         # compare relaxed 1rdm

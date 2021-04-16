@@ -14,7 +14,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 2.0
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
@@ -50,7 +50,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 0.5
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
@@ -86,7 +86,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 0.5
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
@@ -122,7 +122,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 0.05
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
@@ -158,7 +158,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 0.5
         mu = 0.0
 
@@ -213,7 +213,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 0.05
         mu = 0.0
 
@@ -270,7 +270,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 0.5
         mu = 0.0
 

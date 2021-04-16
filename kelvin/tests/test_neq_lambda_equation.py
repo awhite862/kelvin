@@ -2,8 +2,6 @@ import unittest
 import numpy
 from cqcpy.ov_blocks import one_e_blocks
 from cqcpy import test_utils
-from cqcpy import integrals
-from cqcpy import utils
 from kelvin import ft_cc_energy
 from kelvin import ft_cc_equations
 from kelvin import quadrature

@@ -29,7 +29,7 @@ class CCUtilsTest(unittest.TestCase):
         thresh = 1e-10
         athresh = 1e-40
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         sys = scf_system(m,T,mu+delta,orbtype='u')
         ea,eb = sys.u_energies_tot()
         foa = ft_utils.ff(beta, ea, mu)
@@ -193,7 +193,7 @@ class CCUtilsTest(unittest.TestCase):
         delta = 1e-4
         thresh = 1e-8
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         sys = scf_system(m,T,mu+delta,orbtype='g')
         en = sys.g_energies_tot()
         Ff,If = cc_utils.ft_integrals(sys, en, beta, mu + delta)
@@ -236,7 +236,7 @@ class CCUtilsTest(unittest.TestCase):
         delta = 1e-4
         thresh = 1e-8
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         sys = scf_system(m,T,mu+delta,orbtype='u')
         ea,eb = sys.u_energies_tot()
         Faf,Fbf,Iaf,Ibf,Iababf = cc_utils.uft_integrals(sys, ea, eb, beta, mu + delta)
@@ -316,7 +316,7 @@ class CCUtilsTest(unittest.TestCase):
         thresh = 1e-10
         athresh = 1e-40
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         sys = scf_system(m,T,mu+delta,orbtype='g')
         en = sys.g_energies_tot()
         dvec = -beta*numpy.ones(en.shape)
@@ -384,7 +384,7 @@ class CCUtilsTest(unittest.TestCase):
         thresh = 1e-10
         athresh = 1e-40
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         sys = scf_system(m,T,mu+delta,orbtype='u')
         ea,eb = sys.u_energies_tot()
         dveca = -beta*numpy.ones(ea.shape)

@@ -14,7 +14,7 @@ class TDCCSD2RDMTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 0.5
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
@@ -43,7 +43,7 @@ class TDCCSD2RDMTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 0.05
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
@@ -72,7 +72,7 @@ class TDCCSD2RDMTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 0.5
         mu = 0.0
         # compute normal-order 1-rdm from propagation (g)
@@ -199,7 +199,7 @@ class TDCCSD2RDMTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 0.5
         mu = 0.0
         # compute normal-order 1/n-rdm from propagation (u)

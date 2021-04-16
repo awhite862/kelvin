@@ -4,7 +4,7 @@ from kelvin import zt_mp
 from kelvin.scf_system import scf_system
 
 def get_Be_sto3g():
-    from pyscf import gto, scf, cc
+    from pyscf import gto, scf
     mol = gto.M(
         verbose=0,
         atom='Be 0 0 0',
@@ -90,7 +90,7 @@ class SCFTest(unittest.TestCase):
         mu = 0.0
         beta = 1.0/T
         m = get_Be_sto3g()
-        Escf = m.scf()
+        m.scf()
         sys = scf_system(m,T,mu)
 
         # derivative with respect to mu
@@ -112,7 +112,7 @@ class SCFTest(unittest.TestCase):
         mu = 0.0
         beta = 1.0/T
         m = get_diamond()
-        Escf = m.scf()
+        m.scf()
         sys = scf_system(m,T,mu)
 
         # derivative with respect to mu
@@ -134,7 +134,7 @@ class SCFTest(unittest.TestCase):
         mu = 0.0
         beta = 1.0/T
         m = get_Be_sto3g()
-        Escf = m.scf()
+        m.scf()
         sys = scf_system(m,T,mu)
 
         # derivative with respect to mu
@@ -156,7 +156,7 @@ class SCFTest(unittest.TestCase):
         mu = 0.0
         beta = 1.0/T
         m = get_diamond()
-        Escf = m.scf()
+        m.scf()
         sys = scf_system(m,T,mu)
 
         # derivative with respect to mu
@@ -184,7 +184,7 @@ class SCFTest(unittest.TestCase):
         mu = 0.0
         beta = 1.0/T
         m = get_diamond_k()
-        Escf = m.scf()
+        m.scf()
         sys = scf_system(m,T,mu)
 
         # derivative with respect to mu

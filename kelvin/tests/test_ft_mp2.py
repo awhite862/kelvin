@@ -36,14 +36,14 @@ class FTMP2Test(unittest.TestCase):
         self.t2 = 1e-5
 
     def _test_Be_vs_fd(self, T, mu):
-        from pyscf import gto, scf, mp
+        from pyscf import gto, scf
         mol = gto.M(
             verbose=0,
             atom='Be 0 0 0',
             basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         out = compute_ft_mp2(m,T,mu)
         ref = compute_G012_fci(m,T,mu)
         e0str = "Expected: {}  Actual: {}".format(ref[0],out[0])
@@ -66,14 +66,14 @@ class FTMP2Test(unittest.TestCase):
         self._test_Be_vs_fd(10.0,0.1)
 
     def test_0T_Be_sto3g(self):
-        from pyscf import gto, scf, mp
+        from pyscf import gto, scf
         mol = gto.M(
             verbose=0,
             atom='Be 0 0 0',
             basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         out = compute_ft_mp2(m,0.01,0.0)
         ref = compute_zt_mp2(m)
 
@@ -105,7 +105,7 @@ class FTMP2Test(unittest.TestCase):
         cell.verbose = 0
         cell.build()
         mf = pbc_scf.RHF(cell, exxdiv=None)
-        ehf = mf.kernel()
+        mf.kernel()
         T = 0.5
         mu = 0.0
         out = compute_ft_mp2(mf,T,mu)

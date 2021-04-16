@@ -8,12 +8,9 @@ from cqcpy import integrals
 from kelvin import cc_utils
 from kelvin import ft_cc_energy
 from kelvin import ft_cc_equations
-from kelvin import system
 from kelvin import quadrature
 from kelvin.h2_field_system import h2_field_system
 from kelvin.neq_ccsd import neq_ccsd
-from kelvin.ccsd import ccsd
-from kelvin.h2_pol_system import h2_pol_system
 
 def evalLd(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
         Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta):
@@ -58,7 +55,7 @@ class NEQPropTest(unittest.TestCase):
             spin=1)
 
         m = scf.UHF(mol)
-        Escf = m.scf()
+        m.scf()
         mos = m.mo_coeff[0]
         E = numpy.zeros((3))
         E[2] = 1.0
@@ -321,7 +318,7 @@ class NEQPropTest(unittest.TestCase):
             spin=1)
 
         m = scf.UHF(mol)
-        Escf = m.scf()
+        m.scf()
         mos = m.mo_coeff[0]
 
         eri = integrals.get_phys(mol, mos, mos, mos, mos)
@@ -387,7 +384,7 @@ class NEQPropTest(unittest.TestCase):
             spin=1)
 
         m = scf.UHF(mol)
-        Escf = m.scf()
+        m.scf()
         mos = m.mo_coeff[0]
 
         eri = integrals.get_phys(mol, mos, mos, mos, mos)
@@ -466,7 +463,7 @@ class NEQPropTest(unittest.TestCase):
     #        spin = 1)
 
     #    m = scf.UHF(mol)
-    #    Escf = m.scf()
+    #    m.scf()
     #    mos = m.mo_coeff[0]
 
     #    eri = integrals.get_phys(mol, mos, mos, mos, mos)

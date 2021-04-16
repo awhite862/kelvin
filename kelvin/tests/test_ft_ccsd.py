@@ -1,7 +1,6 @@
 import unittest
 import numpy
 from pyscf import gto, scf
-from kelvin.mp2 import mp2
 from kelvin.ccsd import ccsd
 from kelvin.fci import fci
 from kelvin.scf_system import scf_system
@@ -30,7 +29,7 @@ class FTCCSDTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
 
         T = 1.0
         mu = 0.0
@@ -52,7 +51,7 @@ class FTCCSDTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         cc = compute_ft_ccsd(m,5.0,0.0)
         diff = abs(self.Be_ref - cc[1])
         error = "Expected: {}  Actual: {}".format(self.Be_ref,cc[1])
@@ -66,7 +65,7 @@ class FTCCSDTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         sys = scf_system(m,0.0,0.0)
         ccsdT = ccsd(sys,realtime=True,ngrid=160,iprint=0,)
         cc = ccsdT.run()
@@ -82,7 +81,7 @@ class FTCCSDTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 0.02
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
@@ -102,7 +101,7 @@ class FTCCSDTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 0.02
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='u')

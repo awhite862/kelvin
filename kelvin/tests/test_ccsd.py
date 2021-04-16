@@ -1,5 +1,4 @@
 import unittest
-import numpy
 from pyscf import gto, scf, cc
 from pyscf.pbc import cc as pbc_cc
 from kelvin.ccsd import ccsd
@@ -36,7 +35,7 @@ class CCSDTest(unittest.TestCase):
             basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
-        Escf = m.scf()
+        m.scf()
         res = test_ccsd_gen(m)
         diff = abs(res[1] - res[0])
         error = "Expected: {}  Actual: {}".format(res[0],res[1])
@@ -52,7 +51,7 @@ class CCSDTest(unittest.TestCase):
             spin=1)
         m = scf.UHF(mol)
         m.conv_tol = 1e-13
-        Escf = m.scf()
+        m.scf()
         res = test_ccsd_gen(m)
         diff = abs(res[1] - res[0])
         error = "Expected: {}  Actual: {}".format(res[0],res[1])
@@ -65,7 +64,7 @@ class CCSDTest(unittest.TestCase):
             basis='sto-3G')
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
-        Escf = m.scf()
+        m.scf()
         res = test_ccsd(m)
         diff = abs(res[1] - res[0])
         error = "Expected: {}  Actual: {}".format(res[0],res[1])
@@ -81,7 +80,7 @@ class CCSDTest(unittest.TestCase):
             spin=1)
         m = scf.UHF(mol)
         m.conv_tol = 1e-13
-        Escf = m.scf()
+        m.scf()
         res = test_ccsd(m)
         diff = abs(res[1] - res[0])
         error = "Expected: {}  Actual: {}".format(res[0],res[1])
@@ -89,7 +88,7 @@ class CCSDTest(unittest.TestCase):
 
     @unittest.skip("Skipped for time")
     def test_diamond_g(self):
-        from pyscf.pbc import gto, scf, dft
+        from pyscf.pbc import gto, scf
         cell = gto.Cell()
         cell.a = '''
         3.5668  0       0
@@ -111,7 +110,7 @@ class CCSDTest(unittest.TestCase):
         mf = scf.RHF(cell,exxdiv=None)
         mf.conv_tol_grad = 1e-8
         mf.conv_tol = 1e-12
-        Escf = mf.kernel()
+        mf.kernel()
         mycc = cc.CCSD(mf)
         mycc.conv_tol = 1e-11
         mycc.conv_tol_normt = 1e-9
@@ -120,13 +119,11 @@ class CCSDTest(unittest.TestCase):
         ccsd0 = ccsd(sys,iprint=0,max_iter=100,econv=1e-11,damp=0.0)
         Etot,Ecc2 = ccsd0.run()
         diff = abs(Ecc[0] - Ecc2)
-        #print(diff)
         self.assertTrue(diff < self.thresh)
-        #print(Ecc[0],Ecc2)
 
     @unittest.skip("Skipped for time")
     def test_diamond_u(self):
-        from pyscf.pbc import gto, scf, dft
+        from pyscf.pbc import gto, scf
         cell = gto.Cell()
         cell.a = '''
         3.5668  0       0
@@ -148,7 +145,7 @@ class CCSDTest(unittest.TestCase):
         mf = scf.RHF(cell,exxdiv=None)
         mf.conv_tol_grad = 1e-8
         mf.conv_tol = 1e-12
-        Escf = mf.kernel()
+        mf.kernel()
         mycc = cc.CCSD(mf)
         mycc.conv_tol = 1e-11
         mycc.conv_tol_normt = 1e-9
@@ -161,7 +158,7 @@ class CCSDTest(unittest.TestCase):
 
     @unittest.skip("Skipped for time")
     def test_diamond_uk(self):
-        from pyscf.pbc import gto, scf, dft
+        from pyscf.pbc import gto, scf
         cell = gto.Cell()
         cell.a = '''
         3.5668  0       0
@@ -184,7 +181,7 @@ class CCSDTest(unittest.TestCase):
         mf = scf.RHF(cell,kpt=kpt,exxdiv=None)
         mf.conv_tol_grad = 1e-8
         mf.conv_tol = 1e-12
-        Escf = mf.kernel()
+        mf.kernel()
         mycc = pbc_cc.CCSD(mf)
         mycc.conv_tol = 1e-11
         mycc.conv_tol_normt = 1e-9

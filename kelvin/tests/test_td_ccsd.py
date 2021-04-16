@@ -1,5 +1,4 @@
 import unittest
-import numpy
 from pyscf import gto, scf
 from kelvin.td_ccsd import TDCCSD
 from kelvin.ccsd import ccsd
@@ -17,7 +16,7 @@ class TDCCSDTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 0.5
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
@@ -38,7 +37,7 @@ class TDCCSDTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 0.5
         mu = 0.0
         ng = 40
@@ -60,7 +59,7 @@ class TDCCSDTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 0.5
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
@@ -81,7 +80,7 @@ class TDCCSDTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 0.5
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
@@ -103,7 +102,7 @@ class TDCCSDTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 0.5
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
@@ -125,7 +124,7 @@ class TDCCSDTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 0.05
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
@@ -146,7 +145,7 @@ class TDCCSDTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 0.5
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
@@ -169,7 +168,7 @@ class TDCCSDTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 0.05
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')
@@ -192,7 +191,7 @@ class TDCCSDTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 0.5
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='u')
@@ -215,7 +214,7 @@ class TDCCSDTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 0.05
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='u')
@@ -238,7 +237,7 @@ class TDCCSDTest(unittest.TestCase):
 
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
-        Escf = m.scf()
+        m.scf()
         T = 0.5
         mu = 0.0
         sys = scf_system(m,T,mu,orbtype='g')

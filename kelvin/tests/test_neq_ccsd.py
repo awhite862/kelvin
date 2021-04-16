@@ -1,12 +1,9 @@
 import unittest
 import numpy
 from pyscf import gto, scf
-from cqcpy import ft_utils
 from cqcpy import integrals
 from kelvin.h2_field_system import h2_field_system
 from kelvin.neq_ccsd import neq_ccsd
-from kelvin.ccsd import ccsd
-from kelvin.h2_pol_system import h2_pol_system
 
 class NEQ_CCSDTest(unittest.TestCase):
     def setUp(self):
@@ -28,7 +25,7 @@ class NEQ_CCSDTest(unittest.TestCase):
             spin=1)
 
         m = scf.UHF(mol)
-        Escf = m.scf()
+        m.scf()
         mos = m.mo_coeff[0]
 
         eri = integrals.get_phys(mol, mos, mos, mos, mos)
@@ -114,7 +111,7 @@ class NEQ_CCSDTest(unittest.TestCase):
             spin=1)
 
         m = scf.UHF(mol)
-        Escf = m.scf()
+        m.scf()
         mos = m.mo_coeff[0]
 
         eri = integrals.get_phys(mol, mos, mos, mos, mos)
@@ -171,7 +168,7 @@ class NEQ_CCSDTest(unittest.TestCase):
         ti = numpy.asarray([deltat/2 + float(j)*deltat for j in range(ng)])
         sys = h2_field_system(T,mu,omega,ti)
         cc = neq_ccsd(sys,T,mu=mu,tmax=tmax,econv=1e-10,max_iter=40,damp=0.0,ngr=ng,ngi=ngi,iprint=0)
-        Ef = cc.run()
+        cc.run()
         cc._neq_ccsd_lambda()
 
         for i in range(9):
