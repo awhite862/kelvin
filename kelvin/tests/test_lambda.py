@@ -7,6 +7,7 @@ from cqcpy import spin_utils
 from kelvin.ccsd import ccsd
 from kelvin.scf_system import scf_system
 
+
 def test_L1(cc, thresh):
     eo,ev = cc.sys.g_energies()
     Dov = 1.0/(eo[:,None] - ev[None,:])
@@ -66,6 +67,7 @@ def test_L1(cc, thresh):
             if numpy.abs(diff) > thresh:
                 return('{} {}: {}'.format(i,a,diff),False)
     return ("pass",True)
+
 
 def test_L2(cc, thresh):
     eo,ev = cc.sys.g_energies()
@@ -146,6 +148,7 @@ def test_L2(cc, thresh):
                         return ('{} {} {} {}: {}'.format(i,j,a,b,diff),False)
     return ("pass",True)
 
+
 class LambdaTest(unittest.TestCase):
     def setUp(self):
         self.thresh = 1e-8
@@ -218,6 +221,7 @@ class LambdaTest(unittest.TestCase):
         self.assertTrue(outs[1],outs[0])
         outd = test_L2(ccsd0, self.thresh)
         self.assertTrue(outd[1],outd[0])
+
 
 if __name__ == '__main__':
     unittest.main()

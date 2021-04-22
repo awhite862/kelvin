@@ -4,6 +4,7 @@ from pyscf.pbc import cc as pbc_cc
 from kelvin.ccsd import ccsd
 from kelvin.scf_system import scf_system
 
+
 def test_ccsd_gen(m):
     mycc = cc.CCSD(m)
     mycc.conv_tol = 1e-12
@@ -14,6 +15,7 @@ def test_ccsd_gen(m):
 
     return (mycc.e_corr, Ecc)
 
+
 def test_ccsd(m):
     mycc = cc.CCSD(m)
     mycc.conv_tol = 1e-12
@@ -23,6 +25,7 @@ def test_ccsd(m):
     Etot,Ecc = ccsd0.run()
 
     return (mycc.e_corr, Ecc)
+
 
 class CCSDTest(unittest.TestCase):
     def setUp(self):
@@ -191,6 +194,7 @@ class CCSDTest(unittest.TestCase):
         Etot,Ecc2 = ccsd0.run()
         diff = abs(Ecc[0] - Ecc2)
         self.assertTrue(diff < self.thresh)
+
 
 if __name__ == '__main__':
     unittest.main()

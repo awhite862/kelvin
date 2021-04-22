@@ -11,10 +11,12 @@ try:
 except:
     has_lattice = False
 
+
 def compute_FCISimple(hub, nelec):
     myfci = FCISimple(hub,nelec,m_s=0)
     e,v = myfci.run()
     return e[0]
+
 
 def compute_fci_kelvin(hub, nelec):
     nb = nelec//2
@@ -25,12 +27,14 @@ def compute_fci_kelvin(hub, nelec):
     myfci = fci(sys,nalpha=na,nbeta=nb)
     return myfci.run()[0]
 
+
 def compute_fci_kelvinT(hub, T, mu):
     Pa = None
     Pb = None
     sys = hubbard_site_system(T,hub,Pa,Pb,mu=mu)
     myfci = fci(sys,T=T,mu=mu)
     return myfci.run()[0]
+
 
 @unittest.skipUnless(has_lattice, "Lattice module cannot be found")
 class HubbardTest(unittest.TestCase):
@@ -197,6 +201,7 @@ class HubbardTest(unittest.TestCase):
         diff = abs(Eoutg - Eoutu)
         msg = "General: {} Unrestricted: {}".format(Eoutg,Eoutu)
         self.assertTrue(diff < self.thresh,msg)
+
 
 if __name__ == '__main__':
     unittest.main()

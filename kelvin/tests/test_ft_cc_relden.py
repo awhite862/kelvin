@@ -15,6 +15,7 @@ try:
 except:
     has_lattice = False
 
+
 class FTCCReldenTest(unittest.TestCase):
     def setUp(self):
         self.thresh = 1e-14
@@ -462,6 +463,7 @@ class FTCCReldenTest(unittest.TestCase):
         diffb = numpy.linalg.norm(nbref - nbout)/numpy.sqrt(nbref.size)
         self.assertTrue(diffa < thresh, "Error in normal-ordered alpha rdm: {}".format(diffa))
         self.assertTrue(diffb < thresh, "Error in normal-ordered beta rdm: {}".format(diffb))
+
 
 if __name__ == '__main__':
     unittest.main()

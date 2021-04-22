@@ -4,6 +4,7 @@ import numpy
 from kelvin.ueg_system import ueg_system
 from kelvin.ueg_scf_system import ueg_scf_system
 
+
 class UEGUtilsTest(unittest.TestCase):
     def setUp(self):
         pass
@@ -55,6 +56,7 @@ class UEGUtilsTest(unittest.TestCase):
         self.assertTrue(diff < 1e-12)
         diff = numpy.linalg.norm(Fa.oo - F.oo[:1,:1])
         self.assertTrue(diff < 1e-12)
+
 
 if __name__ == '__main__':
     unittest.main()

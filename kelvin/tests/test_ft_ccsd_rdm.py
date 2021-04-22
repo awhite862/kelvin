@@ -8,6 +8,7 @@ from kelvin import quadrature
 
 einsum = numpy.einsum
 
+
 def compute_ref(T1,T2,L1,L2,F,I,D1,D2,ti,ng,g,G,beta):
     T1temp,T2temp = ft_cc_equations.ccsd_simple(F,I,T1,T2,
             D1,D2,ti,ng,G)
@@ -18,6 +19,7 @@ def compute_ref(T1,T2,L1,L2,F,I,D1,D2,ti,ng,g,G,beta):
     A1g = einsum('v,v->',A1,g)
     A2g = einsum('v,v->',A2,g)
     return Eterm - A1g - A2g
+
 
 class FTCCSD_RDMTest(unittest.TestCase):
     def setUp(self):
@@ -712,6 +714,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
         self.assertTrue(diff1 < thresh, "error in Pklij: {}".format(diff1))
         self.assertTrue(diff2 < thresh, "error in PKLIJ: {}".format(diff2))
         self.assertTrue(diff3 < thresh, "error in PkLiJ: {}".format(diff3))
+
 
 if __name__ == '__main__':
     unittest.main()

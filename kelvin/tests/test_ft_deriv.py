@@ -14,6 +14,7 @@ try:
 except:
     has_lattice = False
 
+
 def fd_ESN(m, T, mu, ng, Ecctot, athresh=0.0, quad='lin', damp=0.0, mi=35, delta=5e-4):
     muf = mu + delta
     mub = mu - delta
@@ -39,6 +40,7 @@ def fd_ESN(m, T, mu, ng, Ecctot, athresh=0.0, quad='lin', damp=0.0, mi=35, delta
     Ex = Ecctot + T*Sx + mu*Nx
 
     return (Ex,Nx,Sx)
+
 
 class FTDerivTest(unittest.TestCase):
     def setUp(self):
@@ -456,6 +458,7 @@ class FTDerivTest(unittest.TestCase):
         self.assertTrue(dE < self.hthresh,eE)
         self.assertTrue(dS < self.hthresh,eS)
         self.assertTrue(dN < self.hthresh,eN)
+
 
 if __name__ == '__main__':
     unittest.main()

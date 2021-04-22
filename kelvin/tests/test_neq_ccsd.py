@@ -5,6 +5,7 @@ from cqcpy import integrals
 from kelvin.h2_field_system import h2_field_system
 from kelvin.neq_ccsd import neq_ccsd
 
+
 class NEQ_CCSDTest(unittest.TestCase):
     def setUp(self):
         self.thresh = 3e-4
@@ -182,6 +183,7 @@ class NEQ_CCSDTest(unittest.TestCase):
             #print("{} -- Expected: {}  Actual: {} ".format(i,ref,out))
             msg = "{} -- Expected: {}  Actual: {} ".format(i,ref,out)
             self.assertTrue(diff < self.thresh,msg)
+
 
 if __name__ == '__main__':
     unittest.main()

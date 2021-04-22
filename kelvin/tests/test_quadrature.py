@@ -3,22 +3,26 @@ import numpy
 from cqcpy import test_utils
 from kelvin import quadrature
 
+
 def func(t):
     return t - 0.2*t*t + numpy.sin(t)
 
+
 def func2(t):
-    #return t - 0.2*t*t + numpy.sin(t)
     return numpy.exp(-0.5*t )*0.2*t*t
+
 
 def make_t(T1,tr):
     nt = T1.shape[0]
     for i in range(nt):
         T1[i] = T1[nt - 1]*func(tr[i])
 
+
 def make_l(L1,tr):
     nt = L1.shape[0]
     for i in range(nt):
         L1[i] = L1[nt - 1]*func2(tr[i])
+
 
 class QuadTest(unittest.TestCase):
     def setUp(self):
@@ -157,6 +161,7 @@ class QuadTest(unittest.TestCase):
         eG = numpy.linalg.norm(Go - Go)
         self.assertTrue(eg < self.thresh,"Difference in g: {}".format(eg))
         self.assertTrue(eG < self.thresh,"Difference in G: {}".format(eG))
+
 
 if __name__ == '__main__':
     unittest.main()

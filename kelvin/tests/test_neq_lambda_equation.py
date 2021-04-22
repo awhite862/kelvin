@@ -6,6 +6,7 @@ from kelvin import ft_cc_energy
 from kelvin import ft_cc_equations
 from kelvin import quadrature
 
+
 def evalL(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
         Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta,iprint=False):
     ngr = gr.shape[0]
@@ -34,6 +35,7 @@ def evalL(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
     Tei = (1.0/beta)*numpy.einsum('y,y->',TEi,gi)
     Te = Tef + Teb + Tei
     return E + Te
+
 
 class NEQLambdaEquationsTest(unittest.TestCase):
     def setUp(self):
@@ -344,6 +346,7 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         self.assertTrue(abs(diff2i) < self.thresh,"Error in T2i: {}".format(diff2i))
         self.assertTrue(abs(diff2b) < self.thresh,"Error in T2b: {}".format(diff2b))
         self.assertTrue(abs(diff2f) < self.thresh,"Error in T2f: {}".format(diff2f))
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -33,6 +33,7 @@ from kelvin.tests import test_test
 from kelvin.tests import test_ueg
 from kelvin.tests import test_ueg_utils
 
+
 def get_suite(full):
     suite = unittest.TestSuite()
 
@@ -259,6 +260,7 @@ def get_suite(full):
     suite.addTest(test_ueg_utils.UEGUtilsTest("test_ufock"))
 
     return suite
+
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:

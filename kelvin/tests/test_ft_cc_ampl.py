@@ -7,6 +7,7 @@ from cqcpy import spin_utils
 from kelvin import ft_cc_equations
 from kelvin import quadrature
 
+
 class FTamplEquationsTest(unittest.TestCase):
     def setUp(self):
         self.thresh = 1e-12
@@ -104,6 +105,7 @@ class FTamplEquationsTest(unittest.TestCase):
         e2 = "Error in unrestricted FT T2: {}".format(diff2)
         self.assertTrue(s1,e1)
         self.assertTrue(s2,e2)
+
 
 if __name__ == '__main__':
     unittest.main()

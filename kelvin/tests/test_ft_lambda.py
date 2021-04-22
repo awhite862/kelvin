@@ -11,6 +11,7 @@ from kelvin import ft_cc_energy
 from kelvin import ft_cc_equations
 from kelvin import quadrature
 
+
 def test_L1(cc,thresh):
     # test lambdas
     T = cc.T
@@ -69,6 +70,7 @@ def test_L1(cc,thresh):
                     return ('{} {} {}: {}'.format(y,i,a,diff),False)
     return ("pass",True)
 
+
 def test_L2(cc,thresh):
     # test lambdas
     T = cc.T
@@ -118,6 +120,7 @@ def test_L2(cc,thresh):
                         if numpy.abs(diff) > 1e-7:
                             return ('{} {} {} {} {}: {}'.format(y,i,j,a,b,diff),False)
     return ("pass",True)
+
 
 class FTLambdaTest(unittest.TestCase):
     def setUp(self):
@@ -260,6 +263,7 @@ class FTLambdaTest(unittest.TestCase):
 
         diff = numpy.linalg.norm(dT1L - dT1)/numpy.sqrt(dT1L.size)
         self.assertTrue(diff < 1e-8)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -7,6 +7,7 @@ from kelvin import quadrature
 from kelvin import ft_cc_energy
 from kelvin import ft_cc_equations
 
+
 def evalL(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
         Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta):
     ngr = gr.shape[0]
@@ -29,6 +30,7 @@ def evalL(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
     Te += (1.0/beta)*numpy.einsum('y,y->',TEi,gi)
 
     return E + Te
+
 
 class NEQDensityTest(unittest.TestCase):
     def setUp(self):
@@ -104,6 +106,7 @@ class NEQDensityTest(unittest.TestCase):
         diff = numpy.linalg.norm(out - ref)
         msg = "Error: {}".format(diff)
         self.assertTrue(diff < self.thresh,msg)
+
 
 if __name__ == '__main__':
     unittest.main()

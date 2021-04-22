@@ -17,6 +17,7 @@ try:
 except:
     has_lattice = False
 
+
 class FakeHubbardSystem(object):
     def __init__(self,sys,M=None):
         self.M = M
@@ -59,6 +60,7 @@ class FakeHubbardSystem(object):
     def g_aint_tot(self):
         U = self.sys.g_aint_tot()
         return U + self.M
+
 
 class FTCC2RDMTest(unittest.TestCase):
     def setUp(self):
@@ -300,6 +302,7 @@ class FTCC2RDMTest(unittest.TestCase):
         P2gab = P2g[:na,na:,:na,na:]
         diff = numpy.linalg.norm(P2u[2] - P2gab)/numpy.linalg.norm(P2u[2])
         self.assertTrue(diff < 1e-12,"Error in 2rdm(abab): {}".format(diff))
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -46,6 +46,7 @@ def buildH(hub, phase=None):
     H[e:,e:] = H4
     return H
 
+
 def matrix_exp(M):
     n,m = M.shape
     assert(n == m)
@@ -56,6 +57,7 @@ def matrix_exp(M):
         Mn = numpy.einsum('pq,qr->pr',Mn,M)/float(i+1)
 
     return U
+
 
 @unittest.skipUnless(has_lattice, "Lattice module cannot be found")
 class HubbardFieldTest(unittest.TestCase):
@@ -329,6 +331,7 @@ class HubbardFieldTest(unittest.TestCase):
             # print("{}: {} {}".format(i,m,Mscc[i]))
             #print(diff)
             self.assertTrue(diff < 2e-4,msg)
+
 
 if __name__ == '__main__':
     unittest.main()
