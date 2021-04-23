@@ -69,7 +69,7 @@ class SCFTest(unittest.TestCase):
         m = get_Be_sto3g()
         Escf = m.scf()
         sys = scf_system(m, 0.0, 0.0)
-        eo,ev = sys.g_energies()
+        eo, ev = sys.g_energies()
         En = sys.const_energy()
         E0 = zt_mp.mp0(eo) + En
         E1 = sys.get_mp1()
@@ -81,7 +81,7 @@ class SCFTest(unittest.TestCase):
         mf = get_diamond()
         Escf = mf.kernel()
         sys = scf_system(mf, 0.0, 0.0)
-        eo,ev = sys.g_energies()
+        eo, ev = sys.g_energies()
         En = sys.const_energy()
         E0 = zt_mp.mp0(eo) + En
         E1 = sys.get_mp1()
@@ -95,7 +95,7 @@ class SCFTest(unittest.TestCase):
         beta = 1.0/T
         m = get_Be_sto3g()
         m.scf()
-        sys = scf_system(m,T,mu)
+        sys = scf_system(m, T, mu)
 
         # derivative with respect to mu
         en = sys.g_energies_tot()
@@ -166,10 +166,10 @@ class SCFTest(unittest.TestCase):
         # derivative with respect to mu
         en = sys.g_energies_tot()
         dvec = -beta*numpy.ones(en.shape)
-        ea,eb = sys.u_energies_tot()
+        ea, eb = sys.u_energies_tot()
         dveca = -beta*numpy.ones(ea.shape)
         dvecb = -beta*numpy.ones(eb.shape)
-        dMP1au = sys.u_d_mp1(dveca,dvecb)
+        dMP1au = sys.u_d_mp1(dveca, dvecb)
         dMP1a = sys.g_d_mp1(dvec)
 
         delta = 5e-4
@@ -189,15 +189,15 @@ class SCFTest(unittest.TestCase):
         beta = 1.0/T
         m = get_diamond_k()
         m.scf()
-        sys = scf_system(m,T,mu)
+        sys = scf_system(m, T, mu)
 
         # derivative with respect to mu
         en = sys.g_energies_tot()
         dvec = -beta*numpy.ones(en.shape)
-        ea,eb = sys.u_energies_tot()
+        ea, eb = sys.u_energies_tot()
         dveca = -beta*numpy.ones(ea.shape)
         dvecb = -beta*numpy.ones(eb.shape)
-        dMP1au = sys.u_d_mp1(dveca,dvecb)
+        dMP1au = sys.u_d_mp1(dveca, dvecb)
         dMP1a = sys.g_d_mp1(dvec)
 
         delta = 5e-4

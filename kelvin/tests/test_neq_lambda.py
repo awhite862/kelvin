@@ -70,7 +70,7 @@ def test_L1(cc, thresh):
                            Ff, Fb, F, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
                 diff = (LP - LM)/(2*d)
                 if numpy.abs(diff) > thresh:
-                    return ('I-- {} {} {}: {}'.format(y, i, a, diff),False)
+                    return ('I-- {} {} {}: {}'.format(y, i, a, diff), False)
     for y in range(ngr):
         for i in range(n):
             for a in range(n):
@@ -87,7 +87,7 @@ def test_L1(cc, thresh):
                            Ff, Fb, F, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
                 diff = (LP - LM)/(2*d)
                 if numpy.abs(diff) > thresh:
-                    return ('B-- {} {} {}: {}'.format(y, i, a, diff),False)
+                    return ('B-- {} {} {}: {}'.format(y, i, a, diff), False)
     for y in range(ngr):
         for i in range(n):
             for a in range(n):
@@ -104,7 +104,7 @@ def test_L1(cc, thresh):
                            Ff, Fb, F, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
                 diff = (LP - LM)/(2*d)
                 if numpy.abs(diff) > thresh:
-                    return ('F-- {} {} {}: {}'.format(y, i, a, diff),False)
+                    return ('F-- {} {} {}: {}'.format(y, i, a, diff), False)
     return ("pass",True)
 
 

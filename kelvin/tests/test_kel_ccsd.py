@@ -28,13 +28,13 @@ class KelCCSDTest(unittest.TestCase):
         mos = m.mo_coeff[0]
 
         eri = integrals.get_phys(mol, mos, mos, mos, mos)
-        hcore = numpy.einsum('mp,mn,nq->pq',mos,m.get_hcore(m.mol),mos)
+        hcore = numpy.einsum('mp,mn,nq->pq', mos, m.get_hcore(m.mol), mos)
         thresh = 1e-5
 
         E = numpy.zeros((3))
         E[2] = 1.0
         field = numpy.einsum('x,xij->ij', E, mol.intor('cint1e_r_sph', comp=3))
-        field = numpy.einsum('mp,mn,nq->pq',mos,field,mos)
+        field = numpy.einsum('mp,mn,nq->pq', mos, field, mos)
         H = numpy.zeros((4,4))
         H[1,1] += hcore[0,0]
         H[2,2] += hcore[1,1]
@@ -51,7 +51,7 @@ class KelCCSDTest(unittest.TestCase):
         e0,v0 = numpy.linalg.eigh(H)
         exp = numpy.exp(-beta*(e0))
         Z = exp.sum()
-        p0 = numpy.einsum('mi,i,ni->mn',v0,exp,v0) / Z
+        p0 = numpy.einsum('mi,i,ni->mn', v0, exp, v0) / Z
         p = p0.copy()
         ti = numpy.zeros(ngrid_ref)
         A_ref = []
@@ -62,10 +62,10 @@ class KelCCSDTest(unittest.TestCase):
             Ht = H + numpy.sin(omega*t)*Hint
             e,v = numpy.linalg.eigh(Ht)
             ee = numpy.exp(-deltat*1.j*e)
-            U = numpy.einsum('ai,i,bi->ab',v,ee,numpy.conj(v))
-            p = numpy.einsum('ps,pq,qr->sr',numpy.conj(U),p,U)
+            U = numpy.einsum('ai,i,bi->ab', v, ee, numpy.conj(v))
+            p = numpy.einsum('ps,pq,qr->sr', numpy.conj(U), p, U)
             if i % (ngrid_ref//10) == 0:
-                A_ref.append(numpy.einsum('ij,ji->',p,Hint))
+                A_ref.append(numpy.einsum('ij,ji->', p, Hint))
 
         A = []
         sys = H2FieldSystem(T, mu, omega)
@@ -85,8 +85,8 @@ class KelCCSDTest(unittest.TestCase):
         for i,out in enumerate(A):
             ref = A_ref[i]
             diff = abs(ref - out)
-            msg = "{} -- Expected: {}  Actual: {} ".format(i,ref,out)
-            self.assertTrue(diff < thresh,msg)
+            msg = "{} -- Expected: {}  Actual: {} ".format(i, ref, out)
+            self.assertTrue(diff < thresh, msg)
 
     def test_h2_field_save(self):
         beta = 0.6
@@ -108,7 +108,7 @@ class KelCCSDTest(unittest.TestCase):
         E = numpy.zeros((3))
         E[2] = 1.0
         field = numpy.einsum('x,xij->ij', E, mol.intor('cint1e_r_sph', comp=3))
-        field = numpy.einsum('mp,mn,nq->pq',mos,field,mos)
+        field = numpy.einsum('mp,mn,nq->pq', mos, field, mos)
 
         sys = H2FieldSystem(T, mu, omega)
         prop = {"tprop": "rk1", "lprop": "rk1"}
@@ -135,8 +135,8 @@ class KelCCSDTest(unittest.TestCase):
         for i,out in enumerate(A):
             ref = Aref[i]
             diff = abs(ref - out)
-            msg = "{} -- Expected: {}  Actual: {} ".format(i,ref,out)
-            self.assertTrue(diff < thresh,msg)
+            msg = "{} -- Expected: {}  Actual: {} ".format(i, ref, out)
+            self.assertTrue(diff < thresh, msg)
 
 
 if __name__ == '__main__':

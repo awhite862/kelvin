@@ -27,16 +27,16 @@ def evalL(T1f, T1b, T1i, T2f, T2b, T2i,
     T2b_ -= T2b
     T2i_ -= T2i
 
-    TEf = 0.25*numpy.einsum('yijab,yabij->y',L2f, T2f_)
-    TEf += numpy.einsum('yia,yai->y',L1f,T1f_)
-    TEb = 0.25*numpy.einsum('yijab,yabij->y',L2b, T2b_)
-    TEb += numpy.einsum('yia,yai->y',L1b,T1b_)
-    TEi = 0.25*numpy.einsum('yijab,yabij->y',L2i, T2i_)
-    TEi += numpy.einsum('yia,yai->y',L1i,T1i_)
+    TEf = 0.25*numpy.einsum('yijab,yabij->y', L2f, T2f_)
+    TEf += numpy.einsum('yia,yai->y', L1f, T1f_)
+    TEb = 0.25*numpy.einsum('yijab,yabij->y', L2b, T2b_)
+    TEb += numpy.einsum('yia,yai->y', L1b, T1b_)
+    TEi = 0.25*numpy.einsum('yijab,yabij->y', L2i, T2i_)
+    TEi += numpy.einsum('yia,yai->y', L1i, T1i_)
 
-    Tef = (1.j/beta)*numpy.einsum('y,y->',TEf,gr)
-    Teb = -(1.j/beta)*numpy.einsum('y,y->',TEb,gr)
-    Tei = (1.0/beta)*numpy.einsum('y,y->',TEi,gi)
+    Tef = (1.j/beta)*numpy.einsum('y,y->', TEf, gr)
+    Teb = -(1.j/beta)*numpy.einsum('y,y->', TEb, gr)
+    Tei = (1.0/beta)*numpy.einsum('y,y->', TEi, gi)
     Te = Tef + Teb + Tei
     return E + Te
 
@@ -53,12 +53,12 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         tmax = 0.1
         tii,gi,Gi = quadrature.simpsons(ngi, beta)
         tir,gr,Gr = quadrature.simpsons(ngr, tmax)
-        T1f,T2f = test_utils.make_random_ft_T(ngr,n)
-        T1b,T2b = test_utils.make_random_ft_T(ngr,n)
-        T1i,T2i = test_utils.make_random_ft_T(ngi,n)
-        L1f,L2f = test_utils.make_random_ft_T(ngr,n)
-        L1b,L2b = test_utils.make_random_ft_T(ngr,n)
-        L1i,L2i = test_utils.make_random_ft_T(ngi,n)
+        T1f, T2f = test_utils.make_random_ft_T(ngr, n)
+        T1b, T2b = test_utils.make_random_ft_T(ngr, n)
+        T1i, T2i = test_utils.make_random_ft_T(ngi, n)
+        L1f, L2f = test_utils.make_random_ft_T(ngr, n)
+        L1b, L2b = test_utils.make_random_ft_T(ngr, n)
+        L1i, L2i = test_utils.make_random_ft_T(ngi, n)
         T1f = T1f.astype(complex)
         T1b = T1b.astype(complex)
         T2f = T2f.astype(complex)
@@ -67,7 +67,7 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         L1b = L1b.astype(complex)
         L2f = L2f.astype(complex)
         L2b = L2b.astype(complex)
-        F,I = test_utils.make_random_integrals(n,n)
+        F, I = test_utils.make_random_integrals(n, n)
         Foo = F.oo.astype(complex)
         Fov = F.ov.astype(complex)
         Fvo = F.vo.astype(complex)
@@ -82,9 +82,9 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         I.vvoo = I.vvoo.astype(complex)
         I.oovv = I.oovv.astype(complex)
         I.oooo = I.oooo.astype(complex)
-        F = one_e_blocks(Foo,Fov,Fvo,Fvv)
+        F = one_e_blocks(Foo, Fov, Fvo, Fvv)
         Fb = Ff
-        D1,D2 = test_utils.make_random_ft_D(n)
+        D1, D2 = test_utils.make_random_ft_D(n)
 
         # compute dL/dt1 from Lagrangian directly
         dT1i = numpy.zeros((ngi,n,n),dtype=complex)
@@ -165,9 +165,9 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         diffi = numpy.linalg.norm(L1in - dT1i)
         diffb = numpy.linalg.norm(L1bn - dT1b)
         difff = numpy.linalg.norm(L1fn - dT1f)
-        self.assertTrue(abs(diffi) < self.thresh,"Error in dTi: {}".format(diffi))
-        self.assertTrue(abs(diffb) < self.thresh,"Error in dTb: {}".format(diffb))
-        self.assertTrue(abs(difff) < self.thresh,"Error in dTf: {}".format(difff))
+        self.assertTrue(abs(diffi) < self.thresh, "Error in dTi: {}".format(diffi))
+        self.assertTrue(abs(diffb) < self.thresh, "Error in dTb: {}".format(diffb))
+        self.assertTrue(abs(difff) < self.thresh, "Error in dTf: {}".format(difff))
 
     def test_L2_simple(self):
         ngr = 4
@@ -175,12 +175,12 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         n = 2
         beta = 2.0
         tmax = 0.1
-        T1f,T2f = test_utils.make_random_ft_T(ngr,n)
-        T1b,T2b = test_utils.make_random_ft_T(ngr,n)
-        T1i,T2i = test_utils.make_random_ft_T(ngi,n)
-        L1f,L2f = test_utils.make_random_ft_T(ngr,n)
-        L1b,L2b = test_utils.make_random_ft_T(ngr,n)
-        L1i,L2i = test_utils.make_random_ft_T(ngi,n)
+        T1f, T2f = test_utils.make_random_ft_T(ngr, n)
+        T1b, T2b = test_utils.make_random_ft_T(ngr, n)
+        T1i, T2i = test_utils.make_random_ft_T(ngi, n)
+        L1f, L2f = test_utils.make_random_ft_T(ngr, n)
+        L1b, L2b = test_utils.make_random_ft_T(ngr, n)
+        L1i, L2i = test_utils.make_random_ft_T(ngi, n)
         T1f = T1f.astype(complex)
         T1b = T1b.astype(complex)
         T2f = T2f.astype(complex)
@@ -189,7 +189,7 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         L1b = L1b.astype(complex)
         L2f = L2f.astype(complex)
         L2b = L2b.astype(complex)
-        F,I = test_utils.make_random_integrals(n,n)
+        F, I = test_utils.make_random_integrals(n, n)
         I.vvvv = I.vvvv.astype(complex)
         I.oovv = I.oovv.astype(complex)
         I.vvoo = I.vvoo.astype(complex)
@@ -204,9 +204,9 @@ class NEQLambdaEquationsTest(unittest.TestCase):
                 numpy.ones(ngr)[:,None,None]*Fov[None,:,:],
                 numpy.ones(ngr)[:,None,None]*Fvo[None,:,:],
                 numpy.ones(ngr)[:,None,None]*Fvv[None,:,:])
-        F = one_e_blocks(Foo,Fov,Fvo,Fvv)
+        F = one_e_blocks(Foo, Fov, Fvo, Fvv)
         Fb = Ff
-        D1,D2 = test_utils.make_random_ft_D(n)
+        D1, D2 = test_utils.make_random_ft_D(n)
         tii,gi,Gi = quadrature.simpsons(ngi, beta)
         tir,gr,Gr = quadrature.simpsons(ngr, tmax)
 
@@ -299,8 +299,8 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         # compute dL/dt1 from the Lambda equations
         L1fn,L1bn,L1in,L2fn,L2bn,L2in = \
             ft_cc_equations.neq_lambda_simple(
-                    Ff,Fb,F,I,L1f,L1b,L1i,L2f,L2b,L2i,T1f,T1b,T1i,
-                    T2f,T2b,T2i,D1,D2,tir,tii,ngr,ngi,gr,gi,Gr,Gi)
+                    Ff, Fb, F, I, L1f, L1b, L1i, L2f, L2b, L2i, T1f, T1b, T1i,
+                    T2f, T2b, T2i, D1, D2, tir, tii, ngr, ngi, gr, gi, Gr, Gi)
 
         L2in -= L2i
         L2bn -= L2b
@@ -314,9 +314,9 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         diffi = numpy.linalg.norm(L2in - dT2i)
         diffb = numpy.linalg.norm(L2bn - dT2b)
         difff = numpy.linalg.norm(L2fn - dT2f)
-        self.assertTrue(abs(diffi) < self.thresh,"Error in dTi: {}".format(diffi))
-        self.assertTrue(abs(diffb) < self.thresh,"Error in dTb: {}".format(diffb))
-        self.assertTrue(abs(difff) < self.thresh,"Error in dTf: {}".format(difff))
+        self.assertTrue(abs(diffi) < self.thresh, "Error in dTi: {}".format(diffi))
+        self.assertTrue(abs(diffb) < self.thresh, "Error in dTb: {}".format(diffb))
+        self.assertTrue(abs(difff) < self.thresh, "Error in dTf: {}".format(difff))
 
     def test_lambda_opt(self):
         ngr = 4
@@ -326,12 +326,12 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         tmax = 0.1
         tii,gi,Gi = quadrature.simpsons(ngi, beta)
         tir,gr,Gr = quadrature.simpsons(ngr, tmax)
-        T1f,T2f = test_utils.make_random_ft_T(ngr,n)
-        T1b,T2b = test_utils.make_random_ft_T(ngr,n)
-        T1i,T2i = test_utils.make_random_ft_T(ngi,n)
-        L1f,L2f = test_utils.make_random_ft_T(ngr,n)
-        L1b,L2b = test_utils.make_random_ft_T(ngr,n)
-        L1i,L2i = test_utils.make_random_ft_T(ngi,n)
+        T1f, T2f = test_utils.make_random_ft_T(ngr, n)
+        T1b, T2b = test_utils.make_random_ft_T(ngr, n)
+        T1i, T2i = test_utils.make_random_ft_T(ngi, n)
+        L1f, L2f = test_utils.make_random_ft_T(ngr, n)
+        L1b, L2b = test_utils.make_random_ft_T(ngr, n)
+        L1i, L2i = test_utils.make_random_ft_T(ngi, n)
         T1f = T1f.astype(complex)
         T1b = T1b.astype(complex)
         T2f = T2f.astype(complex)
@@ -340,7 +340,7 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         L1b = L1b.astype(complex)
         L2f = L2f.astype(complex)
         L2b = L2b.astype(complex)
-        F,I = test_utils.make_random_integrals(n,n)
+        F, I = test_utils.make_random_integrals(n, n)
         I.vvvv = I.vvvv.astype(complex)
         I.oovv = I.oovv.astype(complex)
         I.vvoo = I.vvoo.astype(complex)
@@ -355,19 +355,19 @@ class NEQLambdaEquationsTest(unittest.TestCase):
                 numpy.ones(ngr)[:,None,None]*Fov[None,:,:],
                 numpy.ones(ngr)[:,None,None]*Fvo[None,:,:],
                 numpy.ones(ngr)[:,None,None]*Fvv[None,:,:])
-        F = one_e_blocks(Foo,Fov,Fvo,Fvv)
+        F = one_e_blocks(Foo, Fov, Fvo, Fvv)
         Fb = Ff
-        D1,D2 = test_utils.make_random_ft_D(n)
+        D1, D2 = test_utils.make_random_ft_D(n)
 
-        L1fs,L1bs,L1is,L2fs,L2bs,L2is = \
+        L1fs, L1bs, L1is, L2fs, L2bs, L2is = \
             ft_cc_equations.neq_lambda_simple(
-                    Ff,Fb,F,I,L1f,L1b,L1i,L2f,L2b,L2i,T1f,T1b,T1i,
-                    T2f,T2b,T2i,D1,D2,tir,tii,ngr,ngi,gr,gi,Gr,Gi)
+                    Ff, Fb, F, I, L1f, L1b, L1i, L2f, L2b, L2i, T1f, T1b, T1i,
+                    T2f, T2b, T2i, D1, D2, tir, tii, ngr, ngi, gr, gi, Gr, Gi)
 
         L1fo,L1bo,L1io,L2fo,L2bo,L2io = \
             ft_cc_equations.neq_lambda_opt(
-                    Ff,Fb,F,I,L1f,L1b,L1i,L2f,L2b,L2i,T1f,T1b,T1i,
-                    T2f,T2b,T2i,D1,D2,tir,tii,ngr,ngi,gr,gi,Gr,Gi)
+                    Ff, Fb, F, I, L1f, L1b, L1i, L2f, L2b, L2i, T1f, T1b, T1i,
+                    T2f, T2b, T2i, D1, D2, tir, tii, ngr, ngi, gr, gi, Gr, Gi)
 
         diff2i = numpy.linalg.norm(L2is - L2io)
         diff2b = numpy.linalg.norm(L2bs - L2bo)
@@ -375,12 +375,12 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         diff1i = numpy.linalg.norm(L1is - L1io)
         diff1b = numpy.linalg.norm(L1bs - L1bo)
         diff1f = numpy.linalg.norm(L1fs - L1fo)
-        self.assertTrue(abs(diff1i) < self.thresh,"Error in T1i: {}".format(diff1i))
-        self.assertTrue(abs(diff1b) < self.thresh,"Error in T1b: {}".format(diff1b))
-        self.assertTrue(abs(diff1f) < self.thresh,"Error in T1f: {}".format(diff1f))
-        self.assertTrue(abs(diff2i) < self.thresh,"Error in T2i: {}".format(diff2i))
-        self.assertTrue(abs(diff2b) < self.thresh,"Error in T2b: {}".format(diff2b))
-        self.assertTrue(abs(diff2f) < self.thresh,"Error in T2f: {}".format(diff2f))
+        self.assertTrue(abs(diff1i) < self.thresh, "Error in T1i: {}".format(diff1i))
+        self.assertTrue(abs(diff1b) < self.thresh, "Error in T1b: {}".format(diff1b))
+        self.assertTrue(abs(diff1f) < self.thresh, "Error in T1f: {}".format(diff1f))
+        self.assertTrue(abs(diff2i) < self.thresh, "Error in T2i: {}".format(diff2i))
+        self.assertTrue(abs(diff2b) < self.thresh, "Error in T2b: {}".format(diff2b))
+        self.assertTrue(abs(diff2f) < self.thresh, "Error in T2f: {}".format(diff2f))
 
 
 if __name__ == '__main__':

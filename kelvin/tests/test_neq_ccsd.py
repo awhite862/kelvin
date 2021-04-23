@@ -30,12 +30,12 @@ class NEQ_CCSDTest(unittest.TestCase):
         mos = m.mo_coeff[0]
 
         eri = integrals.get_phys(mol, mos, mos, mos, mos)
-        hcore = numpy.einsum('mp,mn,nq->pq',mos,m.get_hcore(m.mol),mos)
+        hcore = numpy.einsum('mp,mn,nq->pq', mos, m.get_hcore(m.mol), mos)
 
         E = numpy.zeros((3))
         E[2] = 1.0
         field = numpy.einsum('x,xij->ij', E, mol.intor('cint1e_r_sph', comp=3))
-        field = numpy.einsum('mp,mn,nq->pq',mos,field,mos)
+        field = numpy.einsum('mp,mn,nq->pq', mos, field, mos)
         H = numpy.zeros((4,4))
         H[1,1] += hcore[0,0]
         H[2,2] += hcore[1,1]
@@ -52,7 +52,7 @@ class NEQ_CCSDTest(unittest.TestCase):
         e0,v0 = numpy.linalg.eigh(H)
         exp = numpy.exp(-beta*(e0))
         Z = exp.sum()
-        p0 = numpy.einsum('mi,i,ni->mn',v0,exp,v0) / Z
+        p0 = numpy.einsum('mi,i,ni->mn', v0, exp, v0) / Z
         p = p0.copy()
         ti = numpy.zeros(ngrid_ref)
         A_ref = []
@@ -63,10 +63,10 @@ class NEQ_CCSDTest(unittest.TestCase):
             Ht = H + numpy.sin(omega*t)*Hint
             e,v = numpy.linalg.eigh(Ht)
             ee = numpy.exp(-deltat*1.j*e)
-            U = numpy.einsum('ai,i,bi->ab',v,ee,numpy.conj(v))
-            p = numpy.einsum('ps,pq,qr->sr',numpy.conj(U),p,U)
+            U = numpy.einsum('ai,i,bi->ab', v, ee, numpy.conj(v))
+            p = numpy.einsum('ps,pq,qr->sr', numpy.conj(U), p, U)
             if i % (ngrid_ref//10) == 0:
-                A_ref.append(numpy.einsum('ij,ji->',p,Hint))
+                A_ref.append(numpy.einsum('ij,ji->', p, Hint))
 
         del A_ref[0]
         # Neq-CCSD
@@ -79,19 +79,19 @@ class NEQ_CCSDTest(unittest.TestCase):
             d = 1e-4
             ti = numpy.asarray([deltat/2 + float(j)*deltat for j in range(ng)])
             sys = h2_field_system(T,mu,omega,ti,O=(d*field),ot=ng - 1)
-            cc = neq_ccsd(sys,T,mu=mu,tmax=tmax,econv=1e-10,max_iter=40,damp=0.0,ngr=ng,ngi=ngi,iprint=0)
+            cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-10, max_iter=40, damp=0.0, ngr=ng, ngi=ngi, iprint=0)
             Ef = cc.run()
 
             sys = h2_field_system(T,mu,omega,ti,O=(-d*field),ot=ng - 1)
-            cc = neq_ccsd(sys,T,mu=mu,tmax=tmax,econv=1e-10,max_iter=40,damp=0.0,ngr=ng,ngi=ngi,iprint=0)
+            cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-10, max_iter=40, damp=0.0, ngr=ng, ngi=ngi, iprint=0)
             Eb = cc.run()
             A.append((Ef[0] - Eb[0])/(2*d))
 
         for i,out in enumerate(A):
             ref = A_ref[i]
             diff = abs(ref - out)
-            msg = "{} -- Expected: {}  Actual: {} ".format(i,ref,out)
-            self.assertTrue(diff < self.thresh,msg)
+            msg = "{} -- Expected: {}  Actual: {} ".format(i, ref, out)
+            self.assertTrue(diff < self.thresh, msg)
 
     def test_h2_field2(self):
         beta = 1.0
@@ -113,12 +113,12 @@ class NEQ_CCSDTest(unittest.TestCase):
         mos = m.mo_coeff[0]
 
         eri = integrals.get_phys(mol, mos, mos, mos, mos)
-        hcore = numpy.einsum('mp,mn,nq->pq',mos,m.get_hcore(m.mol),mos)
+        hcore = numpy.einsum('mp,mn,nq->pq', mos, m.get_hcore(m.mol), mos)
 
         E = numpy.zeros((3))
         E[2] = 1.0
         field = numpy.einsum('x,xij->ij', E, mol.intor('cint1e_r_sph', comp=3))
-        field = numpy.einsum('mp,mn,nq->pq',mos,field,mos)
+        field = numpy.einsum('mp,mn,nq->pq', mos, field, mos)
         H = numpy.zeros((4,4))
         H[1,1] += hcore[0,0]
         H[2,2] += hcore[1,1]
@@ -138,7 +138,7 @@ class NEQ_CCSDTest(unittest.TestCase):
         e0,v0 = numpy.linalg.eigh(H)
         exp = numpy.exp(-beta*(e0))
         Z = exp.sum()
-        p0 = numpy.einsum('mi,i,ni->mn',v0,exp,v0) / Z
+        p0 = numpy.einsum('mi,i,ni->mn', v0, exp, v0) / Z
         p = p0.copy()
         ti = numpy.zeros(ngrid_ref)
         A_ref = []
@@ -149,10 +149,10 @@ class NEQ_CCSDTest(unittest.TestCase):
             Ht = H + numpy.sin(omega*t)*Hint
             e,v = numpy.linalg.eigh(Ht)
             ee = numpy.exp(-deltat*1.j*e)
-            U = numpy.einsum('ai,i,bi->ab',v,ee,numpy.conj(v))
-            p = numpy.einsum('ps,pq,qr->sr',numpy.conj(U),p,U)
+            U = numpy.einsum('ai,i,bi->ab', v, ee, numpy.conj(v))
+            p = numpy.einsum('ps,pq,qr->sr', numpy.conj(U), p, U)
             if i % (ngrid_ref//10) == 0:
-                A_ref.append(numpy.einsum('ij,ji->',p,Htest))
+                A_ref.append(numpy.einsum('ij,ji->', p, Htest))
 
         del A_ref[0]
         # Neq-CCSD
@@ -164,7 +164,7 @@ class NEQ_CCSDTest(unittest.TestCase):
         deltat = tmax / (ng)
         ti = numpy.asarray([deltat/2 + float(j)*deltat for j in range(ng)])
         sys = h2_field_system(T,mu,omega,ti)
-        cc = neq_ccsd(sys,T,mu=mu,tmax=tmax,econv=1e-10,max_iter=40,damp=0.0,ngr=ng,ngi=ngi,iprint=0)
+        cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-10, max_iter=40, damp=0.0, ngr=ng, ngi=ngi, iprint=0)
         cc.run()
         cc._neq_ccsd_lambda()
 
@@ -176,8 +176,8 @@ class NEQ_CCSDTest(unittest.TestCase):
         for i,out in enumerate(A):
             ref = A_ref[i]
             diff = abs(ref - out)
-            msg = "{} -- Expected: {}  Actual: {} ".format(i,ref,out)
-            self.assertTrue(diff < self.thresh,msg)
+            msg = "{} -- Expected: {}  Actual: {} ".format(i, ref, out)
+            self.assertTrue(diff < self.thresh, msg)
 
 
 if __name__ == '__main__':

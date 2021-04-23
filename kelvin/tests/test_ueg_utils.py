@@ -12,7 +12,7 @@ class UEGUtilsTest(unittest.TestCase):
     def test_integral_sym(self):
         L = 3.8855
         mu = 2.0
-        ueg = ueg_system(0.0,L,7.4,mu=mu,norb=19,orbtype='g')
+        ueg = ueg_system(0.0, L, 7.4, mu=mu, norb=19, orbtype='g')
         I = ueg.g_int_tot()
         P12 = numpy.linalg.norm(I - I.transpose((1,0,3,2)))/numpy.sqrt(I.size)
         Preal = numpy.linalg.norm(I - I.transpose((2,3,0,1)))/numpy.sqrt(I.size)
@@ -22,7 +22,7 @@ class UEGUtilsTest(unittest.TestCase):
     def test_ft_uint(self):
         L = 3.8855
         mu = 2.0
-        ueg = ueg_system(0.0,L,7.4,mu=mu,norb=19,orbtype='u')
+        ueg = ueg_system(0.0, L, 7.4, mu=mu, norb=19, orbtype='u')
         I = ueg.g_aint_tot()
         n = I.shape[0]
         na = n//2
@@ -41,7 +41,7 @@ class UEGUtilsTest(unittest.TestCase):
     def test_ufock(self):
         L = 3.8855
         mu = 0.01
-        ueg = ueg_system(0.0,L,7.4,mu=mu,norb=7,orbtype='u')
+        ueg = ueg_system(0.0, L, 7.4, mu=mu, norb=7, orbtype='u')
         Fa,Fb = ueg.u_fock()
         F = ueg.g_fock()
         diff = numpy.linalg.norm(Fa.vv - F.vv[:6,:6])
@@ -49,7 +49,7 @@ class UEGUtilsTest(unittest.TestCase):
         diff = numpy.linalg.norm(Fa.oo - F.oo[:1,:1])
         self.assertTrue(diff < 1e-12)
 
-        ueg = ueg_scf_system(0.0,L,7.4,mu=mu,norb=7,orbtype='u')
+        ueg = ueg_scf_system(0.0, L, 7.4, mu=mu, norb=7, orbtype='u')
         Fa,Fb = ueg.u_fock()
         F = ueg.g_fock()
         diff = numpy.linalg.norm(Fa.vv - F.vv[:6,:6])

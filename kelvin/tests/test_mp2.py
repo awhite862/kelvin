@@ -5,7 +5,7 @@ from kelvin.scf_system import scf_system
 
 
 def test_mp2(m):
-    sys = scf_system(m,0.0,0.0)
+    sys = scf_system(m, 0.0, 0.0)
     mp20 = mp2(sys,iprint=0)
     E00,E10,E20 = mp20.run()
 
@@ -72,7 +72,7 @@ class MP2Test(unittest.TestCase):
         mf.kernel()
         pt = mp.MP2(mf)
         Emp, temp = pt.kernel()
-        sys = scf_system(mf,0.0,0.0)
+        sys = scf_system(mf, 0.0, 0.0)
         mp20 = mp2(sys,iprint=0)
         E00,E10,E20 = mp20.run()
         diff = abs(E20 - Emp)

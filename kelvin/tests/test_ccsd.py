@@ -9,8 +9,8 @@ def test_ccsd_gen(m):
     mycc = cc.CCSD(m)
     mycc.conv_tol = 1e-12
     mycc.run()
-    sys = scf_system(m,0.0,0.0,orbtype='g')
-    ccsd0 = ccsd(sys,iprint=0,max_iter=44,econv=1e-12)
+    sys = scf_system(m, 0.0, 0.0, orbtype='g')
+    ccsd0 = ccsd(sys, iprint=0, max_iter=44, econv=1e-12)
     Etot,Ecc = ccsd0.run()
 
     return (mycc.e_corr, Ecc)
@@ -20,8 +20,8 @@ def test_ccsd(m):
     mycc = cc.CCSD(m)
     mycc.conv_tol = 1e-12
     mycc.run()
-    sys = scf_system(m,0.0,0.0)
-    ccsd0 = ccsd(sys,iprint=0,max_iter=44,econv=1e-12)
+    sys = scf_system(m, 0.0, 0.0)
+    ccsd0 = ccsd(sys, iprint=0, max_iter=44, econv=1e-12)
     Etot,Ecc = ccsd0.run()
 
     return (mycc.e_corr, Ecc)
@@ -41,8 +41,8 @@ class CCSDTest(unittest.TestCase):
         m.scf()
         res = test_ccsd_gen(m)
         diff = abs(res[1] - res[0])
-        error = "Expected: {}  Actual: {}".format(res[0],res[1])
-        self.assertTrue(diff < self.thresh,error)
+        error = "Expected: {}  Actual: {}".format(res[0], res[1])
+        self.assertTrue(diff < self.thresh, error)
         m = scf.UHF(mol)
 
     def test_N2p_631G_gen(self):
@@ -57,8 +57,8 @@ class CCSDTest(unittest.TestCase):
         m.scf()
         res = test_ccsd_gen(m)
         diff = abs(res[1] - res[0])
-        error = "Expected: {}  Actual: {}".format(res[0],res[1])
-        self.assertTrue(diff < self.thresh,error)
+        error = "Expected: {}  Actual: {}".format(res[0], res[1])
+        self.assertTrue(diff < self.thresh, error)
 
     def test_Be_sto3g(self):
         mol = gto.M(
@@ -70,8 +70,8 @@ class CCSDTest(unittest.TestCase):
         m.scf()
         res = test_ccsd(m)
         diff = abs(res[1] - res[0])
-        error = "Expected: {}  Actual: {}".format(res[0],res[1])
-        self.assertTrue(diff < self.thresh,error)
+        error = "Expected: {}  Actual: {}".format(res[0], res[1])
+        self.assertTrue(diff < self.thresh, error)
         m = scf.UHF(mol)
 
     def test_N2p_631G(self):
@@ -86,8 +86,8 @@ class CCSDTest(unittest.TestCase):
         m.scf()
         res = test_ccsd(m)
         diff = abs(res[1] - res[0])
-        error = "Expected: {}  Actual: {}".format(res[0],res[1])
-        self.assertTrue(diff < self.thresh,error)
+        error = "Expected: {}  Actual: {}".format(res[0], res[1])
+        self.assertTrue(diff < self.thresh, error)
 
     @unittest.skip("Skipped for time")
     def test_diamond_g(self):
@@ -110,7 +110,7 @@ class CCSDTest(unittest.TestCase):
         cell.verbose = 0
         cell.build()
 
-        mf = scf.RHF(cell,exxdiv=None)
+        mf = scf.RHF(cell, exxdiv=None)
         mf.conv_tol_grad = 1e-8
         mf.conv_tol = 1e-12
         mf.kernel()
@@ -118,8 +118,8 @@ class CCSDTest(unittest.TestCase):
         mycc.conv_tol = 1e-11
         mycc.conv_tol_normt = 1e-9
         Ecc = mycc.kernel()
-        sys = scf_system(mf,0.0,0.0,orbtype='g')
-        ccsd0 = ccsd(sys,iprint=0,max_iter=100,econv=1e-11,damp=0.0)
+        sys = scf_system(mf, 0.0, 0.0, orbtype='g')
+        ccsd0 = ccsd(sys, iprint=0, max_iter=100, econv=1e-11, damp=0.0)
         Etot,Ecc2 = ccsd0.run()
         diff = abs(Ecc[0] - Ecc2)
         self.assertTrue(diff < self.thresh)
@@ -145,7 +145,7 @@ class CCSDTest(unittest.TestCase):
         cell.verbose = 0
         cell.build()
 
-        mf = scf.RHF(cell,exxdiv=None)
+        mf = scf.RHF(cell, exxdiv=None)
         mf.conv_tol_grad = 1e-8
         mf.conv_tol = 1e-12
         mf.kernel()
@@ -153,8 +153,8 @@ class CCSDTest(unittest.TestCase):
         mycc.conv_tol = 1e-11
         mycc.conv_tol_normt = 1e-9
         Ecc = mycc.kernel()
-        sys = scf_system(mf,0.0,0.0)
-        ccsd0 = ccsd(sys,iprint=0,max_iter=100,econv=1e-11,damp=0.0)
+        sys = scf_system(mf, 0.0, 0.0)
+        ccsd0 = ccsd(sys, iprint=0, max_iter=100, econv=1e-11, damp=0.0)
         Etot,Ecc2 = ccsd0.run()
         diff = abs(Ecc[0] - Ecc2)
         self.assertTrue(diff < self.thresh)
@@ -181,7 +181,7 @@ class CCSDTest(unittest.TestCase):
         cell.build()
         kpt = cell.make_kpts((1,1,1), scaled_center=(0,0,1./3.))
 
-        mf = scf.RHF(cell,kpt=kpt,exxdiv=None)
+        mf = scf.RHF(cell, kpt=kpt, exxdiv=None)
         mf.conv_tol_grad = 1e-8
         mf.conv_tol = 1e-12
         mf.kernel()
@@ -189,8 +189,8 @@ class CCSDTest(unittest.TestCase):
         mycc.conv_tol = 1e-11
         mycc.conv_tol_normt = 1e-9
         Ecc = mycc.kernel()
-        sys = scf_system(mf,0.0,0.0)
-        ccsd0 = ccsd(sys,iprint=1,max_iter=100,econv=1e-11,damp=0.0)
+        sys = scf_system(mf, 0.0, 0.0)
+        ccsd0 = ccsd(sys, iprint=1, max_iter=100, econv=1e-11, damp=0.0)
         Etot,Ecc2 = ccsd0.run()
         diff = abs(Ecc[0] - Ecc2)
         self.assertTrue(diff < self.thresh)

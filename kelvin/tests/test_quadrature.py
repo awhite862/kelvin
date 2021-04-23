@@ -12,13 +12,13 @@ def func2(t):
     return numpy.exp(-0.5*t)*0.2*t*t
 
 
-def make_t(T1,tr):
+def make_t(T1, tr):
     nt = T1.shape[0]
     for i in range(nt):
         T1[i] = T1[nt - 1]*func(tr[i])
 
 
-def make_l(L1,tr):
+def make_l(L1, tr):
     nt = L1.shape[0]
     for i in range(nt):
         L1[i] = L1[nt - 1]*func2(tr[i])
@@ -34,9 +34,9 @@ class QuadTest(unittest.TestCase):
         ngr = 100
         ngi = 50
         tmax = 1.0
-        D1,D2 = test_utils.make_random_ft_D(n)
-        T1f,T2f = test_utils.make_random_ft_T(ngr,n)
-        T1i,T2i = test_utils.make_random_ft_T(ngi,n)
+        D1, D2 = test_utils.make_random_ft_D(n)
+        T1f, T2f = test_utils.make_random_ft_T(ngr, n)
+        T1i, T2i = test_utils.make_random_ft_T(ngi, n)
         tir,gr,Gr = quadrature.simpsons(ngr, tmax)
         tii,gi,Gi = quadrature.simpsons(ngi, self.beta)
         make_t(T1f, tir)
@@ -57,17 +57,17 @@ class QuadTest(unittest.TestCase):
         diff2 = numpy.linalg.norm(t2i - t2ref) / t2i.size
         s1 = diff1 < self.thresh
         s2 = diff2 < self.thresh
-        self.assertTrue(s1,"Difference in T1: {}".format(diff1))
-        self.assertTrue(s2,"Difference in T2: {}".format(diff2))
+        self.assertTrue(s1, "Difference in T1: {}".format(diff1))
+        self.assertTrue(s2, "Difference in T2: {}".format(diff2))
 
     def test_Lint_keldysh(self):
         n = 5
         ngr = 32
         ngi = 10
         tmax = 0.5
-        D1,D2 = test_utils.make_random_ft_D(n)
-        L1f,L2f = test_utils.make_random_ft_T(ngr,n)
-        L1i,L2i = test_utils.make_random_ft_T(ngi,n)
+        D1, D2 = test_utils.make_random_ft_D(n)
+        L1f, L2f = test_utils.make_random_ft_T(ngr, n)
+        L1i, L2i = test_utils.make_random_ft_T(ngi, n)
         tir,gr,Gr = quadrature.simpsons(ngr, tmax)
         tii,gi,Gi = quadrature.simpsons(ngi, self.beta)
         make_l(L1f, tir)
@@ -88,8 +88,8 @@ class QuadTest(unittest.TestCase):
         diff2 = numpy.linalg.norm(l2i - l2ref) / l2i.size
         s1 = diff1 < self.thresh
         s2 = diff2 < self.thresh
-        self.assertTrue(s1,"Difference in L1: {}".format(diff1))
-        self.assertTrue(s2,"Difference in L2: {}".format(diff2))
+        self.assertTrue(s1, "Difference in L1: {}".format(diff1))
+        self.assertTrue(s2, "Difference in L2: {}".format(diff2))
 
     def test_d_simpson(self):
         ng = 10
@@ -102,8 +102,8 @@ class QuadTest(unittest.TestCase):
         Go = (Gp - Gm)/(2.0*delta)
         eg = numpy.linalg.norm(go - gd)
         eG = numpy.linalg.norm(Go - Go)
-        self.assertTrue(eg < self.thresh,"Difference in g: {}".format(eg))
-        self.assertTrue(eG < self.thresh,"Difference in G: {}".format(eG))
+        self.assertTrue(eg < self.thresh, "Difference in g: {}".format(eg))
+        self.assertTrue(eG < self.thresh, "Difference in G: {}".format(eG))
 
     def test_d_simpson_ln(self):
         ng = 10
@@ -116,8 +116,8 @@ class QuadTest(unittest.TestCase):
         Go = (Gp - Gm)/(2.0*delta)
         eg = numpy.linalg.norm(go - gd)
         eG = numpy.linalg.norm(Go - Go)
-        self.assertTrue(eg < self.thresh,"Difference in g: {}".format(eg))
-        self.assertTrue(eG < self.thresh,"Difference in G: {}".format(eG))
+        self.assertTrue(eg < self.thresh, "Difference in g: {}".format(eg))
+        self.assertTrue(eG < self.thresh, "Difference in G: {}".format(eG))
 
     def test_d_simpson_sin(self):
         ng = 10
@@ -130,8 +130,8 @@ class QuadTest(unittest.TestCase):
         Go = (Gp - Gm)/(2.0*delta)
         eg = numpy.linalg.norm(go - gd)
         eG = numpy.linalg.norm(Go - Go)
-        self.assertTrue(eg < self.thresh,"Difference in g: {}".format(eg))
-        self.assertTrue(eG < self.thresh,"Difference in G: {}".format(eG))
+        self.assertTrue(eg < self.thresh, "Difference in g: {}".format(eg))
+        self.assertTrue(eG < self.thresh, "Difference in G: {}".format(eG))
 
     def test_d_simpson_exp(self):
         ng = 10
@@ -144,8 +144,8 @@ class QuadTest(unittest.TestCase):
         Go = (Gp - Gm)/(2.0*delta)
         eg = numpy.linalg.norm(go - gd)
         eG = numpy.linalg.norm(Go - Go)
-        self.assertTrue(eg < self.thresh,"Difference in g: {}".format(eg))
-        self.assertTrue(eG < self.thresh,"Difference in G: {}".format(eG))
+        self.assertTrue(eg < self.thresh, "Difference in g: {}".format(eg))
+        self.assertTrue(eG < self.thresh, "Difference in G: {}".format(eG))
 
     def test_d_simpson_p(self):
         ng = 10
@@ -159,8 +159,8 @@ class QuadTest(unittest.TestCase):
         Go = (Gp - Gm)/(2.0*delta)
         eg = numpy.linalg.norm(go - gd)
         eG = numpy.linalg.norm(Go - Go)
-        self.assertTrue(eg < self.thresh,"Difference in g: {}".format(eg))
-        self.assertTrue(eG < self.thresh,"Difference in G: {}".format(eG))
+        self.assertTrue(eg < self.thresh, "Difference in g: {}".format(eg))
+        self.assertTrue(eG < self.thresh, "Difference in G: {}".format(eG))
 
 
 if __name__ == '__main__':
