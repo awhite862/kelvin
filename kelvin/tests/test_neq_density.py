@@ -8,15 +8,17 @@ from kelvin import ft_cc_energy
 from kelvin import ft_cc_equations
 
 
-def evalL(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
-        Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta):
+def evalL(T1f, T1b, T1i, T2f, T2b, T2i, L1f, L1b, L1i, L2f, L2b, L2i,
+          Ff, Fb, F, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta):
     ngr = gr.shape[0]
     ngi = gi.shape[0]
-    E = ft_cc_energy.ft_cc_energy_neq(T1f,T1b,T1i,T2f,T2b,T2i,
-            Ff.ov,Fb.ov,F.ov,I.oovv,gr,gi,beta)
+    E = ft_cc_energy.ft_cc_energy_neq(
+            T1f, T1b, T1i, T2f, T2b, T2i,
+            Ff.ov, Fb.ov, F.ov, I.oovv, gr, gi, beta)
     T1f_,T1b_,T1i_,T2f_,T2b_,T2i_ =\
-        ft_cc_equations.neq_ccsd_simple(Ff,Fb,F,I,T1f,T1b,T1i,
-                T2f,T2b,T2i,D1,D2,tir,tii,ngr,ngi,Gr,Gi)
+        ft_cc_equations.neq_ccsd_simple(
+            Ff, Fb, F, I, T1f, T1b, T1i, T2f, T2b, T2i,
+            D1, D2, tir, tii, ngr, ngi, Gr, Gi)
 
     TEf = 0.25*numpy.einsum('yijab,yabij->y',L2f, T2f_)
     TEf += numpy.einsum('yia,yai->y',L1f,T1f_)
@@ -89,13 +91,14 @@ class NEQDensityTest(unittest.TestCase):
             vvoo=Inull, vovo=Inull, oovv=Inull,
             vooo=Inull, ooov=Inull, oooo=Inull)
 
-        ref = evalL(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
-            Ftemp,Fzr,Fzi,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta)
+        ref = evalL(
+            T1f, T1b, T1i, T2f, T2b, T2i, L1f, L1b, L1i, L2f, L2b, L2i,
+            Ftemp, Fzr, Fzi, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
 
         pia,pba,pji,pai = ft_cc_equations.neq_1rdm(
-                T1f,T1b,T1i,T2f,T2b,T2i,
-                L1f,L1b,L1i,L2f,L2b,L2i,
-                D1,D2,tir,tii,ngr,ngi,gr,gi,Gr,Gi)
+                T1f, T1b, T1i, T2f, T2b, T2i,
+                L1f, L1b, L1i, L2f, L2b, L2i,
+                D1, D2, tir, tii, ngr, ngi, gr, gi, Gr, Gi)
 
         out1 = 1.j*numpy.einsum('ai,ia->',Avo[tf],pia[tf])
         out2 = 1.j*numpy.einsum('ab,ba->',Avv[tf],pba[tf])

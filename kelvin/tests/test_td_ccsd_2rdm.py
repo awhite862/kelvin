@@ -181,7 +181,6 @@ class TDCCSD2RDMTest(unittest.TestCase):
         diff = numpy.linalg.norm(ccg.P2[7][na:,:na,na:,:na] - ccu.P2[7][3])/den
         self.assertTrue(diff < 1e-12, "Error in PkAiJ: {}".format(diff))
 
-
         # klij
         diff = numpy.linalg.norm(ccg.P2[8][:na,:na,:na,:na] - ccu.P2[8][0])/den
         self.assertTrue(diff < 1e-12, "Error in Pklij: {}".format(diff))

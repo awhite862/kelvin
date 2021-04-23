@@ -95,7 +95,7 @@ class FTMP2Test(unittest.TestCase):
         import pyscf.pbc.gto as pbc_gto
         import pyscf.pbc.scf as pbc_scf
         cell = pbc_gto.Cell()
-        cell.atom='''
+        cell.atom = '''
         He 0.000000000000   0.000000000000   0.000000000000
         He 1.685068664391   1.685068664391   1.685068664391
         '''

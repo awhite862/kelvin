@@ -9,7 +9,7 @@ def func(t):
 
 
 def func2(t):
-    return numpy.exp(-0.5*t )*0.2*t*t
+    return numpy.exp(-0.5*t)*0.2*t*t
 
 
 def make_t(T1,tr):

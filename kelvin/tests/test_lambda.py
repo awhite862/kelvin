@@ -12,16 +12,16 @@ def test_L1(cc, thresh):
     eo,ev = cc.sys.g_energies()
     Dov = 1.0/(eo[:,None] - ev[None,:])
     Doovv = 1.0/(eo[:,None,None,None] + eo[None,:,None,None]
-        - ev[None,None,:,None] - ev[None,None,None,:])
+                 - ev[None,None,:,None] - ev[None,None,None,:])
     Nov = 1.0/Dov
     Noovv = 1.0/Doovv
-    no = eo.shape[0]#cc.L2.shape[0]
-    nv = ev.shape[0]#cc.L2.shape[2]
+    no = eo.shape[0]
+    nv = ev.shape[0]
 
     # get Fock matrix
     F = cc.sys.g_fock()
-    F.oo = F.oo - numpy.diag(eo) # subtract diagonal
-    F.vv = F.vv - numpy.diag(ev) # subtract diagonal
+    F.oo = F.oo - numpy.diag(eo)  # subtract diagonal
+    F.vv = F.vv - numpy.diag(ev)  # subtract diagonal
 
     # get ERIs
     I = cc.sys.g_aint()
@@ -73,7 +73,7 @@ def test_L2(cc, thresh):
     eo,ev = cc.sys.g_energies()
     Dov = 1.0/(eo[:,None] - ev[None,:])
     Doovv = 1.0/(eo[:,None,None,None] + eo[None,:,None,None]
-        - ev[None,None,:,None] - ev[None,None,None,:])
+                 - ev[None,None,:,None] - ev[None,None,None,:])
     Nov = 1.0/Dov
     Noovv = 1.0/Doovv
     no = eo.shape[0]
@@ -81,8 +81,8 @@ def test_L2(cc, thresh):
 
     # get Fock matrix
     F = cc.sys.g_fock()
-    F.oo = F.oo - numpy.diag(eo) # subtract diagonal
-    F.vv = F.vv - numpy.diag(ev) # subtract diagonal
+    F.oo = F.oo - numpy.diag(eo)  # subtract diagonal
+    F.vv = F.vv - numpy.diag(ev)  # subtract diagonal
 
     # get ERIs
     I = cc.sys.g_aint()
@@ -94,10 +94,6 @@ def test_L2(cc, thresh):
         nva = eva.shape[0]
         nob = eob.shape[0]
         nvb = evb.shape[0]
-        #noa = no//2
-        #nva = nv//2
-        #nob = noa
-        #nvb = nva
         T1 = spin_utils.T1_to_spin(cc.T1[0],cc.T1[1],noa,nva,nob,nvb)
         T2 = spin_utils.T2_to_spin(cc.T2[0],cc.T2[1],cc.T2[2],noa,nva,nob,nvb)
         L1 = spin_utils.T1_to_spin(cc.L1[0],cc.L1[1],nva,noa,nvb,nob)

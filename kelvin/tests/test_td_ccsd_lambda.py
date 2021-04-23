@@ -77,7 +77,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         en = sys.g_energies_tot()
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
-                - en[None,None,:,None] - en[None,None,None,:]
+            - en[None,None,:,None] - en[None,None,None,:]
         L1new = quadrature.int_L1(ng,L1,ti,D1,g,G)
         L2new = quadrature.int_L2(ng,L2,ti,D2,g,G)
 
@@ -119,7 +119,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         en = sys.g_energies_tot()
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
-                - en[None,None,:,None] - en[None,None,None,:]
+            - en[None,None,:,None] - en[None,None,None,:]
         L1new = quadrature.int_L1(ng,L1,ti,D1,g,G)
         L2new = quadrature.int_L2(ng,L2,ti,D2,g,G)
 
@@ -161,7 +161,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         en = sys.g_energies_tot()
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
-                - en[None,None,:,None] - en[None,None,None,:]
+            - en[None,None,:,None] - en[None,None,None,:]
         L1new = quadrature.int_L1(ng,L1,ti,D1,g,G)
         L2new = quadrature.int_L2(ng,L2,ti,D2,g,G)
 
@@ -341,7 +341,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         G = ccsdT.G
         en = sys.g_energies_tot()
         D2 = en[:,None,None,None] + en[None,:,None,None] \
-                - en[None,None,:,None] - en[None,None,None,:]
+            - en[None,None,:,None] - en[None,None,None,:]
         L2new = quadrature.int_L2(ng,L2,ti,D2,g,G)
 
         # compute \bar{Lambda} from propagation using rk1

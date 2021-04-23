@@ -12,7 +12,7 @@ try:
     from lattice.hubbard import Hubbard1D
     from kelvin.hubbard_system import HubbardSystem
     has_lattice = True
-except:
+except ImportError:
     has_lattice = False
 
 
@@ -138,32 +138,27 @@ class FTCCReldenTest(unittest.TestCase):
         m.get_hcore = lambda *args: h + alpha*field
         m.mo_energy += alpha*fdiag[:na]
         sys = scf_system(m,T,mu,orbtype='g')
-        ccsdT = ccsd(sys,T=T,mu=mu,iprint=0,
-                damp=0.1,ngrid=ngrid,athresh=1e-30,econv=1e-10,max_iter=mi)
+        ccsdT = ccsd(
+            sys, T=T, mu=mu, iprint=0, damp=0.1, ngrid=ngrid,
+            athresh=1e-30, econv=1e-10, max_iter=mi)
         ccf = ccsdT.run()
-        #G0f = ccsdT.G0
-        #G1f = ccsdT.G1
 
         m.get_hcore = lambda *args: h - alpha*field
         m.mo_energy -= 2.0*alpha*fdiag[:na]
         sys = scf_system(m,T,mu,orbtype='g')
-        ccsdT = ccsd(sys,T=T,mu=mu,iprint=0,
-                damp=0.1,ngrid=ngrid,athresh=1e-30,econv=1e-10,max_iter=mi)
+        ccsdT = ccsd(
+            sys, T=T, mu=mu, iprint=0, damp=0.1, ngrid=ngrid,
+            athresh=1e-30, econv=1e-10, max_iter=mi)
         ccb = ccsdT.run()
-        #G0b = ccsdT.G0
-        #G1b = ccsdT.G1
 
         ref = (ccf[0] - ccb[0])/(2*alpha)
-        #Acc = (ccf[1] - ccb[1])/(2*alpha)
-        #A01 = (ccf[0] - ccf[1] - ccb[0] + ccb[1])/(2*alpha)
-        #A0 = (G0f - G0b)/(2*alpha)
-        #A1 = (G1f - G1b)/(2*alpha)
 
         m.get_hcore = lambda *args: h
         m.mo_energy += alpha*fdiag[:na]
         sys = scf_system(m,T,mu,orbtype='g')
-        ccsdT = ccsd(sys,T=T,mu=mu,iprint=0,
-                damp=0.1,ngrid=ngrid,athresh=1e-30,econv=1e-10,max_iter=mi)
+        ccsdT = ccsd(
+            sys, T=T, mu=mu, iprint=0, damp=0.1, ngrid=ngrid,
+            athresh=1e-30, econv=1e-10, max_iter=mi)
         ccsdT.run()
         Dm = ccsdT.full_1rdm(relax=True)
         out = numpy.einsum('ij,ji->',Dm,fmo)

@@ -7,15 +7,19 @@ from kelvin import ft_cc_equations
 from kelvin import quadrature
 
 
-def evalL(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
-        Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta,iprint=False):
+def evalL(T1f, T1b, T1i, T2f, T2b, T2i,
+          L1f, L1b, L1i, L2f, L2b, L2i,
+          Ff, Fb, F, I, D1, D2, tir, tii,
+          gr, gi, Gr, Gi, beta, iprint=False):
     ngr = gr.shape[0]
     ngi = gi.shape[0]
-    E = ft_cc_energy.ft_cc_energy_neq(T1f,T1b,T1i,T2f,T2b,T2i,
-            Ff.ov,Fb.ov,F.ov,I.oovv,gr,gi,beta)
+    E = ft_cc_energy.ft_cc_energy_neq(
+            T1f, T1b, T1i, T2f, T2b, T2i,
+            Ff.ov, Fb.ov, F.ov, I.oovv, gr, gi, beta)
     T1f_,T1b_,T1i_,T2f_,T2b_,T2i_ =\
-        ft_cc_equations.neq_ccsd_stanton(Ff,Fb,F,I,T1f,T1b,T1i,
-                T2f,T2b,T2i,D1,D2,tir,tii,ngr,ngi,Gr,Gi)
+        ft_cc_equations.neq_ccsd_stanton(
+            Ff, Fb, F, I, T1f, T1b, T1i,
+            T2f, T2b, T2i, D1, D2, tir, tii, ngr, ngi, Gr, Gi)
     T1f_ -= T1f
     T1b_ -= T1b
     T1i_ -= T1i
@@ -86,8 +90,6 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         dT1i = numpy.zeros((ngi,n,n),dtype=complex)
         dT1b = numpy.zeros((ngr,n,n),dtype=complex)
         dT1f = numpy.zeros((ngr,n,n),dtype=complex)
-        #Ltest = evalL(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
-        #    Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta)
         for y in range(ngi):
             for i in range(n):
                 for a in range(n):
@@ -96,10 +98,16 @@ class NEQLambdaEquationsTest(unittest.TestCase):
                     TM = T1i.copy()
                     TP[y,a,i] += d
                     TM[y,a,i] -= d
-                    LP = evalL(T1f,T1b,TP,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
-                        Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta)
-                    LM = evalL(T1f,T1b,TM,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
-                        Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta)
+                    LP = evalL(
+                        T1f, T1b, TP, T2f, T2b, T2i,
+                        L1f, L1b, L1i, L2f, L2b, L2i,
+                        Ff, Fb, F,I, D1, D2, tir, tii,
+                        gr, gi, Gr, Gi, beta)
+                    LM = evalL(
+                        T1f, T1b, TM, T2f, T2b, T2i,
+                        L1f, L1b, L1i, L2f, L2b, L2i,
+                        Ff, Fb, F, I, D1, D2, tir, tii,
+                        gr, gi, Gr, Gi, beta)
                     dT1i[y,i,a] = (LP - LM)/(2*d)
         for y in range(ngr):
             for i in range(n):
@@ -109,10 +117,16 @@ class NEQLambdaEquationsTest(unittest.TestCase):
                     TM = T1b.copy()
                     TP[y,a,i] += d
                     TM[y,a,i] -= d
-                    LP = evalL(T1f,TP,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
-                        Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta)
-                    LM = evalL(T1f,TM,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
-                        Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta)
+                    LP = evalL(
+                        T1f, TP, T1i, T2f, T2b, T2i,
+                        L1f, L1b, L1i, L2f, L2b, L2i,
+                        Ff, Fb, F, I, D1, D2, tir, tii,
+                        gr, gi, Gr, Gi, beta)
+                    LM = evalL(
+                        T1f, TM, T1i, T2f, T2b, T2i,
+                        L1f, L1b, L1i, L2f, L2b, L2i,
+                        Ff, Fb, F, I, D1, D2, tir, tii,
+                        gr, gi, Gr, Gi, beta)
                     dT1b[y,i,a] = (LP - LM)/(2*d)
         for y in range(ngr):
             for i in range(n):
@@ -121,17 +135,23 @@ class NEQLambdaEquationsTest(unittest.TestCase):
                     TM = T1f.copy()
                     TP[y,a,i] += d
                     TM[y,a,i] -= d
-                    LP = evalL(TP,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
-                        Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta)
-                    LM = evalL(TM,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
-                        Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta)
+                    LP = evalL(
+                        TP, T1b, T1i, T2f, T2b, T2i,
+                        L1f, L1b, L1i, L2f, L2b, L2i,
+                        Ff, Fb, F, I, D1, D2, tir, tii,
+                        gr, gi, Gr, Gi, beta)
+                    LM = evalL(
+                        TM, T1b, T1i, T2f, T2b, T2i,
+                        L1f, L1b, L1i, L2f, L2b, L2i,
+                        Ff, Fb, F, I, D1, D2, tir, tii,
+                        gr, gi, Gr, Gi, beta)
                     dT1f[y,i,a] = (LP - LM)/(2*d)
 
         # compute dL/dt1 from the Lambda equations
         L1fn,L1bn,L1in,L2fn,L2bn,L2in = \
             ft_cc_equations.neq_lambda_simple(
-                    Ff,Fb,F,I,L1f,L1b,L1i,L2f,L2b,L2i,T1f,T1b,T1i,
-                    T2f,T2b,T2i,D1,D2,tir,tii,ngr,ngi,gr,gi,Gr,Gi)
+                Ff, Fb, F, I, L1f, L1b, L1i, L2f, L2b, L2i, T1f, T1b, T1i,
+                T2f, T2b, T2i, D1, D2, tir, tii, ngr, ngi, gr, gi, Gr, Gi)
 
         L1in -= L1i
         L1bn -= L1b
@@ -194,8 +214,6 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         dT2i = numpy.zeros((ngi,n,n,n,n),dtype=complex)
         dT2b = numpy.zeros((ngr,n,n,n,n),dtype=complex)
         dT2f = numpy.zeros((ngr,n,n,n,n),dtype=complex)
-        #Ltest = evalL(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
-        #    Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta)
         for y in range(ngi):
             for i in range(n):
                 for j in range(n):
@@ -212,10 +230,16 @@ class NEQLambdaEquationsTest(unittest.TestCase):
                             TM[y,a,b,j,i] += d
                             TM[y,b,a,i,j] += d
                             TM[y,b,a,j,i] -= d
-                            LP = evalL(T1f,T1b,T1i,T2f,T2b,TP,L1f,L1b,L1i,L2f,L2b,L2i,
-                                Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta)
-                            LM = evalL(T1f,T1b,T1i,T2f,T2b,TM,L1f,L1b,L1i,L2f,L2b,L2i,
-                                Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta)
+                            LP = evalL(
+                                T1f, T1b, T1i, T2f, T2b, TP,
+                                L1f, L1b, L1i, L2f, L2b, L2i,
+                                Ff, Fb, F, I, D1, D2, tir, tii,
+                                gr, gi, Gr, Gi, beta)
+                            LM = evalL(
+                                T1f, T1b, T1i, T2f, T2b, TM,
+                                L1f, L1b, L1i, L2f, L2b, L2i,
+                                Ff, Fb, F, I, D1, D2, tir, tii,
+                                gr, gi, Gr, Gi, beta)
                             dT2i[y,i,j,a,b] = (LP - LM)/(2*d)
         for y in range(ngr):
             for i in range(n):
@@ -233,10 +257,16 @@ class NEQLambdaEquationsTest(unittest.TestCase):
                             TM[y,a,b,j,i] += d
                             TM[y,b,a,i,j] += d
                             TM[y,b,a,j,i] -= d
-                            LP = evalL(T1f,T1b,T1i,T2f,TP,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
-                                Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta)
-                            LM = evalL(T1f,T1b,T1i,T2f,TM,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
-                                Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta)
+                            LP = evalL(
+                                T1f, T1b, T1i, T2f, TP, T2i,
+                                L1f, L1b, L1i, L2f, L2b, L2i,
+                                Ff, Fb, F, I, D1, D2, tir, tii,
+                                gr, gi, Gr, Gi, beta)
+                            LM = evalL(
+                                T1f, T1b, T1i, T2f, TM, T2i,
+                                L1f, L1b, L1i, L2f, L2b, L2i,
+                                Ff, Fb, F, I, D1, D2, tir, tii,
+                                gr, gi, Gr, Gi, beta)
                             dT2b[y,i,j,a,b] = (LP - LM)/(2*d)
         for y in range(ngr):
             for i in range(n):
@@ -254,10 +284,16 @@ class NEQLambdaEquationsTest(unittest.TestCase):
                             TM[y,a,b,j,i] += d
                             TM[y,b,a,i,j] += d
                             TM[y,b,a,j,i] -= d
-                            LP = evalL(T1f,T1b,T1i,TP,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
-                                Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta)
-                            LM = evalL(T1f,T1b,T1i,TM,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
-                                Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta)
+                            LP = evalL(
+                                T1f, T1b, T1i, TP, T2b, T2i,
+                                L1f, L1b, L1i, L2f, L2b, L2i,
+                                Ff, Fb, F, I, D1, D2, tir, tii,
+                                gr, gi, Gr, Gi, beta)
+                            LM = evalL(
+                                T1f, T1b, T1i, TM, T2b, T2i,
+                                L1f, L1b, L1i, L2f, L2b, L2i,
+                                Ff, Fb, F, I, D1, D2, tir, tii,
+                                gr, gi, Gr, Gi, beta)
                             dT2f[y,i,j,a,b] = (LP - LM)/(2*d)
 
         # compute dL/dt1 from the Lambda equations
@@ -266,7 +302,6 @@ class NEQLambdaEquationsTest(unittest.TestCase):
                     Ff,Fb,F,I,L1f,L1b,L1i,L2f,L2b,L2i,T1f,T1b,T1i,
                     T2f,T2b,T2i,D1,D2,tir,tii,ngr,ngi,gr,gi,Gr,Gi)
 
-        #print(L2fn[0])
         L2in -= L2i
         L2bn -= L2b
         L2fn -= L2f

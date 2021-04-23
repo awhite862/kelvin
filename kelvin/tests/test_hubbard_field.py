@@ -11,7 +11,7 @@ try:
     from kelvin.hubbard_system import HubbardSystem
     from kelvin.hubbard_field_system import hubbard_field_system, HubbardFieldSystem
     has_lattice = True
-except:
+except ImportError:
     has_lattice = False
 
 
@@ -172,12 +172,8 @@ class HubbardFieldTest(unittest.TestCase):
             e,v = numpy.linalg.eigh(Ht)
             ee = numpy.exp(-deltat*1.j*e)
             ee2 = numpy.exp(deltat*1.j*e)
-            #V = numpy.einsum('ai,i,bi->ab',v,ee,numpy.conj(v))
-            #U = matrix_exp(-1.j*Ht*deltat)
             U = numpy.einsum('ai,i,bi->ab',v,ee,numpy.conj(v))
-            #U2 = matrix_exp(1.j*Ht*deltat)
             U2 = numpy.einsum('ai,i,bi->ab',v,ee2,numpy.conj(v))
-            #P = numpy.einsum('sp,pq,qr->sr',numpy.conj(U),P,U)
             P = numpy.einsum('sp,pq,qr->sr',U,P,U2)
 
             # measure M
@@ -197,13 +193,6 @@ class HubbardFieldTest(unittest.TestCase):
         E,Ecc = cc.run()
         cc._neq_ccsd_lambda()
         cc._neq_1rdm()
-        #m = numpy.zeros((2,2))
-        #m[0,0] = 1.0
-        #ma = numpy.einsum('ij,ip,jq->pq',m,sys.ua,sys.ua)
-        #mb = numpy.einsum('ij,ip,jq->pq',m,sys.ub,sys.ub)
-        #print(ma)
-        #print(mb)
-        #mg = block_diag(ma,mb)
         Mscc = []
         for i,t in enumerate(ti):
             out = cc.compute_prop(mg,i)
@@ -212,8 +201,6 @@ class HubbardFieldTest(unittest.TestCase):
         for i,m in enumerate(Ms):
             diff = abs(m - Mscc[i])
             msg = "{}: {} {}".format(i,m,Mscc[i])
-            # print("{}: {} {}".format(i,m,Mscc[i]))
-            #print(diff)
             self.assertTrue(diff < 2e-4,msg)
 
     def test_kel_cc(self):
@@ -328,8 +315,6 @@ class HubbardFieldTest(unittest.TestCase):
             m,m2 = ms
             diff = abs(m - m2)
             msg = "{}: {} {}".format(i,m,m2)
-            # print("{}: {} {}".format(i,m,Mscc[i]))
-            #print(diff)
             self.assertTrue(diff < 2e-4,msg)
 
 

@@ -10,8 +10,8 @@ einsum = numpy.einsum
 
 
 def compute_ref(T1,T2,L1,L2,F,I,D1,D2,ti,ng,g,G,beta):
-    T1temp,T2temp = ft_cc_equations.ccsd_simple(F,I,T1,T2,
-            D1,D2,ti,ng,G)
+    T1temp,T2temp = ft_cc_equations.ccsd_simple(
+        F, I, T1, T2, D1, D2, ti, ng, G)
 
     Eterm = ft_cc_energy.ft_cc_energy(T1,T2,F.ov,I.oovv,g,beta)
     A1 = (1.0/beta)*einsum('via,vai->v',L1, T1temp)
@@ -171,7 +171,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
         F.vo = numpy.zeros((n,n))
         F.ov = numpy.zeros((n,n))
         F.vv = numpy.zeros((n,n))
-        #I.vvvv = numpy.zeros((n,n,n,n))
+        # I.vvvv = numpy.zeros((n,n,n,n))
         I.vvvo = numpy.zeros((n,n,n,n))
         I.vovv = numpy.zeros((n,n,n,n))
         I.vvoo = numpy.zeros((n,n,n,n))
@@ -206,7 +206,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
         F.ov = numpy.zeros((n,n))
         F.vv = numpy.zeros((n,n))
         I.vvvv = numpy.zeros((n,n,n,n))
-        #I.vvvo = numpy.zeros((n,n,n,n))
+        # I.vvvo = numpy.zeros((n,n,n,n))
         I.vovv = numpy.zeros((n,n,n,n))
         I.vvoo = numpy.zeros((n,n,n,n))
         I.vovo = numpy.zeros((n,n,n,n))
@@ -241,7 +241,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
         F.vv = numpy.zeros((n,n))
         I.vvvv = numpy.zeros((n,n,n,n))
         I.vvvo = numpy.zeros((n,n,n,n))
-        #I.vovv = numpy.zeros((n,n,n,n))
+        # I.vovv = numpy.zeros((n,n,n,n))
         I.vvoo = numpy.zeros((n,n,n,n))
         I.vovo = numpy.zeros((n,n,n,n))
         I.oovv = numpy.zeros((n,n,n,n))
@@ -276,7 +276,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
         I.vvvv = numpy.zeros((n,n,n,n))
         I.vvvo = numpy.zeros((n,n,n,n))
         I.vovv = numpy.zeros((n,n,n,n))
-        #I.vvoo = numpy.zeros((n,n,n,n))
+        # I.vvoo = numpy.zeros((n,n,n,n))
         I.vovo = numpy.zeros((n,n,n,n))
         I.oovv = numpy.zeros((n,n,n,n))
         I.vooo = numpy.zeros((n,n,n,n))
@@ -311,7 +311,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
         I.vvvo = numpy.zeros((n,n,n,n))
         I.vovv = numpy.zeros((n,n,n,n))
         I.vvoo = numpy.zeros((n,n,n,n))
-        #I.vovo = numpy.zeros((n,n,n,n))
+        # I.vovo = numpy.zeros((n,n,n,n))
         I.oovv = numpy.zeros((n,n,n,n))
         I.vooo = numpy.zeros((n,n,n,n))
         I.ooov = numpy.zeros((n,n,n,n))
@@ -346,7 +346,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
         I.vovv = numpy.zeros((n,n,n,n))
         I.vvoo = numpy.zeros((n,n,n,n))
         I.vovo = numpy.zeros((n,n,n,n))
-        #I.oovv = numpy.zeros((n,n,n,n))
+        # I.oovv = numpy.zeros((n,n,n,n))
         I.vooo = numpy.zeros((n,n,n,n))
         I.ooov = numpy.zeros((n,n,n,n))
         I.oooo = numpy.zeros((n,n,n,n))
@@ -381,7 +381,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
         I.vvoo = numpy.zeros((n,n,n,n))
         I.vovo = numpy.zeros((n,n,n,n))
         I.oovv = numpy.zeros((n,n,n,n))
-        #I.vooo = numpy.zeros((n,n,n,n))
+        # I.vooo = numpy.zeros((n,n,n,n))
         I.ooov = numpy.zeros((n,n,n,n))
         I.oooo = numpy.zeros((n,n,n,n))
 
@@ -416,7 +416,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
         I.vovo = numpy.zeros((n,n,n,n))
         I.oovv = numpy.zeros((n,n,n,n))
         I.vooo = numpy.zeros((n,n,n,n))
-        #I.ooov = numpy.zeros((n,n,n,n))
+        # I.ooov = numpy.zeros((n,n,n,n))
         I.oooo = numpy.zeros((n,n,n,n))
 
         D1,D2 = test_utils.make_random_ft_D(n)
@@ -451,7 +451,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
         I.oovv = numpy.zeros((n,n,n,n))
         I.vooo = numpy.zeros((n,n,n,n))
         I.ooov = numpy.zeros((n,n,n,n))
-        #I.oooo = numpy.zeros((n,n,n,n))
+        # I.oooo = numpy.zeros((n,n,n,n))
 
         D1,D2 = test_utils.make_random_ft_D(n)
         ti,g,G = quadrature.simpsons(ng, beta)
@@ -495,8 +495,9 @@ class FTCCSD_RDMTest(unittest.TestCase):
             T2[i] = spin_utils.T2_to_spin(T2aa[i], T2ab[i], T2bb[i], na, na, nb, nb)
             L2[i] = spin_utils.T2_to_spin(L2aa[i], L2ab[i], L2bb[i], na, na, nb, nb)
 
-        urdm1 = ft_cc_equations.uccsd_1rdm(T1a,T1b,T2aa,T2ab,T2bb,
-                L1a,L1b,L2aa,L2ab,L2bb,D1a,D1b,D2aa,D2ab,D2bb,ti,ng,g,G)
+        urdm1 = ft_cc_equations.uccsd_1rdm(
+            T1a, T1b, T2aa, T2ab, T2bb, L1a, L1b, L2aa, L2ab, L2bb,
+            D1a, D1b, D2aa, D2ab, D2bb, ti, ng, g, G)
         grdm1 = ft_cc_equations.ccsd_1rdm(T1,T2,L1,L2,D1,D2,ti,ng,g,G)
 
         # test ia
@@ -557,8 +558,9 @@ class FTCCSD_RDMTest(unittest.TestCase):
             T2[i] = spin_utils.T2_to_spin(T2aa[i], T2ab[i], T2bb[i], na, na, nb, nb)
             L2[i] = spin_utils.T2_to_spin(L2aa[i], L2ab[i], L2bb[i], na, na, nb, nb)
 
-        urdm2 = ft_cc_equations.uccsd_2rdm(T1a,T1b,T2aa,T2ab,T2bb,
-                L1a,L1b,L2aa,L2ab,L2bb,D1a,D1b,D2aa,D2ab,D2bb,ti,ng,g,G)
+        urdm2 = ft_cc_equations.uccsd_2rdm(
+            T1a, T1b, T2aa, T2ab, T2bb, L1a, L1b, L2aa, L2ab, L2bb,
+            D1a, D1b, D2aa, D2ab, D2bb, ti, ng, g, G)
         grdm2 = ft_cc_equations.ccsd_2rdm(T1,T2,L1,L2,D1,D2,ti,ng,g,G)
 
         # test cdab

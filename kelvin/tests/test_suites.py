@@ -48,8 +48,8 @@ def get_suite(full):
     suite.addTest(test_ccsd.CCSDTest("test_N2p_631G"))
     suite.addTest(test_ccsd.CCSDTest("test_Be_sto3g_gen"))
     suite.addTest(test_ccsd.CCSDTest("test_N2p_631G_gen"))
-    #suite.addTest(test_ccsd.CCSDTest("test_diamond"))
-    #suite.addTest(test_ccsd.CCSDTest("test_diamond_u"))
+    # suite.addTest(test_ccsd.CCSDTest("test_diamond"))
+    # suite.addTest(test_ccsd.CCSDTest("test_diamond_u"))
 
     suite.addTest(test_ft_cc_2rdm.FTCC2RDMTest("test_hubbard"))
     suite.addTest(test_ft_cc_2rdm.FTCC2RDMTest("test_Be_gen"))

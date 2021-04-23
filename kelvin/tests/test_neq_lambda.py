@@ -51,7 +51,7 @@ def test_L1(cc, thresh):
     en = cc.sys.g_energies_tot()
     D1 = en[:,None] - en[None,:]
     D2 = en[:,None,None,None] + en[None,:,None,None] \
-            - en[None,None,:,None] - en[None,None,None,:]
+        - en[None,None,:,None] - en[None,None,None,:]
     F, Ff, Fb, I = cc_utils.get_ft_integrals_neq(cc.sys, en, beta, mu)
     n = cc.L2f.shape[1]
     for y in range(ngi):
@@ -80,11 +80,11 @@ def test_L1(cc, thresh):
                 TP[y,a,i] += d
                 TM[y,a,i] -= d
                 LP = evalL(cc.T1f, TP, cc.T1i, cc.T2f, cc.T2b, cc.T2i,
-                          cc.L1f, cc.L1b, cc.L1i, cc.L2f, cc.L2b, cc.L2i,
-                          Ff, Fb, F, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
+                           cc.L1f, cc.L1b, cc.L1i, cc.L2f, cc.L2b, cc.L2i,
+                           Ff, Fb, F, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
                 LM = evalL(cc.T1f, TM, cc.T1i, cc.T2f, cc.T2b, cc.T2i,
-                          cc.L1f, cc.L1b, cc.L1i, cc.L2f, cc.L2b, cc.L2i,
-                          Ff, Fb, F, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
+                           cc.L1f, cc.L1b, cc.L1i, cc.L2f, cc.L2b, cc.L2i,
+                           Ff, Fb, F, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
                 diff = (LP - LM)/(2*d)
                 if numpy.abs(diff) > thresh:
                     return ('B-- {} {} {}: {}'.format(y, i, a, diff),False)
@@ -137,7 +137,7 @@ class NEQLambdaTest(unittest.TestCase):
         en = cc.sys.g_energies_tot()
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
-                - en[None,None,:,None] - en[None,None,None,:]
+            - en[None,None,:,None] - en[None,None,None,:]
         F, Ff, Fb, I = cc_utils.get_ft_integrals_neq(cc.sys, en, beta, mu)
         L = evalL(cc.T1f, cc.T1b, cc.T1i, cc.T2f, cc.T2b, cc.T2i,
                   cc.L1f, cc.L1b, cc.L1i, cc.L2f, cc.L2b, cc.L2i,
@@ -161,8 +161,9 @@ class NEQLambdaTest(unittest.TestCase):
         tii, gi, Gi = quadrature.simpsons(ngi, beta)
         tir, gr, Gr = quadrature.midpoint(ngr, tmax)
         sys = h2_field_system(T, mu, omega, tir, O=None, ot=None)
-        ccsdT = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-12,
-                max_iter=40, damp=0.0, ngr=ngr, ngi=ngi, iprint=0)
+        ccsdT = neq_ccsd(
+            sys, T, mu=mu, tmax=tmax, econv=1e-12,
+            max_iter=40, damp=0.0, ngr=ngr, ngi=ngi, iprint=0)
         E = ccsdT.run()
         ccsdT._neq_ccsd_lambda()
 
@@ -170,7 +171,7 @@ class NEQLambdaTest(unittest.TestCase):
         en = ccsdT.sys.g_energies_tot()
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
-                - en[None,None,:,None] - en[None,None,None,:]
+            - en[None,None,:,None] - en[None,None,None,:]
         cc = ccsdT
         F, Ff, Fb, I = cc_utils.get_ft_integrals_neq(cc.sys, en, beta, mu)
         L = evalL(cc.T1f, cc.T1b, cc.T1i, cc.T2f, cc.T2b, cc.T2i,

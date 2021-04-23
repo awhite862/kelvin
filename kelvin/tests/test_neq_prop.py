@@ -13,15 +13,18 @@ from kelvin.h2_field_system import h2_field_system
 from kelvin.neq_ccsd import neq_ccsd
 
 
-def evalLd(T1f,T1b,T1i,T2f,T2b,T2i,L1f,L1b,L1i,L2f,L2b,L2i,
-        Ff,Fb,F,I,D1,D2,tir,tii,gr,gi,Gr,Gi,beta):
+def evalLd(T1f, T1b, T1i, T2f, T2b, T2i, L1f, L1b, L1i, L2f, L2b, L2i,
+           Ff, Fb, F, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta):
+
     ngr = gr.shape[0]
     ngi = gi.shape[0]
-    E = ft_cc_energy.ft_cc_energy_neq(T1f,T1b,T1i,T2f,T2b,T2i,
-            Ff.ov,Fb.ov,F.ov,I.oovv,gr,gi,beta)
+    E = ft_cc_energy.ft_cc_energy_neq(
+        T1f, T1b, T1i, T2f, T2b, T2i,
+        Ff.ov, Fb.ov, F.ov, I.oovv, gr, gi, beta)
     T1f_,T1b_,T1i_,T2f_,T2b_,T2i_ =\
-        ft_cc_equations.neq_ccsd_simple(Ff,Fb,F,I,T1f,T1b,T1i,
-                T2f,T2b,T2i,D1,D2,tir,tii,ngr,ngi,Gr,Gi)
+        ft_cc_equations.neq_ccsd_simple(
+            Ff, Fb, F, I, T1f, T1b, T1i, T2f, T2b, T2i,
+            D1, D2, tir, tii, ngr, ngi, Gr, Gi)
     TEf = 0.25*numpy.einsum('yijab,yabij->y',L2f, T2f_)
     TEf += numpy.einsum('yia,yai->y',L1f,T1f_)
     TEb = 0.25*numpy.einsum('yijab,yabij->y',L2b, T2b_)
@@ -120,7 +123,7 @@ class NEQPropTest(unittest.TestCase):
         # get energy differences
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
-                - en[None,None,:,None] - en[None,None,None,:]
+            - en[None,None,:,None] - en[None,None,None,:]
 
         # compute first order part
         E1 = numpy.einsum('ii,i->',field,fo)
@@ -234,7 +237,6 @@ class NEQPropTest(unittest.TestCase):
                                 cc.T1f,cc.T1b,cc.T1i,cc.T2f,cc.T2b,TM,
                                 Ff.ov,Fb.ov,F.ov,I.oovv,gr,gi,beta)
                             dT2i[y,i,j,a,b] = (EP - EM)/(2*d)
-        #print("I")
         for y in range(ngr):
             for i in range(n):
                 for j in range(n):
@@ -258,7 +260,6 @@ class NEQPropTest(unittest.TestCase):
                                 cc.T1f,cc.T1b,cc.T1i,cc.T2f,TM,cc.T2i,
                                 Ff.ov,Fb.ov,F.ov,I.oovv,gr,gi,beta)
                             dT2b[y,i,j,a,b] = (EP - EM)/(2*d)
-        #print("B")
         for y in range(ngr):
             for i in range(n):
                 for j in range(n):
@@ -285,7 +286,7 @@ class NEQPropTest(unittest.TestCase):
         Ers1 = numpy.einsum('yia,yai->',dT1f,td1f)
         Ers1 += numpy.einsum('yia,yai->',dT1b,td1b)
         Ers1 += numpy.einsum('yia,yai->',dT1i,td1i)
-        Ers2 =  0.25*numpy.einsum('yijab,yabij->',dT2f,td2f)
+        Ers2 = 0.25*numpy.einsum('yijab,yabij->',dT2f,td2f)
         Ers2 += 0.25*numpy.einsum('yijab,yabij->',dT2b,td2b)
         Ers2 += 0.25*numpy.einsum('yijab,yabij->',dT2i,td2i)
 
@@ -295,8 +296,9 @@ class NEQPropTest(unittest.TestCase):
         self.assertTrue(Dd < self.fd_thresh,"Error in amplitude response: {}".format(Dd))
 
         # evaluate Lagrangian partial and confirm it is equal to the total derivative
-        L = evalLd(cc.T1f,cc.T1b,cc.T1i,cc.T2f,cc.T2b,cc.T2i,cc.L1f,cc.L1b,cc.L1i,cc.L2f,cc.L2b,cc.L2i,
-            Ffn,Fbn,Fn,In,D1,D2,tir,tii,gr,gi,Gr,Gi,beta)
+        L = evalLd(cc.T1f, cc.T1b, cc.T1i, cc.T2f, cc.T2b, cc.T2i,
+                   cc.L1f, cc.L1b, cc.L1i, cc.L2f, cc.L2b, cc.L2i,
+                   Ffn, Fbn, Fn, In, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
         Dl = abs(L - (Efd - E1))
         self.assertTrue(Dl < self.fd_thresh,"Error in lagrangian response: {}".format(Dl))
 
@@ -304,7 +306,6 @@ class NEQPropTest(unittest.TestCase):
         out = cc.compute_prop(field,ngr - 1)
         Dp = abs(out - L - E1)
         self.assertTrue(Dp < self.fd_thresh,"Error in response density: {}".format(Dp))
-
 
     def test_h2_field(self):
         beta = 1.0
@@ -427,7 +428,7 @@ class NEQPropTest(unittest.TestCase):
             U = numpy.einsum('ai,i,bi->ab',v,ee,numpy.conj(v))
             U2 = numpy.einsum('ai,i,bi->ab',v,ee2,numpy.conj(v))
             p = numpy.einsum('sp,pq,qr->sr',U,p,U2)
-            if i%(ngrid_ref//10) == 0:
+            if i % (ngrid_ref//10) == 0:
                 Aref.append(numpy.einsum('ij,ji->',p,Hint))
 
         # Neq-CCSD from density

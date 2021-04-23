@@ -65,9 +65,8 @@ class NEQ_CCSDTest(unittest.TestCase):
             ee = numpy.exp(-deltat*1.j*e)
             U = numpy.einsum('ai,i,bi->ab',v,ee,numpy.conj(v))
             p = numpy.einsum('ps,pq,qr->sr',numpy.conj(U),p,U)
-            if i%(ngrid_ref//10) == 0:
+            if i % (ngrid_ref//10) == 0:
                 A_ref.append(numpy.einsum('ij,ji->',p,Hint))
-                #print(t,A_ref[len(A_ref) - 1])
 
         del A_ref[0]
         # Neq-CCSD
@@ -86,13 +85,11 @@ class NEQ_CCSDTest(unittest.TestCase):
             sys = h2_field_system(T,mu,omega,ti,O=(-d*field),ot=ng - 1)
             cc = neq_ccsd(sys,T,mu=mu,tmax=tmax,econv=1e-10,max_iter=40,damp=0.0,ngr=ng,ngi=ngi,iprint=0)
             Eb = cc.run()
-            #print((Ef[0] + Eb[0])/2)
             A.append((Ef[0] - Eb[0])/(2*d))
 
         for i,out in enumerate(A):
             ref = A_ref[i]
             diff = abs(ref - out)
-            #print("{} -- Expected: {}  Actual: {} ".format(i,ref,out))
             msg = "{} -- Expected: {}  Actual: {} ".format(i,ref,out)
             self.assertTrue(diff < self.thresh,msg)
 
@@ -154,9 +151,8 @@ class NEQ_CCSDTest(unittest.TestCase):
             ee = numpy.exp(-deltat*1.j*e)
             U = numpy.einsum('ai,i,bi->ab',v,ee,numpy.conj(v))
             p = numpy.einsum('ps,pq,qr->sr',numpy.conj(U),p,U)
-            if i%(ngrid_ref//10) == 0:
+            if i % (ngrid_ref//10) == 0:
                 A_ref.append(numpy.einsum('ij,ji->',p,Htest))
-                #print(t,A_ref[len(A_ref) - 1])
 
         del A_ref[0]
         # Neq-CCSD
@@ -180,7 +176,6 @@ class NEQ_CCSDTest(unittest.TestCase):
         for i,out in enumerate(A):
             ref = A_ref[i]
             diff = abs(ref - out)
-            #print("{} -- Expected: {}  Actual: {} ".format(i,ref,out))
             msg = "{} -- Expected: {}  Actual: {} ".format(i,ref,out)
             self.assertTrue(diff < self.thresh,msg)
 

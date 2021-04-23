@@ -19,7 +19,7 @@ def get_diamond():
     import pyscf.pbc.gto as pbc_gto
     import pyscf.pbc.scf as pbc_scf
     cell = pbc_gto.Cell()
-    cell.atom='''
+    cell.atom = '''
     C 0.000000000000   0.000000000000   0.000000000000
     C 1.685068664391   1.685068664391   1.685068664391
     '''
@@ -42,7 +42,7 @@ def get_diamond_k():
     import pyscf.pbc.gto as pbc_gto
     import pyscf.pbc.scf as pbc_scf
     cell = pbc_gto.Cell()
-    cell.atom='''
+    cell.atom = '''
     C 0.000000000000   0.000000000000   0.000000000000
     C 1.685068664391   1.685068664391   1.685068664391
     '''

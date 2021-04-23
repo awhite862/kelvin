@@ -64,7 +64,7 @@ class KelCCSDTest(unittest.TestCase):
             ee = numpy.exp(-deltat*1.j*e)
             U = numpy.einsum('ai,i,bi->ab',v,ee,numpy.conj(v))
             p = numpy.einsum('ps,pq,qr->sr',numpy.conj(U),p,U)
-            if i%(ngrid_ref//10) == 0:
+            if i % (ngrid_ref//10) == 0:
                 A_ref.append(numpy.einsum('ij,ji->',p,Hint))
 
         A = []
@@ -74,20 +74,18 @@ class KelCCSDTest(unittest.TestCase):
         mycc.run()
         mycc._ccsd_lambda()
 
-
         kccsd = KelCCSD(sys, prop, T=T, mu=mu, iprint=0)
         kccsd.init_from_ftccsd(mycc, contour="keldysh")
         kccsd._ccsd(nstep=200, step=0.005)
         A = []
         for i,p in enumerate(kccsd.P):
-            if i%20 == 0:
+            if i % 20 == 0:
                 A.append(numpy.einsum('ij,ji->', field, p))
 
         for i,out in enumerate(A):
             ref = A_ref[i]
             diff = abs(ref - out)
             msg = "{} -- Expected: {}  Actual: {} ".format(i,ref,out)
-            #print(diff)
             self.assertTrue(diff < thresh,msg)
 
     def test_h2_field_save(self):
@@ -123,7 +121,7 @@ class KelCCSDTest(unittest.TestCase):
         kccsd._ccsd(nstep=200, step=0.005)
         Aref = []
         for i,p in enumerate(kccsd.P):
-            if i%20 == 0:
+            if i % 20 == 0:
                 Aref.append(numpy.einsum('ij,ji->', field, p))
 
         kccsd2 = KelCCSD(sys, prop, T=T, mu=mu, iprint=0)
@@ -138,7 +136,6 @@ class KelCCSDTest(unittest.TestCase):
             ref = Aref[i]
             diff = abs(ref - out)
             msg = "{} -- Expected: {}  Actual: {} ".format(i,ref,out)
-            #print(diff)
             self.assertTrue(diff < thresh,msg)
 
 

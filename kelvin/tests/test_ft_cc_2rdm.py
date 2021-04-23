@@ -14,7 +14,7 @@ try:
     from lattice.hubbard import Hubbard1D
     from kelvin.hubbard_system import HubbardSystem
     has_lattice = True
-except:
+except ImportError:
     has_lattice = False
 
 

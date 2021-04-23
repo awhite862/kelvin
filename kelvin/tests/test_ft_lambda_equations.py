@@ -123,7 +123,6 @@ class FTLambdaEquationsTest(unittest.TestCase):
             L2old[i,:,:,:,:] = spin_utils.T2_to_spin(
                     L2aaold[i,:,:,:,:],L2abold[i,:,:,:,:],L2bbold[i,:,:,:,:],na,na,nb,nb)
 
-
         D1a,D2aa = test_utils.make_random_ft_D(na)
         D1b,D2bb = test_utils.make_random_ft_D(nb)
         D2ab = test_utils.make_random_ft_D2(na,nb)

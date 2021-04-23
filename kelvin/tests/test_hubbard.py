@@ -8,7 +8,7 @@ try:
     from lattice.hubbard import Hubbard1D
     from lattice.fci import FCISimple
     has_lattice = True
-except:
+except ImportError:
     has_lattice = False
 
 

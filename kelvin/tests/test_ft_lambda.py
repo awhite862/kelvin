@@ -32,13 +32,13 @@ def test_L1(cc,thresh):
 
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
-                - en[None,None,:,None] - en[None,None,None,:]
+            - en[None,None,:,None] - en[None,None,None,:]
         D1 = D1[numpy.ix_(ivir,iocc)]
         D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
     else:
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
-                - en[None,None,:,None] - en[None,None,None,:]
+            - en[None,None,:,None] - en[None,None,None,:]
         F,I = cc_utils.ft_integrals(cc.sys, en, beta, mu)
     ng,no,nv = cc.L1.shape
     d = 1e-4
@@ -81,7 +81,7 @@ def test_L2(cc,thresh):
     en = cc.sys.g_energies_tot()
     D1 = en[:,None] - en[None,:]
     D2 = en[:,None,None,None] + en[None,:,None,None] \
-            - en[None,None,:,None] - en[None,None,None,:]
+        - en[None,None,:,None] - en[None,None,None,:]
     F,I = cc_utils.ft_integrals(cc.sys, en, beta, mu)
     n = cc.L2.shape[1]
     d = 1e-4
@@ -224,7 +224,7 @@ class FTLambdaTest(unittest.TestCase):
         en = cc.sys.g_energies_tot()
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
-                - en[None,None,:,None] - en[None,None,None,:]
+            - en[None,None,:,None] - en[None,None,None,:]
         F,I = cc_utils.ft_integrals(sys, en, beta, mu)
         dT1 = numpy.zeros((ng,n,n))
         for y in range(ng):

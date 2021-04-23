@@ -86,9 +86,10 @@ class FTamplEquationsTest(unittest.TestCase):
         ti,g,G = quadrature.simpsons(ng, self.beta)
 
         T1ref,T2ref = ft_cc_equations.ccsd_stanton(
-                F,I,T1old,T2old,D1,D2,ti,ng,G)
-        T1out,T2out = ft_cc_equations.uccsd_stanton(Fa,Fb,Ia,Ib,Iabab,T1a,T1b,T2aa,T2ab,T2bb,
-                D1a,D1b,D2aa,D2ab,D2bb,ti,ng,G)
+            F, I, T1old, T2old, D1, D2, ti, ng, G)
+        T1out,T2out = ft_cc_equations.uccsd_stanton(
+            Fa, Fb, Ia, Ib, Iabab, T1a, T1b, T2aa, T2ab, T2bb,
+            D1a, D1b, D2aa, D2ab, D2bb, ti, ng, G)
 
         T1 = numpy.zeros((ng,n,n))
         T2 = numpy.zeros((ng,n,n,n,n))
