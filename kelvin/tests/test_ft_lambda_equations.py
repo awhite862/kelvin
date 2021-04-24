@@ -26,9 +26,9 @@ class FTLambdaEquationsTest(unittest.TestCase):
         ti, g, G = quadrature.simpsons(ng, beta)
 
         L1sim,L2sim = ft_cc_equations.ccsd_lambda_simple(
-            F,I,T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G,beta)
+            F, I, T1old, T2old, L1old, L2old, D1, D2, ti, ng, g, G, beta)
         L1opt,L2opt = ft_cc_equations.ccsd_lambda_opt(
-            F,I,T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G,beta)
+            F, I, T1old, T2old, L1old, L2old, D1, D2, ti, ng, g, G, beta)
 
         diff1 = numpy.linalg.norm(L1opt - L1sim)
         diff2 = numpy.linalg.norm(L2opt - L2sim)
@@ -83,8 +83,8 @@ class FTLambdaEquationsTest(unittest.TestCase):
         T2old = numpy.zeros((ng,n,n,n,n))
         for i in range(ng):
             T1at, T1bt = test_utils.make_random_T1_spatial(na, na, nb, nb)
-            T1aold[i,:,:] = T1at
-            T1bold[i,:,:] = T1bt
+            T1aold[i] = T1at
+            T1bold[i] = T1bt
         T2aaold = numpy.zeros((ng,na,na,na,na))
         T2abold = numpy.zeros((ng,na,nb,na,nb))
         T2bbold = numpy.zeros((ng,nb,nb,nb,nb))
@@ -92,15 +92,14 @@ class FTLambdaEquationsTest(unittest.TestCase):
         T2old = numpy.zeros((ng,n,n,n,n))
         for i in range(ng):
             T2aat, T2abt, T2bbt = test_utils.make_random_T2_spatial(na, na, nb, nb)
-            T2aaold[i,:,:,:,:] = T2aat
-            T2abold[i,:,:,:,:] = T2abt
-            T2bbold[i,:,:,:,:] = T2bbt
+            T2aaold[i] = T2aat
+            T2abold[i] = T2abt
+            T2bbold[i] = T2bbt
         for i in range(ng):
-            T1old[i,:,:] = spin_utils.T1_to_spin(
-                T1aold[i,:,:], T1bold[i,:,:], na, na, nb, nb)
-            T2old[i,:,:,:,:] = spin_utils.T2_to_spin(
-                T2aaold[i,:,:,:,:], T2abold[i,:,:,:,:],
-                T2bbold[i,:,:,:,:], na, na, nb, nb)
+            T1old[i] = spin_utils.T1_to_spin(
+                T1aold[i], T1bold[i], na, na, nb, nb)
+            T2old[i] = spin_utils.T2_to_spin(
+                T2aaold[i], T2abold[i], T2bbold[i], na, na, nb, nb)
 
         L1aold = numpy.zeros((ng,na,na))
         L1bold = numpy.zeros((ng,nb,nb))
@@ -108,8 +107,8 @@ class FTLambdaEquationsTest(unittest.TestCase):
         L2old = numpy.zeros((ng,n,n,n,n))
         for i in range(ng):
             L1at, L1bt = test_utils.make_random_T1_spatial(na, na, nb, nb)
-            L1aold[i,:,:] = L1at
-            L1bold[i,:,:] = L1bt
+            L1aold[i] = L1at
+            L1bold[i] = L1bt
         L2aaold = numpy.zeros((ng,na,na,na,na))
         L2abold = numpy.zeros((ng,na,nb,na,nb))
         L2bbold = numpy.zeros((ng,nb,nb,nb,nb))
@@ -117,13 +116,14 @@ class FTLambdaEquationsTest(unittest.TestCase):
         L2old = numpy.zeros((ng,n,n,n,n))
         for i in range(ng):
             L2aat, L2abt, L2bbt = test_utils.make_random_T2_spatial(na, na, nb, nb)
-            L2aaold[i,:,:,:,:] = L2aat
-            L2abold[i,:,:,:,:] = L2abt
-            L2bbold[i,:,:,:,:] = L2bbt
+            L2aaold[i] = L2aat
+            L2abold[i] = L2abt
+            L2bbold[i] = L2bbt
         for i in range(ng):
-            L1old[i,:,:] = spin_utils.T1_to_spin(L1aold[i,:,:],L1bold[i,:,:],na,na,nb,nb)
-            L2old[i,:,:,:,:] = spin_utils.T2_to_spin(
-                    L2aaold[i,:,:,:,:],L2abold[i,:,:,:,:],L2bbold[i,:,:,:,:],na,na,nb,nb)
+            L1old[i] = spin_utils.T1_to_spin(
+                L1aold[i], L1bold[i], na, na, nb, nb)
+            L2old[i] = spin_utils.T2_to_spin(
+                    L2aaold[i], L2abold[i], L2bbold[i], na, na, nb, nb)
 
         D1a, D2aa = test_utils.make_random_ft_D(na)
         D1b, D2bb = test_utils.make_random_ft_D(nb)
@@ -133,17 +133,20 @@ class FTLambdaEquationsTest(unittest.TestCase):
 
         ti,g,G = quadrature.simpsons(ng, beta)
         L1ref,L2ref = ft_cc_equations.ccsd_lambda_simple(
-            F,I,T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G,beta)
+            F, I, T1old, T2old, L1old, L2old, D1, D2, ti, ng, g, G, beta)
         L1a,L1b,L2aa,L2ab,L2bb = ft_cc_equations.uccsd_lambda_opt(
-            Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,T2aaold,T2abold,T2bbold,
-            L1aold,L1bold,L2aaold,L2abold,L2bbold,D1a,D1b,D2aa,D2ab,D2bb,ti,ng,g,G,beta)
+            Fa, Fb, Ia, Ib, Iabab, T1aold, T1bold,
+            T2aaold, T2abold, T2bbold, L1aold, L1bold,
+            L2aaold, L2abold, L2bbold, D1a, D1b,
+            D2aa, D2ab, D2bb, ti, ng, g, G, beta)
 
         L1out = numpy.zeros((ng,n,n))
         L2out = numpy.zeros((ng,n,n,n,n))
         for i in range(ng):
-            L1out[i,:,:] = spin_utils.T1_to_spin(L1a[i,:,:],L1b[i,:,:],na,na,nb,nb)
-            L2out[i,:,:,:,:] = spin_utils.T2_to_spin(
-                    L2aa[i,:,:,:,:],L2ab[i,:,:,:,:],L2bb[i,:,:,:,:],na,na,nb,nb)
+            L1out[i] = spin_utils.T1_to_spin(
+                L1a[i], L1b[i], na, na, nb, nb)
+            L2out[i] = spin_utils.T2_to_spin(
+                    L2aa[i], L2ab[i], L2bb[i], na, na, nb, nb)
 
         diff1 = numpy.linalg.norm(L1out - L1ref)
         diff2 = numpy.linalg.norm(L2out - L2ref)

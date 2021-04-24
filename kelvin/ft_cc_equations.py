@@ -19,7 +19,7 @@ def lccd_simple(F,I,T2old,D2,ti,ng,G):
     T2new = -einsum('v,abij->vabij',Id,I.vvoo)
 
     for y in range(ng):
-        cc_equations._D_D(T2new[y,:,:,:,:],F,I,T2old[y,:,:,:,:],fac=-1.0)
+        cc_equations._D_D(T2new[y],F,I,T2old[y],fac=-1.0)
 
     # integrate the new T-amplitudes
     T2new = quadrature.int_tbar2(ng,T2new,ti,D2,G)
@@ -37,10 +37,10 @@ def lccsd_simple(F,I,T1old,T2old,D1,D2,ti,ng,G):
     T2new = -einsum('v,abij->vabij',Id,I.vvoo)
 
     for y in range(ng):
-        cc_equations._S_S(T1new[y,:,:],F,I,T1old[y,:,:],fac=-1.0)
-        cc_equations._S_D(T1new[y,:,:],F,I,T2old[y,:,:,:,:],fac=-1.0)
-        cc_equations._D_S(T2new[y,:,:,:,:],F,I,T1old[y,:,:],fac=-1.0)
-        cc_equations._D_D(T2new[y,:,:,:,:],F,I,T2old[y,:,:,:,:],fac=-1.0)
+        cc_equations._S_S(T1new[y],F,I,T1old[y],fac=-1.0)
+        cc_equations._S_D(T1new[y],F,I,T2old[y],fac=-1.0)
+        cc_equations._D_S(T2new[y],F,I,T1old[y],fac=-1.0)
+        cc_equations._D_D(T2new[y],F,I,T2old[y],fac=-1.0)
 
     # integrate the new T-amplitudes
     T1new = quadrature.int_tbar1(ng,T1new,ti,D1,G)
@@ -58,8 +58,8 @@ def ccd_simple(F,I,T2old,D2,ti,ng,G):
     T2new = -einsum('v,abij->vabij',Id,I.vvoo)
 
     for y in range(ng):
-        cc_equations._D_D(T2new[y,:,:,:,:],F,I,T2old[y,:,:,:,:],fac=-1.0)
-        cc_equations._D_DD(T2new[y,:,:,:,:],F,I,T2old[y,:,:,:,:],fac=-1.0)
+        cc_equations._D_D(T2new[y],F,I,T2old[y],fac=-1.0)
+        cc_equations._D_DD(T2new[y],F,I,T2old[y],fac=-1.0)
 
     # integrate the new T-amplitudes
     T2new = quadrature.int_tbar2(ng,T2new,ti,D2,G)
@@ -77,20 +77,20 @@ def ccsd_simple(F,I,T1old,T2old,D1,D2,ti,ng,G):
     T2new = -einsum('v,abij->vabij',Id,I.vvoo)
 
     for y in range(ng):
-        cc_equations._S_S(T1new[y,:,:],F,I,T1old[y,:,:],fac=-1.0)
-        cc_equations._S_D(T1new[y,:,:],F,I,T2old[y,:,:,:,:],fac=-1.0)
-        cc_equations._S_SS(T1new[y,:,:],F,I,T1old[y,:,:],fac=-1.0)
-        cc_equations._S_SD(T1new[y,:,:],F,I,T1old[y,:,:],T2old[y,:,:,:,:],fac=-1.0)
-        cc_equations._S_SSS(T1new[y,:,:],F,I,T1old[y,:,:],fac=-1.0)
+        cc_equations._S_S(T1new[y],F,I,T1old[y],fac=-1.0)
+        cc_equations._S_D(T1new[y],F,I,T2old[y],fac=-1.0)
+        cc_equations._S_SS(T1new[y],F,I,T1old[y],fac=-1.0)
+        cc_equations._S_SD(T1new[y],F,I,T1old[y],T2old[y],fac=-1.0)
+        cc_equations._S_SSS(T1new[y],F,I,T1old[y],fac=-1.0)
 
-        cc_equations._D_S(T2new[y,:,:,:,:],F,I,T1old[y,:,:],fac=-1.0)
-        cc_equations._D_D(T2new[y,:,:,:,:],F,I,T2old[y,:,:,:,:],fac=-1.0)
-        cc_equations._D_SS(T2new[y,:,:,:,:],F,I,T1old[y,:,:],fac=-1.0)
-        cc_equations._D_SD(T2new[y,:,:,:,:],F,I,T1old[y,:,:],T2old[y,:,:,:,:],fac=-1.0)
-        cc_equations._D_DD(T2new[y,:,:,:,:],F,I,T2old[y,:,:,:,:],fac=-1.0)
-        cc_equations._D_SSD(T2new[y,:,:,:,:],F,I,T1old[y,:,:],T2old[y,:,:,:,:],fac=-1.0)
-        cc_equations._D_SSS(T2new[y,:,:,:,:],F,I,T1old[y,:,:],fac=-1.0)
-        cc_equations._D_SSSS(T2new[y,:,:,:,:],F,I,T1old[y,:,:],fac=-1.0)
+        cc_equations._D_S(T2new[y],F,I,T1old[y],fac=-1.0)
+        cc_equations._D_D(T2new[y],F,I,T2old[y],fac=-1.0)
+        cc_equations._D_SS(T2new[y],F,I,T1old[y],fac=-1.0)
+        cc_equations._D_SD(T2new[y],F,I,T1old[y],T2old[y],fac=-1.0)
+        cc_equations._D_DD(T2new[y],F,I,T2old[y],fac=-1.0)
+        cc_equations._D_SSD(T2new[y],F,I,T1old[y],T2old[y],fac=-1.0)
+        cc_equations._D_SSS(T2new[y],F,I,T1old[y],fac=-1.0)
+        cc_equations._D_SSSS(T2new[y],F,I,T1old[y],fac=-1.0)
 
     # integrate the new T-amplitudes
     T1new = quadrature.int_tbar1(ng,T1new,ti,D1,G)
@@ -110,8 +110,8 @@ def ccsd_stanton(F,I,T1old,T2old,D1,D2,ti,ng,G):
     T2new = -einsum('v,abij->vabij',Id,I.vvoo)
 
     for y in range(ng):
-        cc_equations._Stanton(T1new[y,:,:],T2new[y,:,:,:,:],
-                F,I,T1old[y,:,:],T2old[y,:,:,:,:],fac=-1.0)
+        cc_equations._Stanton(T1new[y],T2new[y],
+                F,I,T1old[y],T2old[y],fac=-1.0)
 
     # integrate the new T-amplitudes
     T1new = quadrature.int_tbar1(ng,T1new,ti,D1,G)
@@ -152,14 +152,14 @@ def uccsd_stanton(Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,T2aaold,T2abold,T2bbold,
     T2bb = numpy.zeros((ng,nvb,nvb,nob,nob), dtype=T2bbold.dtype)
 
     for y in range(ng):
-        T1a[y,:,:] = -Fa.vo.copy()
-        T1b[y,:,:] = -Fb.vo.copy()
-        T2aa[y,:,:,:,:] = -Ia.vvoo.copy()
-        T2bb[y,:,:,:,:] = -Ib.vvoo.copy()
-        T2ab[y,:,:,:,:] = -Iabab.vvoo.copy()
-        T1olds = (T1aold[y,:,:],T1bold[y,:,:])
-        T2olds = (T2aaold[y,:,:,:,:],T2abold[y,:,:,:,:],T2bbold[y,:,:,:,:])
-        cc_equations._u_Stanton(T1a[y,:,:], T1b[y,:,:], T2aa[y,:,:,:,:], T2ab[y,:,:,:,:], T2bb[y,:,:,:,:],
+        T1a[y] = -Fa.vo.copy()
+        T1b[y] = -Fb.vo.copy()
+        T2aa[y] = -Ia.vvoo.copy()
+        T2bb[y] = -Ib.vvoo.copy()
+        T2ab[y] = -Iabab.vvoo.copy()
+        T1olds = (T1aold[y],T1bold[y])
+        T2olds = (T2aaold[y],T2abold[y],T2bbold[y])
+        cc_equations._u_Stanton(T1a[y], T1b[y], T2aa[y], T2ab[y], T2bb[y],
                 Fa, Fb, Ia, Ib, Iabab, T1olds, T2olds, fac=-1.0)
 
     # integrate the new T-amplitudes
@@ -307,7 +307,7 @@ def lccd_lambda_simple(F,I,T2old,L2old,D2,ti,ng,g,G,beta):
 
     # amplitude term
     for y in range(ng):
-        cc_equations._LD_LD(L2[y,:,:,:,:], F, I, L2int[y,:,:,:,:], fac=-1.0)
+        cc_equations._LD_LD(L2[y], F, I, L2int[y], fac=-1.0)
 
     # energy term
     Id = numpy.ones((ng))
@@ -331,18 +331,18 @@ def lccsd_lambda_simple(F,I,T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G,beta):
 
     # amplitude term
     for y in range(ng):
-        cc_equations._LS_LS(L1[y,:,:], F, I, L1int[y,:,:], fac=-1.0)
-        cc_equations._LS_LD(L1[y,:,:], F, I, L2int[y,:,:,:,:], fac=-1.0)
+        cc_equations._LS_LS(L1[y], F, I, L1int[y], fac=-1.0)
+        cc_equations._LS_LD(L1[y], F, I, L2int[y], fac=-1.0)
 
-        cc_equations._LD_LS(L2[y,:,:,:,:], F, I, L1int[y,:,:], fac=-1.0)
-        cc_equations._LD_LD(L2[y,:,:,:,:], F, I, L2int[y,:,:,:,:], fac=-1.0)
+        cc_equations._LD_LS(L2[y], F, I, L1int[y], fac=-1.0)
+        cc_equations._LD_LD(L2[y], F, I, L2int[y], fac=-1.0)
 
     # energy term
     Id = numpy.ones((ng))
     L1 -= einsum('v,ia->via',Id,F.ov)
     L2 -= einsum('v,ijab->vijab',Id,I.oovv)
     for y in range(ng):
-        cc_equations._LS_TS(L1[y,:,:],I,T1old[y,:,:],fac=-1.0)
+        cc_equations._LS_TS(L1[y],I,T1old[y],fac=-1.0)
     t2 = time.time()
 
     return L1,L2
@@ -361,30 +361,30 @@ def ccsd_lambda_simple(F,I,T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G,beta):
 
     # amplitude term
     for y in range(ng):
-        cc_equations._LS_LS(L1[y,:,:], F, I, L1int[y,:,:], fac=-1.0)
-        cc_equations._LS_LSTS(L1[y,:,:], F, I, L1int[y,:,:], T1old[y,:,:], fac=-1.0)
-        cc_equations._LS_LSTD(L1[y,:,:], I, L1int[y,:,:], T2old[y,:,:,:,:], fac=-1.0)
-        cc_equations._LS_LSTSS(L1[y,:,:], I, L1int[y,:,:], T1old[y,:,:], fac=-1.0)
-        cc_equations._LS_LD(L1[y,:,:], F, I, L2int[y,:,:,:,:], fac=-1.0)
-        cc_equations._LS_LDTS(L1[y,:,:], F, I, L2int[y,:,:,:,:], T1old[y,:,:], fac=-1.0)
-        cc_equations._LS_LDTD(L1[y,:,:], F, I, L2int[y,:,:,:,:], T2old[y,:,:,:,:], fac=-1.0)
-        cc_equations._LS_LDTSS(L1[y,:,:], F, I, L2int[y,:,:,:,:], T1old[y,:,:], fac=-1.0)
-        cc_equations._LS_LDTSD(L1[y,:,:], I, L2int[y,:,:,:,:], T1old[y,:,:], T2old[y,:,:,:,:], fac=-1.0)
-        cc_equations._LS_LDTSSS(L1[y,:,:], I, L2int[y,:,:,:,:], T1old[y,:,:], fac=-1.0)
+        cc_equations._LS_LS(L1[y], F, I, L1int[y], fac=-1.0)
+        cc_equations._LS_LSTS(L1[y], F, I, L1int[y], T1old[y], fac=-1.0)
+        cc_equations._LS_LSTD(L1[y], I, L1int[y], T2old[y], fac=-1.0)
+        cc_equations._LS_LSTSS(L1[y], I, L1int[y], T1old[y], fac=-1.0)
+        cc_equations._LS_LD(L1[y], F, I, L2int[y], fac=-1.0)
+        cc_equations._LS_LDTS(L1[y], F, I, L2int[y], T1old[y], fac=-1.0)
+        cc_equations._LS_LDTD(L1[y], F, I, L2int[y], T2old[y], fac=-1.0)
+        cc_equations._LS_LDTSS(L1[y], F, I, L2int[y], T1old[y], fac=-1.0)
+        cc_equations._LS_LDTSD(L1[y], I, L2int[y], T1old[y], T2old[y], fac=-1.0)
+        cc_equations._LS_LDTSSS(L1[y], I, L2int[y], T1old[y], fac=-1.0)
 
-        cc_equations._LD_LS(L2[y,:,:,:,:], F, I, L1int[y,:,:], fac=-1.0)
-        cc_equations._LD_LSTS(L2[y,:,:,:,:], F, I, L1int[y,:,:], T1old[y,:,:], fac=-1.0)
-        cc_equations._LD_LD(L2[y,:,:,:,:], F, I, L2int[y,:,:,:,:], fac=-1.0)
-        cc_equations._LD_LDTS(L2[y,:,:,:,:], F, I, L2int[y,:,:,:,:], T1old[y,:,:], fac=-1.0)
-        cc_equations._LD_LDTD(L2[y,:,:,:,:], I, L2int[y,:,:,:,:], T2old[y,:,:,:,:], fac=-1.0)
-        cc_equations._LD_LDTSS(L2[y,:,:,:,:], F, I, L2int[y,:,:,:,:], T1old[y,:,:], fac=-1.0)
+        cc_equations._LD_LS(L2[y], F, I, L1int[y], fac=-1.0)
+        cc_equations._LD_LSTS(L2[y], F, I, L1int[y], T1old[y], fac=-1.0)
+        cc_equations._LD_LD(L2[y], F, I, L2int[y], fac=-1.0)
+        cc_equations._LD_LDTS(L2[y], F, I, L2int[y], T1old[y], fac=-1.0)
+        cc_equations._LD_LDTD(L2[y], I, L2int[y], T2old[y], fac=-1.0)
+        cc_equations._LD_LDTSS(L2[y], F, I, L2int[y], T1old[y], fac=-1.0)
 
     # energy term
     Id = numpy.ones((ng))
     L1 -= einsum('v,ia->via',Id,F.ov)
     L2 -= einsum('v,ijab->vijab',Id,I.oovv)
     for y in range(ng):
-        cc_equations._LS_TS(L1[y,:,:],I,T1old[y,:,:],fac=-1.0)
+        cc_equations._LS_TS(L1[y],I,T1old[y],fac=-1.0)
 
     return L1,L2
 
@@ -403,15 +403,15 @@ def ccsd_lambda_opt(F,I,T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G,beta):
     # amplitude term
     t1 = time.time()
     for y in range(ng):
-        cc_equations._Lambda_opt(L1[y,:,:], L2[y,:,:,:,:], F, I,
-                L1int[y,:,:], L2int[y,:,:,:,:], T1old[y,:,:], T2old[y,:,:,:,:], fac=-1.0)
+        cc_equations._Lambda_opt(L1[y], L2[y], F, I,
+                L1int[y], L2int[y], T1old[y], T2old[y], fac=-1.0)
 
     # energy term
     Id = numpy.ones((ng))
     L1 -= einsum('v,ia->via',Id,F.ov)
     L2 -= einsum('v,ijab->vijab',Id,I.oovv)
     for y in range(ng):
-        cc_equations._LS_TS(L1[y,:,:],I,T1old[y,:,:],fac=-1.0)
+        cc_equations._LS_TS(L1[y],I,T1old[y],fac=-1.0)
 
     return L1,L2
 
@@ -447,8 +447,8 @@ def uccsd_lambda_opt(Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,T2aaold,T2abold,T2bbold,
         T1olds = (T1aold[y],T1bold[y])
         L2olds = (L2aaint[y],L2abint[y],L2bbint[y])
         T2olds = (T2aaold[y],T2abold[y],T2bbold[y])
-        cc_equations._uccsd_Lambda_opt(L1a[y,:,:], L1b[y,:,:], L2aa[y,:,:,:,:],
-                L2ab[y,:,:,:,:], L2bb[y,:,:,:,:], Fa, Fb, Ia, Ib, Iabab,
+        cc_equations._uccsd_Lambda_opt(L1a[y], L1b[y], L2aa[y],
+                L2ab[y], L2bb[y], Fa, Fb, Ia, Ib, Iabab,
                 L1olds, L2olds, T1olds, T2olds, fac=-1.0)
 
     # energy term
@@ -459,8 +459,8 @@ def uccsd_lambda_opt(Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,T2aaold,T2abold,T2bbold,
     L2ab -= einsum('v,ijab->vijab',Id,Iabab.oovv)
     L2bb -= einsum('v,ijab->vijab',Id,Ib.oovv)
     for y in range(ng):
-        T1olds = (T1aold[y,:,:],T1bold[y,:,:])
-        cc_equations._u_LS_TS(L1a[y,:,:],L1b[y,:,:],Ia,Ib,Iabab,T1olds[0],T1olds[1],fac=-1.0)
+        T1olds = (T1aold[y],T1bold[y])
+        cc_equations._u_LS_TS(L1a[y],L1b[y],Ia,Ib,Iabab,T1olds[0],T1olds[1],fac=-1.0)
 
     return L1a,L1b,L2aa,L2ab,L2bb
 
@@ -468,7 +468,7 @@ def ft_ccsd_lambda_int(F, I, T1old, T2old):
     ng = T1old.shape[0]
     intor = []
     for y in range(ng):
-        intor.append(cc_equations.lambda_int(F, I, T1old[y,:,:], T2old[y,:,:,:,:]))
+        intor.append(cc_equations.lambda_int(F, I, T1old[y], T2old[y]))
     return intor
 
 def ccsd_lambda_opt_int(F,I,T1old,T2old,L1old,L2old,intor,D1,D2,ti,ng,g,G,beta):
@@ -486,15 +486,15 @@ def ccsd_lambda_opt_int(F,I,T1old,T2old,L1old,L2old,intor,D1,D2,ti,ng,g,G,beta):
     # amplitude term
     t1 = time.time()
     for y in range(ng):
-        cc_equations._Lambda_opt_int(L1[y,:,:], L2[y,:,:,:,:], F, I,
-            L1int[y,:,:], L2int[y,:,:,:,:], T1old[y,:,:], T2old[y,:,:,:,:], intor[y], fac=-1.0)
+        cc_equations._Lambda_opt_int(L1[y], L2[y], F, I,
+            L1int[y], L2int[y], T1old[y], T2old[y], intor[y], fac=-1.0)
 
     # energy term
     Id = numpy.ones((ng))
     L1 -= einsum('v,ia->via',Id,F.ov)
     L2 -= einsum('v,ijab->vijab',Id,I.oovv)
     for y in range(ng):
-        cc_equations._LS_TS(L1[y,:,:],I,T1old[y,:,:],fac=-1.0)
+        cc_equations._LS_TS(L1[y],I,T1old[y],fac=-1.0)
 
 
     return L1,L2
@@ -512,7 +512,7 @@ def ccsd_lambda_guess(F,I,T1old,beta,ng):
     L1 = (1.0/beta)*einsum('v,ia->via',Id,F.ov)
     L2 = (1.0/beta)*einsum('v,ijab->vijab',Id,I.oovv)
     for y in range(ng):
-        cc_equations._LS_TS(L1[y,:,:],I,T1old[y,:,:],fac=(1.0/beta))
+        cc_equations._LS_TS(L1[y],I,T1old[y],fac=(1.0/beta))
 
     return L1,L2
 
@@ -524,8 +524,8 @@ def uccsd_lambda_guess(Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,beta,ng):
     L2ab = (1.0/beta)*einsum('v,ijab->vijab',Id,Iabab.oovv)
     L2bb = (1.0/beta)*einsum('v,ijab->vijab',Id,Ib.oovv)
     for y in range(ng):
-        T1olds = (T1aold[y,:,:],T1bold[y,:,:])
-        cc_equations._u_LS_TS(L1a[y,:,:],L1b[y,:,:],Ia,Ib,Iabab,T1olds[0],T1olds[1])
+        T1olds = (T1aold[y],T1bold[y])
+        cc_equations._u_LS_TS(L1a[y],L1b[y],Ia,Ib,Iabab,T1olds[0],T1olds[1])
 
     return L1a,L1b,L2aa,L2ab,L2bb
 
@@ -694,8 +694,8 @@ def ccd_lambda_simple(F,I,T2old,L2old,D2,ti,ng,g,G,beta):
 
     # amplitude term
     for y in range(ng):
-        cc_equations._LD_LD(L2[y,:,:,:,:], F, I, L2int[y,:,:,:,:], fac=-1.0)
-        cc_equations._LD_LDTD(L2[y,:,:,:,:], I, L2int[y,:,:,:,:], T2old[y,:,:,:,:], fac=-1.0)
+        cc_equations._LD_LD(L2[y], F, I, L2int[y], fac=-1.0)
+        cc_equations._LD_LDTD(L2[y], I, L2int[y], T2old[y], fac=-1.0)
 
     # energy term
     Id = numpy.ones((ng))

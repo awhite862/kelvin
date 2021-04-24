@@ -77,11 +77,11 @@ class mol_field_system(system):
         ng = len(self.ti)
         for i in range(ng):
             temp = field*numpy.sin(self.omega*self.ti[i])
-            Fock[i,:,:] += temp
+            Fock[i] += temp
         if direc == 'f':
-            Fock[self.ot,:,:] += -3.j*self.beta*utils.block_diag(self.O,self.O)/delta
+            Fock[self.ot] += -3.j*self.beta*utils.block_diag(self.O,self.O)/delta
         elif direc == 'b':
-            Fock[self.ot,:,:] -= 0.j*self.beta*utils.block_diag(self.O,self.O)/delta
+            Fock[self.ot] -= 0.j*self.beta*utils.block_diag(self.O,self.O)/delta
         else:
             raise Exception("Unrecognized direction: " + str(direc))
 
@@ -101,13 +101,13 @@ class mol_field_system(system):
         F = numpy.einsum('x,xij->ij', E, mol.intor('cint1e_r_sph', comp=3))
         I = numpy.ones(self.nt)
         for i in range(self.nt):
-            thcore[i,:,:] += numpy.sin(self.omega*ti[i])*F
+            thcore[i] += numpy.sin(self.omega*ti[i])*F
         for i in range(self.nt):
-            thcore[i,:,:] = scf_utils.mo_tran_1e(self.mf,thcore[i,:,:])
+            thcore[i] = scf_utils.mo_tran_1e(self.mf,thcore[i])
         if direc == 'f':
-            thcore[ot,:,:] += O
+            thcore[ot] += O
         elif direc == 'b':
-            thcore[ot,:,:] -= O
+            thcore[ot] -= O
             thcore = numpy.flip(thcore,0)
         return thcore
 

@@ -83,13 +83,13 @@ class h2_field_system(system):
         ti = self.ti
         for i in range(ng):
             temp = field*numpy.sin(self.omega*self.ti[i])
-            Fock[i,:,:] += temp
+            Fock[i] += temp
         if self.O is not None:
             delta = ti[ot] - ti[ot - 1] #if ot > 0 else ti[ot + 1] - ti[ot]
         if direc == 'f' and self.O is not None:
-            Fock[self.ot,:,:] += -1.j*self.beta*self.O/delta
+            Fock[self.ot] += -1.j*self.beta*self.O/delta
         elif direc == 'b'and self.O is not None:
-            Fock[self.ot,:,:] -= -0.j*self.beta*self.O/delta
+            Fock[self.ot] -= -0.j*self.beta*self.O/delta
 
         if direc == 'b':
             temp = Fock.copy()

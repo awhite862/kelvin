@@ -60,8 +60,8 @@ class FTamplEquationsTest(unittest.TestCase):
         T1b = numpy.zeros((ng,nb,nb))
         for i in range(ng):
             T1at, T1bt = test_utils.make_random_T1_spatial(na, na, nb, nb)
-            T1a[i,:,:] = T1at
-            T1b[i,:,:] = T1bt
+            T1a[i] = T1at
+            T1b[i] = T1bt
         T2aa = numpy.zeros((ng,na,na,na,na))
         T2ab = numpy.zeros((ng,na,nb,na,nb))
         T2bb = numpy.zeros((ng,nb,nb,nb,nb))
@@ -69,13 +69,14 @@ class FTamplEquationsTest(unittest.TestCase):
         T2old = numpy.zeros((ng,n,n,n,n))
         for i in range(ng):
             T2aat, T2abt, T2bbt = test_utils.make_random_T2_spatial(na, na, nb, nb)
-            T2aa[i,:,:,:,:] = T2aat
-            T2ab[i,:,:,:,:] = T2abt
-            T2bb[i,:,:,:,:] = T2bbt
+            T2aa[i] = T2aat
+            T2ab[i] = T2abt
+            T2bb[i] = T2bbt
         for i in range(ng):
-            T1old[i,:,:] = spin_utils.T1_to_spin(T1a[i,:,:], T1b[i,:,:], na, na, nb, nb)
-            T2old[i,:,:,:,:] = spin_utils.T2_to_spin(
-                    T2aa[i,:,:,:,:], T2ab[i,:,:,:,:], T2bb[i,:,:,:,:], na, na, nb, nb)
+            T1old[i] = spin_utils.T1_to_spin(
+                T1a[i], T1b[i], na, na, nb, nb)
+            T2old[i] = spin_utils.T2_to_spin(
+                T2aa[i], T2ab[i], T2bb[i], na, na, nb, nb)
 
         D1a, D2aa = test_utils.make_random_ft_D(na)
         D2ab = test_utils.make_random_ft_D2(na, nb)
@@ -94,9 +95,10 @@ class FTamplEquationsTest(unittest.TestCase):
         T1 = numpy.zeros((ng,n,n))
         T2 = numpy.zeros((ng,n,n,n,n))
         for i in range(ng):
-            T1[i,:,:] = spin_utils.T1_to_spin(T1out[0][i,:,:], T1out[1][i,:,:], na, na, nb, nb)
-            T2[i,:,:,:,:] = spin_utils.T2_to_spin(
-                    T2out[0][i,:,:,:,:], T2out[1][i,:,:,:,:], T2out[2][i,:,:,:,:], na, na, nb, nb)
+            T1[i] = spin_utils.T1_to_spin(
+                T1out[0][i], T1out[1][i], na, na, nb, nb)
+            T2[i] = spin_utils.T2_to_spin(
+                T2out[0][i], T2out[1][i], T2out[2][i], na, na, nb, nb)
 
         diff1 = numpy.linalg.norm(T1ref - T1)
         diff2 = numpy.linalg.norm(T2ref - T2)

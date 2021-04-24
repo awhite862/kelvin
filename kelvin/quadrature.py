@@ -6,17 +6,17 @@ einsum = lib.einsum
 def integrate1a(t1,n,ng,delta):
     """Integrate a function of t' from 0 to t."""
     t1_temp = numpy.zeros(t1.shape)
-    t1_temp[1,:] = 0.5*delta*(t1[0,:] + t1[1,:])
+    t1_temp[1] = 0.5*delta*(t1[0] + t1[1])
     for y in range(2,ng):
-        t1_temp[y,:] = t1_temp[y - 2,:] + (delta/3.0)*(t1[y - 2,:] 
-                + 4.0*t1[y - 1,:] + t1[y,:])
+        t1_temp[y] = t1_temp[y - 2] + (delta/3.0)*(t1[y - 2] 
+                + 4.0*t1[y - 1] + t1[y])
     return t1_temp
 
 def get_G_midpoint(ng,delta):
     G = numpy.zeros((ng,ng))
     G[0,0] = delta
     for y in range(1,ng):
-        G[y,:] = G[y - 1,:]
+        G[y] = G[y - 1]
         G[y,y] += delta
     return G
 
@@ -30,7 +30,7 @@ def get_G(ng,delta):
     G = numpy.zeros((ng,ng))
     G[1,0] = G[1,1] = 0.5*delta
     for y in range(2,ng):
-        G[y,:] = G[y - 2,:]
+        G[y] = G[y - 2]
         G[y,y - 2] += delta/3.0
         G[y,y - 1] += 4.0*delta/3.0
         G[y,y] += delta/3.0
@@ -111,7 +111,7 @@ def simpsons_ln(ng, beta):
     G = get_G(ng,delta)
     g = beta*g/si
     for i in range(ng):
-        G[i,:] = beta*G[i,:]/si
+        G[i] = beta*G[i]/si
     return ti,g,G
 
 def d_simpsons_ln(ng, beta):
@@ -122,7 +122,7 @@ def d_simpsons_ln(ng, beta):
     G = get_G(ng,delta)
     g = g/si
     for i in range(ng):
-        G[i,:] = G[i,:]/si
+        G[i] = G[i]/si
 
     return g,G
 
@@ -134,7 +134,7 @@ def simpsons_sin(ng, beta):
     G = get_G(ng,delta)
     g = beta*g*numpy.cos(si)/2.0
     for i in range(ng):
-        G[i,:] = beta*G[i,:]*numpy.cos(si)/2.0
+        G[i] = beta*G[i]*numpy.cos(si)/2.0
     return ti,g,G
 
 def d_simpsons_sin(ng, beta):
@@ -144,7 +144,7 @@ def d_simpsons_sin(ng, beta):
     G = get_G(ng,delta)
     g = g*numpy.cos(si)/2.0
     for i in range(ng):
-        G[i,:] = G[i,:]*numpy.cos(si)/2.0
+        G[i] = G[i]*numpy.cos(si)/2.0
     return g,G
 
 def simpsons_exp(ng, beta):
@@ -156,7 +156,7 @@ def simpsons_exp(ng, beta):
     G = get_G(ng,delta)
     g = beta*g*numpy.exp(si)
     for i in range(ng):
-        G[i,:] = beta*G[i,:]*numpy.exp(si)
+        G[i] = beta*G[i]*numpy.exp(si)
     return ti,g,G
 
 def d_simpsons_exp(ng, beta):
@@ -167,7 +167,7 @@ def d_simpsons_exp(ng, beta):
     G = get_G(ng,delta)
     g = g*numpy.exp(si)
     for i in range(ng):
-        G[i,:] = G[i,:]*numpy.exp(si)
+        G[i] = G[i]*numpy.exp(si)
     return g,G
 
 def simpsons_p(ng, beta, n=2):
@@ -178,7 +178,7 @@ def simpsons_p(ng, beta, n=2):
     G = get_G(ng,delta)
     g = beta*g*(numpy.power(si,n - 1)*float(n) + 1.0)/2.0
     for i in range(ng):
-        G[i,:] = beta*G[i,:]*(numpy.power(si,n - 1)*float(n) + 1.0)/2.0
+        G[i] = beta*G[i]*(numpy.power(si,n - 1)*float(n) + 1.0)/2.0
     return ti,g,G
 
 def d_simpsons_p(ng, beta, n=2):
@@ -188,7 +188,7 @@ def d_simpsons_p(ng, beta, n=2):
     G = get_G(ng,delta)
     g = g*(numpy.power(si,n - 1)*float(n) + 1.0)/2.0
     for i in range(ng):
-        G[i,:] = G[i,:]*(numpy.power(si,n - 1)*float(n) + 1.0)/2.0
+        G[i] = G[i]*(numpy.power(si,n - 1)*float(n) + 1.0)/2.0
     return g,G
 
 def ft_quad(ng, beta, quad):
@@ -273,7 +273,7 @@ def int_tbar1(ng,t1bar,ti,D1,G):
             dt[i] = ti[i] - ti[y]
         gtemp = numpy.exp(dt[:,None,None]*D1[None,:,:])
         t1_temp = gtemp*t1bar
-        t1_out[y,:,:] = einsum('x,xai->ai',G[y,:],t1_temp)
+        t1_out[y] = einsum('x,xai->ai',G[y],t1_temp)
 
     return t1_out
 
@@ -286,7 +286,7 @@ def int_tbar2(ng,t2bar,ti,D2,G):
             dt[i] = ti[i] - ti[y]
         gtemp = numpy.exp((dt[:,None,None,None,None]*D2[None,:,:,:,:]))
         t2_temp = gtemp*t2bar
-        t2_out[y,:,:,:,:] = einsum('x,xabij->abij',G[y,:],t2_temp)
+        t2_out[y] = einsum('x,xabij->abij',G[y],t2_temp)
 
     return t2_out
 
@@ -299,7 +299,7 @@ def int_L1(ng,L1old,ti,D1,g,G):
             dt[y] = ti[s] - ti[y]
         gtemp = numpy.exp(dt[:,None,None]*D1[None,:,:])
         L1temp = einsum('yai,yia->yia',gtemp,L1old)
-        L1_out[s,:,:] = einsum('y,yia,y->ia',g,L1temp,G[:,s])/g[s]
+        L1_out[s] = einsum('y,yia,y->ia',g,L1temp,G[:,s])/g[s]
 
     return L1_out
 
@@ -312,7 +312,7 @@ def int_L2(ng,L2old,ti,D2,g,G):
             dt[y] = ti[s] - ti[y]
         gtemp = numpy.exp(dt[:,None,None,None,None]*D2[None,:,:,:,:])
         L2temp = einsum('yabij,yijab->yijab',gtemp,L2old)
-        L2_out[s,:,:,:,:] = einsum('y,yijab,y->ijab',g,L2temp,G[:,s])/g[s]
+        L2_out[s] = einsum('y,yijab,y->ijab',g,L2temp,G[:,s])/g[s]
 
     return L2_out
 
@@ -361,8 +361,8 @@ def int_tbar1_keldysh(ngr,ngi,t1barf,t1barb,t1bari,tir,tii,D1,Gr,Gi):
             dt[i] = tib[i] - tib[y]
         gtemp = numpy.exp(1.j*dt[:,None,None]*D1[None,:,:])
         t1_temp = gtemp*t1barb
-        t1_outb[y,:,:] = -1.j*einsum('x,xai->ai',Gr[y,:],t1_temp)\
-                + t1_outf[ngr - 1,:,:]*numpy.exp(1.j*(tir[ngr - 1] - tib[y])*D1[:,:])
+        t1_outb[y] = -1.j*einsum('x,xai->ai',Gr[y],t1_temp)\
+                + t1_outf[ngr - 1]*numpy.exp(1.j*(tir[ngr - 1] - tib[y])*D1)
 
     t1_outi = numpy.zeros(t1bari.shape,dtype=complex)
     dt = numpy.zeros((ngi))
@@ -371,7 +371,7 @@ def int_tbar1_keldysh(ngr,ngi,t1barf,t1barb,t1bari,tir,tii,D1,Gr,Gi):
             dt[i] = tii[i] - tii[y]
         gtemp = numpy.exp(dt[:,None,None]*D1[None,:,:])
         t1_temp = gtemp*t1bari
-        t1_outi[y,:,:] = einsum('x,xai->ai',Gi[y,:],t1_temp) + t1_outb[ngr - 1,:,:]*numpy.exp(D1*(1.j*tir[0] - tii[y]))
+        t1_outi[y] = einsum('x,xai->ai',Gi[y],t1_temp) + t1_outb[ngr - 1]*numpy.exp(D1*(1.j*tir[0] - tii[y]))
 
     return t1_outf,t1_outb,t1_outi
 
@@ -384,7 +384,7 @@ def int_tbar2_keldysh(ngr,ngi,t2barf,t2barb,t2bari,tir,tii,D2,Gr,Gi):
             dt[i] = tir[i] - tir[y]
         gtemp = numpy.exp(1.j*dt[:,None,None,None,None]*D2[None,:,:,:,:])
         t2_temp = gtemp*t2barf
-        t2_outf[y] = 1.j*einsum('x,xabij->abij',Gr[y,:],t2_temp)
+        t2_outf[y] = 1.j*einsum('x,xabij->abij',Gr[y],t2_temp)
 
     t2_outb = numpy.zeros(t2barb.shape,dtype=complex)
     dt = numpy.zeros((ngr))
@@ -397,7 +397,7 @@ def int_tbar2_keldysh(ngr,ngi,t2barf,t2barb,t2bari,tir,tii,D2,Gr,Gi):
         gtemp = numpy.exp(1.j*dt[:,None,None,None,None]*D2[None,:,:,:,:])
         t2_temp = gtemp*t2barb
         t2_outb[y] = -1.j*einsum('x,xabij->abij',Gr[y,:],t2_temp)\
-                + t2_outf[ngr - 1,:,:]*numpy.exp(1.j*(tir[ngr - 1] - tib[y])*D2[:,:])
+                + t2_outf[ngr - 1]*numpy.exp(1.j*(tir[ngr - 1] - tib[y])*D2)
 
     t2_outi = numpy.zeros(t2bari.shape,dtype=complex)
     dt = numpy.zeros((ngi))
@@ -406,7 +406,7 @@ def int_tbar2_keldysh(ngr,ngi,t2barf,t2barb,t2bari,tir,tii,D2,Gr,Gi):
             dt[i] = tii[i] - tii[y]
         gtemp = numpy.exp(dt[:,None,None,None,None]*D2[None,:,:,:,:])
         t2_temp = gtemp*t2bari
-        t2_outi[y] = einsum('x,xabij->abij',Gi[y,:],t2_temp) + t2_outb[ngr - 1,:,:]*numpy.exp(D2*(1.j*tir[0] - tii[y]))
+        t2_outi[y] = einsum('x,xabij->abij',Gi[y],t2_temp) + t2_outb[ngr - 1]*numpy.exp(D2*(1.j*tir[0] - tii[y]))
 
     return t2_outf,t2_outb,t2_outi
 
@@ -419,7 +419,7 @@ def int_L1_keldysh(ngr,ngi,L1f,L1b,L1i,tir,tii,D1,gr,gi,Gr,Gi):
             dt[y] = tii[s] - tii[y]
         gtemp = numpy.exp(dt[:,None,None]*D1[None,:,:])
         L1temp = einsum('yai,yia->yia',gtemp,L1i)
-        L1i_out[s,:,:] = einsum('y,yia,y->ia',gi,L1temp,Gi[:,s])/gi[s]
+        L1i_out[s] = einsum('y,yia,y->ia',gi,L1temp,Gi[:,s])/gi[s]
 
     L1b_out = numpy.zeros(L1b.shape,dtype=complex)
     tib = tir.copy()
@@ -432,8 +432,8 @@ def int_L1_keldysh(ngr,ngi,L1f,L1b,L1i,tir,tii,D1,gr,gi,Gr,Gi):
         gtemp = numpy.exp(1.j*dt[:,None,None]*D1[None,:,:])
         L1temp = einsum('yai,yia->yia',gtemp,L1b)
         add = numpy.exp(D1[None,:,:]*(1.j*tib[s] - tii[:,None,None]))/gr[s]
-        L1b_out[s,:,:] = -1.j*einsum('y,yia,y->ia',gr,L1temp,Gr[:,s])/gr[s]
-        L1b_out[s,:,:] += numpy.einsum('y,yia,yai->ia',gi,L1i,add)*Gr[ngr - 1,s]
+        L1b_out[s] = -1.j*einsum('y,yia,y->ia',gr,L1temp,Gr[:,s])/gr[s]
+        L1b_out[s] += numpy.einsum('y,yia,yai->ia',gi,L1i,add)*Gr[ngr - 1,s]
 
     L1f_out = numpy.zeros(L1b.shape,dtype=complex)
     for s in range(ngr):
@@ -444,9 +444,9 @@ def int_L1_keldysh(ngr,ngi,L1f,L1b,L1i,tir,tii,D1,gr,gi,Gr,Gi):
         L1temp = einsum('yai,yia->yia',gtemp,L1f)
         fac = numpy.exp(1.j*D1[None,:,:]*(tir[s] - tib[:,None,None]))/gr[s]
         add = numpy.exp(D1[None,:,:]*(1.j*tir[s] - tii[:,None,None]))/gr[s]
-        L1f_out[s,:,:] = 1.j*einsum('y,yia,y->ia',gr,L1temp,Gr[:,s])/gr[s]
-        L1f_out[s,:,:] -= 1.j*numpy.einsum('y,yia,yai->ia',gr,L1b,fac)*Gr[ngr - 1,s]
-        L1f_out[s,:,:] += numpy.einsum('y,yia,yai->ia',gi,L1i,add)*Gr[ngr - 1,s]
+        L1f_out[s] = 1.j*einsum('y,yia,y->ia',gr,L1temp,Gr[:,s])/gr[s]
+        L1f_out[s] -= 1.j*numpy.einsum('y,yia,yai->ia',gr,L1b,fac)*Gr[ngr - 1,s]
+        L1f_out[s] += numpy.einsum('y,yia,yai->ia',gi,L1i,add)*Gr[ngr - 1,s]
 
     return L1f_out,L1b_out,L1i_out
 
