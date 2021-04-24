@@ -1,3 +1,4 @@
+import logging
 import sys
 import unittest
 from kelvin.tests import test_cc_utils
@@ -131,13 +132,13 @@ def get_suite(full):
         suite.addTest(test_ft_mp2.FTMP2Test("test_Hdiamond_vs_fd"))
 
     suite.addTest(test_hubbard.HubbardTest("test_2_1"))
-    suite.addTest(test_hubbard.HubbardTest("test_4_1_closed"))
-    suite.addTest(test_hubbard.HubbardTest("test_4_1_open"))
+    suite.addTest(test_hubbard.HubbardTest("test_4_1"))
+    suite.addTest(test_hubbard.HubbardTest("test_4_1_pbc"))
     suite.addTest(test_hubbard.HubbardTest("test_ccsd_site"))
     suite.addTest(test_hubbard.HubbardTest("test_ccsd"))
     suite.addTest(test_hubbard.HubbardTest("test_ft_ccsd"))
     if full:
-        suite.addTest(test_hubbard.HubbardTest("test_6_2_open"))
+        suite.addTest(test_hubbard.HubbardTest("test_6_2_pbc"))
         suite.addTest(test_hubbard.HubbardTest("test_ft_ccsd_u_g"))
 
     suite.addTest(test_hubbard_field.HubbardFieldTest("test_null_cc"))
@@ -263,6 +264,10 @@ def get_suite(full):
 
 
 if __name__ == '__main__':
+    logging.basicConfig(
+        format='%(levelname)s:%(message)s',
+        level=logging.ERROR,
+        stream=sys.stdout)
     if len(sys.argv) == 1:
         full = False
     elif sys.argv[1] == "full" or sys.argv[1] == "all":

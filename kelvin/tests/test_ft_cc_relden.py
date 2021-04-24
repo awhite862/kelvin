@@ -400,7 +400,7 @@ class FTCCReldenTest(unittest.TestCase):
         Ob[1] = 1.0
         Pa = numpy.einsum('i,j->ij', Oa, Oa)
         Pb = numpy.einsum('i,j->ij', Ob, Ob)
-        hub = Hubbard1D(L, 1.0, U, boundary='c')
+        hub = Hubbard1D(L, 1.0, U, boundary='o')
         sys = HubbardSystem(T, hub, Pa, Pb, mu=mu, orbtype='u')
         ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=10)
         ccsdT.run()
@@ -429,7 +429,7 @@ class FTCCReldenTest(unittest.TestCase):
         Ob[1] = 1.0
         Pa = numpy.einsum('i,j->ij', Oa, Oa)
         Pb = numpy.einsum('i,j->ij', Ob, Ob)
-        hub = Hubbard1D(L, 1.0, U, boundary='c')
+        hub = Hubbard1D(L, 1.0, U, boundary='o')
         sys = HubbardSystem(T, hub, Pa, Pb, mu=mu, orbtype='g')
         ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, damp=damp, ngrid=10, econv=ethresh, max_iter=mi)
         ccsdT.run()

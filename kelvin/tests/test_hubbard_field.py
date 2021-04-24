@@ -78,7 +78,7 @@ class HubbardFieldTest(unittest.TestCase):
         mu = 0.0
         L = 2
         U = 1.0
-        hub = Hubbard1D(L, 1.0, U, boundary='c')
+        hub = Hubbard1D(L, 1.0, U, boundary='o')
         ti = numpy.asarray([deltat/2 + float(j)*deltat for j in range(ng)])
 
         Pa = numpy.zeros((2,2))
@@ -112,7 +112,7 @@ class HubbardFieldTest(unittest.TestCase):
         beta = 1.0/T
         L = 2
         U = 1.0
-        hub = Hubbard1D(L, 1.0, U, boundary='c')
+        hub = Hubbard1D(L, 1.0, U, boundary='o')
         ti = numpy.asarray([deltat/2 + float(j)*deltat for j in range(ng)])
 
         # 00 u0 0u d0 0d ud0 ud du 0ud uu dd udu uud udd dud udud
@@ -219,7 +219,7 @@ class HubbardFieldTest(unittest.TestCase):
         beta = 1.0/T
         L = 2
         U = 1.0
-        hub = Hubbard1D(L, 1.0, U, boundary='c')
+        hub = Hubbard1D(L, 1.0, U, boundary='o')
         ti = numpy.asarray([deltat/2 + float(j)*deltat for j in range(ng)])
 
         # 00 u0 0u d0 0d ud0 ud du 0ud uu dd udu uud udd dud udud
