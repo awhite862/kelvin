@@ -57,7 +57,6 @@ class lccsd(object):
             else:
                 self.beta = None
                 self.beta_max = 80
-            ng = self.ngrid
             self.ti,self.g,self.G = quadrature.ft_quad(self.ngrid, self.beta_max, self.quad)
         self.sys = sys
 
@@ -91,7 +90,6 @@ class lccsd(object):
         En = self.sys.const_energy()
         E0 = zt_mp.mp0(eo) + En
         E1 = self.sys.get_mp1()
-        Ehf = E0 + E1
 
         # get Fock matrix
         F = self.sys.g_fock()
@@ -157,7 +155,6 @@ class lccsd(object):
         En = self.sys.const_energy()
         E0 = zt_mp.mp0(eo) + En
         E1 = self.sys.get_mp1()
-        Ehf = E0 + E1
 
         # get Fock matrix
         F = self.sys.g_fock()
@@ -170,7 +167,7 @@ class lccsd(object):
         # get MP2 T-amplitudes
         Id = numpy.ones(ng)
         if T1in is not None and T2in is not None:
-            T1old = T1in if self.singles else numpy.zeros((ng,n,n))
+            T1old = T1in if self.singles else numpy.zeros((ng,nv,no))
             T2old = T2in
         else:
             if self.singles:
@@ -210,8 +207,6 @@ class lccsd(object):
 
         # get energies and occupation numbers
         en = self.sys.g_energies_tot()
-        fo = ft_utils.ff(beta, en, mu)
-        fv = ft_utils.ffv(beta, en, mu)
 
         # compute requisite memory
         n = en.shape[0]
@@ -249,8 +244,8 @@ class lccsd(object):
             T2old = quadrature.int_tbar2(ng,T2old,ti,D2,G)
         if not self.singles:
             T1old = numpy.zeros(T1old.shape)
-        E2 = ft_cc_energy.ft_cc_energy(T1old,T2old,
-            F.ov,I.oovv,g,beta,Qterm=False)
+        #E2 = ft_cc_energy.ft_cc_energy(T1old,T2old,
+        #    F.ov,I.oovv,g,beta,Qterm=False)
 
         # run CC iterations
         conv_options = {
@@ -294,8 +289,6 @@ class lccsd(object):
         nocc = len(focc)
         nvir = len(fvir)
         nact = nocc + nvir - n
-        ncor = nocc - nact
-        nvvv = nvir - nact
         if self.iprint > 0:
             print("FT-LCCSD orbital info:")
             print('  nocc: {:d}'.format(nocc))
@@ -337,8 +330,8 @@ class lccsd(object):
             T2old = -numpy.einsum('v,abij->vabij',Id,I.vvoo)
             T1old = quadrature.int_tbar1(ng,T1old,ti,D1,G)
             T2old = quadrature.int_tbar2(ng,T2old,ti,D2,G)
-        E2 = ft_cc_energy.ft_cc_energy(T1old,T2old,
-            F.ov,I.oovv,g,beta,Qterm=False)
+        #E2 = ft_cc_energy.ft_cc_energy(T1old,T2old,
+        #    F.ov,I.oovv,g,beta,Qterm=False)
 
         # run CC iterations
         method = "LCCSD" if self.singles else "LCCD"
@@ -368,8 +361,6 @@ class lccsd(object):
 
         # get energies and occupation numbers
         en = self.sys.g_energies_tot()
-        fo = ft_utils.ff(beta, en, mu)
-        fv = ft_utils.ffv(beta, en, mu)
 
         # compute requisite memory
         n = en.shape[0]
@@ -378,13 +369,6 @@ class lccsd(object):
         mem_mb = 2.0*(mem1e + mem2e)*8.0/1024.0/1024.0
         if self.iprint > 0:
             print('  FT-LCCSD will use %f mb' % mem_mb)
-
-        # get FT Fock matrix
-        En = self.sys.const_energy()
-        g0 = ft_utils.GP0(beta, en, mu)
-        E0 = ft_mp.mp0(g0) + En
-        E1 = self.sys.get_mp1()
-        E01 = E0 + E1
 
         # get scaled integrals
         F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)

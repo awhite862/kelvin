@@ -271,7 +271,6 @@ class ueg_system(system):
             raise Exception("Undefined ov blocks at FT")
         F = self.r_hcore()
         d = self.r_energies_tot()
-        mu = self.mu
         n = d.shape[0]
         occ = []
         vir = []
@@ -297,7 +296,6 @@ class ueg_system(system):
             raise Exception("Undefined ov blocks at FT")
         F = self.r_hcore()
         d = self.r_energies_tot()
-        mu = self.mu
         n = d.shape[0]
         occ = []
         vir = []
@@ -323,7 +321,6 @@ class ueg_system(system):
     def g_fock(self):
         if self.T > 0.0:
             raise Exception("Undefined ov blocks at FT")
-        mu = self.mu
         d = self.g_energies_tot()
         F = self.g_hcore()
         n = d.shape[0]
@@ -467,7 +464,7 @@ class ueg_system(system):
         nb = db.shape[0]
         if self.T == 0.0:
             print("WARNING: Occupations derivatives are zero at 0K")
-            return numpy.zeros((na,na)),numpy.zeros((na,na))
+            return numpy.zeros((na,na)),numpy.zeros((nb,nb))
         beta = 1.0 / self.T
         foa = ft_utils.ff(beta, da, self.mu)
         fva = ft_utils.ffv(beta, da, self.mu)

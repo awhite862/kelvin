@@ -63,7 +63,6 @@ class scf_system(system):
             en = self.g_energies_tot()
             fo = ft_utils.ff(beta, en, self.mu)
             p = scf_utils.get_ao_ft_den(self.mf, fo)
-            p0 = scf_utils.get_ao_den(self.mf)
             f0 = scf_utils.get_ao_fock(self.mf)
             fao = scf_utils.get_ao_ft_fock(self.mf, fo)
             return ft_mp.mp1(p,2*f0 - fao,h)
@@ -97,7 +96,6 @@ class scf_system(system):
 
         d1 = -numpy.einsum('ii,i->i',hmo - numpy.diag(en),fov)
         d2 = -numpy.einsum('ijij,i,j->i',eri,fov,fo)
-        na = en.shape[0]//2
         return beta*(d1 + d2)
 
     # TODO: Do this with Fock build
@@ -281,7 +279,6 @@ class scf_system(system):
     #    return scf_utils.mo_tran_1e(self.mf,hcore)
 
     def u_aint(self):
-        mo_coeff = self.mf.mo_coeff
         mo_occ = self.mf.mo_occ
         _Ia,_Ib,_Iabab = self.u_aint_tot()
         if self.is_rhf:
@@ -328,13 +325,11 @@ class scf_system(system):
         return integrals.get_phys_antiu_all_gen(self.mf)
 
     def r_int_tot(self):
-        mo_coeff = self.mf.mo_coeff
-        mo = mo_coeff
+        mo = self.mf.mo_coeff
         I = integrals.get_phys_gen(self.mf,mo,mo,mo,mo,anti=False)
         return I
 
     def u_aint_tot(self):
-        mo_coeff = self.mf.mo_coeff
         if self.is_rhf:
             moa = self.mf.mo_coeff
             mob = moa

@@ -8,6 +8,8 @@ from cqcpy import utils
 from . import zt_mp
 from .system import system
 
+einsum = numpy.einsum
+
 class hubbard_site_system(system):
     """Hubbard model system in the site basis
 
@@ -51,10 +53,10 @@ class hubbard_site_system(system):
             Va = V - V.transpose((0,1,3,2))
             Fa = self.r_hcore()
             Fb = self.r_hcore()
-            Fa += numpy.einsum('pqrs,qs->pq',Va,Pa)
-            Fa += numpy.einsum('pqrs,qs->pq',V,Pb)
-            Fb += numpy.einsum('pqrs,qs->pq',Va,Pb)
-            Fb += numpy.einsum('pqrs,pr->qs',V,Pa)
+            Fa += einsum('pqrs,qs->pq',Va,Pa)
+            Fa += einsum('pqrs,qs->pq',V,Pb)
+            Fb += einsum('pqrs,qs->pq',Va,Pb)
+            Fb += einsum('pqrs,pr->qs',V,Pa)
             self.Fa = Fa
             self.Fb = Fb
 
@@ -135,8 +137,6 @@ class hubbard_site_system(system):
             raise Exception("Undefined ov blocks at FT")
         mu = self.mu
         if mu is None:
-            ea = self.Fa.diagonal()
-            eb = self.Fb.diagonal()
             e = self.g_energies_tot()
             o,v = self._get_ov()
             oidx = numpy.r_[o]
@@ -188,7 +188,7 @@ class hubbard_site_system(system):
     def g_fock(self):
         if self.T > 0.0:
             raise Exception("Undefined ov blocks at FT")
-        F = utils.block_diag(self.Fa,self,Fb)
+        F = utils.block_diag(self.Fa,self.Fb)
         o,v = self._get_ov()
         oidx = numpy.r_[o]
         vidx = numpy.r_[v]
@@ -266,8 +266,6 @@ class hubbard_site_system(system):
         vidxa = numpy.r_[va]
         oidxb = numpy.r_[ob]
         vidxb = numpy.r_[vb]
-        na = self.na
-        nb = self.nb
         Va,Vb,Vabab = self.u_aint_tot()
 
         Vvvvv = Va[numpy.ix_(vidxa,vidxa,vidxa,vidxa)]

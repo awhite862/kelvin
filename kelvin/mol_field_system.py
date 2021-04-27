@@ -99,7 +99,6 @@ class mol_field_system(system):
         E = numpy.zeros((3))
         E[2] = 1.0
         F = numpy.einsum('x,xij->ij', E, mol.intor('cint1e_r_sph', comp=3))
-        I = numpy.ones(self.nt)
         for i in range(self.nt):
             thcore[i] += numpy.sin(self.omega*ti[i])*F
         for i in range(self.nt):

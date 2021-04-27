@@ -184,7 +184,6 @@ def ft_cc_iter_extrap(method, F, I, D1, D2, g, G, beta, ng, ti,
         iprint (int): print level.
         conv_options (dict): Convergence options.
     """
-    tbeg = time.time()
     thresh = conv_options["tconv"]
     max_iter = conv_options["max_iter"]
     alpha = conv_options["damp"]
@@ -264,9 +263,6 @@ def ft_ucc_iter(method, T1aold, T1bold, T2aaold, T2abold, T2bbold, Fa, Fb, Ia, I
     max_iter = conv_options["max_iter"]
     alpha = conv_options["damp"]
     i = 0
-    na = D1a.shape[0]
-    nb = D1b.shape[0]
-    n = na + nb
     Eold = 888888888.888888888
     while i < max_iter and not converged:
         T1out,T2out = form_new_ampl_u(method,Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,
@@ -333,7 +329,6 @@ def ft_ucc_iter_extrap(method, Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb
         iprint (int): print level.
         conv_options (dict): Convergence options.
     """
-    tbeg = time.time()
     thresh = conv_options["tconv"]
     max_iter = conv_options["max_iter"]
     alpha = conv_options["damp"]
@@ -443,7 +438,7 @@ def ft_lambda_iter(method, L1old, L2old, T1, T2, F, I, D1, D2,
                 F,I,T1,T2,L1old,L2old,D1,D2,ti,ng,g,G,beta)
         elif method == "LCCD":
             L1 = L1old
-            L2 = ft_cc_equations.lccd_lambda_simple(F,I,self.T2,
+            L2 = ft_cc_equations.lccd_lambda_simple(F,I,T2,
                     L2old,D2,ti,ng,g,G,beta)
         elif method == "CCSD":
             L1,L2 = ft_cc_equations.ccsd_lambda_opt(
@@ -505,9 +500,6 @@ def ft_ulambda_iter(method, L1ain, L1bin, L2aain, L2abin, L2bbin, T1aold, T1bold
     thresh = conv_options["tconv"]
     max_iter = conv_options["max_iter"]
     alpha = conv_options["damp"]
-    na = D1a.shape[0]
-    nb = D1b.shape[0]
-    n = na + nb
     i = 0
     L1aold = L1ain
     L1bold = L1bin
@@ -694,9 +686,6 @@ def get_ft_integrals_neq(sys, en, beta, mu):
 
 def uft_integrals(sys, ea, eb, beta, mu):
     """Return one and two-electron integrals in the general spin orbital basis."""
-    na = ea.shape[0]
-    nb = eb.shape[0]
-    #en = numpy.concatenate((ea,eb))
     foa = ft_utils.ff(beta, ea, mu)
     fva = ft_utils.ffv(beta, ea, mu)
     fob = ft_utils.ff(beta, eb, mu)
@@ -1124,8 +1113,6 @@ def ft_d_integrals(sys, en, fo, fv, dvec):
 
 def u_ft_d_integrals(sys, ea, eb, foa, fva, fob, fvb, dveca, dvecb):
     """form unrestricted integrals contracted with derivatives of occupation numbers."""
-    na = ea.shape[0]
-    nb = eb.shape[0]
 
     # get FT Fock matrices
     fa,fb = sys.u_fock_tot()
@@ -1909,14 +1896,14 @@ def r_Fd_on_active(Fdss, Fdos, iocc, ivir,ndia, ndba, ndji, ndai):
     Fdabk = Fdss[numpy.ix_(ivir,ivir)]
     Fdijk = Fdss[numpy.ix_(iocc,iocc)]
     Fdiak = Fdss[numpy.ix_(iocc,ivir)]
-    FdaiK = Fdss[numpy.ix_(ivir,iocc)]
-    FdabK = Fdss[numpy.ix_(ivir,ivir)]
-    FdijK = Fdss[numpy.ix_(iocc,iocc)]
-    FdiaK = Fdss[numpy.ix_(iocc,ivir)]
-    FdAIK = Fdss[numpy.ix_(ivir,iocc)]
-    FdABK = Fdss[numpy.ix_(ivir,ivir)]
-    FdIJK = Fdss[numpy.ix_(iocc,iocc)]
-    FdIAK = Fdss[numpy.ix_(iocc,ivir)]
+    #FdaiK = Fdss[numpy.ix_(ivir,iocc)]
+    #FdabK = Fdss[numpy.ix_(ivir,ivir)]
+    #FdijK = Fdss[numpy.ix_(iocc,iocc)]
+    #FdiaK = Fdss[numpy.ix_(iocc,ivir)]
+    #FdAIK = Fdss[numpy.ix_(ivir,iocc)]
+    #FdABK = Fdss[numpy.ix_(ivir,ivir)]
+    #FdIJK = Fdss[numpy.ix_(iocc,iocc)]
+    #FdIAK = Fdss[numpy.ix_(iocc,ivir)]
     FdAIk = Fdos[numpy.ix_(ivir,iocc)]
     FdABk = Fdos[numpy.ix_(ivir,ivir)]
     FdIJk = Fdos[numpy.ix_(iocc,iocc)]

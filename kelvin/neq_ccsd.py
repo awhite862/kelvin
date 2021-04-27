@@ -68,7 +68,6 @@ class neq_ccsd(object):
 
         # get scaled integrals
         F,Ff,Fb,I = cc_utils.get_ft_integrals_neq(self.sys, en, beta, mu)
-        ot = self.sys.ot
 
         # get energy differences
         D1 = en[:,None] - en[None,:]
@@ -156,7 +155,7 @@ class neq_ccsd(object):
             Eold = E
 
         if not converged:
-            print("WARNING: {} did not converge!".format(method))
+            print("WARNING: NEQ-CCSD did not converge!")
 
         self.T1f = T1oldf
         self.T1b = T1oldb
@@ -185,11 +184,11 @@ class neq_ccsd(object):
         # get energies and occupation numbers
         en = self.sys.g_energies_tot()
 
-        En = self.sys.const_energy()
-        g0 = ft_utils.GP0(beta, en, mu)
-        E0 = ft_mp.mp0(g0) + En
-        E1 = self.sys.get_mp1()
-        E01 = E0 + E1
+        #En = self.sys.const_energy()
+        #g0 = ft_utils.GP0(beta, en, mu)
+        #E0 = ft_mp.mp0(g0) + En
+        #E1 = self.sys.get_mp1()
+        #E01 = E0 + E1
 
         # get scaled integrals
         F,Ff,Fb,I = cc_utils.get_ft_integrals_neq(self.sys, en, beta, mu)
@@ -225,7 +224,6 @@ class neq_ccsd(object):
         max_iter = self.max_iter
         alpha = self.alpha
         i = 0
-        Eold = 888888888.888888888
         nl1 = numpy.linalg.norm(L1oldf) + 0.0001
         nl1 += numpy.linalg.norm(L1oldb)
         nl1 += numpy.linalg.norm(L1oldi)
@@ -277,10 +275,8 @@ class neq_ccsd(object):
 
     def _neq_1rdm(self):
         if self.L2f is None or self.T2f is None:
-            raise Exception("Cannot compute density without Lambda!")
-
-        beta = self.beta
-        mu = self.mu
+            self._neq_ccsd_lambda()
+            #raise Exception("Cannot compute density without Lambda!")
 
         # get time-grid
         ngr = self.ngr
@@ -316,10 +312,6 @@ class neq_ccsd(object):
     def _neq_2rdm(self, t):
         if self.L2f is None:
             self._neq_ccsd_lambda()
-            #raise Exception("Cannot compute density without Lambda!")
-
-        beta = self.beta
-        mu = self.mu
 
         # get time-grid
         ngr = self.ngr

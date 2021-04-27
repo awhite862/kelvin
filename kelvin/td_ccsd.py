@@ -6,6 +6,7 @@ from cqcpy import ft_utils
 from cqcpy.cc_energy import cc_energy, ucc_energy, rcc_energy
 from . import cc_utils
 from . import ft_mp
+from . import zt_mp
 from . import quadrature
 from . import propagation
 
@@ -14,7 +15,6 @@ einsum = numpy.einsum
 def _get_active(athresh, fthresh, beta, mu, sys, iprint):
     if sys.has_r():
         en = sys.r_energies_tot()
-        n = len(en)
         fo = ft_utils.ff(beta, en, mu)
         fv = ft_utils.ffv(beta, en, mu)
         focc = [x for x,y in zip(fo, fv) if x > athresh and y > fthresh]
@@ -23,17 +23,12 @@ def _get_active(athresh, fthresh, beta, mu, sys, iprint):
         ivir = [i for i,x in enumerate(fv) if x > athresh and fo[i] > fthresh]
         nocc = len(focc)
         nvir = len(fvir)
-        nact = nocc + nvir - n
-        ncor = nocc - nact
-        nvvv = nvir - nact
         if iprint > 0:
             print("FT-CCSD orbital info:")
             print('  nocc: {:d}'.format(nocc))
             print('  nvir: {:d}'.format(nvir))
     elif sys.has_u():
         ea,eb = sys.u_energies_tot()
-        na = len(ea)
-        nb = len(eb)
         foa = ft_utils.ff(beta, ea, mu)
         fva = ft_utils.ffv(beta, ea, mu)
         fob = ft_utils.ff(beta, eb, mu)
@@ -54,28 +49,22 @@ def _get_active(athresh, fthresh, beta, mu, sys, iprint):
         nvira = len(fvira)
         noccb = len(foccb)
         nvirb = len(fvirb)
-        nacta = nocca + nvira - na
-        nactb = noccb + nvirb - nb
         if iprint > 0:
             print("FT-UCCSD orbital info:")
             print('  nocca: {:d}'.format(nocca))
             print('  nvira: {:d}'.format(nvira))
-            print('  noccb: {:d}'.format(nocca))
-            print('  nvirb: {:d}'.format(nvira))
+            print('  noccb: {:d}'.format(noccb))
+            print('  nvirb: {:d}'.format(nvirb))
     else:
         en = sys.g_energies_tot()
         fo = ft_utils.ff(beta, en, mu)
         fv = ft_utils.ffv(beta, en, mu)
-        n = len(en)
         focc = [x for x,y in zip(fo, fv) if x > athresh and y > fthresh]
         fvir = [x for x,y in zip(fv, fo) if x > athresh and y > fthresh]
         iocc = [i for i,x in enumerate(fo) if x > athresh and fv[i] > fthresh]
         ivir = [i for i,x in enumerate(fv) if x > athresh and fo[i] > fthresh]
         nocc = len(focc)
         nvir = len(fvir)
-        nact = nocc + nvir - n
-        ncor = nocc - nact
-        nvvv = nvir - nact
         if iprint > 0:
             print("FT-CCSD orbital info:")
             print('  nocc: {:d}'.format(nocc))
@@ -244,11 +233,9 @@ class TDCCSD(object):
         self._u_ft_ron()
 
         # zero order contributions
-        en = self.sys.g_energies_tot()
         ea,eb = self.sys.u_energies_tot()
         foa = ft_utils.ff(beta, ea, mu)
         fob = ft_utils.ff(beta, eb, mu)
-        B0 = ft_utils.dGP0(beta, en, mu)
         B0a = ft_utils.dGP0(beta, ea, mu)
         B0b = ft_utils.dGP0(beta, eb, mu)
         N0 = foa.sum() + fob.sum()
@@ -501,7 +488,7 @@ class TDCCSD(object):
                 h5f.create_dataset("l2ab", data=l2ab)
                 h5f.create_dataset("l2bb", data=l2bb)
             else:
-                h5f.create_dataset("l2", data=T2)
+                h5f.create_dataset("l2", data=L2)
             h5f.close()
         else:
             raise Exception("Unrecognized memory option for amplitudes!")
@@ -515,12 +502,12 @@ class TDCCSD(object):
             h5f = h5py.File(filename, 'r')
             n = len(h5f.keys())
             if n == 1:
-                t1 = h5f["l1"][:]
+                l1 = h5f["l1"][:]
                 h5f.close()
-                return t1
+                return l1
             elif n == 2:
-                t1a = h5f["l1a"][:]
-                t1b = h5f["l1b"][:]
+                l1a = h5f["l1a"][:]
+                l1b = h5f["l1b"][:]
                 h5f.close()
                 return (l1a,l1b)
             else:
@@ -573,7 +560,6 @@ class TDCCSD(object):
 
         # get time-grid
         ng = self.ngrid
-        ti = self.ti
         g = self.g
 
         if not self.finite_T:
@@ -603,9 +589,6 @@ class TDCCSD(object):
         else:
             # get orbital energies
             en = self.sys.g_energies_tot()
-            fo = ft_utils.ff(beta, en, mu)
-            fv = ft_utils.ffv(beta, en, mu)
-            n = en.shape[0]
 
             # get 0th and 1st order contributions
             En = self.sys.const_energy()
@@ -678,7 +661,6 @@ class TDCCSD(object):
 
         # get time-grid
         ng = self.ngrid
-        ti = self.ti
         g = self.g
         if not self.singles:
             raise Exception("This is not implemented for CCD")
@@ -686,8 +668,8 @@ class TDCCSD(object):
         if not self.finite_T:
             # create energies in spin-orbital basis
             eoa,eva,eob,evb = self.sys.u_energies()
-            no = eo.shape[0]
-            nv = ev.shape[0]
+            #no = eo.shape[0]
+            #nv = ev.shape[0]
             D1a = (eva[:,None] - eoa[None,:])
             D1b = (evb[:,None] - eob[None,:])
             D2aa = (eva[:,None,None,None] + eva[None,:,None,None]
@@ -715,8 +697,6 @@ class TDCCSD(object):
         else:
             # get orbital energies
             ea,eb = self.sys.u_energies_tot()
-            na = ea.shape[0]
-            nb = eb.shape[0]
 
             # get 0th and 1st order contributions
             En = self.sys.const_energy()
@@ -811,7 +791,6 @@ class TDCCSD(object):
 
         # get time-grid
         ng = self.ngrid
-        ti = self.ti
         g = self.g
 
         if not self.finite_T:
@@ -841,9 +820,6 @@ class TDCCSD(object):
         else:
             # get orbital energies
             en = self.sys.r_energies_tot()
-            fo = ft_utils.ff(beta, en, mu)
-            fv = ft_utils.ffv(beta, en, mu)
-            n = en.shape[0]
 
             # get 0th and 1st order contributions
             En = self.sys.const_energy()
@@ -910,7 +886,6 @@ class TDCCSD(object):
 
         # get time-grid
         ng = self.ngrid
-        ti = self.ti
         g = self.g
 
         if not self.finite_T:
@@ -932,8 +907,6 @@ class TDCCSD(object):
             F = self.sys.g_fock()
             F.oo = F.oo - numpy.diag(eo) # subtract diagonal
             F.vv = F.vv - numpy.diag(ev) # subtract diagonal
-            t1shape = (nv,no)
-            t2shape = (nv,nv,no,no)
 
             # get ERIs
             I = self.sys.g_aint()
@@ -942,8 +915,6 @@ class TDCCSD(object):
         else:
             # get orbital energies
             en = self.sys.g_energies_tot()
-            fo = ft_utils.ff(beta, en, mu)
-            fv = ft_utils.ffv(beta, en, mu)
             n = en.shape[0]
 
             # get 0th and 1st order contributions
@@ -952,9 +923,6 @@ class TDCCSD(object):
             E0 = ft_mp.mp0(g0) + En
             E1 = self.sys.get_mp1()
             E01 = E0 + E1
-
-            nocc = len(self.focc)
-            nvir = len(self.fvir)
 
             # get scaled active space integrals
             F,I = cc_utils.ft_active_integrals(self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
@@ -965,8 +933,6 @@ class TDCCSD(object):
                     - en[None,None,:,None] - en[None,None,None,:]
             D1 = D1[numpy.ix_(self.ivir,self.iocc)]
             D2 = D2[numpy.ix_(self.ivir,self.ivir,self.iocc,self.iocc)]
-            t1shape = (nvir,nocc)
-            t2shape = (nvir,nvir,nocc,nocc)
             sfo = numpy.sqrt(self.focc)
             sfv = numpy.sqrt(self.fvir)
 
@@ -1083,10 +1049,6 @@ class TDCCSD(object):
             t1b = t1e
             t2b = t2e
 
-        G0 = E0
-        G1 = E1
-        Gcc = Eccn
-        Gtot = E0 + E1 + Eccn
         if not self.saveL:
             self.L1 = l1
             self.L2 = l2
@@ -1118,7 +1080,6 @@ class TDCCSD(object):
 
         # get time-grid
         ng = self.ngrid
-        ti = self.ti
         g = self.g
 
         if not self.finite_T:
@@ -1168,10 +1129,6 @@ class TDCCSD(object):
             E0 = ft_mp.ump0(g0[0],g0[1]) + En
             E1 = self.sys.get_mp1()
             E01 = E0 + E1
-            foa = ft_utils.ff(beta, ea, mu)
-            fva = ft_utils.ffv(beta, ea, mu)
-            fob = ft_utils.ff(beta, eb, mu)
-            fvb = ft_utils.ffv(beta, eb, mu)
 
             beta = self.beta
             mu = self.mu
@@ -1478,10 +1435,6 @@ class TDCCSD(object):
             t2dab = t2eab
             t2dbb = t2ebb
 
-        G0 = E0
-        G1 = E1
-        Gcc = Eccn
-        Gtot = E0 + E1 + Eccn
         if not self.saveL:
             self.L1 = (l1a,l1b)
             self.L2 = (l2aa,l2ab,l2bb)
@@ -1533,7 +1486,6 @@ class TDCCSD(object):
 
         # get time-grid
         ng = self.ngrid
-        ti = self.ti
         g = self.g
 
         if not self.finite_T:
@@ -1555,8 +1507,6 @@ class TDCCSD(object):
             F = self.sys.r_fock()
             F.oo = F.oo - numpy.diag(eo) # subtract diagonal
             F.vv = F.vv - numpy.diag(ev) # subtract diagonal
-            t1shape = (nv,no)
-            t2shape = (nv,nv,no,no)
 
             # get ERIs
             I = self.sys.r_int()
@@ -1565,8 +1515,6 @@ class TDCCSD(object):
         else:
             # get orbital energies
             en = self.sys.r_energies_tot()
-            fo = ft_utils.ff(beta, en, mu)
-            fv = ft_utils.ffv(beta, en, mu)
             n = en.shape[0]
 
             # get 0th and 1st order contributions
@@ -1575,9 +1523,6 @@ class TDCCSD(object):
             E0 = ft_mp.mp0(g0) + En
             E1 = self.sys.get_mp1()
             E01 = E0 + E1
-
-            nocc = len(self.focc)
-            nvir = len(self.fvir)
 
             # get scaled active space integrals
             F,I = cc_utils.rft_active_integrals(self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
@@ -1588,8 +1533,6 @@ class TDCCSD(object):
                     - en[None,None,:,None] - en[None,None,None,:]
             D1 = D1[numpy.ix_(self.ivir,self.iocc)]
             D2 = D2[numpy.ix_(self.ivir,self.ivir,self.iocc,self.iocc)]
-            t1shape = (nvir,nocc)
-            t2shape = (nvir,nvir,nocc,nocc)
             sfo = numpy.sqrt(self.focc)
             sfv = numpy.sqrt(self.fvir)
 
@@ -1702,10 +1645,6 @@ class TDCCSD(object):
             t1b = t1e
             t2b = t2e
 
-        G0 = E0
-        G1 = E1
-        Gcc = Eccn
-        Gtot = E0 + E1 + Eccn
         if not self.saveL:
             self.L1 = l1
             self.L2 = l2
@@ -1731,12 +1670,9 @@ class TDCCSD(object):
     def _g_gderiv_approx(self):
         # temperature info
         beta = self.beta
-        mu = self.mu
 
         # get energies and occupation numbers
         en = self.sys.g_energies_tot()
-        fo = ft_utils.ff(beta, en, mu)
-        fv = ft_utils.ffv(beta, en, mu)
 
         F,I = cc_utils.ft_active_integrals(
                 self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
@@ -1751,13 +1687,9 @@ class TDCCSD(object):
     def _u_gderiv_approx(self):
         # temperature info
         beta = self.beta
-        mu = self.mu
 
         # get energies and occupation numbers
-        en = self.sys.g_energies_tot()
         ea,eb = self.sys.u_energies_tot()
-        na = ea.shape[0]
-        nb = eb.shape[0]
 
         ng = self.ngrid
         Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
@@ -1781,12 +1713,9 @@ class TDCCSD(object):
     def _r_gderiv_approx(self):
         # temperature info
         beta = self.beta
-        mu = self.mu
 
         # get energies and occupation numbers
         en = self.sys.r_energies_tot()
-        fo = ft_utils.ff(beta, en, mu)
-        fv = ft_utils.ffv(beta, en, mu)
 
         F,I = cc_utils.rft_active_integrals(
                 self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
@@ -1969,7 +1898,6 @@ class TDCCSD(object):
         self._g_ft_ron()
         if self.rorbo is None:
             raise Exception("Orbital energy response hasn't been computed!")
-        n = fo.shape[0]
 
         rdji = numpy.diag(self.rono)
         rdba = numpy.diag(self.ronv)
@@ -2059,8 +1987,6 @@ class TDCCSD(object):
         self.r1rdm = rdji + rdba
 
     def full_1rdm(self, relax=False):
-        beta = self.beta
-        mu = self.mu
         if self.sys.orbtype == 'r':
             if relax:
                 if self.r1rdm is None:
@@ -2068,8 +1994,6 @@ class TDCCSD(object):
                 return self.r1rdm + (self.n1rdm - numpy.diag(self.n1rdm.diagonal()))
             if self.n1rdm is None:
                 raise Exception("Normal ordered 1-rdm does not exist")
-            en = self.sys.r_energies_tot()
-            fo = ft_utils.ff(beta, ea, mu)
             rdm1 = self.n1rdm.copy()
             rdm1[numpy.ix_(self.iocc,self.iocc)] += numpy.diag(self.focc)
             return rdm1
@@ -2081,9 +2005,6 @@ class TDCCSD(object):
                         self.r1rdm[1] + (self.n1rdm[1] - numpy.diag(self.n1rdm[1].diagonal()))]
             if self.n1rdm is None:
                 raise Exception("Normal ordered 1-rdm does not exist")
-            ea,eb = self.sys.u_energies_tot()
-            foa = ft_utils.ff(beta, ea, mu)
-            fob = ft_utils.ff(beta, eb, mu)
             rdm1 = [self.n1rdm[0].copy(), self.n1rdm[1].copy()]
             rdm1[0][numpy.ix_(self.iocc[0],self.iocc[0])] += numpy.diag(self.focc[0])
             rdm1[1][numpy.ix_(self.iocc[1],self.iocc[1])] += numpy.diag(self.focc[1])
@@ -2095,8 +2016,6 @@ class TDCCSD(object):
                 return self.r1rdm + (self.n1rdm - numpy.diag(self.n1rdm.diagonal()))
             if self.n1rdm is None:
                 raise Exception("Normal ordered 1-rdm does not exist")
-            en = self.sys.g_energies_tot()
-            fo = ft_utils.ff(beta, en, mu)
             rdm1 = self.n1rdm.copy()
             rdm1[numpy.ix_(self.iocc,self.iocc)] += numpy.diag(self.focc)
             return rdm1

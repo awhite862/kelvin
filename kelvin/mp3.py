@@ -80,6 +80,7 @@ class mp3(object):
 
     def _ft_mp3(self):
         mu = self.mu
+        T = self.T
 
         # get energies and occupation numbers
         en = self.sys.g_energies_tot()

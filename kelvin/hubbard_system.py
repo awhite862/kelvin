@@ -187,7 +187,6 @@ class HubbardSystem(system):
             fob = ft_utils.ff(beta, eb, self.mu)
             fvb = ft_utils.ffv(beta, eb, self.mu)
             vecb = fob*fvb
-            tmat = self.r_hcore()
             T = self.model.get_tmatS()
             Ta = numpy.einsum('ij,ip,jq->pq',T,self.ua,self.ua)
             Tb = numpy.einsum('ij,ip,jq->pq',T,self.ub,self.ub)
@@ -383,8 +382,6 @@ class HubbardSystem(system):
         return Fa,Fb
 
     def u_fock_d_tot(self,dveca,dvecb):
-        Ta = self.model.get_tmatS()
-        Tb = Ta
         da,db = self.u_energies_tot()
         na = da.shape[0]
         nb = db.shape[0]
@@ -475,8 +472,6 @@ class HubbardSystem(system):
         vidxa = numpy.r_[va]
         oidxb = numpy.r_[ob]
         vidxb = numpy.r_[vb]
-        na = self.na
-        nb = self.nb
         Va,Vb,Vabab = self.u_aint_tot()
 
         Vvvvv = Va[numpy.ix_(vidxa,vidxa,vidxa,vidxa)]
@@ -538,7 +533,6 @@ class HubbardSystem(system):
         return Va,Vb,Vabab
 
     def g_aint(self,code=0):
-        Utot = utils.block_diag(self.ua,self.ub)
         Umat = self.g_aint_tot()
         o,v = self._get_ov()
         Vvvvv = None

@@ -107,7 +107,6 @@ class pueg_system(system):
         if self.T > 0.0:
             raise Exception("Undefined ov blocks at FT")
         d = self.g_energies_tot()
-        nbsf = self.basis.get_nbsf()
         n = int(self.N)
         eo = d[n:]
         ev = d[:n]
@@ -119,7 +118,6 @@ class pueg_system(system):
     def g_fock(self):
         if self.T > 0.0:
             raise Exception("Undefined ov blocks at FT")
-        mu = self.mu
         d = self.g_energies_tot()
         F = self.g_hcore()
         n = d.shape[0]

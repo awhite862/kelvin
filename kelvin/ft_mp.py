@@ -78,14 +78,12 @@ def get_D2a(e,T):
 def get_D1exp(e,T):
     """Return 1-electron propagator."""
     beta = 1.0/T
-    n = e.shape[0]
     D1 = e[:,None] - e[None,:]
     return numpy.exp(beta*D1) - 1.0
 
 def get_D2exp(e,T):
     """Return 2-electron propagator."""
     beta = 1.0/T
-    n = e.shape[0]
     D2 = e[:,None,None,None] + e[None,:,None,None] \
         - e[None,None,:,None] - e[None,None,None,:]
     return numpy.exp(beta*D2) - 1.0
@@ -504,7 +502,6 @@ def mp23_int(e, no, nv, f, eri, T, ngrid=10):
     imaginary time integration.
     """
     beta = 1.0 / (T + 1e-12)
-    n = e.shape[0]
 
     # get time-grid
     ng = ngrid

@@ -101,18 +101,14 @@ class KelCCSD(object):
 
         # get orbital energies
         en = self.sys.g_energies_tot()
-        fo = ft_utils.ff(beta, en, mu)
-        fv = ft_utils.ffv(beta, en, mu)
         n = en.shape[0]
 
         # get 0th and 1st order contributions
-        En = self.sys.const_energy()
-        g0 = ft_utils.GP0(beta, en, mu)
-        E0 = ft_mp.mp0(g0) + En
-        E1 = self.sys.get_mp1()
-        E01 = E0 + E1
-        nocc = len(self.focc)
-        nvir = len(self.fvir)
+        #En = self.sys.const_energy()
+        #g0 = ft_utils.GP0(beta, en, mu)
+        #E0 = ft_mp.mp0(g0) + En
+        #E1 = self.sys.get_mp1()
+        #E01 = E0 + E1
 
         # get scaled integrals
         F,I = cc_utils.ft_active_integrals(self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
@@ -123,14 +119,8 @@ class KelCCSD(object):
                 - en[None,None,:,None] - en[None,None,None,:]
         D1 = D1[numpy.ix_(self.ivir,self.iocc)]
         D2 = D2[numpy.ix_(self.ivir,self.ivir,self.iocc,self.iocc)]
-        t1shape = (nvir,nocc)
-        t2shape = (nvir,nvir,nocc,nocc)
         sfo = numpy.sqrt(self.focc)
         sfv = numpy.sqrt(self.fvir)
-
-        Eccn = 0.0
-
-        singles = self.singles
 
         # compute initial density matrix
         pia = self.L1.copy()
@@ -185,7 +175,7 @@ class KelCCSD(object):
                         l1, l2, t1, t2, fac=1.j)
                 cc_equations._LS_TS(l1s,I,t1,fac=1.j)
                 if not self.singles:
-                    l1s = numpy.zeros(l1s.shape, kls.dtype)
+                    l1s = numpy.zeros(l1s.shape, l1s.dtype)
                 return [l1s,l1d]
 
             dL = self._step(self.prop["lprop"], t0, [self.L1,self.L2], h, fLRHSt)

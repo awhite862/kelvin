@@ -19,7 +19,7 @@ class h2_field_system(system):
             spin=1)
 
         self.m = scf.UHF(mol)
-        Escf = self.m.scf()
+        self.m.scf()
         self.T = T
         self.beta = 1/T if T > 0.0 else 1.0e20
         self.mu = mu
@@ -64,7 +64,6 @@ class h2_field_system(system):
         return e
 
     def g_fock_tot(self,direc='f'):
-        e = self.g_energies_tot()
         en = self.g_energies_tot()
         fo = ft_utils.ff(self.beta, en, self.mu)
         E = numpy.zeros(3)
@@ -113,7 +112,7 @@ class H2FieldSystem(NeqSystem):
             spin=1)
 
         self.m = scf.UHF(mol)
-        Escf = self.m.scf()
+        self.m.scf()
         self.T = T
         self.beta = 1/T if T > 0.0 else 1.0e20
         self.mu = mu
@@ -149,7 +148,6 @@ class H2FieldSystem(NeqSystem):
         return e
 
     def g_fock_tot(self, t=0):
-        e = self.g_energies_tot()
         en = self.g_energies_tot()
         fo = ft_utils.ff(self.beta, en, self.mu)
         E = numpy.zeros(3)

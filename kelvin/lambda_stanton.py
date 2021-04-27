@@ -1,3 +1,7 @@
+import numpy
+
+einsum = numpy.einsum
+
 def _Lambda_Stanton(L1, L2, F, I, L1old, L2old, T1old, T2old, fac=1.0):
     FI_vv = F.vv - 0.5*einsum('bi,ia->ba',T1old,F.ov)
     FI_oo = F.oo - 0.5*einsum('bj,ib->ij',T1old,F.ov)
@@ -56,7 +60,7 @@ def _Lambda_Stanton(L1, L2, F, I, L1old, L2old, T1old, T2old, fac=1.0):
     L1 -= einsum('ja,ij->ia',L1old, FI_oo)
     L1 += 0.5*einsum('ijbc,bcaj->ia',L2old, Wvvvo)
     L1 += einsum('me,eima->ia',L1old, Wovvo.transpose((1,0,3,2))) # fix this
-    L1 -= 0.5*einsum('mnae,mnie->ia',L2old,Wooov)
+    #L1 -= 0.5*einsum('mnae,mnie->ia',L2old,Wooov)
     L1 -= einsum('ef,eifa->ia',LTvv,I.vovv)
     L1 -= einsum('mn,mina->ia',LToo,I.ooov)
     Temp1 = einsum('fe,fm->em',LTvv,T1old)

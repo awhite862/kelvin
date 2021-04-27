@@ -79,8 +79,6 @@ def get_u_orbital_energies_tot(mf):
 
 def get_orbital_energies_gen(mf):
     """Get all spin-orbital orbital energies."""
-    mo_occ = mf.mo_occ
-
     if is_rhf(mf):
         e = mf.mo_energy
         return numpy.concatenate((e,e))
@@ -207,13 +205,11 @@ def get_ao_ft_fock(mf, fo):
         mob = mf.mo_coeff[1]
         pa = numpy.dot(numpy.dot(moa,numpy.diag(fo[:n])),numpy.conj(moa.T))
         pb = numpy.dot(numpy.dot(mob,numpy.diag(fo[n:])),numpy.conj(mob.T))
-        d = (pa,pb)
         h1 = mf.get_hcore(mf.mol)
         if pbc:
             veff = mf.get_veff(mf.cell,[pa,pb])
         else:
             veff = mf.get_veff(mf.mol,[pa,pb])
-        #veff = mf.get_veff(mf.mol,d)
         fTa = h1 + veff[0]
         fTb = h1 + veff[1]
         return utils.block_diag(fTa,fTb)
@@ -333,7 +329,6 @@ def get_mo_d_ft_fock(mf, fo, fv, dvec):
     if is_rhf(mf):
         mo = mf.mo_coeff
         p = numpy.dot(numpy.dot(mo,numpy.diag(fov[:n])),numpy.conj(mo.T))
-        h1 = mf.get_hcore(mf.mol)
         if pbc:
             veff = mf.get_veff(mf.cell,p)
         else:
@@ -362,8 +357,6 @@ def get_mo_d_ft_fock(mf, fo, fv, dvec):
         raise Exception("unrecognized SCF type")
 
 def u_mo_d_ft_fock(mf, foa, fva, fob, fvb, dveca, dvecb):
-    na = foa.shape[0]
-    nb = fob.shape[0]
     fova = dveca*foa*fva
     fovb = dvecb*fob*fvb
     pbc = False
@@ -375,7 +368,6 @@ def u_mo_d_ft_fock(mf, foa, fva, fob, fvb, dveca, dvecb):
     if is_rhf(mf):
         mo = mf.mo_coeff
         p = numpy.dot(numpy.dot(mo,numpy.diag(fova)),numpy.conj(mo.T))
-        h1 = mf.get_hcore(mf.mol)
         if pbc:
             veff = mf.get_veff(mf.cell,p)
         else:

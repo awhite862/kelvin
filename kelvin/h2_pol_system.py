@@ -17,7 +17,7 @@ class h2_pol_system(system):
             spin=1)
 
         self.m = scf.UHF(mol)
-        Escf = self.m.scf()
+        self.m.scf()
         self.T = T
         self.mu = mu
         mos = self.m.mo_coeff[0]
@@ -54,7 +54,6 @@ class h2_pol_system(system):
         return e
 
     def g_fock_tot(self):
-        e = self.g_energies_tot()
         en = self.g_energies_tot()
         fo = ft_utils.ff(self.beta, en, self.mu)
         F = self.hcore + \

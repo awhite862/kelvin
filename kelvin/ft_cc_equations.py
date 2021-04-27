@@ -1,4 +1,3 @@
-import time
 import numpy
 from pyscf import lib
 from cqcpy.ov_blocks import one_e_blocks
@@ -13,8 +12,6 @@ def lccd_simple(F,I,T2old,D2,ti,ng,G):
     """Time-dependent linearized coupled cluster
     doubles (LCCD) iteration.
     """
-    t1 = time.time()
-
     Id = numpy.ones((ng))
     T2new = -einsum('v,abij->vabij',Id,I.vvoo)
 
@@ -30,8 +27,6 @@ def lccsd_simple(F,I,T1old,T2old,D1,D2,ti,ng,G):
     """Time-dependent linearized coupled cluster
     singles and doubles (LCCSD) iteration.
     """
-    t1 = time.time()
-
     Id = numpy.ones((ng))
     T1new = -einsum('v,ai->vai',Id,F.vo)
     T2new = -einsum('v,abij->vabij',Id,I.vvoo)
@@ -52,8 +47,6 @@ def ccd_simple(F,I,T2old,D2,ti,ng,G):
     """Time-dependent coupled cluster doubles (CCD)
     iteration.
     """
-    t1 = time.time()
-
     Id = numpy.ones((ng))
     T2new = -einsum('v,abij->vabij',Id,I.vvoo)
 
@@ -70,8 +63,6 @@ def ccsd_simple(F,I,T1old,T2old,D1,D2,ti,ng,G):
     """Time-dependent coupled cluster singles and
     doubles (CCSD) iteration.
     """
-    t1 = time.time()
-
     Id = numpy.ones((ng))
     T1new = -einsum('v,ai->vai',Id,F.vo)
     T2new = -einsum('v,abij->vabij',Id,I.vvoo)
@@ -103,8 +94,6 @@ def ccsd_stanton(F,I,T1old,T2old,D1,D2,ti,ng,G):
     doubles (CCSD) iteration using Stanton-Gauss
     intermediates.
     """
-    t1 = time.time()
-
     Id = numpy.ones((ng))
     T1new = -einsum('v,ai->vai',Id,F.vo)
     T2new = -einsum('v,abij->vabij',Id,I.vvoo)
@@ -120,9 +109,6 @@ def ccsd_stanton(F,I,T1old,T2old,D1,D2,ti,ng,G):
     return T1new,T2new
 
 def ccsd_stanton_single(ig,F,I,T1old,T2old,T1bar,T2bar,D1,D2,ti,ng,G):
-    t1 = time.time()
-
-    Id = numpy.ones((ng))
     T1new = -F.vo
     T2new = -I.vvoo
 
@@ -141,7 +127,6 @@ def uccsd_stanton(Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,T2aaold,T2abold,T2bbold,
     doubles (CCSD) iteration using Stanton-Gauss
     intermediates.
     """
-    t1 = time.time()
     nva,noa = Fa.vo.shape
     nvb,nob = Fb.vo.shape
 
@@ -168,14 +153,12 @@ def uccsd_stanton(Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,T2aaold,T2abold,T2bbold,
     T2aa = quadrature.int_tbar2(ng,T2aa,ti,D2aa,G)
     T2ab = quadrature.int_tbar2(ng,T2ab,ti,D2ab,G)
     T2bb = quadrature.int_tbar2(ng,T2bb,ti,D2bb,G)
-    t2 = time.time()
 
     return (T1a,T1b),(T2aa,T2ab,T2bb)
 
 def uccsd_stanton_single(ig,Fa,Fb,Ia,Ib,Iabab,
         T1a,T1b,T2aa,T2ab,T2bb,T1bara,T1barb,T2baraa,T2barab,T2barbb,
         D1a,D1b,D2aa,D2ab,D2bb,ti,ng,G):
-    t1 = time.time()
 
     T1newa = -Fa.vo
     T1newb = -Fb.vo
@@ -298,7 +281,6 @@ def lccd_lambda_simple(F,I,T2old,L2old,D2,ti,ng,g,G,beta):
     """Time-dependent linearized coupled cluster doubles (LCCD)
     Lambda iteration.
     """
-    t1 = time.time()
     # integrate old lambda amplitudes
     L2int = quadrature.int_L2(ng,L2old,ti,D2,g,G)
 
@@ -312,7 +294,6 @@ def lccd_lambda_simple(F,I,T2old,L2old,D2,ti,ng,g,G,beta):
     # energy term
     Id = numpy.ones((ng))
     L2 -= (1.0/beta)*einsum('v,ijab->vijab',Id,I.oovv)
-    t2 = time.time()
 
     return L2
 
@@ -320,7 +301,6 @@ def lccsd_lambda_simple(F,I,T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G,beta):
     """Time-dependent linearized coupled cluster singles and doubles (LCCSD)
     Lambda iteration.
     """
-    t1 = time.time()
     # integrate old lambda amplitudes
     L1int = quadrature.int_L1(ng,L1old,ti,D1,g,G)
     L2int = quadrature.int_L2(ng,L2old,ti,D2,g,G)
@@ -343,7 +323,6 @@ def lccsd_lambda_simple(F,I,T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G,beta):
     L2 -= einsum('v,ijab->vijab',Id,I.oovv)
     for y in range(ng):
         cc_equations._LS_TS(L1[y],I,T1old[y],fac=-1.0)
-    t2 = time.time()
 
     return L1,L2
 
@@ -401,7 +380,6 @@ def ccsd_lambda_opt(F,I,T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G,beta):
     L2 = numpy.zeros(L2old.shape, dtype=L2old.dtype)
 
     # amplitude term
-    t1 = time.time()
     for y in range(ng):
         cc_equations._Lambda_opt(L1[y], L2[y], F, I,
                 L1int[y], L2int[y], T1old[y], T2old[y], fac=-1.0)
@@ -420,8 +398,6 @@ def uccsd_lambda_opt(Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,T2aaold,T2abold,T2bbold,
     """Time-dependent coupled cluster singles and doubles (CCSD)
     Lambda iteration with intermediates.
     """
-    na = D1a.shape[0]
-    nb = D1b.shape[0]
     nt,nva,noa = T1aold.shape
     nt,nvb,nob = T1bold.shape
     assert(nt == ng)
@@ -441,7 +417,6 @@ def uccsd_lambda_opt(Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,T2aaold,T2abold,T2bbold,
     L2bb = numpy.zeros((ng,nob,nob,nvb,nvb), dtype=L2bbold.dtype)
 
     # amplitude term
-    t1 = time.time()
     for y in range(ng):
         L1olds = (L1aint[y],L1bint[y])
         T1olds = (T1aold[y],T1bold[y])
@@ -484,7 +459,6 @@ def ccsd_lambda_opt_int(F,I,T1old,T2old,L1old,L2old,intor,D1,D2,ti,ng,g,G,beta):
     L2 = numpy.zeros(L2old.shape, dtype=L2old.dtype)
 
     # amplitude term
-    t1 = time.time()
     for y in range(ng):
         cc_equations._Lambda_opt_int(L1[y], L2[y], F, I,
             L1int[y], L2int[y], T1old[y], T2old[y], intor[y], fac=-1.0)
@@ -685,7 +659,6 @@ def ccd_lambda_simple(F,I,T2old,L2old,D2,ti,ng,g,G,beta):
     """Time-dependent coupled cluster doubles (CCD)
     Lambda iteration.
     """
-    t1 = time.time()
     # integrate old lambda amplitudes
     L2int = quadrature.int_L2(ng,L2old,ti,D2,g,G)
 
@@ -701,7 +674,6 @@ def ccd_lambda_simple(F,I,T2old,L2old,D2,ti,ng,g,G,beta):
     Id = numpy.ones((ng))
     L2 -= einsum('v,ijab->vijab',Id,I.oovv)
     #L2 += (1.0/beta)*numpy.einsum('v,ijab->vijab',Id,I.oovv)
-    t2 = time.time()
 
     return L2
 
@@ -844,7 +816,6 @@ def uccsd_2rdm(T1a,T1b,T2aa,T2ab,T2bb,L1a,L1b,L2aa,L2ab,L2bb,
     PBcAi = numpy.zeros((nvb,nva,nvb,noa), dtype=T2ab.dtype)
     PJkAi = numpy.zeros((nob,noa,nvb,noa), dtype=T2ab.dtype)
     PKaIj = numpy.zeros((nob,nva,nob,noa), dtype=T2ab.dtype)
-    PKlIj = numpy.zeros((nob,noa,nob,noa), dtype=T2ab.dtype)
 
     PbJAi = numpy.zeros((nva,nob,nvb,noa), dtype=T2ab.dtype)
     PBjaI = numpy.zeros((nvb,noa,nva,nob), dtype=T2ab.dtype)

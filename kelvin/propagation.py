@@ -73,7 +73,7 @@ def be_step(h, var, k1, mi, alpha, thresh, RHS, iprint):
 def be(h, var, mi, alpha, thresh, RHS, iprint):
     k1 = RHS(var)
     k1 = [h*x for x in k1]
-    d = tbe_step(h, var, k1, mi, alpha, thresh, RHS, iprint)
+    d = be_step(h, var, k1, mi, alpha, thresh, RHS, iprint)
     return d
 
 def cn(h, var, mi, alpha, thresh, RHS, iprint):

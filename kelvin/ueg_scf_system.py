@@ -250,8 +250,6 @@ class ueg_scf_system(system):
 
     def u_energies(self):
         fa,fb = self.u_fock()
-        na = int(self.Na)
-        nb = int(self.Nb)
         eoa = fa.oo.diagonal()
         eva = fa.vv.diagonal()
         eob = fb.oo.diagonal()
@@ -300,6 +298,7 @@ class ueg_scf_system(system):
             raise Exception("Undefined ov blocks at FT")
         F = self.r_hcore()
         V = self.r_int_tot()
+        n = F.shape[0]
         Vd = V[numpy.ix_(numpy.arange(n),self.oidx,numpy.arange(n),self.oidx)]
         Vx = V[numpy.ix_(numpy.arange(n),self.oidx,self.oidx,numpy.arange(n))]
         F = F + 2*einsum('piri->pr',Vd) - einsum('piir->pr',Vx)
@@ -331,7 +330,6 @@ class ueg_scf_system(system):
     def g_fock(self):
         if self.T > 0.0:
             raise Exception("Undefined ov blocks at FT")
-        mu = self.mu
         F = self.g_hcore()
         n = F.shape[0]
         goidx = self.goidx
@@ -419,7 +417,7 @@ class ueg_scf_system(system):
         nb = db.shape[0]
         if self.T == 0.0:
             print("WARNING: Occupations derivatives are zero at 0K")
-            return numpy.zeros((n,n)),numpy.zeros((n,n))
+            return numpy.zeros((na,na)),numpy.zeros((nb,nb))
         beta = 1.0 / self.T
         foa = ft_utils.ff(beta, da, self.mu)
         fva = ft_utils.ffv(beta, da, self.mu)
@@ -444,7 +442,7 @@ class ueg_scf_system(system):
         nb = db.shape[0]
         if self.T == 0.0:
             print("WARNING: Occupations derivatives are zero at 0K")
-            return numpy.zeros((n,n)),numpy.zeros((n,n))
+            return numpy.zeros((na,na)),numpy.zeros((nb,nb))
         beta = 1.0 / self.T
         foa = ft_utils.ff(beta, da, self.mu)
         fva = ft_utils.ffv(beta, da, self.mu)
@@ -565,8 +563,6 @@ class ueg_scf_system(system):
     def g_aint(self,code=0):
         if self.T > 0.0:
             raise Exception("Undefined ov blocks at FT")
-        d = self.g_energies_tot()
-        n = d.shape[0]
         V = self.g_aint_tot()
         Vvvvv = None
         Vvvvo = None

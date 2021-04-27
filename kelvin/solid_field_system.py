@@ -133,7 +133,6 @@ class solid_field_system(system):
         return Fock
 
     def u_aint_tot(self):
-        mo_coeff = self.mf.mo_coeff
         mo_occ = self.mf.mo_occ
         if len(mo_occ.shape) == 1:
             moa = self.mf.mo_coeff
