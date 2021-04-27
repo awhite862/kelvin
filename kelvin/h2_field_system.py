@@ -12,11 +12,11 @@ class h2_field_system(system):
     """H2 molecule in a TD field (deprecated)"""
     def __init__(self,T,mu,omega,ti,O=None,ot=None):
         mol = gto.M(
-            verbose = 0,
-            atom = 'H 0 0 -0.6; H 0 0 0.0',
-            basis = 'STO-3G',
-            charge = 1,
-            spin = 1)
+            verbose=0,
+            atom='H 0 0 -0.6; H 0 0 0.0',
+            basis='STO-3G',
+            charge=1,
+            spin=1)
 
         self.m = scf.UHF(mol)
         Escf = self.m.scf()
@@ -88,7 +88,7 @@ class h2_field_system(system):
             delta = ti[ot] - ti[ot - 1] #if ot > 0 else ti[ot + 1] - ti[ot]
         if direc == 'f' and self.O is not None:
             Fock[self.ot] += -1.j*self.beta*self.O/delta
-        elif direc == 'b'and self.O is not None:
+        elif direc == 'b' and self.O is not None:
             Fock[self.ot] -= -0.j*self.beta*self.O/delta
 
         if direc == 'b':
@@ -106,11 +106,11 @@ class H2FieldSystem(NeqSystem):
     """H2 molecule in a TD field (deprecated)"""
     def __init__(self,T,mu,omega):
         mol = gto.M(
-            verbose = 0,
-            atom = 'H 0 0 -0.6; H 0 0 0.0',
-            basis = 'STO-3G',
-            charge = 1,
-            spin = 1)
+            verbose=0,
+            atom='H 0 0 -0.6; H 0 0 0.0',
+            basis='STO-3G',
+            charge=1,
+            spin=1)
 
         self.m = scf.UHF(mol)
         Escf = self.m.scf()

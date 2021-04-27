@@ -89,7 +89,7 @@ class ueg_basis(object):
                     kr = self.ks[r]
                     for s in range(n):
                         ks = self.ks[s]
-                        peqr = (p == r) 
+                        peqr = (p == r)
                         qeqs = (q == s)
                         s1 = True#(p == r)
                         s2 = True#(q == s)
@@ -104,7 +104,7 @@ class ueg_basis(object):
             Va = V - numpy.transpose(V,(0,1,3,2))
         return Va,Va,V
 
-    
+
     def build_g2e_matrix(self,anti=True):
         nbsf = self.get_nbsf()
         n = 2*nbsf
@@ -112,25 +112,25 @@ class ueg_basis(object):
         L = self.L
         aaa = 4.0*numpy.pi / (L*L*L)
         for p in range(n):
-            kp = self.ks[p%nbsf]
+            kp = self.ks[p % nbsf]
             sp = p//nbsf
             for q in range(n):
-                kq = self.ks[q%nbsf]
+                kq = self.ks[q % nbsf]
                 sq = q//nbsf
                 for r in range(n):
-                    kr = self.ks[r%nbsf]
+                    kr = self.ks[r % nbsf]
                     sr = r//nbsf
                     for s in range(n):
                         ss = s//nbsf
-                        ks = self.ks[s%nbsf]
-                        peqr = (p == r) 
+                        ks = self.ks[s % nbsf]
+                        peqr = (p == r)
                         qeqs = (q == s)
                         s1 = (sp == sr)
                         s2 = (sq == ss)
                         if (not peqr) and (not qeqs) and s1 and s2:
                             if numpy.linalg.norm(kp + kq - kr - ks) < 1e-12:
                                 V[p,q,r,s] = aaa / (scaled_energy(kp - kr))
-    
+
         if anti:
             return V - numpy.transpose(V,(0,1,3,2))
         else:

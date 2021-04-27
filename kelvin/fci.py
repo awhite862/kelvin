@@ -18,7 +18,7 @@ class fci(object):
         nalpha (int): Number of alpha electrons.
         nbeta (int): Number of beta electrons.
     """
-    def __init__(self, sys, T=0, mu=0, iprint=0, lam=1.0, 
+    def __init__(self, sys, T=0, mu=0, iprint=0, lam=1.0,
         nalpha=None,nbeta=None):
 
         self.sys = sys
@@ -57,7 +57,7 @@ class fci(object):
         else:
             if self.iprint > 0:
                 print("Running FCI at T=0")
-            Efci = self._fci_fixedN(self.nalpha,self.nbeta)[0] 
+            Efci = self._fci_fixedN(self.nalpha,self.nbeta)[0]
             E0 = self.sys.g_energies()[0].sum() + En
             E1 = self.sys.get_mp1()
             return (Efci+En,Efci - E0 - E1)
@@ -106,4 +106,3 @@ class fci(object):
                     Z += numpy.exp(ex)
 
         return -T*numpy.log(Z)
-

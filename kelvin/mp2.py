@@ -8,7 +8,7 @@ class mp2(object):
 
     Attributes:
         sys: System object.
-        T (float): Temperature.    
+        T (float): Temperature.
         mu (float): Chemical potential.
         iprint (int): Print level.
         saveT (bool): Save T-amplitudes.
@@ -30,14 +30,14 @@ class mp2(object):
     def run(self):
         if self.finite_T:
             if self.iprint > 0:
-                print('Running MP2 at an electronic temperature of %f K' 
+                print('Running MP2 at an electronic temperature of %f K'
                     % ft_utils.HtoK(self.T))
             return self._ft_mp2()
         else:
             if self.iprint > 0:
                 print('Running MP2 at zero Temperature')
             return self._mp2()
-        
+
     def _mp2(self):
         eo,ev = self.sys.g_energies()
         no = eo.shape[0]
@@ -59,7 +59,7 @@ class mp2(object):
         # get ERIs
         I = self.sys.g_aint(code=4)
 
-        # get Fock matrix 
+        # get Fock matrix
         F = self.sys.g_fock()
 
         # get first order energy
@@ -73,7 +73,7 @@ class mp2(object):
         else:
             E2 = zt_mp.mp2(eo,ev,F.vo,I.vvoo)
 
-        # save and return energies 
+        # save and return energies
         self.E0 = E0
         self.E1 = E1
         self.E2 = E2
@@ -86,7 +86,7 @@ class mp2(object):
         en = self.sys.g_energies_tot()
         fo = ft_utils.ff(self.beta, en, mu)
 
-        # compute zero order quantities 
+        # compute zero order quantities
         En = self.sys.const_energy()
         g0 = ft_utils.GP0(self.beta, en, mu)
         E0 = ft_mp.mp0(g0) + En
@@ -100,7 +100,7 @@ class mp2(object):
         if self.iprint > 0:
             print('  FT-RMP2 will use %f mb' % mem_mb)
 
-        # get FT Fock matrix 
+        # get FT Fock matrix
         fmo = self.sys.g_fock_tot()
         fmo = fmo - numpy.diag(en)
 

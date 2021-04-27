@@ -46,9 +46,9 @@ class HubbardSystem(system):
 
         # Build T = 0 fock matrices
         if Pa is None and Pb is None:
-            if ua is None or ub is None :
+            if ua is None or ub is None:
                 raise Exception("No reference provided")
-            if na is None or nb is None :
+            if na is None or nb is None:
                 raise Exception("No reference provided")
             self.Pa = numpy.einsum('pi,qi->pq',ua[:na,:],ua[:na,:])
             self.Pb = numpy.einsum('pi,qi->pq',ua[:nb,:],ua[:nb,:])
@@ -236,7 +236,7 @@ class HubbardSystem(system):
         else:
             ea = self.ea
             eb = self.eb
-            return (ea[ea<mu],ea[ea>mu],eb[eb<mu],eb[eb>mu])
+            return (ea[ea < mu],ea[ea > mu],eb[eb < mu],eb[eb > mu])
 
     def g_energies(self):
         if self.T > 0.0:
@@ -252,7 +252,7 @@ class HubbardSystem(system):
             return (numpy.hstack((eoa,eob)),numpy.hstack((eva,evb)))
         else:
             dtot = self.g_energies_tot()
-            return (dtot[dtot<mu],dtot[dtot>mu])
+            return (dtot[dtot < mu],dtot[dtot > mu])
 
     def r_energies_tot(self):
         raise Exception("Unrestricted reference")
@@ -327,7 +327,7 @@ class HubbardSystem(system):
     def r_fock_tot(self):
         raise Exception("Restricted Fock operator not defined")
         return self.model.get_tmatS()
-            
+
     def g_fock_tot(self):
         T = self.model.get_tmat()
         d = self.g_energies_tot()
@@ -600,7 +600,7 @@ class HubbardSystem(system):
         utot = utils.block_diag(self.ua,self.ub)
         U = self._transform1(U,utot)
         return U
-        
+
     def r_int_tot(self):
         raise Exception("Restricted MOs not implemented")
         return None

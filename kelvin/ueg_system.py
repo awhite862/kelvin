@@ -14,8 +14,8 @@ einsum = lib.einsum
 
 class ueg_system(system):
     """The uniform electron gas in a plane-wave basis set.
-    
-    Attributes: 
+
+    Attributes:
         T (float): Temperature.
         L (float): Box-length.
         basis: UEG plane-wave basis set.
@@ -41,7 +41,7 @@ class ueg_system(system):
             fo = ft_utils.ff(beta, en, self.mu)
             N = fo.sum()
             self.Na = N/2.0
-            self.Nb = self.Na 
+            self.Nb = self.Na
         else:
             self.Na = na
             self.Nb = nb
@@ -60,7 +60,7 @@ class ueg_system(system):
         self.Ef = 0.5*(3.0*pi2*self.den)**(2.0/3.0)
         self.Tf = self.T / self.Ef
         self.orbtype = orbtype
-        self.madelung=madelung
+        self.madelung = madelung
         self._mconst = 2.837297479 / (2*self.L)
 
     def has_g(self):
@@ -265,7 +265,7 @@ class ueg_system(system):
 
     def g_energies_tot(self):
         return self.basis.g_build_diag()
-    
+
     def r_fock(self):
         if self.T > 0.0:
             raise Exception("Undefined ov blocks at FT")
@@ -545,7 +545,7 @@ class ueg_system(system):
         vbidx = numpy.r_[virb]
 
         Vvvvv = Va[numpy.ix_(vaidx,vaidx,vaidx,vaidx)]
-        Vvvvo = Va[numpy.ix_(vaidx,vaidx,vaidx,oaidx)] 
+        Vvvvo = Va[numpy.ix_(vaidx,vaidx,vaidx,oaidx)]
         Vvovv = Va[numpy.ix_(vaidx,oaidx,vaidx,vaidx)]
         Vvvoo = Va[numpy.ix_(vaidx,vaidx,oaidx,oaidx)]
         Vvovo = Va[numpy.ix_(vaidx,oaidx,vaidx,oaidx)]
@@ -560,7 +560,7 @@ class ueg_system(system):
             vooo=Vvooo,ooov=Vooov,
             oooo=Voooo)
         Vvvvv = Vb[numpy.ix_(vbidx,vbidx,vbidx,vbidx)]
-        Vvvvo = Vb[numpy.ix_(vbidx,vbidx,vbidx,obidx)] 
+        Vvvvo = Vb[numpy.ix_(vbidx,vbidx,vbidx,obidx)]
         Vvovv = Vb[numpy.ix_(vbidx,obidx,vbidx,vbidx)]
         Vvvoo = Vb[numpy.ix_(vbidx,vbidx,obidx,obidx)]
         Vvovo = Vb[numpy.ix_(vbidx,obidx,vbidx,obidx)]
@@ -576,8 +576,8 @@ class ueg_system(system):
             oooo=Voooo)
 
         Vvvvv = Vabab[numpy.ix_(vaidx,vbidx,vaidx,vbidx)]
-        Vvvvo = Vabab[numpy.ix_(vaidx,vbidx,vaidx,obidx)] 
-        Vvvov = Vabab[numpy.ix_(vaidx,vbidx,oaidx,vbidx)] 
+        Vvvvo = Vabab[numpy.ix_(vaidx,vbidx,vaidx,obidx)]
+        Vvvov = Vabab[numpy.ix_(vaidx,vbidx,oaidx,vbidx)]
         Vvovv = Vabab[numpy.ix_(vaidx,obidx,vaidx,vbidx)]
         Vovvv = Vabab[numpy.ix_(oaidx,vbidx,vaidx,vbidx)]
         Vvvoo = Vabab[numpy.ix_(vaidx,vbidx,oaidx,obidx)]
@@ -629,7 +629,7 @@ class ueg_system(system):
         if code == 0 or code == 1:
             Vvvvv = V[numpy.ix_(vidx,vidx,vidx,vidx)]
         if code == 0 or code == 2:
-            Vvvvo = V[numpy.ix_(vidx,vidx,vidx,oidx)] 
+            Vvvvo = V[numpy.ix_(vidx,vidx,vidx,oidx)]
         if code == 0 or code == 3:
             Vvovv = V[numpy.ix_(vidx,oidx,vidx,vidx)]
         if code == 0 or code == 4:

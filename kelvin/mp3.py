@@ -10,7 +10,7 @@ class mp3(object):
 
     Attributes:
         sys: System object.
-        T (float): Temperature.    
+        T (float): Temperature.
         mu (float): Chemical potential.
         iprint (int): Print level.
     """
@@ -29,14 +29,14 @@ class mp3(object):
 
     def run(self):
         if self.finite_T:
-            print('Running MP3 at an electronic temperature of %f K' 
+            print('Running MP3 at an electronic temperature of %f K'
                 % ft_utils.HtoK(self.T))
             return self._ft_mp3()
         else:
             if self.iprint > 0:
                 print('Running MP3 at zero Temperature')
             return self._mp3()
-        
+
     def _mp3(self):
         # create orbitals and energies in spin-orbital basis
         eo,ev = self.sys.g_energies()
@@ -59,7 +59,7 @@ class mp3(object):
         # get ERIs
         I = self.sys.g_aint()
 
-        # get Fock matrix 
+        # get Fock matrix
         F = self.sys.g_fock()
         F.oo = F.oo - numpy.diag(eo) # subtract diagonal
         F.vv = F.vv - numpy.diag(ev) # subtract diagonal
@@ -67,7 +67,7 @@ class mp3(object):
         # get first order energy
         E1 = self.sys.get_mp1()
 
-        # compute 2nd and 3rd order energies 
+        # compute 2nd and 3rd order energies
         E2 = zt_mp.mp2(eo,ev,F.vo,I.vvoo)
         E3 = zt_mp.mp3(eo,ev,F,I)
 
@@ -95,12 +95,12 @@ class mp3(object):
         if self.iprint > 0:
             print('  FT-RMP3 will use %f mb' % mem_mb)
 
-        # compute zero order quantities 
+        # compute zero order quantities
         En = self.sys.const_energy()
         g0 = ft_utils.GP0(self.beta, en, mu)
         E0 = ft_mp.mp0(g0) + En
 
-        # get FT Fock matrix 
+        # get FT Fock matrix
         fmo = self.sys.g_fock_tot()
         fmo = fmo - numpy.diag(en)
 
@@ -110,7 +110,7 @@ class mp3(object):
         # get ERIs
         eri = self.sys.g_aint_tot()
 
-        # compute second and third order energies 
+        # compute second and third order energies
         E2 = ft_mp.mp2(en, fo, fmo, eri, T)
         #E3 = ft_mp.mp3_new(en, fo, fmo, eri, T) TODO: fix this!
         E23 = ft_mp.mp23_int(en, fo, fv, fmo, eri, T, ngrid=100)

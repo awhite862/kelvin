@@ -12,7 +12,7 @@ def ump0(ea,eb):
 
 def mp1(p, f, h):
     """Return the 1st order energy."""
-    ec1 = numpy.tensordot(h,p,axes=([0,1],[0,1])) 
+    ec1 = numpy.tensordot(h,p,axes=([0,1],[0,1]))
     ec2 = numpy.tensordot(f,p,axes=([0,1],[0,1]))
     return 0.5*(ec1 - ec2)
 
@@ -24,10 +24,10 @@ def mp2(eo, ev, fvo, Ivvoo, returnT=False):
 
     T1 = numpy.einsum('ai,ia->ai',fvo,D1)
     T2 = numpy.einsum('abij,ijab->abij',Ivvoo,D2)
-    
+
     Es = cc_energy_s1(T1, fvo.transpose(1,0))
     Ed = cc_energy_d(T2, Ivvoo.transpose(2,3,0,1))
-    
+
     if returnT:
         return (Es + Ed,T1,T2)
     else:

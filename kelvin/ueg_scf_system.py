@@ -14,8 +14,8 @@ einsum = lib.einsum
 
 class ueg_scf_system(system):
     """The uniform electron gas in a plane-wave basis set.
-    
-    Attributes: 
+
+    Attributes:
         T (float): Temperature.
         L (float): Box-length.
         basis: UEG plane-wave basis set.
@@ -49,7 +49,7 @@ class ueg_scf_system(system):
             assert(mu is not None)
             self.mu = mu
 
-        # store orbital occupations as numpy ranges 
+        # store orbital occupations as numpy ranges
         d0 = numpy.asarray(self.basis.Es)
         n = d0.shape[0]
         if naref is not None:
@@ -75,7 +75,7 @@ class ueg_scf_system(system):
             self.goidx = numpy.r_[occ]
             self.gvidx = numpy.r_[vir]
 
-        # now get real occupations if necessary 
+        # now get real occupations if necessary
         if na is None:
             assert(nb is None)
             en = self.g_energies_tot()
@@ -83,7 +83,7 @@ class ueg_scf_system(system):
             fo = ft_utils.ff(beta, en, self.mu)
             N = fo.sum()
             self.Na = N/2.0
-            self.Nb = self.Na 
+            self.Nb = self.Na
 
         # save some parameters
         self.N = self.Na + self.Nb
@@ -93,7 +93,7 @@ class ueg_scf_system(system):
         self.Ef = 0.5*(3.0*pi2*self.den)**(2.0/3.0)
         self.Tf = self.T / self.Ef
         self.orbtype = orbtype
-        self.madelung=madelung
+        self.madelung = madelung
         self._mconst = 2.837297479 / (2*self.L)
 
     def has_g(self):
@@ -294,7 +294,7 @@ class ueg_scf_system(system):
     def g_energies_tot(self):
         ea,eb = self.u_energies_tot()
         return numpy.hstack((ea,eb))
-    
+
     def r_fock(self):
         if self.T > 0.0:
             raise Exception("Undefined ov blocks at FT")
@@ -505,7 +505,7 @@ class ueg_scf_system(system):
         vbidx = self.vidx
 
         Vvvvv = Va[numpy.ix_(vaidx,vaidx,vaidx,vaidx)]
-        Vvvvo = Va[numpy.ix_(vaidx,vaidx,vaidx,oaidx)] 
+        Vvvvo = Va[numpy.ix_(vaidx,vaidx,vaidx,oaidx)]
         Vvovv = Va[numpy.ix_(vaidx,oaidx,vaidx,vaidx)]
         Vvvoo = Va[numpy.ix_(vaidx,vaidx,oaidx,oaidx)]
         Vvovo = Va[numpy.ix_(vaidx,oaidx,vaidx,oaidx)]
@@ -520,7 +520,7 @@ class ueg_scf_system(system):
             vooo=Vvooo,ooov=Vooov,
             oooo=Voooo)
         Vvvvv = Vb[numpy.ix_(vbidx,vbidx,vbidx,vbidx)]
-        Vvvvo = Vb[numpy.ix_(vbidx,vbidx,vbidx,obidx)] 
+        Vvvvo = Vb[numpy.ix_(vbidx,vbidx,vbidx,obidx)]
         Vvovv = Vb[numpy.ix_(vbidx,obidx,vbidx,vbidx)]
         Vvvoo = Vb[numpy.ix_(vbidx,vbidx,obidx,obidx)]
         Vvovo = Vb[numpy.ix_(vbidx,obidx,vbidx,obidx)]
@@ -536,8 +536,8 @@ class ueg_scf_system(system):
             oooo=Voooo)
 
         Vvvvv = Vabab[numpy.ix_(vaidx,vbidx,vaidx,vbidx)]
-        Vvvvo = Vabab[numpy.ix_(vaidx,vbidx,vaidx,obidx)] 
-        Vvvov = Vabab[numpy.ix_(vaidx,vbidx,oaidx,vbidx)] 
+        Vvvvo = Vabab[numpy.ix_(vaidx,vbidx,vaidx,obidx)]
+        Vvvov = Vabab[numpy.ix_(vaidx,vbidx,oaidx,vbidx)]
         Vvovv = Vabab[numpy.ix_(vaidx,obidx,vaidx,vbidx)]
         Vovvv = Vabab[numpy.ix_(oaidx,vbidx,vaidx,vbidx)]
         Vvvoo = Vabab[numpy.ix_(vaidx,vbidx,oaidx,obidx)]
@@ -581,21 +581,21 @@ class ueg_scf_system(system):
         gvidx = self.gvidx
         if code == 0 or code == 1:
             Vvvvv = V[numpy.ix_(gvidx,gvidx,gvidx,gvidx)]
-        if code == 0 or code == 2:                 
-            Vvvvo = V[numpy.ix_(gvidx,gvidx,gvidx,goidx)] 
-        if code == 0 or code == 3:                 
+        if code == 0 or code == 2:
+            Vvvvo = V[numpy.ix_(gvidx,gvidx,gvidx,goidx)]
+        if code == 0 or code == 3:
             Vvovv = V[numpy.ix_(gvidx,goidx,gvidx,gvidx)]
-        if code == 0 or code == 4:                 
+        if code == 0 or code == 4:
             Vvvoo = V[numpy.ix_(gvidx,gvidx,goidx,goidx)]
-        if code == 0 or code == 5:                 
+        if code == 0 or code == 5:
             Vvovo = V[numpy.ix_(gvidx,goidx,gvidx,goidx)]
-        if code == 0 or code == 6:                 
+        if code == 0 or code == 6:
             Voovv = V[numpy.ix_(goidx,goidx,gvidx,gvidx)]
-        if code == 0 or code == 7:                 
+        if code == 0 or code == 7:
             Vvooo = V[numpy.ix_(gvidx,goidx,goidx,goidx)]
-        if code == 0 or code == 8:                 
+        if code == 0 or code == 8:
             Vooov = V[numpy.ix_(goidx,goidx,goidx,gvidx)]
-        if code == 0 or code == 9:                 
+        if code == 0 or code == 9:
             Voooo = V[numpy.ix_(goidx,goidx,goidx,goidx)]
         return two_e_blocks(
             vvvv=Vvvvv,vvvo=Vvvvo,

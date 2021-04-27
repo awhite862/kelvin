@@ -1,6 +1,11 @@
 import numpy
 from cqcpy.cc_energy import cc_energy_d
 from cqcpy.cc_energy import cc_energy_s1
+from cqcpy.ov_blocks import one_e_blocks
+from cqcpy.ov_blocks import two_e_blocks
+from . import ft_cc_energy
+from . import ft_cc_equations
+from . import quadrature
 
 def mp0(g0):
     """Return 0th order free energy."""
@@ -113,7 +118,7 @@ def mp2(en, no, f, eri, T, returnT=False):
 
     Es = cc_energy_s1(T1, f.transpose(1,0))
     Ed = cc_energy_d(T2, eri)
-    
+
     if returnT:
         return (Es + Ed, T1, T2)
     else:
@@ -169,7 +174,7 @@ def mp2(en, no, f, eri, T, returnT=False):
 #        return (Es + Ed, T1, T2)
 #    else:
 #        return Es + Ed
-    
+
 def mp2_a(D1a, D2a, no, f, eri, T):
     """Return anomalous 2nd order correction to the free energy."""
     nv = (1.0 - no)
@@ -182,12 +187,12 @@ def mp2_a(D1a, D2a, no, f, eri, T):
 
     Es = cc_energy_s1(T1, f.transpose(1,0))
     Ed = cc_energy_d(T2, eri)
-    
+
     return Es + Ed
 
 
 def mp2_sep(en, no, f, eri, T, returnT=False):
-    """Return 2nd order correction and compute separate MP2 
+    """Return 2nd order correction and compute separate MP2
     T amplitudes.
     """
     D1 = get_D1c(en)
@@ -211,14 +216,14 @@ def mp2_sep(en, no, f, eri, T, returnT=False):
 
     Es = cc_energy_s1(T1a + T1n, f.transpose(1,0))
     Ed = cc_energy_d(T2a + T2a, eri)
-    
+
     if returnT:
         return (Es + Ed, T1n, T2n, T1a, T2a)
     else:
         return Es + Ed
 
 def mp3_doubles(no, eri, D21, D22):
-    """Return conventional doubles piece of the 3rd order 
+    """Return conventional doubles piece of the 3rd order
     correction to the free energy.
     """
     nv = (1.0 - no)
@@ -234,7 +239,7 @@ def mp3_doubles(no, eri, D21, D22):
     return F1 + F2 + F3
 
 def mp3_doubles1N(no, eri, D21, D22):
-    """Return anomalous doubles piece of the 3rd order 
+    """Return anomalous doubles piece of the 3rd order
     correction to the free energy.
     """
     nv = (1.0 - no)
@@ -250,7 +255,7 @@ def mp3_doubles1N(no, eri, D21, D22):
     return F1 + F2 + F3
 
 def mp3_doubles2N(no, eri, D21, D22):
-    """Return the doubly anomalous doubles piece of the 3rd order 
+    """Return the doubly anomalous doubles piece of the 3rd order
     correction to the free energy.
     """
     nv = (1.0 - no)
@@ -266,7 +271,7 @@ def mp3_doubles2N(no, eri, D21, D22):
     return F1 + F2 + F3
 
 def mp3_singles(no, f, eri, D11, D12, D21, D22):
-    """Return the conventional singles piece of the 3rd order 
+    """Return the conventional singles piece of the 3rd order
     correction to the free energy.
     """
     nv = (1.0 - no)
@@ -308,7 +313,7 @@ def mp3_singles(no, f, eri, D11, D12, D21, D22):
     return dtot
 
 def mp3_singles1N(no, f, eri, D11, D12, D21, D22):
-    """Return the anomalous singles piece of the 3rd order 
+    """Return the anomalous singles piece of the 3rd order
     correction to the free energy.
     """
     nv = (1.0 - no)
@@ -350,7 +355,7 @@ def mp3_singles1N(no, f, eri, D11, D12, D21, D22):
     return dtot
 
 def mp3_singles2N(no, f, eri, D11, D12, D21, D22):
-    """Return the doubly anomalous singles piece of the 3rd order 
+    """Return the doubly anomalous singles piece of the 3rd order
     correction to the free energy.
     """
     nv = (1.0 - no)
@@ -424,7 +429,7 @@ def mp3(e, no, f, eri, T):
             E3daa1 + E3daa2 + E3saa1 + E3saa2
 
 def mp3_a(D1, D2, D1a, D2a, no, f, eri, T):
-    """Return the total anomalous contribution to the 3rd order 
+    """Return the total anomalous contribution to the 3rd order
     correction to the free energy.
     """
     raise Exception("MP3 code is incorrect")
@@ -493,14 +498,9 @@ def mp3_new(e, no, f, eri, T):
     S = SN+SN1+SN2+SA1+SA2+SA3+SA4+SAA
     return S+D
 
-from . import ft_cc_energy
-from . import ft_cc_equations
-from . import quadrature
-from cqcpy.ov_blocks import one_e_blocks
-from cqcpy.ov_blocks import two_e_blocks
 
 def mp23_int(e, no, nv, f, eri, T, ngrid=10):
-    """Return the 2nd and 3rd order corrections to the free energy by 
+    """Return the 2nd and 3rd order corrections to the free energy by
     imaginary time integration.
     """
     beta = 1.0 / (T + 1e-12)

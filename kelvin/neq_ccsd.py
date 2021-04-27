@@ -90,7 +90,7 @@ class neq_ccsd(object):
             Idi = numpy.ones((ngi))
             T1oldi = -numpy.einsum('v,ai->vai',Idi,F.vo)
             T2oldb = -numpy.einsum('v,abij->vabij',Idr,I.vvoo)
-            T2oldf = T2oldb.copy() 
+            T2oldf = T2oldb.copy()
             T2oldi = -numpy.einsum('v,abij->vabij',Idi,I.vvoo)
 
             T1oldf,T1oldb,T1oldi = quadrature.int_tbar1_keldysh(
@@ -397,7 +397,9 @@ class neq_ccsd(object):
         A9 = 0.25*einsum('klij,ijkl,k,l->',P2[8],A,fo,fo)
 
         # product terms
-        if self.dia is None: self._neq_1rdm()
+        if self.dia is None:
+            self._neq_1rdm()
+
         A5 += 1.0*einsum('ba,ajbj,j,a->',self.dba[t],A,fo,fv)
 
         A7 += 0.5*einsum('ja,aiji,j,i,a->',self.dia[t],A,fo,fo,fv)

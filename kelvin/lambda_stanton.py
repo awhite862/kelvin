@@ -10,7 +10,7 @@ def _Lambda_Stanton(L1, L2, F, I, L1old, L2old, T1old, T2old, fac=1.0):
     T2B += einsum('ai,bj->abij',T1old,T1old)
     T2B -= einsum('bi,aj->abij',T1old,T1old)
 
-    Woooo = I.oooo.copy() 
+    Woooo = I.oooo.copy()
     Woooo += einsum('klic,cj->klij',I.ooov,T1old)
     Woooo -= einsum('kljc,ci->klij',I.ooov,T1old)
     Woooo += 0.25*einsum('klcd,cdij->klij',I.oovv,T2B)
@@ -32,8 +32,8 @@ def _Lambda_Stanton(L1, L2, F, I, L1old, L2old, T1old, T2old, fac=1.0):
     Wtemp = -I.vovo.transpose((1,0,2,3))
     Wtemp -= einsum('bckj,ikac->ibaj',T2old,I.oovv)
 
-    #temp = einsum('bj,iabj->iajk',T1old,Wtemp) 
-    temp = einsum('bj,iabk->iajk',T1old,Wtemp) 
+    #temp = einsum('bj,iabj->iajk',T1old,Wtemp)
+    temp = einsum('bj,iabk->iajk',T1old,Wtemp)
     temp += einsum('iljb,abkl->iajk',I.ooov,T2old)
     temp -= temp.transpose((0,1,3,2))
     Wovoo = -I.vooo.transpose((1,0,2,3)) - einsum('ib,abjk->iajk',Fov,T2old)
@@ -64,6 +64,6 @@ def _Lambda_Stanton(L1, L2, F, I, L1old, L2old, T1old, T2old, fac=1.0):
     L1 += einsum('em,imae->ia',Temp1,I.oovv)
 
     #L2 = I.oovv.copy()
-    #L2 += 
+    #L2 +=
 
     return L1,L2

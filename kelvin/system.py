@@ -72,7 +72,7 @@ class system(object):
         """Return all the U/G orbital energies."""
         err = "Base class function g_energies_tot()"
         raise Exception(err)
-    
+
     def r_fock(self):
         """Return the restricted Fock operator (including diagonal) in block form."""
         err = "Base class function r_fock()"

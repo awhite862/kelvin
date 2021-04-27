@@ -285,17 +285,17 @@ class scf_system(system):
         mo_occ = self.mf.mo_occ
         _Ia,_Ib,_Iabab = self.u_aint_tot()
         if self.is_rhf:
-            noa = mo_occ[mo_occ>0].size
-            nva = mo_occ[mo_occ==0].size
+            noa = mo_occ[mo_occ > 0].size
+            nva = mo_occ[mo_occ == 0].size
             nob = noa
             nvb = nva
         elif self.is_uhf:
             mo_occa = mo_occ[0]
             mo_occb = mo_occ[1]
-            noa = mo_occa[mo_occa>0].size
-            nva = mo_occa[mo_occa==0].size
-            nob = mo_occb[mo_occb>0].size
-            nvb = mo_occb[mo_occb==0].size
+            noa = mo_occa[mo_occa > 0].size
+            nva = mo_occa[mo_occa == 0].size
+            nob = mo_occb[mo_occb > 0].size
+            nvb = mo_occb[mo_occb == 0].size
         else:
             raise Exception("incompatible MF type")
         Ia = make_two_e_blocks(_Ia,noa,nva,noa,nva,noa,nva,noa,nva)

@@ -10,12 +10,12 @@ from .neq_system import *
 class h2_pol_system(system):
     def __init__(self,T,mu):
         mol = gto.M(
-            verbose = 0,
-            atom = 'H 0 0 -0.6; H 0 0 0.0',
-            basis = 'STO-3G',
-            charge = 1,
-            spin = 1)
-        
+            verbose=0,
+            atom='H 0 0 -0.6; H 0 0 0.0',
+            basis='STO-3G',
+            charge=1,
+            spin=1)
+
         self.m = scf.UHF(mol)
         Escf = self.m.scf()
         self.T = T
@@ -30,7 +30,7 @@ class h2_pol_system(system):
             return False
         else:
             return True
-    
+
     def has_g(self):
         return True
 
@@ -52,7 +52,7 @@ class h2_pol_system(system):
         F = self.hcore + self.eri[:,0,:,0] - self.eri[:,0,0,:]
         e,v = numpy.linalg.eigh(F)
         return e
-    
+
     def g_fock_tot(self):
         e = self.g_energies_tot()
         en = self.g_energies_tot()

@@ -58,15 +58,16 @@ def be_step(h, var, k1, mi, alpha, thresh, RHS, iprint):
     converged = False
     for k in range(mi):
         d = RHS([x + y for x,y in zip(var,dold)])
-        d = [h*x for x  in d]
+        d = [h*x for x in d]
         error = sum([numpy.linalg.norm(x - y)/(numpy.linalg.norm(x) + 0.01) for x,y in zip(d,dold)])
         if iprint > 1:
             print(' %2d  %.4E' % (k+1,error))
         dold = [(1.0 - alpha)*x + alpha*y for x,y in zip(d,dold)]
-        if error < thresh: 
+        if error < thresh:
             converged = True
             break
-    if not converged: raise Exception("BE: Failed to compute implicit step")
+    if not converged:
+        raise Exception("BE: Failed to compute implicit step")
     return dold
 
 def be(h, var, mi, alpha, thresh, RHS, iprint):
@@ -93,8 +94,9 @@ def am2(h, var, mi, alpha, thresh, RHS, iprint):
         if iprint > 1:
             print(' %2d  %.4E' % (k+1,error))
         dold = [(1.0 - alpha)*x + alpha*y for x,y in zip(d,dold)]
-        if error < thresh: 
+        if error < thresh:
             converged = True
             break
-    if not converged: raise Exception("AM2: Failed to compute implicit step")
+    if not converged:
+        raise Exception("AM2: Failed to compute implicit step")
     return dold

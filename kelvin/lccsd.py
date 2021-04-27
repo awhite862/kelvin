@@ -16,7 +16,7 @@ class lccsd(object):
 
     Attributes:
         sys: System object.
-        T (float): Temperature.    
+        T (float): Temperature.
         mu (float): Chemical potential.
         iprint (int): Print level.
         singles (bool): Include singles (False -> CCD).
@@ -27,8 +27,8 @@ class lccsd(object):
         realtime (bool): Force time-dependent formulation for zero T
         athresh (float): Threshold for ignoring small occupations
     """
-    def __init__(self, sys, T=0, mu=0, iprint=0, 
-            singles=True, econv=1e-8, tconv=None, max_iter=40, 
+    def __init__(self, sys, T=0, mu=0, iprint=0,
+            singles=True, econv=1e-8, tconv=None, max_iter=40,
             damp=0.0, ngrid=10, realtime=False, athresh=0.0):
         self.T = T
         self.mu = mu
@@ -66,7 +66,7 @@ class lccsd(object):
     def run(self,T1=None,T2=None):
         if self.finite_T:
             if self.iprint > 0:
-                print('Running LCCSD at an electronic temperature of %f K' 
+                print('Running LCCSD at an electronic temperature of %f K'
                     % ft_utils.HtoK(self.T))
             if self.athresh > 0.0:
                 return self._ft_lccsd_active(T1in=T1,T2in=T2)
@@ -87,7 +87,7 @@ class lccsd(object):
         Doovv = 1.0/(eo[:,None,None,None] + eo[None,:,None,None]
             - ev[None,None,:,None] - ev[None,None,None,:])
 
-        # get HF energy 
+        # get HF energy
         En = self.sys.const_energy()
         E0 = zt_mp.mp0(eo) + En
         E1 = self.sys.get_mp1()
@@ -116,7 +116,7 @@ class lccsd(object):
         while i < max_iter and not converged:
             if self.singles:
                 T1,T2 = cc_equations.lccsd_simple(F, I, T1old, T2old)
-            else: 
+            else:
                 T2 = cc_equations.lccd_simple(F, I, T2old)
                 T1 = numpy.zeros(F.vo.shape)
             T1 = numpy.einsum('ai,ia->ai',T1,Dov)
@@ -347,7 +347,7 @@ class lccsd(object):
             "tconv":self.tconv,
             "max_iter":self.max_iter,
             "damp":self.damp}
-        Eccn,T1,T2 = cc_utils.ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G, beta, 
+        Eccn,T1,T2 = cc_utils.ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G, beta,
                 ng, ti, self.iprint, conv_options)
         self.T1 = T1
         self.T2 = T2
@@ -412,4 +412,3 @@ class lccsd(object):
         # save lambda amplitudes
         self.L1 = L1
         self.L2 = L2
-

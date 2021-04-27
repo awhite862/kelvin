@@ -208,10 +208,10 @@ def ft_cc_iter_extrap(method, F, I, D1, D2, g, G, beta, ng, ti,
             T2new[ig] = quadrature.int_tbar2_single(ng,ig,t2bar,ti,D2,G)
         else:
             # linear extrapolation
-            T1new[ig] = T1new[ig - 1] + (T1new[ig - 2] - T1new[ig - 1])\
-                    *(ti[ig] - ti[ig - 1])/(ti[ig - 2] - ti[ig - 1])
-            T2new[ig] = T2new[ig - 1] + (T2new[ig - 2] - T2new[ig - 1])\
-                    *(ti[ig] - ti[ig - 1])/(ti[ig - 2] - ti[ig - 1])
+            T1new[ig] = T1new[ig - 1]\
+                + (T1new[ig - 2] - T1new[ig - 1])*(ti[ig] - ti[ig - 1])/(ti[ig - 2] - ti[ig - 1])
+            T2new[ig] = T2new[ig - 1]\
+                + (T2new[ig - 2] - T2new[ig - 1])*(ti[ig] - ti[ig - 1])/(ti[ig - 2] - ti[ig - 1])
         converged = False
         nl1 = numpy.sqrt(float(T1new[ig].size))
         nl2 = numpy.sqrt(float(T2new[ig].size))
@@ -1118,7 +1118,7 @@ def ft_d_integrals(sys, en, fo, fv, dvec):
             + einsum('ab,a,b->ab',fmo,dsv,sfv)\
             + einsum('ab,a,b->ab',fmo,sfv,dsv)
     F = one_e_blocks(Foo,Fov,Fvo,Fvv)
-    
+
     I = _form_ft_d_eris(eri,sfo,sfv,dso,dsv)
     return F,I
 
@@ -1422,7 +1422,7 @@ def uft_d_active_integrals(
           + einsum('akij,a,k,i,j->akij',eriAB[numpy.ix_(ivira,ioccb,iocca,ioccb)],sfva,dsob,sfoa,sfob)\
           + einsum('akij,a,k,i,j->akij',eriAB[numpy.ix_(ivira,ioccb,iocca,ioccb)],sfva,sfob,dsoa,sfob)\
           + einsum('akij,a,k,i,j->akij',eriAB[numpy.ix_(ivira,ioccb,iocca,ioccb)],sfva,sfob,sfoa,dsob)
- 
+
     Iovoo = einsum('kaij,k,a,i,j->kaij',eriAB[numpy.ix_(iocca,ivirb,iocca,ioccb)],sfoa,dsvb,sfoa,sfob)\
           + einsum('kaij,k,a,i,j->kaij',eriAB[numpy.ix_(iocca,ivirb,iocca,ioccb)],dsoa,sfvb,sfoa,sfob)\
           + einsum('kaij,k,a,i,j->kaij',eriAB[numpy.ix_(iocca,ivirb,iocca,ioccb)],sfoa,sfvb,dsoa,sfob)\

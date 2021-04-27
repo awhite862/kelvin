@@ -62,7 +62,7 @@ class mol_field_system(system):
 
     def g_energies_tot(self):
         return scf_utils.get_orbital_energies_gen(self.mf)
-    
+
     def g_fock_tot(self,direc='f'):
         en = self.g_energies_tot()
         fo = ft_utils.ff(self.beta, en, self.mu)

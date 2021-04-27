@@ -51,7 +51,7 @@ class hubbard_field_system(system):
         # Build T = 0 fock matrices
         self.orbtype = 'u'
         if Pa is None and Pb is None:
-            if ua is None or ub is None :
+            if ua is None or ub is None:
                 raise Exception("No reference provided")
             self.Pa = numpy.einsum('pi,qi->pq',ua[:na,:],ua[:na,:])
             self.Pb = numpy.einsum('pi,qi->pq',ua[:nb,:],ua[:nb,:])
@@ -137,7 +137,7 @@ class hubbard_field_system(system):
     def u_energies_tot(self):
         ea = self.ea
         eb = self.eb
-        return ea,eb 
+        return ea,eb
 
     def g_energies_tot(self):
         ea = self.ea
@@ -283,7 +283,7 @@ class HubbardFieldSystem(NeqSystem):
         # Build T = 0 fock matrices
         self.orbtype = 'u'
         if Pa is None and Pb is None:
-            if ua is None or ub is None :
+            if ua is None or ub is None:
                 raise Exception("No reference provided")
             self.Pa = numpy.einsum('pi,qi->pq',ua[:na,:],ua[:na,:])
             self.Pb = numpy.einsum('pi,qi->pq',ua[:nb,:],ua[:nb,:])
@@ -373,7 +373,7 @@ class HubbardFieldSystem(NeqSystem):
     def u_energies_tot(self):
         ea = self.ea
         eb = self.eb
-        return ea,eb 
+        return ea,eb
 
     def g_energies_tot(self):
         ea = self.ea

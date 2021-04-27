@@ -44,10 +44,10 @@ class KelCCSD(object):
         self.ti = []
 
     def init(self, T1=None, T2=None, L1=None, L2=None):
-        self.T1=T1
-        self.T2=T2
-        self.L1=L1
-        self.L2=L2
+        self.T1 = T1
+        self.T2 = T2
+        self.L1 = L1
+        self.L2 = L2
 
     def init_from_ftccsd(self, tdccsd, contour=None, itime=None):
         """Initialize dynamics from an ftccsd onject
@@ -152,7 +152,8 @@ class KelCCSD(object):
         self.P.append(n1rdm)
         self.ti.append(t0)
 
-        if rdm2: raise Exception("2-rdm is not implemented!")
+        if rdm2:
+            raise Exception("2-rdm is not implemented!")
 
         for i in range(1,nstep):
             t = t0 + step
@@ -163,7 +164,8 @@ class KelCCSD(object):
                 k1s = -1.j*D1*t1 - 1.j*F.vo.copy()
                 k1d = -1.j*D2*t2 - 1.j*I.vvoo.copy()
                 cc_equations._Stanton(k1s,k1d,F,I,t1,t2,fac=-1.j)
-                if not self.singles: k1s = numpy.zeros(k1s.shape, k1s.dtype)
+                if not self.singles:
+                    k1s = numpy.zeros(k1s.shape, k1s.dtype)
                 return [k1s,k1d]
 
             dT = self._step(self.prop["tprop"], t0, [self.T1,self.T2], h, fRHSt)
@@ -182,7 +184,8 @@ class KelCCSD(object):
                 cc_equations._Lambda_opt(l1s, l1d, F, I,
                         l1, l2, t1, t2, fac=1.j)
                 cc_equations._LS_TS(l1s,I,t1,fac=1.j)
-                if not self.singles: l1s = numpy.zeros(l1s.shape, kls.dtype)
+                if not self.singles:
+                    l1s = numpy.zeros(l1s.shape, kls.dtype)
                 return [l1s,l1d]
 
             dL = self._step(self.prop["lprop"], t0, [self.L1,self.L2], h, fLRHSt)
@@ -213,7 +216,7 @@ class KelCCSD(object):
             n1rdm[numpy.ix_(self.ivir,self.iocc)] += ndai
             n1rdm[numpy.ix_(self.ivir,self.ivir)] += ndba
             n1rdm[numpy.ix_(self.iocc,self.iocc)] += numpy.diag(self.focc)
-            if i%save == 0:
+            if i % save == 0:
                 self.P.append(n1rdm)
                 self.ti.append(t)
             t0 = t

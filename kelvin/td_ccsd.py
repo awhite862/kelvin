@@ -640,7 +640,8 @@ class TDCCSD(object):
             k1s = -D1*t1 - F.vo.copy()
             k1d = -D2*t2 - I.vvoo.copy()
             cc_equations._Stanton(k1s,k1d,F,I,t1,t2,fac=-1.0)
-            if not singles: k1s = numpy.zeros(k1s.shape, k1s.dtype)
+            if not singles:
+                k1s = numpy.zeros(k1s.shape, k1s.dtype)
             return [k1s,k1d]
 
         if self.saveT:
@@ -651,7 +652,8 @@ class TDCCSD(object):
             # propagate
             h = self.ti[i] - self.ti[i - 1]
             d1,d2 = self._get_t_step(h, [t1,t2], fRHS)
-            if singles: t1 += d1
+            if singles:
+                t1 += d1
             t2 += d2
 
             # compute free energy contribution
@@ -678,7 +680,8 @@ class TDCCSD(object):
         ng = self.ngrid
         ti = self.ti
         g = self.g
-        if not self.singles: raise Exception("This is not implemented for CCD")
+        if not self.singles:
+            raise Exception("This is not implemented for CCD")
 
         if not self.finite_T:
             # create energies in spin-orbital basis
@@ -803,7 +806,8 @@ class TDCCSD(object):
         beta = self.beta
         mu = self.mu if self.finite_T else None
 
-        if not self.singles: raise Exception("Restricted CCD is not implemented")
+        if not self.singles:
+            raise Exception("Restricted CCD is not implemented")
 
         # get time-grid
         ng = self.ngrid
@@ -973,7 +977,8 @@ class TDCCSD(object):
             k1s = -D1*t1 - F.vo.copy()
             k1d = -D2*t2 - I.vvoo.copy()
             cc_equations._Stanton(k1s,k1d,F,I,t1,t2,fac=-1.0)
-            if not singles: k1s = numpy.zeros(k1s.shape, k1s.dtype)
+            if not singles:
+                k1s = numpy.zeros(k1s.shape, k1s.dtype)
             return [(-1.0)*k1s,(-1.0)*k1d]
 
         def fLRHS(ttot,var):
@@ -984,7 +989,8 @@ class TDCCSD(object):
             cc_equations._Lambda_opt(l1s, l1d, F, I,
                     l1, l2, t1, t2, fac=-1.0)
             cc_equations._LS_TS(l1s,I,t1,fac=-1.0)
-            if not singles: l1s = numpy.zeros(l1s.shape, l1s.dtype)
+            if not singles:
+                l1s = numpy.zeros(l1s.shape, l1s.dtype)
             return [l1s,l1d]
 
         t1b = self._read_T1(ng - 1)
@@ -1043,7 +1049,8 @@ class TDCCSD(object):
                 d1test = -F.vo.copy()
                 d2test = -I.vvoo.copy()
                 cc_equations._Stanton(d1test,d2test,F,I,t1e,t2e,fac=-1.0)
-            if singles: l1 += ld1
+            if singles:
+                l1 += ld1
             l2 += ld2
             if self.saveL:
                 self._save_L1(ng - i - 1, l1.copy())
@@ -1106,7 +1113,8 @@ class TDCCSD(object):
         beta = self.beta
         mu = self.mu if self.finite_T else None
 
-        if not self.singles: raise Exception("This is not implemented for CCD")
+        if not self.singles:
+            raise Exception("This is not implemented for CCD")
 
         # get time-grid
         ng = self.ngrid
@@ -1520,7 +1528,8 @@ class TDCCSD(object):
         beta = self.beta
         mu = self.mu if self.finite_T else None
 
-        if not self.singles: raise Exception("This is not implemented for CCD")
+        if not self.singles:
+            raise Exception("This is not implemented for CCD")
 
         # get time-grid
         ng = self.ngrid

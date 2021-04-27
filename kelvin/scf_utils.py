@@ -15,8 +15,8 @@ def get_r_orbital_energies(mf):
 
     mo_occ = mf.mo_occ
     if is_rhf(mf):
-        eo = mf.mo_energy[mo_occ>0]
-        ev = mf.mo_energy[mo_occ==0]
+        eo = mf.mo_energy[mo_occ > 0]
+        ev = mf.mo_energy[mo_occ == 0]
         return (eo, ev)
     else:
         raise Exception("Mean-field object is not restricted")
@@ -26,14 +26,14 @@ def get_u_orbital_energies(mf):
 
     mo_occ = mf.mo_occ
     if is_rhf(mf):
-        eo = mf.mo_energy[mo_occ>0]
-        ev = mf.mo_energy[mo_occ==0]
+        eo = mf.mo_energy[mo_occ > 0]
+        ev = mf.mo_energy[mo_occ == 0]
         return (eo, ev, eo, ev)
     elif is_uhf(mf):
-        eoa = mf.mo_energy[0][mo_occ[0]>0]
-        eva = mf.mo_energy[0][mo_occ[0]==0]
-        eob = mf.mo_energy[1][mo_occ[1]>0]
-        evb = mf.mo_energy[1][mo_occ[1]==0]
+        eoa = mf.mo_energy[0][mo_occ[0] > 0]
+        eva = mf.mo_energy[0][mo_occ[0] == 0]
+        eob = mf.mo_energy[1][mo_occ[1] > 0]
+        evb = mf.mo_energy[1][mo_occ[1] == 0]
         return (eoa, eva, eob, evb)
     else:
         raise Exception("Unexpected size of mo_coeffs")
@@ -43,18 +43,18 @@ def get_orbital_energies(mf):
     mo_occ = mf.mo_occ
 
     if is_rhf(mf):
-        eo = mf.mo_energy[mo_occ>0]
-        ev = mf.mo_energy[mo_occ==0]
+        eo = mf.mo_energy[mo_occ > 0]
+        ev = mf.mo_energy[mo_occ == 0]
         eo2 = numpy.concatenate((eo,eo))
         ev2 = numpy.concatenate((ev,ev))
         return (eo2, ev2)
     elif is_uhf(mf):
         mo_occa = mf.mo_occ[0]
         mo_occb = mf.mo_occ[1]
-        eoa = (mf.mo_energy[0])[mo_occa>0]
-        eva = (mf.mo_energy[0])[mo_occa==0]
-        eob = (mf.mo_energy[1])[mo_occb>0]
-        evb = (mf.mo_energy[1])[mo_occb==0]
+        eoa = (mf.mo_energy[0])[mo_occa > 0]
+        eva = (mf.mo_energy[0])[mo_occa == 0]
+        eob = (mf.mo_energy[1])[mo_occb > 0]
+        evb = (mf.mo_energy[1])[mo_occb == 0]
         eo = numpy.concatenate((eoa,eob))
         ev = numpy.concatenate((eva,evb))
         return (eo,ev)
@@ -239,7 +239,7 @@ def get_r_ft_fock(mf, fo):
             veff = mf.get_veff(mf.mol,p)
         fT = h1 + 2*veff
         fmo = numpy.einsum('mp,mn,nq->pq',numpy.conj(mo),fT,mo)
-        return fmo 
+        return fmo
     else:
         raise Exception("SCF is not resstricted")
 
@@ -301,7 +301,7 @@ def get_mo_ft_fock(mf, fo):
         fT = h1 + 2*veff
         fmo = numpy.einsum('mp,mn,nq->pq',numpy.conj(mo),fT,mo)
         return utils.block_diag(fmo,fmo)
-        
+
     elif is_uhf(mf):
         moa = mf.mo_coeff[0]
         mob = mf.mo_coeff[1]
@@ -341,7 +341,7 @@ def get_mo_d_ft_fock(mf, fo, fv, dvec):
         fT = 2*veff
         fmo = numpy.einsum('mp,mn,nq->pq',numpy.conj(mo),fT,mo)
         return utils.block_diag(-fmo,-fmo)
- 
+
     elif is_uhf(mf):
         moa = mf.mo_coeff[0]
         mob = mf.mo_coeff[1]
@@ -405,18 +405,18 @@ class r_fock_blocks(object):
     def __init__(self,mf,orb='a'):
         mo_occ = mf.mo_occ
         if is_rhf(mf):
-            o = mf.mo_coeff[:,mo_occ>0]
-            v = mf.mo_coeff[:,mo_occ==0]
+            o = mf.mo_coeff[:,mo_occ > 0]
+            v = mf.mo_coeff[:,mo_occ == 0]
             f = mf.get_fock()
             self._transform_fock(mf,o,v,f)
         elif orb == 'a':
-            o = mf.mo_coeff[0][:,mo_occ[0]>0]
-            v = mf.mo_coeff[0][:,mo_occ[0]==0]
+            o = mf.mo_coeff[0][:,mo_occ[0] > 0]
+            v = mf.mo_coeff[0][:,mo_occ[0] == 0]
             f = mf.get_fock()[0]
             self._transform_fock(mf,o,v,f)
         elif orb == 'b':
-            o = mf.mo_coeff[1][:,mo_occ[1]>0]
-            v = mf.mo_coeff[1][:,mo_occ[1]==0]
+            o = mf.mo_coeff[1][:,mo_occ[1] > 0]
+            v = mf.mo_coeff[1][:,mo_occ[1] == 0]
             f = mf.get_fock()[1]
             self._transform_fock(mf,o,v,f)
         else:
@@ -438,17 +438,17 @@ class g_fock_blocks(object):
         except AttributeError:
             pbc = False
         if is_rhf(mf):
-            o = mf.mo_coeff[:,mo_occ>0]
-            v = mf.mo_coeff[:,mo_occ==0]
+            o = mf.mo_coeff[:,mo_occ > 0]
+            v = mf.mo_coeff[:,mo_occ == 0]
             f = mf.get_fock()
             self._transform_fock(mf,o,o,v,v,f,f)
         elif is_uhf(mf):
             mo_occa = mf.mo_occ[0]
             mo_occb = mf.mo_occ[1]
-            oa = (mf.mo_coeff[0])[:,mo_occa>0]
-            va = (mf.mo_coeff[0])[:,mo_occa==0]
-            ob = (mf.mo_coeff[1])[:,mo_occb>0]
-            vb = (mf.mo_coeff[1])[:,mo_occb==0]
+            oa = (mf.mo_coeff[0])[:,mo_occa > 0]
+            va = (mf.mo_coeff[0])[:,mo_occa == 0]
+            ob = (mf.mo_coeff[1])[:,mo_occb > 0]
+            vb = (mf.mo_coeff[1])[:,mo_occb == 0]
             pa = numpy.dot(oa, numpy.conj(oa.T))
             pb = numpy.dot(ob, numpy.conj(ob.T))
             dm = numpy.array((pa,pb))
@@ -475,4 +475,3 @@ class g_fock_blocks(object):
         self.ov = utils.block_diag(fova,fovb)
         self.vo = utils.block_diag(fvoa,fvob)
         self.vv = utils.block_diag(fvva,fvvb)
-

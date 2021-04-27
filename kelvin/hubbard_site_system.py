@@ -128,7 +128,7 @@ class hubbard_site_system(system):
             return (eoa,eva,eob,evb)
         else:
             ea,eb = self.u_energies_tot()
-            return (ea[ea<mu],ea[ea>mu],eb[eb<mu],eb[eb>mu])
+            return (ea[ea < mu],ea[ea > mu],eb[eb < mu],eb[eb > mu])
 
     def g_energies(self):
         if self.T > 0.0:
@@ -146,7 +146,7 @@ class hubbard_site_system(system):
             return (eo,ev)
         else:
             dtot = self.g_energies_tot()
-            return (dtot[dtot<mu],dtot[dtot>mu])
+            return (dtot[dtot < mu],dtot[dtot > mu])
 
     def r_energies_tot(self):
         if self.orbtype == 'r':
@@ -200,7 +200,7 @@ class hubbard_site_system(system):
 
     def r_fock_tot(self):
         return self.model.get_tmatS()
-            
+
     def g_fock_tot(self):
         T = self.model.tmat()
         d = self.g_energies_tot()
@@ -375,7 +375,7 @@ class hubbard_site_system(system):
     def g_aint_tot(self):
         U = self.model.get_umat()
         return U - U.transpose((0,1,3,2))
-        
+
     def r_int_tot(self):
         return self.model.get_umatS()
 

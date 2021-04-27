@@ -9,8 +9,8 @@ from .system import system
 
 class pueg_system(system):
     """The polarized uniform electron gas in a plane-wave basis set.
-    
-    Attributes: 
+
+    Attributes:
         T (float): Temperature.
         L (float): Box-length.
         basis: UEG plane-wave basis set.
@@ -229,7 +229,7 @@ class pueg_system(system):
         if code == 0 or code == 1:
             Vvvvv = V[numpy.ix_(vidx,vidx,vidx,vidx)]
         if code == 0 or code == 2:
-            Vvvvo = V[numpy.ix_(vidx,vidx,vidx,oidx)] 
+            Vvvvo = V[numpy.ix_(vidx,vidx,vidx,oidx)]
         if code == 0 or code == 3:
             Vvovv = V[numpy.ix_(vidx,oidx,vidx,vidx)]
         if code == 0 or code == 4:

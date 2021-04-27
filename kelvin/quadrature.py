@@ -8,7 +8,7 @@ def integrate1a(t1,n,ng,delta):
     t1_temp = numpy.zeros(t1.shape)
     t1_temp[1] = 0.5*delta*(t1[0] + t1[1])
     for y in range(2,ng):
-        t1_temp[y] = t1_temp[y - 2] + (delta/3.0)*(t1[y - 2] 
+        t1_temp[y] = t1_temp[y - 2] + (delta/3.0)*(t1[y - 2]
                 + 4.0*t1[y - 1] + t1[y])
     return t1_temp
 
@@ -34,13 +34,13 @@ def get_G(ng,delta):
         G[y,y - 2] += delta/3.0
         G[y,y - 1] += 4.0*delta/3.0
         G[y,y] += delta/3.0
-    
+
     return G
 
 def get_gint(ng, delta):
     """Return 0 to beta quadrature weight tensor for uniform grid."""
     g = numpy.zeros(ng)
-    if ng%2 == 0:
+    if ng % 2 == 0:
         g[0] += 0.5*delta
         g[1] += 0.5*delta
         for y in range(3,ng,2):
@@ -127,7 +127,7 @@ def d_simpsons_ln(ng, beta):
     return g,G
 
 def simpsons_sin(ng, beta):
-    delta = numpy.pi/(ng  - 1.0)
+    delta = numpy.pi/(ng - 1.0)
     si = numpy.asarray([(float(i)*delta - numpy.pi/2) for i in range(ng)])
     ti = beta*(numpy.sin(si) + 1.0)/2.0
     g = get_gint(ng,delta)
@@ -138,7 +138,7 @@ def simpsons_sin(ng, beta):
     return ti,g,G
 
 def d_simpsons_sin(ng, beta):
-    delta = numpy.pi/(ng  - 1.0)
+    delta = numpy.pi/(ng - 1.0)
     si = numpy.asarray([(float(i)*delta - numpy.pi/2) for i in range(ng)])
     g = get_gint(ng,delta)
     G = get_G(ng,delta)
@@ -149,7 +149,7 @@ def d_simpsons_sin(ng, beta):
 
 def simpsons_exp(ng, beta):
     ln2 = numpy.log(2.0)
-    delta = ln2/(ng  - 1.0)
+    delta = ln2/(ng - 1.0)
     si = numpy.asarray([float(i)*delta for i in range(ng)])
     ti = beta*(numpy.exp(si) - 1.0)
     g = get_gint(ng,delta)
@@ -161,7 +161,7 @@ def simpsons_exp(ng, beta):
 
 def d_simpsons_exp(ng, beta):
     ln2 = numpy.log(2.0)
-    delta = ln2/(ng  - 1.0)
+    delta = ln2/(ng - 1.0)
     si = numpy.asarray([float(i)*delta for i in range(ng)])
     g = get_gint(ng,delta)
     G = get_G(ng,delta)
@@ -171,7 +171,7 @@ def d_simpsons_exp(ng, beta):
     return g,G
 
 def simpsons_p(ng, beta, n=2):
-    delta = 1.0/(ng  - 1.0)
+    delta = 1.0/(ng - 1.0)
     si = numpy.asarray([float(i)*delta for i in range(ng)])
     ti = beta*(numpy.power(si,n) + si)/2.0
     g = get_gint(ng,delta)
@@ -182,7 +182,7 @@ def simpsons_p(ng, beta, n=2):
     return ti,g,G
 
 def d_simpsons_p(ng, beta, n=2):
-    delta = 1.0/(ng  - 1.0)
+    delta = 1.0/(ng - 1.0)
     si = numpy.asarray([float(i)*delta for i in range(ng)])
     g = get_gint(ng,delta)
     G = get_G(ng,delta)
@@ -244,7 +244,7 @@ def d_ft_quad(ng, beta, quad):
 #    t1_temp = numpy.zeros(t1.shape)
 #    t1_temp[1,:,:] = 0.5*delta*(t1[0,:,:] + t1[1,:,:])
 #    for y in range(2,ng):
-#        t1_temp[y,:,:] = t1_temp[y - 2,:,:] + (delta/3.0)*(t1[y - 2,:,:] 
+#        t1_temp[y,:,:] = t1_temp[y - 2,:,:] + (delta/3.0)*(t1[y - 2,:,:]
 #                + 4.0*t1[y - 1,:,:] + t1[y,:,:])
 #    return t1_temp
 #
@@ -252,7 +252,7 @@ def d_ft_quad(ng, beta, quad):
 #    t1_temp = numpy.zeros(t1.shape)
 #    t1_temp[1,:,:,:] = 0.5*delta*(t1[0,:,:,:] + t1[1,:,:,:])
 #    for y in range(2,ng):
-#        t1_temp[y,:,:,:] = t1_temp[y - 2,:,:,:] + (delta/3.0)*(t1[y - 2,:,:,:] 
+#        t1_temp[y,:,:,:] = t1_temp[y - 2,:,:,:] + (delta/3.0)*(t1[y - 2,:,:,:]
 #                + 4.0*t1[y - 1,:,:,:] + t1[y,:,:,:])
 #    return t1_temp
 #
@@ -260,7 +260,7 @@ def d_ft_quad(ng, beta, quad):
 #    t2_temp = numpy.zeros(t2.shape)
 #    t2_temp[1,:,:,:,:] = 0.5*delta*(t2[0,:,:,:,:] + t2[1,:,:,:,:])
 #    for y in range(2,ng):
-#       t2_temp[y,:,:,:,:] = t2_temp[y-2,:,:,:,:] + (delta/3.0)*(t2[y - 2,:,:,:,:] 
+#       t2_temp[y,:,:,:,:] = t2_temp[y-2,:,:,:,:] + (delta/3.0)*(t2[y - 2,:,:,:,:]
 #            + 4.0*t2[y - 1,:,:,:,:] + t2[y,:,:,:,:])
 #    return t2_temp
 
