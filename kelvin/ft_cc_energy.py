@@ -1,6 +1,5 @@
 import numpy
 from pyscf import lib
-from cqcpy import ft_utils
 
 einsum = lib.einsum
 #einsum = einsum

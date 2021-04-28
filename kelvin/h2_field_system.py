@@ -2,9 +2,6 @@ import numpy
 from pyscf import gto, scf
 from cqcpy import ft_utils
 from cqcpy import integrals
-from cqcpy.integrals import eri_blocks
-from . import zt_mp
-from . import ft_mp
 from .system import system
 from .neq_system import NeqSystem
 

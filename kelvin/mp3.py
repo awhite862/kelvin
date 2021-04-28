@@ -1,9 +1,7 @@
 import numpy
 from cqcpy import ft_utils
 from . import ft_mp
-from . import scf_utils
 from . import zt_mp
-from .system import system
 
 class mp3(object):
     """MP3 driver.

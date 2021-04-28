@@ -1,10 +1,7 @@
 import numpy
-from cqcpy import ft_utils
 from cqcpy import cc_equations
 from pyscf import lib
 from . import cc_utils
-from . import ft_mp
-from . import quadrature
 from . import propagation
 from .td_ccsd import _get_active
 

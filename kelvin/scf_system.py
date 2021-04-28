@@ -1,13 +1,11 @@
 import numpy
 import functools
-from pyscf import gto, scf
 from pyscf.scf import uhf
 from pyscf.scf import hf
 from cqcpy import ft_utils
 from cqcpy import integrals
 from cqcpy.ov_blocks import one_e_blocks
 from cqcpy.ov_blocks import two_e_blocks
-from cqcpy.ov_blocks import two_e_blocks_full
 from cqcpy.ov_blocks import make_two_e_blocks
 from cqcpy.ov_blocks import make_two_e_blocks_full
 from cqcpy.integrals import eri_blocks

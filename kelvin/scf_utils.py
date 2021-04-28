@@ -1,5 +1,4 @@
 import numpy
-from pyscf import gto, scf
 from pyscf.scf import uhf
 from pyscf.scf import hf
 from cqcpy import utils

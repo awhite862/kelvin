@@ -6,8 +6,6 @@ from cqcpy.ov_blocks import two_e_blocks
 from cqcpy.ov_blocks import two_e_blocks_full
 from .system import system
 from .ueg_utils import ueg_basis
-from . import zt_mp
-from . import ft_mp
 
 einsum = lib.einsum
 #einsum = einsum

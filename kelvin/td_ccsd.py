@@ -1,5 +1,4 @@
 import numpy
-import time
 from pyscf import lib
 from cqcpy import cc_equations
 from cqcpy import ft_utils
@@ -11,6 +10,7 @@ from . import quadrature
 from . import propagation
 
 einsum = numpy.einsum
+#einsum = lib.einsum
 
 def _get_active(athresh, fthresh, beta, mu, sys, iprint):
     if sys.has_r():

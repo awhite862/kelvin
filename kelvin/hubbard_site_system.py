@@ -1,11 +1,9 @@
 import numpy
-import lattice
 from cqcpy import ft_utils
 from cqcpy.ov_blocks import one_e_blocks
 from cqcpy.ov_blocks import two_e_blocks
 from cqcpy.ov_blocks import two_e_blocks_full
 from cqcpy import utils
-from . import zt_mp
 from .system import system
 
 einsum = numpy.einsum

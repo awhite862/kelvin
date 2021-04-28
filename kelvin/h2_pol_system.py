@@ -2,8 +2,6 @@ import numpy
 from pyscf import gto, scf
 from cqcpy import ft_utils
 from cqcpy import integrals
-from cqcpy.integrals import eri_blocks
-from . import ft_mp
 from .system import system
 
 class h2_pol_system(system):

@@ -1,5 +1,4 @@
 import numpy
-import time
 from cqcpy import cc_energy
 from cqcpy import cc_equations
 from cqcpy import ft_utils

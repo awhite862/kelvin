@@ -2,8 +2,6 @@ import numpy
 from cqcpy import ft_utils
 from cqcpy.ov_blocks import one_e_blocks
 from cqcpy.ov_blocks import two_e_blocks
-from . import zt_mp
-from . import ft_mp
 from .ueg_utils import ueg_basis
 from .system import system
 

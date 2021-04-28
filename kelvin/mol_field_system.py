@@ -1,12 +1,9 @@
 import numpy
-from pyscf import gto, scf
 from cqcpy import ft_utils
 from cqcpy import utils
 from . import integrals
 from . import scf_utils
-from . import zt_mp
 from . import ft_mp
-from .integrals import eri_blocks
 from .system import system
 
 class mol_field_system(system):

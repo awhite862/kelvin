@@ -1,5 +1,4 @@
 import numpy
-import lattice
 from cqcpy import ft_utils
 from cqcpy import utils
 

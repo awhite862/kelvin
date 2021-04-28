@@ -1,6 +1,4 @@
-import time
 import numpy
-from pyscf import gto, scf, ao2mo
 from pyscf.fci import cistring
 from pyscf.fci import fci_slow
 from cqcpy import ft_utils

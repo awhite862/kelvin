@@ -2,7 +2,6 @@ import numpy
 from pyscf import lib
 from cqcpy.ov_blocks import one_e_blocks
 from cqcpy import cc_equations
-from cqcpy import ft_utils
 from . import quadrature
 
 einsum = lib.einsum
