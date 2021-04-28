@@ -92,20 +92,21 @@ class mol_field_system(system):
         else:
             return Fock
 
-    def r_hcore(self):
+    def r_hcore(self, direc='f'):
         hcore = self.mf.get_hcore()
+        I = numpy.ones(self.nt)
         thcore = I[:,None,None,]*hcore[None,:,:]
         E = numpy.zeros((3))
         E[2] = 1.0
-        F = numpy.einsum('x,xij->ij', E, mol.intor('cint1e_r_sph', comp=3))
+        F = numpy.einsum('x,xij->ij', E, self.mf.mol.intor('cint1e_r_sph', comp=3))
         for i in range(self.nt):
-            thcore[i] += numpy.sin(self.omega*ti[i])*F
+            thcore[i] += numpy.sin(self.omega*self.ti[i])*F
         for i in range(self.nt):
             thcore[i] = scf_utils.mo_tran_1e(self.mf,thcore[i])
         if direc == 'f':
-            thcore[ot] += O
+            thcore[self.ot] += self.O
         elif direc == 'b':
-            thcore[ot] -= O
+            thcore[self.ot] -= self.O
             thcore = numpy.flip(thcore,0)
         return thcore
 
