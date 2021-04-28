@@ -4,8 +4,7 @@ from cqcpy import ft_utils
 from cqcpy import integrals
 from cqcpy.integrals import eri_blocks
 from . import ft_mp
-from .system import *
-from .neq_system import *
+from .system import system
 
 class h2_pol_system(system):
     def __init__(self,T,mu):

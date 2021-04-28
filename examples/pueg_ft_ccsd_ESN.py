@@ -28,4 +28,3 @@ ccsdT.compute_ESN()
 print("E: {}".format(ccsdT.E))
 print("S: {}".format(ccsdT.S))
 print("N: {}".format(ccsdT.N))
-

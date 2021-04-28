@@ -26,4 +26,3 @@ T1 = ccsdT.T1
 T2 = ccsdT.T2
 print('Omega: {:.10f}'.format(Ecctot))
 print('OmegaC: {:.12f}'.format(Ecc))
-

@@ -3,8 +3,8 @@ import lattice
 from cqcpy import ft_utils
 from cqcpy import utils
 
-from .system import *
-from .neq_system import *
+from .system import system
+from .neq_system import NeqSystem
 
 class hubbard_field_system(system):
     """Hubbard model system with a time-dependent Pierls phase

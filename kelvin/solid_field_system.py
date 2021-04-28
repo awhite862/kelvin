@@ -3,8 +3,7 @@ from cqcpy import ft_utils
 from cqcpy import utils
 from cqcpy import integrals
 
-#from .neq_system import *
-from .system import *
+from .system import system
 from . import scf_utils
 
 class solid_field_system(system):

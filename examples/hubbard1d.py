@@ -1,6 +1,6 @@
 import numpy
 from kelvin.ccsd import ccsd
-from kelvin.hubbard_system import hubbard_system 
+from kelvin.hubbard_system import hubbard_system
 from lattice.hubbard import Hubbard1D
 
 L = 6

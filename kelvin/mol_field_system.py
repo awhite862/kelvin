@@ -7,8 +7,7 @@ from . import scf_utils
 from . import zt_mp
 from . import ft_mp
 from .integrals import eri_blocks
-from .system import *
-from .neq_system import *
+from .system import system
 
 class mol_field_system(system):
     """Object representing a molecular system in a TD field (deprecated).
