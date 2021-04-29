@@ -34,11 +34,11 @@ class neq_ccsd(object):
         self.dji = None
         self.dai = None
 
-    def run(self,T1=None,T2=None):
+    def run(self, T1=None, T2=None):
         """Run CCSD calculation."""
         return self._neq_ccsd(T1in=T1,T2in=T2)
 
-    def _neq_ccsd(self,T1in=None,T2in=None):
+    def _neq_ccsd(self, T1in=None, T2in=None):
 
         beta = self.beta
         tmax = self.tmax
@@ -87,10 +87,10 @@ class neq_ccsd(object):
             T1oldb = -Fb.vo.copy()
             Idr = numpy.ones((ngr))
             Idi = numpy.ones((ngi))
-            T1oldi = -numpy.einsum('v,ai->vai',Idi,F.vo)
-            T2oldb = -numpy.einsum('v,abij->vabij',Idr,I.vvoo)
+            T1oldi = -numpy.einsum('v,ai->vai', Idi, F.vo)
+            T2oldb = -numpy.einsum('v,abij->vabij', Idr, I.vvoo)
             T2oldf = T2oldb.copy()
-            T2oldi = -numpy.einsum('v,abij->vabij',Idi,I.vvoo)
+            T2oldi = -numpy.einsum('v,abij->vabij', Idi, I.vvoo)
 
             T1oldf,T1oldb,T1oldi = quadrature.int_tbar1_keldysh(
                 ngr,ngi,T1oldf,T1oldb,T1oldi,tir,tii,D1,Gr,Gi)
@@ -353,13 +353,13 @@ class neq_ccsd(object):
         fv = ft_utils.ffv(beta, en, mu)
 
         # compute first order part
-        prop = einsum('ii,i->',A,fo)
+        prop = einsum('ii,i->', A, fo)
 
         # compute higher order contribution
-        E21 = einsum('ai,ia,i,a->',A,pia,fo,fv)
-        E22 = einsum('ab,ba,a->',A,pba,fv)
-        E23 = einsum('ij,ji,j->',A,pji,fo)
-        E24 = einsum('ia,ai->',A,pai)
+        E21 = einsum('ai,ia,i,a->', A, pia, fo, fv)
+        E22 = einsum('ab,ba,a->', A, pba, fv)
+        E23 = einsum('ij,ji,j->', A, pji, fo)
+        E24 = einsum('ia,ai->', A, pai)
         E2 = E21 + E22 + E23 + E24
         prop += E2
 
@@ -374,36 +374,36 @@ class neq_ccsd(object):
         fv = ft_utils.ffv(beta, en, mu)
 
         # compute first order part
-        prop = 0.5*einsum('ijij,i,j->',A,fo,fo)
+        prop = 0.5*einsum('ijij,i,j->', A, fo, fo)
         P2 = self._neq_2rdm(t)
 
         # compute higher order contribution
-        A1 = 0.25*einsum('cdab,abcd,a,b->',P2[0],A,fv,fv)
-        A2 = 0.5*einsum('ciab,abci,i,a,b->',P2[1],A,fo,fv,fv)
-        A3 = 0.5*einsum('bcai,aibc,a->',P2[2],A,fv)
-        A4 = 0.25*einsum('ijab,abij,i,j,a,b->',P2[3],A,fo,fo,fv,fv)
-        A5 = 1.0*einsum('bjai,aibj,j,a->',P2[4],A,fo,fv)
-        A6 = 0.25*einsum('abij,ijab->',P2[5],A)
-        A7 = 0.5*einsum('jkai,aijk,j,k,a->',P2[6],A,fo,fo,fv)
-        A8 = 0.5*einsum('kaij,ijka,k->',P2[7],A,fo)
-        A9 = 0.25*einsum('klij,ijkl,k,l->',P2[8],A,fo,fo)
+        A1 = 0.25*einsum('cdab,abcd,a,b->', P2[0], A, fv, fv)
+        A2 = 0.5*einsum('ciab,abci,i,a,b->', P2[1], A, fo, fv, fv)
+        A3 = 0.5*einsum('bcai,aibc,a->', P2[2], A, fv)
+        A4 = 0.25*einsum('ijab,abij,i,j,a,b->', P2[3], A, fo, fo, fv, fv)
+        A5 = 1.0*einsum('bjai,aibj,j,a->', P2[4], A, fo, fv)
+        A6 = 0.25*einsum('abij,ijab->', P2[5], A)
+        A7 = 0.5*einsum('jkai,aijk,j,k,a->', P2[6], A, fo, fo, fv)
+        A8 = 0.5*einsum('kaij,ijka,k->', P2[7], A, fo)
+        A9 = 0.25*einsum('klij,ijkl,k,l->', P2[8], A, fo, fo)
 
         # product terms
         if self.dia is None:
             self._neq_1rdm()
 
-        A5 += 1.0*einsum('ba,ajbj,j,a->',self.dba[t],A,fo,fv)
+        A5 += 1.0*einsum('ba,ajbj,j,a->', self.dba[t], A, fo, fv)
 
-        A7 += 0.5*einsum('ja,aiji,j,i,a->',self.dia[t],A,fo,fo,fv)
-        A7 -= 0.5*einsum('ka,aiik,i,k,a->',self.dia[t],A,fo,fo,fv)
+        A7 += 0.5*einsum('ja,aiji,j,i,a->', self.dia[t], A, fo, fo, fv)
+        A7 -= 0.5*einsum('ka,aiik,i,k,a->', self.dia[t], A, fo, fo, fv)
 
-        A8 += 0.5*einsum('aj,ijia,i->',self.dai[t],A,fo)
-        A8 -= 0.5*einsum('ai,ijja,j->',self.dai[t],A,fo)
+        A8 += 0.5*einsum('aj,ijia,i->', self.dai[t], A, fo)
+        A8 -= 0.5*einsum('ai,ijja,j->', self.dai[t], A, fo)
 
-        A9 += 0.25*einsum('ki,ijkj,k,j->',self.dji[t],A,fo,fo)
-        A9 -= 0.25*einsum('kj,ijki,k,i->',self.dji[t],A,fo,fo)
-        A9 += 0.25*einsum('lj,ijil,i,l->',self.dji[t],A,fo,fo)
-        A9 -= 0.25*einsum('li,ijjl,j,l->',self.dji[t],A,fo,fo)
+        A9 += 0.25*einsum('ki,ijkj,k,j->', self.dji[t], A, fo, fo)
+        A9 -= 0.25*einsum('kj,ijki,k,i->', self.dji[t], A, fo, fo)
+        A9 += 0.25*einsum('lj,ijil,i,l->', self.dji[t], A, fo, fo)
+        A9 -= 0.25*einsum('li,ijjl,j,l->', self.dji[t], A, fo, fo)
         prop += A1 + A2 + A3 + A4 + A5 + A6 + A7 + A8 + A9
 
         return prop
@@ -417,8 +417,8 @@ class neq_ccsd(object):
 
         p = numpy.zeros(self.dai.shape, dtype=complex)
         p += numpy.diag(fo)[None,:,:]
-        p += einsum('xia,i,a->xai',self.dia,fo,fv)
-        p += einsum('xba,a->xba',self.dba,fv)
-        p += einsum('xji,j->xji',self.dji,fo)
+        p += einsum('xia,i,a->xai', self.dia, fo, fv)
+        p += einsum('xba,a->xba', self.dba, fv)
+        p += einsum('xji,j->xji', self.dji, fo)
         p += self.dai
         return p

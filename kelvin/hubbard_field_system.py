@@ -17,8 +17,9 @@ class hubbard_field_system(system):
         Na (float): Number of alpha electrons.
         Nb (float): Number of beta electrons.
     """
-    def __init__(self,T,model,ti,A0,t0,sigma,omega,phi=0.0,
-            Pa=None,Pb=None,mu=None,na=None,nb=None,ua=None,ub=None):
+    def __init__(self, T, model, ti, A0, t0, sigma, omega,
+                 phi=0.0, Pa=None, Pb=None, mu=None,
+                 na=None, nb=None, ua=None, ub=None):
         self.A0 = A0
         self.t0 = t0
         self.sigma = sigma
@@ -52,8 +53,8 @@ class hubbard_field_system(system):
         if Pa is None and Pb is None:
             if ua is None or ub is None:
                 raise Exception("No reference provided")
-            self.Pa = numpy.einsum('pi,qi->pq',ua[:na,:],ua[:na,:])
-            self.Pb = numpy.einsum('pi,qi->pq',ua[:nb,:],ua[:nb,:])
+            self.Pa = numpy.einsum('pi,qi->pq', ua[:na,:], ua[:na,:])
+            self.Pb = numpy.einsum('pi,qi->pq', ua[:nb,:], ua[:nb,:])
             self.ua = ua
             self.ub = ub
         # build and diagonalize fock matrices
@@ -61,10 +62,10 @@ class hubbard_field_system(system):
         Va = V - V.transpose((0,1,3,2))
         Fa = self.model.get_tmatS()
         Fb = self.model.get_tmatS()
-        Fa += numpy.einsum('pqrs,qs->pr',Va,Pa)
-        Fa += numpy.einsum('pqrs,qs->pr',V,Pb)
-        Fb += numpy.einsum('pqrs,qs->pr',Va,Pb)
-        Fb += numpy.einsum('pqrs,pr->qs',V,Pa)
+        Fa += numpy.einsum('pqrs,qs->pr', Va, Pa)
+        Fa += numpy.einsum('pqrs,qs->pr', V, Pb)
+        Fb += numpy.einsum('pqrs,qs->pr', Va, Pb)
+        Fb += numpy.einsum('pqrs,pr->qs', V, Pa)
         self.Fa = Fa
         self.Fb = Fb
         if ua is None:
@@ -72,10 +73,10 @@ class hubbard_field_system(system):
             self.ea,self.ua = numpy.linalg.eigh(self.Fa)
             self.eb,self.ub = numpy.linalg.eigh(self.Fb)
         else:
-            self.ea = numpy.einsum('ij,ip,jq->pq',self.Fa,self.ua,self.ua).diagonal()
-            self.eb = numpy.einsum('ij,ip,jq->pq',self.Fb,self.ua,self.ub).diagonal()
+            self.ea = numpy.einsum('ij,ip,jq->pq', self.Fa, self.ua, self.ua).diagonal()
+            self.eb = numpy.einsum('ij,ip,jq->pq', self.Fb, self.ua, self.ub).diagonal()
 
-    def verify(self,T,mu):
+    def verify(self, T, mu):
         if not (T == self.T and mu == self.mu):
             return False
         else:
@@ -94,14 +95,14 @@ class hubbard_field_system(system):
                 foa[i] = 1.0
             for i in range(self.nb):
                 fob[i] = 1.0
-            E1 = -0.5*numpy.einsum('ijij,i,j->',Va,foa,foa)
-            E1 -= 0.5*numpy.einsum('ijij,i,j->',Vb,fob,fob)
-            E1 -= numpy.einsum('ijij,i,j->',Vabab,foa,fob)
+            E1 = -0.5*numpy.einsum('ijij,i,j->', Va, foa, foa)
+            E1 -= 0.5*numpy.einsum('ijij,i,j->', Vb, fob, fob)
+            E1 -= numpy.einsum('ijij,i,j->', Vabab, foa, fob)
             Fa,Fb = self.u_fock()
             Fao = Fa.oo - numpy.diag(self.ea[:self.na])
             Fbo = Fb.oo - numpy.diag(self.eb[:self.nb])
-            E1 += numpy.einsum('ii->',Fao)
-            E1 += numpy.einsum('ii->',Fbo)
+            E1 += numpy.einsum('ii->', Fao)
+            E1 += numpy.einsum('ii->', Fbo)
             return E1
         else:
             Va,Vb,Vabab = self.u_aint_tot()
@@ -110,27 +111,27 @@ class hubbard_field_system(system):
             nb = eb.shape[0]
             foa = ft_utils.ff(self.beta, ea, self.mu)
             fob = ft_utils.ff(self.beta, eb, self.mu)
-            E1 = -0.5*numpy.einsum('ijij,i,j->',Va,foa,foa)
-            E1 = -0.5*numpy.einsum('ijij,i,j->',Vb,fob,fob)
-            E1 = -numpy.einsum('ijij,i,j->',Vabab,foa,fob)
+            E1 = -0.5*numpy.einsum('ijij,i,j->', Va, foa, foa)
+            E1 = -0.5*numpy.einsum('ijij,i,j->', Vb, fob, fob)
+            E1 = -numpy.einsum('ijij,i,j->', Vabab, foa, fob)
             Ia = numpy.identity(na)
             Ib = numpy.identity(nb)
-            dena = numpy.einsum('pi,i,qi->pq',Ia,foa,Ia)
-            denb = numpy.einsum('pi,i,qi->pq',Ib,fob,Ib)
-            JKa = numpy.einsum('prqs,rs->pq',Va,dena)
-            JKa += numpy.einsum('prqs,rs->pq',Vabab,denb)
-            JKb = numpy.einsum('prqs,rs->pq',Vb,denb)
-            JKb += numpy.einsum('prqs,pq->rs',Vabab,dena)
+            dena = numpy.einsum('pi,i,qi->pq', Ia, foa, Ia)
+            denb = numpy.einsum('pi,i,qi->pq', Ib, fob, Ib)
+            JKa = numpy.einsum('prqs,rs->pq', Va, dena)
+            JKa += numpy.einsum('prqs,rs->pq', Vabab, denb)
+            JKb = numpy.einsum('prqs,rs->pq', Vb, denb)
+            JKb += numpy.einsum('prqs,pq->rs', Vabab, dena)
             Ta = self.model.get_tmatS()
             Tb = Ta
-            Fa = numpy.einsum('ij,ip,jq->pq',Ta,self.ua,self.ua)
-            Fb = numpy.einsum('ij,ip,jq->pq',Tb,self.ub,self.ub)
+            Fa = numpy.einsum('ij,ip,jq->pq', Ta, self.ua, self.ua)
+            Fb = numpy.einsum('ij,ip,jq->pq', Tb, self.ub, self.ub)
             Fa += JKa.copy()
             Fb += JKb.copy()
             Fao = Fa - numpy.diag(ea)
             Fbo = Fb - numpy.diag(eb)
-            E1 += numpy.einsum('ii,i->',Fao,foa)
-            E1 += numpy.einsum('ii,i->',Fbo,fob)
+            E1 += numpy.einsum('ii,i->', Fao, foa)
+            E1 += numpy.einsum('ii,i->', Fbo, fob)
             return E1
 
     def u_energies_tot(self):
@@ -143,7 +144,7 @@ class hubbard_field_system(system):
         eb = self.eb
         return numpy.hstack((ea,eb))
 
-    def u_fock_tot(self,direc='f'):
+    def u_fock_tot(self, direc='f'):
         da,db = self.u_energies_tot()
         nt = self.ti.shape[0]
         na = da.shape[0]
@@ -159,15 +160,15 @@ class hubbard_field_system(system):
         fob = ft_utils.ff(self.beta, db, self.mu)
         Ia = numpy.identity(na)
         Ib = numpy.identity(nb)
-        dena = numpy.einsum('pi,i,qi->pq',Ia,foa,Ia)
-        denb = numpy.einsum('pi,i,qi->pq',Ib,fob,Ib)
+        dena = numpy.einsum('pi,i,qi->pq', Ia, foa, Ia)
+        denb = numpy.einsum('pi,i,qi->pq', Ib, fob, Ib)
         Va,Vb,Vabab = self.u_aint_tot()
-        JKa = numpy.einsum('prqs,rs->pq',Va,dena)
-        JKa += numpy.einsum('prqs,rs->pq',Vabab,denb)
-        JKb = numpy.einsum('prqs,rs->pq',Vb,denb)
-        JKb += numpy.einsum('prqs,pq->rs',Vabab,dena)
-        Fa = numpy.einsum('yij,ip,jq->ypq',Tt,self.ua,self.ua)
-        Fb = numpy.einsum('yij,ip,jq->ypq',Tt,self.ub,self.ub)
+        JKa = numpy.einsum('prqs,rs->pq', Va, dena)
+        JKa += numpy.einsum('prqs,rs->pq', Vabab, denb)
+        JKb = numpy.einsum('prqs,rs->pq', Vb, denb)
+        JKb += numpy.einsum('prqs,pq->rs', Vabab, dena)
+        Fa = numpy.einsum('yij,ip,jq->ypq', Tt, self.ua, self.ua)
+        Fb = numpy.einsum('yij,ip,jq->ypq', Tt, self.ub, self.ub)
         Fa += JKa.copy()[None,:,:]
         Fb += JKb.copy()[None,:,:]
         if direc == 'b':
@@ -179,7 +180,7 @@ class hubbard_field_system(system):
                 Fb[i] = tempb[ng - i - 1]
         return Fa,Fb
 
-    def g_fock_tot(self,direc='f'):
+    def g_fock_tot(self, direc='f'):
         d = self.g_energies_tot()
         n = d.shape[0]
         nt = self.ti.shape[0]
@@ -191,11 +192,11 @@ class hubbard_field_system(system):
             Tt[i] = self.model.get_tmat(phase=phase)
         fo = ft_utils.ff(self.beta, d, self.mu)
         I = numpy.identity(n)
-        den = numpy.einsum('pi,i,qi->pq',I,fo,I)
+        den = numpy.einsum('pi,i,qi->pq', I, fo, I)
         V = self.g_aint_tot()
-        JK = numpy.einsum('prqs,rs->pq',V,den)
-        Utot = utils.block_diag(self.ua,self.ub)
-        Fock = numpy.einsum('yij,ip,jq->ypq',Tt,Utot,Utot)
+        JK = numpy.einsum('prqs,rs->pq', V, den)
+        Utot = utils.block_diag(self.ua, self.ub)
+        Fock = numpy.einsum('yij,ip,jq->ypq', Tt, Utot, Utot)
         Fock += JK[None,:,:]
         if direc == 'b':
             temp = Fock.copy()
@@ -231,10 +232,10 @@ class hubbard_field_system(system):
         return self._transform2(V, u, u, u, u)
 
     def _transform2(self, V, u1, u2, u3, u4):
-        Umat2 = numpy.einsum('ijkl,ls->ijks',V,u4)
-        Umat1 = numpy.einsum('ijks,kr->ijrs',Umat2,u3)
-        Umat2 = numpy.einsum('ijrs,jq->iqrs',Umat1,u2)
-        Umat1 = numpy.einsum('iqrs,ip->pqrs',Umat2,u1)
+        Umat2 = numpy.einsum('ijkl,ls->ijks', V, u4)
+        Umat1 = numpy.einsum('ijks,kr->ijrs', Umat2, u3)
+        Umat2 = numpy.einsum('ijrs,jq->iqrs', Umat1, u2)
+        Umat1 = numpy.einsum('iqrs,ip->pqrs', Umat2, u1)
         return Umat1
 
 class HubbardFieldSystem(NeqSystem):
@@ -249,8 +250,9 @@ class HubbardFieldSystem(NeqSystem):
         Na (float): Number of alpha electrons.
         Nb (float): Number of beta electrons.
     """
-    def __init__(self,T,model,A0,t0,sigma,omega,phi=0.0,
-            Pa=None,Pb=None,mu=None,na=None,nb=None,ua=None,ub=None):
+    def __init__(self, T, model, A0, t0, sigma, omega,
+                 phi=0.0, Pa=None, Pb=None, mu=None,
+                 na=None, nb=None, ua=None, ub=None):
         self.A0 = A0
         self.t0 = t0
         self.sigma = sigma
@@ -284,8 +286,8 @@ class HubbardFieldSystem(NeqSystem):
         if Pa is None and Pb is None:
             if ua is None or ub is None:
                 raise Exception("No reference provided")
-            self.Pa = numpy.einsum('pi,qi->pq',ua[:na,:],ua[:na,:])
-            self.Pb = numpy.einsum('pi,qi->pq',ua[:nb,:],ua[:nb,:])
+            self.Pa = numpy.einsum('pi,qi->pq', ua[:na,:], ua[:na,:])
+            self.Pb = numpy.einsum('pi,qi->pq', ua[:nb,:], ua[:nb,:])
             self.ua = ua
             self.ub = ub
         # build and diagonalize fock matrices
@@ -293,10 +295,10 @@ class HubbardFieldSystem(NeqSystem):
         Va = V - V.transpose((0,1,3,2))
         Fa = self.model.get_tmatS()
         Fb = self.model.get_tmatS()
-        Fa += numpy.einsum('pqrs,qs->pr',Va,Pa)
-        Fa += numpy.einsum('pqrs,qs->pr',V,Pb)
-        Fb += numpy.einsum('pqrs,qs->pr',Va,Pb)
-        Fb += numpy.einsum('pqrs,pr->qs',V,Pa)
+        Fa += numpy.einsum('pqrs,qs->pr', Va, Pa)
+        Fa += numpy.einsum('pqrs,qs->pr', V, Pb)
+        Fb += numpy.einsum('pqrs,qs->pr', Va, Pb)
+        Fb += numpy.einsum('pqrs,pr->qs', V, Pa)
         self.Fa = Fa
         self.Fb = Fb
         if ua is None:
@@ -304,10 +306,10 @@ class HubbardFieldSystem(NeqSystem):
             self.ea,self.ua = numpy.linalg.eigh(self.Fa)
             self.eb,self.ub = numpy.linalg.eigh(self.Fb)
         else:
-            self.ea = numpy.einsum('ij,ip,jq->pq',self.Fa,self.ua,self.ua).diagonal()
-            self.eb = numpy.einsum('ij,ip,jq->pq',self.Fb,self.ua,self.ub).diagonal()
+            self.ea = numpy.einsum('ij,ip,jq->pq', self.Fa, self.ua, self.ua).diagonal()
+            self.eb = numpy.einsum('ij,ip,jq->pq', self.Fb, self.ua, self.ub).diagonal()
 
-    def verify(self,T,mu):
+    def verify(self, T, mu):
         if not (T == self.T and mu == self.mu):
             return False
         else:
@@ -330,14 +332,14 @@ class HubbardFieldSystem(NeqSystem):
                 foa[i] = 1.0
             for i in range(self.nb):
                 fob[i] = 1.0
-            E1 = -0.5*numpy.einsum('ijij,i,j->',Va,foa,foa)
-            E1 -= 0.5*numpy.einsum('ijij,i,j->',Vb,fob,fob)
-            E1 -= numpy.einsum('ijij,i,j->',Vabab,foa,fob)
+            E1 = -0.5*numpy.einsum('ijij,i,j->', Va, foa, foa)
+            E1 -= 0.5*numpy.einsum('ijij,i,j->', Vb, fob, fob)
+            E1 -= numpy.einsum('ijij,i,j->', Vabab, foa, fob)
             Fa,Fb = self.u_fock()
             Fao = Fa.oo - numpy.diag(self.ea[:self.na])
             Fbo = Fb.oo - numpy.diag(self.eb[:self.nb])
-            E1 += numpy.einsum('ii->',Fao)
-            E1 += numpy.einsum('ii->',Fbo)
+            E1 += numpy.einsum('ii->', Fao)
+            E1 += numpy.einsum('ii->', Fbo)
             return E1
         else:
             Va,Vb,Vabab = self.u_aint_tot()
@@ -346,27 +348,27 @@ class HubbardFieldSystem(NeqSystem):
             nb = eb.shape[0]
             foa = ft_utils.ff(self.beta, ea, self.mu)
             fob = ft_utils.ff(self.beta, eb, self.mu)
-            E1 = -0.5*numpy.einsum('ijij,i,j->',Va,foa,foa)
-            E1 = -0.5*numpy.einsum('ijij,i,j->',Vb,fob,fob)
-            E1 = -numpy.einsum('ijij,i,j->',Vabab,foa,fob)
+            E1 = -0.5*numpy.einsum('ijij,i,j->', Va, foa, foa)
+            E1 = -0.5*numpy.einsum('ijij,i,j->', Vb, fob, fob)
+            E1 = -numpy.einsum('ijij,i,j->', Vabab, foa, fob)
             Ia = numpy.identity(na)
             Ib = numpy.identity(nb)
-            dena = numpy.einsum('pi,i,qi->pq',Ia,foa,Ia)
-            denb = numpy.einsum('pi,i,qi->pq',Ib,fob,Ib)
-            JKa = numpy.einsum('prqs,rs->pq',Va,dena)
-            JKa += numpy.einsum('prqs,rs->pq',Vabab,denb)
-            JKb = numpy.einsum('prqs,rs->pq',Vb,denb)
-            JKb += numpy.einsum('prqs,pq->rs',Vabab,dena)
+            dena = numpy.einsum('pi,i,qi->pq', Ia, foa, Ia)
+            denb = numpy.einsum('pi,i,qi->pq', Ib, fob, Ib)
+            JKa = numpy.einsum('prqs,rs->pq', Va, dena)
+            JKa += numpy.einsum('prqs,rs->pq', Vabab, denb)
+            JKb = numpy.einsum('prqs,rs->pq', Vb, denb)
+            JKb += numpy.einsum('prqs,pq->rs', Vabab, dena)
             Ta = self.model.get_tmatS()
             Tb = Ta
-            Fa = numpy.einsum('ij,ip,jq->pq',Ta,self.ua,self.ua)
-            Fb = numpy.einsum('ij,ip,jq->pq',Tb,self.ub,self.ub)
+            Fa = numpy.einsum('ij,ip,jq->pq', Ta, self.ua, self.ua)
+            Fb = numpy.einsum('ij,ip,jq->pq', Tb, self.ub, self.ub)
             Fa += JKa.copy()
             Fb += JKb.copy()
             Fao = Fa - numpy.diag(ea)
             Fbo = Fb - numpy.diag(eb)
-            E1 += numpy.einsum('ii,i->',Fao,foa)
-            E1 += numpy.einsum('ii,i->',Fbo,fob)
+            E1 += numpy.einsum('ii,i->', Fao, foa)
+            E1 += numpy.einsum('ii,i->', Fbo, fob)
             return E1
 
     def u_energies_tot(self):
@@ -392,15 +394,15 @@ class HubbardFieldSystem(NeqSystem):
         fob = ft_utils.ff(self.beta, db, self.mu)
         Ia = numpy.identity(na)
         Ib = numpy.identity(nb)
-        dena = numpy.einsum('pi,i,qi->pq',Ia,foa,Ia)
-        denb = numpy.einsum('pi,i,qi->pq',Ib,fob,Ib)
+        dena = numpy.einsum('pi,i,qi->pq', Ia, foa, Ia)
+        denb = numpy.einsum('pi,i,qi->pq', Ib, fob, Ib)
         Va,Vb,Vabab = self.u_aint_tot()
-        JKa = numpy.einsum('prqs,rs->pq',Va,dena)
-        JKa += numpy.einsum('prqs,rs->pq',Vabab,denb)
-        JKb = numpy.einsum('prqs,rs->pq',Vb,denb)
-        JKb += numpy.einsum('prqs,pq->rs',Vabab,dena)
-        Fa = numpy.einsum('ij,ip,jq->pq',Tt,self.ua,self.ua)
-        Fb = numpy.einsum('ij,ip,jq->pq',Tt,self.ub,self.ub)
+        JKa = numpy.einsum('prqs,rs->pq', Va, dena)
+        JKa += numpy.einsum('prqs,rs->pq', Vabab, denb)
+        JKb = numpy.einsum('prqs,rs->pq', Vb, denb)
+        JKb += numpy.einsum('prqs,pq->rs', Vabab, dena)
+        Fa = numpy.einsum('ij,ip,jq->pq', Tt, self.ua, self.ua)
+        Fb = numpy.einsum('ij,ip,jq->pq', Tt, self.ub, self.ub)
         Fa += JKa.copy()
         Fb += JKb.copy()
         return Fa,Fb
@@ -414,11 +416,11 @@ class HubbardFieldSystem(NeqSystem):
         Tt = self.model.get_tmat(phase=phase)
         fo = ft_utils.ff(self.beta, d, self.mu)
         I = numpy.identity(n)
-        den = numpy.einsum('pi,i,qi->pq',I,fo,I)
+        den = numpy.einsum('pi,i,qi->pq', I, fo, I)
         V = self.g_aint_tot()
-        JK = numpy.einsum('prqs,rs->pq',V,den)
+        JK = numpy.einsum('prqs,rs->pq', V, den)
         Utot = utils.block_diag(self.ua,self.ub)
-        Fock = numpy.einsum('ij,ip,jq->pq',Tt,Utot,Utot)
+        Fock = numpy.einsum('ij,ip,jq->pq', Tt, Utot, Utot)
         Fock += JK
         return Fock
 
@@ -449,8 +451,8 @@ class HubbardFieldSystem(NeqSystem):
         return self._transform2(V, u, u, u, u)
 
     def _transform2(self, V, u1, u2, u3, u4):
-        Umat2 = numpy.einsum('ijkl,ls->ijks',V,u4)
-        Umat1 = numpy.einsum('ijks,kr->ijrs',Umat2,u3)
-        Umat2 = numpy.einsum('ijrs,jq->iqrs',Umat1,u2)
-        Umat1 = numpy.einsum('iqrs,ip->pqrs',Umat2,u1)
+        Umat2 = numpy.einsum('ijkl,ls->ijks', V, u4)
+        Umat1 = numpy.einsum('ijks,kr->ijrs', Umat2, u3)
+        Umat2 = numpy.einsum('ijrs,jq->iqrs', Umat1, u2)
+        Umat1 = numpy.einsum('iqrs,ip->pqrs', Umat2, u1)
         return Umat1

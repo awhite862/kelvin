@@ -5,7 +5,7 @@ def scaled_energy(x):
     """Return the square the reduced k-vector (x)."""
     return x[0]*x[0] + x[1]*x[1] + x[2]*x[2]
 
-def computek(x,L):
+def computek(x, L):
     """Return the actual k-vector given a reduced vector (x)."""
     ccc = 2.0*numpy.pi/L
     return numpy.array((ccc*x[0],ccc*x[1],ccc*x[2]))
@@ -24,7 +24,7 @@ class ueg_basis(object):
         Es (array): array of energies.
         ks (array): array of k-vectors.
     """
-    def __init__(self,L,cutoff,norb=None):
+    def __init__(self, L, cutoff, norb=None):
         self.L = L
         self.cutoff = cutoff
         kmax = numpy.sqrt(2*cutoff)
@@ -98,14 +98,14 @@ class ueg_basis(object):
                                 V[p,q,r,s] = aaa / (scaled_energy(kp - kr))
         return V
 
-    def build_u2e_matrix(self,anti=True):
+    def build_u2e_matrix(self, anti=True):
         V = self.build_r2e_matrix()
         if anti:
             Va = V - numpy.transpose(V,(0,1,3,2))
         return Va,Va,V
 
 
-    def build_g2e_matrix(self,anti=True):
+    def build_g2e_matrix(self, anti=True):
         nbsf = self.get_nbsf()
         n = 2*nbsf
         V = numpy.zeros((n,n,n,n))

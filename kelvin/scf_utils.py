@@ -145,14 +145,14 @@ def mo_tran_1e(mf, h):
         mo = mf.mo_coeff
         nao = mo.shape[0]
         assert(h.shape[0] == nao)
-        hmo = numpy.einsum('mp,mn,nq->pq',numpy.conj(mo),h,mo)
+        hmo = numpy.einsum('mp,mn,nq->pq', numpy.conj(mo), h, mo)
         return utils.block_diag(hmo,hmo)
 
     elif is_uhf(mf):
         moa = mf.mo_coeff[0]
         mob = mf.mo_coeff[1]
-        ha = numpy.einsum('mp,mn,nq->pq',numpy.conj(moa),h,moa)
-        hb = numpy.einsum('mp,mn,nq->pq',numpy.conj(mob),h,mob)
+        ha = numpy.einsum('mp,mn,nq->pq', numpy.conj(moa), h, moa)
+        hb = numpy.einsum('mp,mn,nq->pq', numpy.conj(mob), h, mob)
         return utils.block_diag(ha,hb)
 
 def u_mo_tran_1e(mf, h):
@@ -160,14 +160,14 @@ def u_mo_tran_1e(mf, h):
         mo = mf.mo_coeff
         nao = mo.shape[0]
         assert(h.shape[0] == nao)
-        hmo = numpy.einsum('mp,mn,nq->pq',numpy.conj(mo),h,mo)
+        hmo = numpy.einsum('mp,mn,nq->pq', numpy.conj(mo), h, mo)
         return hmo,hmo
 
     elif is_uhf(mf):
         moa = mf.mo_coeff[0]
         mob = mf.mo_coeff[1]
-        ha = numpy.einsum('mp,mn,nq->pq',numpy.conj(moa),h,moa)
-        hb = numpy.einsum('mp,mn,nq->pq',numpy.conj(mob),h,mob)
+        ha = numpy.einsum('mp,mn,nq->pq', numpy.conj(moa), h, moa)
+        hb = numpy.einsum('mp,mn,nq->pq', numpy.conj(mob), h, mob)
         return ha,hb
 
 def r_mo_tran_1e(mf, h):
@@ -175,7 +175,7 @@ def r_mo_tran_1e(mf, h):
         mo = mf.mo_coeff
         nao = mo.shape[0]
         assert(h.shape[0] == nao)
-        hmo = numpy.einsum('mp,mn,nq->pq',numpy.conj(mo),h,mo)
+        hmo = numpy.einsum('mp,mn,nq->pq', numpy.conj(mo), h, mo)
         return hmo
     else:
         raise Exception("r_mo_tran_1e requires a restricted reference")
@@ -233,7 +233,7 @@ def get_r_ft_fock(mf, fo):
         else:
             veff = mf.get_veff(mf.mol,p)
         fT = h1 + 2*veff
-        fmo = numpy.einsum('mp,mn,nq->pq',numpy.conj(mo),fT,mo)
+        fmo = numpy.einsum('mp,mn,nq->pq', numpy.conj(mo), fT, mo)
         return fmo
     else:
         raise Exception("SCF is not resstricted")
@@ -254,7 +254,7 @@ def get_u_ft_fock(mf, foa, fob):
         else:
             veff = mf.get_veff(mf.mol,p)
         fT = h1 + 2*veff
-        fmo = numpy.einsum('mp,mn,nq->pq',numpy.conj(mo),fT,mo)
+        fmo = numpy.einsum('mp,mn,nq->pq', numpy.conj(mo), fT, mo)
         return fmo,fmo
 
     elif is_uhf(mf):
@@ -269,8 +269,8 @@ def get_u_ft_fock(mf, foa, fob):
             veff = mf.get_veff(mf.mol,d)
         fTa = h1 + veff[0]
         fTb = h1 + veff[1]
-        fmoa = numpy.einsum('mp,mn,nq->pq',numpy.conj(moa),fTa,moa)
-        fmob = numpy.einsum('mp,mn,nq->pq',numpy.conj(mob),fTb,mob)
+        fmoa = numpy.einsum('mp,mn,nq->pq', numpy.conj(moa), fTa, moa)
+        fmob = numpy.einsum('mp,mn,nq->pq', numpy.conj(mob), fTb, mob)
         return fmoa,fmob
 
     else:
@@ -294,7 +294,7 @@ def get_mo_ft_fock(mf, fo):
         else:
             veff = mf.get_veff(mf.mol,p)
         fT = h1 + 2*veff
-        fmo = numpy.einsum('mp,mn,nq->pq',numpy.conj(mo),fT,mo)
+        fmo = numpy.einsum('mp,mn,nq->pq', numpy.conj(mo), fT, mo)
         return utils.block_diag(fmo,fmo)
 
     elif is_uhf(mf):
@@ -309,8 +309,8 @@ def get_mo_ft_fock(mf, fo):
             veff = mf.get_veff(mf.mol,d)
         fTa = h1 + veff[0]
         fTb = h1 + veff[1]
-        fmoa = numpy.einsum('mp,mn,nq->pq',numpy.conj(moa),fTa,moa)
-        fmob = numpy.einsum('mp,mn,nq->pq',numpy.conj(mob),fTb,mob)
+        fmoa = numpy.einsum('mp,mn,nq->pq', numpy.conj(moa), fTa, moa)
+        fmob = numpy.einsum('mp,mn,nq->pq', numpy.conj(mob), fTb, mob)
         return utils.block_diag(fmoa,fmob)
 
     else:
@@ -333,7 +333,7 @@ def get_mo_d_ft_fock(mf, fo, fv, dvec):
         else:
             veff = mf.get_veff(mf.mol,p)
         fT = 2*veff
-        fmo = numpy.einsum('mp,mn,nq->pq',numpy.conj(mo),fT,mo)
+        fmo = numpy.einsum('mp,mn,nq->pq', numpy.conj(mo), fT, mo)
         return utils.block_diag(-fmo,-fmo)
 
     elif is_uhf(mf):
@@ -348,8 +348,8 @@ def get_mo_d_ft_fock(mf, fo, fv, dvec):
             veff = mf.get_veff(mf.mol,d)
         fTa = veff[0]
         fTb = veff[1]
-        fmoa = numpy.einsum('mp,mn,nq->pq',numpy.conj(moa),fTa,moa)
-        fmob = numpy.einsum('mp,mn,nq->pq',numpy.conj(mob),fTb,mob)
+        fmoa = numpy.einsum('mp,mn,nq->pq', numpy.conj(moa), fTa, moa)
+        fmob = numpy.einsum('mp,mn,nq->pq', numpy.conj(mob), fTb, mob)
         return utils.block_diag(-fmoa,-fmob)
 
     else:
@@ -372,7 +372,7 @@ def u_mo_d_ft_fock(mf, foa, fva, fob, fvb, dveca, dvecb):
         else:
             veff = mf.get_veff(mf.mol,p)
         fT = 2*veff
-        fmo = numpy.einsum('mp,mn,nq->pq',numpy.conj(mo),fT,mo)
+        fmo = numpy.einsum('mp,mn,nq->pq', numpy.conj(mo), fT, mo)
         return -fmo,-fmo
     elif is_uhf(mf):
         moa = mf.mo_coeff[0]
@@ -386,14 +386,14 @@ def u_mo_d_ft_fock(mf, foa, fva, fob, fvb, dveca, dvecb):
             veff = mf.get_veff(mf.mol,d)
         fTa = veff[0]
         fTb = veff[1]
-        fmoa = numpy.einsum('mp,mn,nq->pq',numpy.conj(moa),fTa,moa)
-        fmob = numpy.einsum('mp,mn,nq->pq',numpy.conj(mob),fTb,mob)
+        fmoa = numpy.einsum('mp,mn,nq->pq', numpy.conj(moa), fTa, moa)
+        fmob = numpy.einsum('mp,mn,nq->pq', numpy.conj(mob), fTb, mob)
         return -fmoa,-fmob
     else:
         raise Exception("unrecognized SCF type")
 
 class r_fock_blocks(object):
-    def __init__(self,mf,orb='a'):
+    def __init__(self, mf, orb='a'):
         mo_occ = mf.mo_occ
         if is_rhf(mf):
             o = mf.mo_coeff[:,mo_occ > 0]
@@ -414,13 +414,13 @@ class r_fock_blocks(object):
             raise Exception("SCF is not restricted")
 
     def _transform_fock(self, mf, o, v, f):
-        self.oo = numpy.einsum('mo,mn,np->op',numpy.conj(o),f,o)
-        self.ov = numpy.einsum('mo,mn,nv->ov',numpy.conj(o),f,v)
-        self.vo = numpy.einsum('mv,mn,no->vo',numpy.conj(v),f,o)
-        self.vv = numpy.einsum('mv,mn,nu->vu',numpy.conj(v),f,v)
+        self.oo = numpy.einsum('mo,mn,np->op', numpy.conj(o), f, o)
+        self.ov = numpy.einsum('mo,mn,nv->ov', numpy.conj(o), f, v)
+        self.vo = numpy.einsum('mv,mn,no->vo', numpy.conj(v), f, o)
+        self.vv = numpy.einsum('mv,mn,nu->vu', numpy.conj(v), f, v)
 
 class g_fock_blocks(object):
-    def __init__(self,mf):
+    def __init__(self, mf):
         mo_occ = mf.mo_occ
         pbc = False
         try:
@@ -454,15 +454,15 @@ class g_fock_blocks(object):
             raise Exception("unrecognized SCF type")
 
     def _transform_fock(self, mf, oa, ob, va, vb, fa, fb):
-        fvoa = numpy.einsum('mv,mn,no->vo',numpy.conj(va),fa,oa)
-        fova = numpy.einsum('mv,mn,no->vo',numpy.conj(oa),fa,va)
-        fooa = numpy.einsum('mo,mn,np->op',numpy.conj(oa),fa,oa)
-        fvva = numpy.einsum('mv,mn,nu->vu',numpy.conj(va),fa,va)
-        fvob = numpy.einsum('mv,mn,no->vo',numpy.conj(vb),fb,ob)
-        fovb = numpy.einsum('mv,mn,no->vo',numpy.conj(ob),fb,vb)
-        foob = numpy.einsum('mo,mn,np->op',numpy.conj(ob),fb,ob)
-        fvvb = numpy.einsum('mv,mn,nu->vu',numpy.conj(vb),fb,vb)
-        self.oo = utils.block_diag(fooa,foob)
-        self.ov = utils.block_diag(fova,fovb)
-        self.vo = utils.block_diag(fvoa,fvob)
-        self.vv = utils.block_diag(fvva,fvvb)
+        fvoa = numpy.einsum('mv,mn,no->vo', numpy.conj(va), fa, oa)
+        fova = numpy.einsum('mv,mn,no->vo', numpy.conj(oa), fa, va)
+        fooa = numpy.einsum('mo,mn,np->op', numpy.conj(oa), fa, oa)
+        fvva = numpy.einsum('mv,mn,nu->vu', numpy.conj(va), fa, va)
+        fvob = numpy.einsum('mv,mn,no->vo', numpy.conj(vb), fb, ob)
+        fovb = numpy.einsum('mv,mn,no->vo', numpy.conj(ob), fb, vb)
+        foob = numpy.einsum('mo,mn,np->op', numpy.conj(ob), fb, ob)
+        fvvb = numpy.einsum('mv,mn,nu->vu', numpy.conj(vb), fb, vb)
+        self.oo = utils.block_diag(fooa, foob)
+        self.ov = utils.block_diag(fova, fovb)
+        self.vo = utils.block_diag(fvoa, fvob)
+        self.vv = utils.block_diag(fvva, fvvb)

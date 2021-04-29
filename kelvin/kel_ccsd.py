@@ -125,10 +125,10 @@ class KelCCSD(object):
         pba = cc_equations.ccsd_1rdm_ba_opt(self.T1,self.T2,self.L1,self.L2)
         pai = cc_equations.ccsd_1rdm_ai_opt(self.T1,self.T2,self.L1,self.L2)
 
-        ndia = numpy.einsum('ia,i,a->ia',pia,sfo,sfv)
-        ndba = numpy.einsum('ba,b,a->ba',pba,sfv,sfv)
-        ndji = numpy.einsum('ji,j,i->ji',pji,sfo,sfo)
-        ndai = numpy.einsum('ai,a,i->ai',pai,sfv,sfo)
+        ndia = numpy.einsum('ia,i,a->ia', pia, sfo, sfv)
+        ndba = numpy.einsum('ba,b,a->ba', pba, sfv, sfv)
+        ndji = numpy.einsum('ji,j,i->ji', pji, sfo, sfo)
+        ndai = numpy.einsum('ai,a,i->ai', pai, sfv, sfo)
 
         n1rdm = numpy.zeros((n,n), dtype=complex)
         n1rdm[numpy.ix_(self.iocc,self.iocc)] += ndji
@@ -185,10 +185,10 @@ class KelCCSD(object):
             pba = cc_equations.ccsd_1rdm_ba_opt(T1,T2,L1,L2)
             pai = cc_equations.ccsd_1rdm_ai_opt(T1,T2,L1,L2)
 
-            ndia = numpy.einsum('ia,i,a->ia',pia,sfo,sfv)
-            ndba = numpy.einsum('ba,b,a->ba',pba,sfv,sfv)
-            ndji = numpy.einsum('ji,j,i->ji',pji,sfo,sfo)
-            ndai = numpy.einsum('ai,a,i->ai',pai,sfv,sfo)
+            ndia = numpy.einsum('ia,i,a->ia', pia, sfo, sfv)
+            ndba = numpy.einsum('ba,b,a->ba', pba, sfv, sfv)
+            ndji = numpy.einsum('ji,j,i->ji', pji, sfo, sfo)
+            ndai = numpy.einsum('ai,a,i->ai', pai, sfv, sfo)
 
             # save current amplitudes
             self.T1 = T1

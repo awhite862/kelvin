@@ -7,7 +7,7 @@ from .neq_system import NeqSystem
 
 class h2_field_system(system):
     """H2 molecule in a TD field (deprecated)"""
-    def __init__(self,T,mu,omega,ti,O=None,ot=None):
+    def __init__(self, T, mu, omega, ti, O=None, ot=None):
         mol = gto.M(
             verbose=0,
             atom='H 0 0 -0.6; H 0 0 0.0',
@@ -27,7 +27,7 @@ class h2_field_system(system):
         self.ot = ot
         mos = self.m.mo_coeff[0]
         self.eri = integrals.get_phys(mol, mos, mos, mos, mos)
-        self.hcore = numpy.einsum('mp,mn,nq->pq',mos,self.m.get_hcore(mol),mos)
+        self.hcore = numpy.einsum('mp,mn,nq->pq', mos, self.m.get_hcore(mol), mos)
 
     def reversible(self):
         if self.O is None:
@@ -35,7 +35,7 @@ class h2_field_system(system):
         else:
             return False
 
-    def verify(self,T,mu):
+    def verify(self, T, mu):
         if not (T == self.T and mu == self.mu):
             return False
         else:
@@ -47,11 +47,11 @@ class h2_field_system(system):
     def get_mp1(self):
         en = self.g_energies_tot()
         fo = ft_utils.ff(self.beta, en, self.mu)
-        E1 = numpy.einsum('ii,i->',self.hcore,fo) - (self.g_energies_tot()*fo).sum()
-        E1 += 0.5*numpy.einsum('ijij,i,j->',self.eri,fo,fo)
-        E1 -= 0.5*numpy.einsum('ijji,i,j->',self.eri,fo,fo)
+        E1 = numpy.einsum('ii,i->', self.hcore, fo) - (self.g_energies_tot()*fo).sum()
+        E1 += 0.5*numpy.einsum('ijij,i,j->', self.eri, fo, fo)
+        E1 -= 0.5*numpy.einsum('ijji,i,j->', self.eri, fo, fo)
         if self.O is not None:
-            Eo = numpy.einsum('ii,i->',self.O,fo)
+            Eo = numpy.einsum('ii,i->', self.O, fo)
             E1 += Eo
         return E1
 
@@ -60,7 +60,7 @@ class h2_field_system(system):
         e,v = numpy.linalg.eigh(F)
         return e
 
-    def g_fock_tot(self,direc='f'):
+    def g_fock_tot(self, direc='f'):
         en = self.g_energies_tot()
         fo = ft_utils.ff(self.beta, en, self.mu)
         E = numpy.zeros(3)
@@ -68,7 +68,7 @@ class h2_field_system(system):
         mos = self.m.mo_coeff[0]
         E[2] = 1.0
         field = numpy.einsum('x,xij->ij', E, mol.intor('cint1e_r_sph', comp=3))
-        field = numpy.einsum('mp,mn,nq->pq',mos,field,mos)
+        field = numpy.einsum('mp,mn,nq->pq', mos, field, mos)
         F = self.hcore + \
             (self.eri[:,0,:,0] - self.eri[:,0,0,:])*fo[0] +\
             (self.eri[:,1,:,1] - self.eri[:,1,1,:])*fo[1]
@@ -100,7 +100,7 @@ class h2_field_system(system):
 
 class H2FieldSystem(NeqSystem):
     """H2 molecule in a TD field (deprecated)"""
-    def __init__(self,T,mu,omega):
+    def __init__(self, T, mu, omega):
         mol = gto.M(
             verbose=0,
             atom='H 0 0 -0.6; H 0 0 0.0',
@@ -116,9 +116,9 @@ class H2FieldSystem(NeqSystem):
         self.omega = omega
         mos = self.m.mo_coeff[0]
         self.eri = integrals.get_phys(mol, mos, mos, mos, mos)
-        self.hcore = numpy.einsum('mp,mn,nq->pq',mos,self.m.get_hcore(mol),mos)
+        self.hcore = numpy.einsum('mp,mn,nq->pq', mos, self.m.get_hcore(mol), mos)
 
-    def verify(self,T,mu):
+    def verify(self, T, mu):
         if not (T == self.T and mu == self.mu):
             return False
         else:
@@ -134,9 +134,9 @@ class H2FieldSystem(NeqSystem):
     def get_mp1(self):
         en = self.g_energies_tot()
         fo = ft_utils.ff(self.beta, en, self.mu)
-        E1 = numpy.einsum('ii,i->',self.hcore,fo) - (self.g_energies_tot()*fo).sum()
-        E1 += 0.5*numpy.einsum('ijij,i,j->',self.eri,fo,fo)
-        E1 -= 0.5*numpy.einsum('ijji,i,j->',self.eri,fo,fo)
+        E1 = numpy.einsum('ii,i->', self.hcore, fo) - (self.g_energies_tot()*fo).sum()
+        E1 += 0.5*numpy.einsum('ijij,i,j->', self.eri, fo, fo)
+        E1 -= 0.5*numpy.einsum('ijji,i,j->', self.eri, fo, fo)
         return E1
 
     def g_energies_tot(self):
@@ -152,7 +152,7 @@ class H2FieldSystem(NeqSystem):
         mos = self.m.mo_coeff[0]
         E[2] = 1.0
         field = numpy.einsum('x,xij->ij', E, mol.intor('cint1e_r_sph', comp=3))
-        field = numpy.einsum('mp,mn,nq->pq',mos,field,mos)
+        field = numpy.einsum('mp,mn,nq->pq', mos, field, mos)
         F = self.hcore + \
             (self.eri[:,0,:,0] - self.eri[:,0,0,:])*fo[0] +\
             (self.eri[:,1,:,1] - self.eri[:,1,1,:])*fo[1]

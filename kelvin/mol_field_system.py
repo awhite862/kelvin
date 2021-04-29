@@ -14,7 +14,8 @@ class mol_field_system(system):
         T (float): Temperature.
         mu (float): Chemical potential.
     """
-    def __init__(self,mf,T,mu,omega,ti,Emax=1.0,O=None,ot=None):
+    def __init__(self, mf, T, mu, omega, ti,
+                 Emax=1.0, O=None, ot=None):
         self.mf = mf
         self.T = T
         self.mu = mu
@@ -31,7 +32,7 @@ class mol_field_system(system):
         else:
             return False
 
-    def verify(self,T,mu):
+    def verify(self, T, mu):
         if not (T == self.T and mu == self.mu):
             return False
         else:
@@ -53,13 +54,13 @@ class mol_field_system(system):
 
         # contribution from real-time contour
         if self.O is not None:
-            E1 += numpy.einsum('ii,i->',utils.block_diag(self.O,self.O),fo)
+            E1 += numpy.einsum('ii,i->', utils.block_diag(self.O, self.O), fo)
         return E1
 
     def g_energies_tot(self):
         return scf_utils.get_orbital_energies_gen(self.mf)
 
-    def g_fock_tot(self,direc='f'):
+    def g_fock_tot(self, direc='f'):
         en = self.g_energies_tot()
         fo = ft_utils.ff(self.beta, en, self.mu)
         F = scf_utils.get_mo_ft_fock(self.mf, fo)

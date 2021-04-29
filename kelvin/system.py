@@ -3,7 +3,7 @@ class system(object):
     def __init__(self):
         pass
 
-    def verify(self,T,mu):
+    def verify(self, T, mu):
         """Verify that the system is consistent with the given T,mu."""
         err = "Base class function verify()"
         raise Exception(err)
@@ -33,12 +33,12 @@ class system(object):
         err = "Base class function get_mp1()"
         raise Exception(err)
 
-    def g_d_mp1(self,dvec):
+    def g_d_mp1(self, dvec):
         """Return the derivative of the MP1 energy with respect to occupation numbers."""
         err = "Base class function g_d_mp1()"
         raise Exception(err)
 
-    def u_d_mp1(self,dveca,dvecb):
+    def u_d_mp1(self, dveca, dvecb):
         """Return the derivative of the MP1 energy with respect to occupation numbers."""
         err = "Base class function u_d_mp1()"
         raise Exception(err)
@@ -103,12 +103,12 @@ class system(object):
         err = "Base class function g_fock_tot()"
         raise Exception(err)
 
-    def g_fock_d_tot(self,dvec):
+    def g_fock_d_tot(self, dvec):
         """Return the n-derivative of the general 1-electron operator ."""
         err = "Base class function g_fock_d_tot()"
         raise Exception(err)
 
-    def u_fock_d_tot(self,dveca,dvecb):
+    def u_fock_d_tot(self, dveca, dvecb):
         """Return the n-derivative of the general 1-electron operator ."""
         err = "Base class function u_fock_d_tot()"
         raise Exception(err)
@@ -123,7 +123,7 @@ class system(object):
         err = "Base class function g_hcore()"
         raise Exception(err)
 
-    def g_aint(self,code=0):
+    def g_aint(self, code=0):
         """Return general orbital blocks of the anti-symmetrized 2-electron interaction."""
         err = "Base class function g_aint()"
         raise Exception(err)

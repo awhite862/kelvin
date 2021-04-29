@@ -19,7 +19,7 @@ class pueg_system(system):
         Ef (float): Fermi-energy (of non-interacting system).
         Tf (float): Redued temperature.
     """
-    def __init__(self,T,L,Emax,mu=None,n=None,norb=None):
+    def __init__(self, T, L, Emax, mu=None, n=None, norb=None):
         self.T = T
         self.L = L
         self.basis = ueg_basis(L,Emax,norb=norb)
@@ -53,7 +53,7 @@ class pueg_system(system):
     def has_r(self):
         return False
 
-    def verify(self,T,mu):
+    def verify(self, T, mu):
         if T > 0.0:
             s = T == self.T and mu == self.mu
         else:
@@ -72,13 +72,12 @@ class pueg_system(system):
             beta = 1.0 / self.T
             en = self.g_energies_tot()
             fo = ft_utils.ff(beta, en, self.mu)
-            return 0.5*numpy.einsum('ijij,i,j->',
-                V,fo,fo)
+            return 0.5*numpy.einsum('ijij,i,j->', V, fo, fo)
         else:
             V = self.g_aint()
-            return 0.5*numpy.einsum('ijij->',V.oooo)
+            return 0.5*numpy.einsum('ijij->', V.oooo)
 
-    def g_d_mp1(self,dvec):
+    def g_d_mp1(self, dvec):
         if self.T > 0:
             V = self.g_aint_tot()
             beta = 1.0 / self.T
@@ -86,7 +85,7 @@ class pueg_system(system):
             fo = ft_utils.ff(beta, en, self.mu)
             fv = ft_utils.ffv(beta, en, self.mu)
             vec = dvec*fo*fv
-            return -numpy.einsum('ijij,i,j->',V,vec,fo)
+            return -numpy.einsum('ijij,i,j->', V, vec, fo)
         else:
             print("WARNING: Derivative of MP1 energy is zero at OK")
             return 0.0
@@ -99,7 +98,7 @@ class pueg_system(system):
         fo = ft_utils.ff(beta, en, self.mu)
         fv = ft_utils.ffv(beta, en, self.mu)
         vec = fo*fv
-        return -beta*numpy.einsum('ijij,i,j->i',V,vec,fo)
+        return -beta*numpy.einsum('ijij,i,j->i', V, vec, fo)
 
     def g_energies(self):
         if self.T > 0.0:
@@ -130,7 +129,7 @@ class pueg_system(system):
         vidx = numpy.r_[vir]
         V = self.g_aint_tot()
         V = V[numpy.ix_(numpy.arange(n),oidx,numpy.arange(n),oidx)]
-        F = F + numpy.einsum('piri->pr',V)
+        F = F + numpy.einsum('piri->pr', V)
         Foo = F[numpy.ix_(oidx,oidx)]
         Fvv = F[numpy.ix_(vidx,vidx)]
         Fov = F[numpy.ix_(oidx,vidx)]
@@ -145,7 +144,7 @@ class pueg_system(system):
             beta = 1.0 / self.T
             fo = ft_utils.ff(beta, d, self.mu)
             I = numpy.identity(n)
-            den = numpy.einsum('pi,i,qi->pq',I,fo,I)
+            den = numpy.einsum('pi,i,qi->pq', I, fo, I)
         else:
             to = numpy.zeros((n,self.N))
             i = 0
@@ -153,12 +152,12 @@ class pueg_system(system):
                 if d[p] < self.mu:
                     to[p,i] = 1.0
                     i = i+1
-            den = numpy.einsum('pi,qi->pq',to,to)
+            den = numpy.einsum('pi,qi->pq', to, to)
         V = self.g_aint_tot()
-        JK = numpy.einsum('prqs,rs->pq',V,den)
+        JK = numpy.einsum('prqs,rs->pq', V, den)
         return T + JK
 
-    def g_fock_d_tot(self,dvec):
+    def g_fock_d_tot(self, dvec):
         d = self.g_energies_tot()
         n = d.shape[0]
         if self.T == 0.0:
@@ -169,9 +168,9 @@ class pueg_system(system):
         fv = ft_utils.ffv(beta, d, self.mu)
         vec = dvec*fo*fv
         I = numpy.identity(n)
-        den = numpy.einsum('pi,i,qi->pq',I,vec,I)
+        den = numpy.einsum('pi,i,qi->pq', I, vec, I)
         V = self.g_aint_tot()
-        JK = -numpy.einsum('prqs,rs->pq',V,den)
+        JK = -numpy.einsum('prqs,rs->pq', V, den)
         return JK
 
     def g_fock_d_den(self):
@@ -187,7 +186,7 @@ class pueg_system(system):
         V = self.g_aint_tot()
         #I = numpy.identity(n)
         #den = numpy.einsum('pi,i,qi->pq',I,vec,I)
-        JK = numpy.einsum('piqi,i->pqi',V,vec)
+        JK = numpy.einsum('piqi,i->pqi', V, vec)
         return JK
 
     def g_hcore(self):
@@ -198,7 +197,7 @@ class pueg_system(system):
         V = V - V.transpose((0,1,3,2))
         return V
 
-    def g_aint(self,code=0):
+    def g_aint(self, code=0):
         if self.T > 0.0:
             raise Exception("Undefined ov blocks at FT")
         d = self.g_energies_tot()

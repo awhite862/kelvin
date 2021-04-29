@@ -23,7 +23,7 @@ class scf_system(system):
         T (float): Temperature.
         mu (float): Chemical potential.
     """
-    def __init__(self,mf,T,mu,orbtype='u'):
+    def __init__(self, mf, T, mu, orbtype='u'):
         self.mf = mf
         self.T = T
         self.mu = mu
@@ -31,7 +31,7 @@ class scf_system(system):
         self.is_uhf = isinstance(mf, uhf.UHF)
         self.is_rhf = isinstance(mf, hf.RHF)
 
-    def verify(self,T,mu):
+    def verify(self, T, mu):
         if not (T == self.T and mu == self.mu):
             return False
         else:
@@ -66,7 +66,7 @@ class scf_system(system):
             return ft_mp.mp1(p,2*f0 - fao,h)
 
     # TODO: Do this with Fock build
-    def g_d_mp1(self,dvec):
+    def g_d_mp1(self, dvec):
         assert(self.T > 0.0)
         beta = 1.0 / self.T
         en = self.g_energies_tot()
@@ -77,8 +77,8 @@ class scf_system(system):
         hmo = scf_utils.mo_tran_1e(self.mf, hcore)
         eri = self.g_aint_tot()
 
-        d1 = -numpy.einsum('ii,i->',hmo - numpy.diag(en),fov)
-        d2 = -numpy.einsum('ijij,i,j->',eri,fov,fo)
+        d1 = -numpy.einsum('ii,i->', hmo - numpy.diag(en), fov)
+        d2 = -numpy.einsum('ijij,i,j->', eri, fov, fo)
         return (d1 + d2)
 
     def g_mp1_den(self):
@@ -92,12 +92,12 @@ class scf_system(system):
         hmo = scf_utils.mo_tran_1e(self.mf, hcore)
         eri = self.g_aint_tot()
 
-        d1 = -numpy.einsum('ii,i->i',hmo - numpy.diag(en),fov)
-        d2 = -numpy.einsum('ijij,i,j->i',eri,fov,fo)
+        d1 = -numpy.einsum('ii,i->i', hmo - numpy.diag(en), fov)
+        d2 = -numpy.einsum('ijij,i,j->i', eri, fov, fo)
         return beta*(d1 + d2)
 
     # TODO: Do this with Fock build
-    def u_d_mp1(self,dveca,dvecb):
+    def u_d_mp1(self, dveca, dvecb):
         assert(self.T > 0.0)
         beta = 1.0 / self.T
         ea,eb = self.u_energies_tot()
@@ -110,12 +110,12 @@ class scf_system(system):
         fova = dveca*foa*fva
         fovb = dvecb*fob*fvb
         Ia,Ib,Iabab = self.u_aint_tot()
-        d1 = -numpy.einsum('ii,i->',ha - numpy.diag(ea),fova)
-        d1 -= numpy.einsum('ii,i->',hb - numpy.diag(eb),fovb)
-        d2 = -numpy.einsum('ijij,i,j->',Ia,fova,foa)
-        d2 -= numpy.einsum('ijij,i,j->',Ib,fovb,fob)
-        d2 -= numpy.einsum('ijij,i,j->',Iabab,fova,fob)
-        d2 -= numpy.einsum('ijij,i,j->',Iabab,foa,fovb)
+        d1 = -numpy.einsum('ii,i->', ha - numpy.diag(ea), fova)
+        d1 -= numpy.einsum('ii,i->', hb - numpy.diag(eb), fovb)
+        d2 = -numpy.einsum('ijij,i,j->', Ia, fova, foa)
+        d2 -= numpy.einsum('ijij,i,j->', Ib, fovb, fob)
+        d2 -= numpy.einsum('ijij,i,j->', Iabab, fova, fob)
+        d2 -= numpy.einsum('ijij,i,j->', Iabab, foa, fovb)
         return (d1 + d2)
 
     def u_mp1_den(self):
@@ -131,12 +131,12 @@ class scf_system(system):
         fova = foa*fva
         fovb = fob*fvb
         Ia,Ib,Iabab = self.u_aint_tot()
-        d1a = -numpy.einsum('ii,i->i',ha - numpy.diag(ea),fova)
-        d1b = -numpy.einsum('ii,i->i',hb - numpy.diag(eb),fovb)
-        d2a = -numpy.einsum('ijij,i,j->i',Ia,fova,foa)
-        d2b = -numpy.einsum('ijij,i,j->i',Ib,fovb,fob)
-        d2a -= numpy.einsum('ijij,i,j->i',Iabab,fova,fob)
-        d2b -= numpy.einsum('ijij,i,j->j',Iabab,foa,fovb)
+        d1a = -numpy.einsum('ii,i->i', ha - numpy.diag(ea), fova)
+        d1b = -numpy.einsum('ii,i->i', hb - numpy.diag(eb), fovb)
+        d2a = -numpy.einsum('ijij,i,j->i', Ia, fova, foa)
+        d2b = -numpy.einsum('ijij,i,j->i', Ib, fovb, fob)
+        d2a -= numpy.einsum('ijij,i,j->i', Iabab, fova, fob)
+        d2b -= numpy.einsum('ijij,i,j->j', Iabab, foa, fovb)
         return beta*(d1a + d2a),beta*(d1b + d2b)
 
     def r_mp1_den(self):
@@ -149,8 +149,8 @@ class scf_system(system):
         fv = ft_utils.ffv(beta, en, self.mu)
         fov = fo*fv
         I = self.r_int_tot()
-        d1 = -numpy.einsum('ii,i->i',h - numpy.diag(en),fov)
-        d2 = -numpy.einsum('ijij,i,j->i',2.0*I - I.transpose((0,1,3,2)),fov,fo)
+        d1 = -numpy.einsum('ii,i->i', h - numpy.diag(en), fov)
+        d2 = -numpy.einsum('ijij,i,j->i', 2.0*I - I.transpose((0,1,3,2)), fov, fo)
         #d2 -= numpy.einsum('ijij,i,j->i',I,fov,fo)
         return beta*(d1 + d2)
 
@@ -223,11 +223,11 @@ class scf_system(system):
         fv = ft_utils.ffv(beta, en, self.mu)
         vec = fo*fv
         V = self.r_int_tot()
-        JKss = numpy.einsum('piqi,i->pqi',V - V.transpose((0,1,3,2)),vec)
-        JKos = numpy.einsum('piqi,i->pqi',V,vec)
+        JKss = numpy.einsum('piqi,i->pqi', V - V.transpose((0,1,3,2)), vec)
+        JKos = numpy.einsum('piqi,i->pqi', V, vec)
         return JKss,JKos
 
-    def u_fock_d_tot(self,dveca,dvecb):
+    def u_fock_d_tot(self, dveca, dvecb):
         beta = 1.0 / self.T if self.T > 0 else 1.0e20
         ea,eb = self.u_energies_tot()
         foa = ft_utils.ff(beta, ea, self.mu)
@@ -246,13 +246,13 @@ class scf_system(system):
         veca = foa*fva
         vecb = fob*fvb
         Va,Vb,Vabab = self.u_aint_tot()
-        JKaa = numpy.einsum('piqi,i->pqi',Va,veca)
-        JKab = numpy.einsum('piqi,i->pqi',Vabab,vecb)
-        JKbb = numpy.einsum('piqi,i->pqi',Vb,vecb)
-        JKba = numpy.einsum('iris,i->rsi',Vabab,veca)
+        JKaa = numpy.einsum('piqi,i->pqi', Va, veca)
+        JKab = numpy.einsum('piqi,i->pqi', Vabab, vecb)
+        JKbb = numpy.einsum('piqi,i->pqi', Vb, vecb)
+        JKba = numpy.einsum('iris,i->rsi', Vabab, veca)
         return JKaa,JKab,JKbb,JKba
 
-    def g_fock_d_tot(self,dvec):
+    def g_fock_d_tot(self, dvec):
         beta = 1.0 / self.T if self.T > 0 else 1.0e20
         en = self.g_energies_tot()
         fo = ft_utils.ff(beta, en, self.mu)
@@ -265,7 +265,7 @@ class scf_system(system):
         fo = ft_utils.ff(beta, en, self.mu)
         fv = ft_utils.ffv(beta, en, self.mu)
         I = self.g_aint_tot()
-        return numpy.einsum('piqi,i->pqi',I,fo*fv)
+        return numpy.einsum('piqi,i->pqi', I, fo*fv)
 
     def r_hcore(self):
         hcore = self.mf.get_hcore()
@@ -300,7 +300,7 @@ class scf_system(system):
 
         return Ia, Ib, Iabab
 
-    def g_aint(self,code=0):
+    def g_aint(self, code=0):
         if self.T > 0.0:
             raise Exception("Undefined ov blocks at FT")
         I = eri_blocks(self.mf, code=code)

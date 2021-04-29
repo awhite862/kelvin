@@ -19,7 +19,7 @@ class solid_field_system(system):
         self.mf = mf
         self.ot = None
 
-    def verify(self,T,mu):
+    def verify(self, T, mu):
         if not (T == self.T and mu == self.mu):
             return False
         else:
@@ -38,14 +38,14 @@ class solid_field_system(system):
                 foa[i] = 1.0
             for i in range(self.nb):
                 fob[i] = 1.0
-            E1 = -0.5*numpy.einsum('ijij,i,j->',Va,foa,foa)
-            E1 -= 0.5*numpy.einsum('ijij,i,j->',Vb,fob,fob)
-            E1 -= numpy.einsum('ijij,i,j->',Vabab,foa,fob)
+            E1 = -0.5*numpy.einsum('ijij,i,j->', Va, foa, foa)
+            E1 -= 0.5*numpy.einsum('ijij,i,j->', Vb, fob, fob)
+            E1 -= numpy.einsum('ijij,i,j->', Vabab, foa, fob)
             Fa,Fb = self.u_fock()
             Fao = Fa.oo - numpy.diag(self.ea[:self.na])
             Fbo = Fb.oo - numpy.diag(self.eb[:self.nb])
-            E1 += numpy.einsum('ii->',Fao)
-            E1 += numpy.einsum('ii->',Fbo)
+            E1 += numpy.einsum('ii->', Fao)
+            E1 += numpy.einsum('ii->', Fbo)
             return E1
         else:
             Va,Vb,Vabab = self.u_aint_tot()
@@ -55,27 +55,27 @@ class solid_field_system(system):
             nb = eb.shape[0]
             foa = ft_utils.ff(beta, ea, self.mu)
             fob = ft_utils.ff(beta, eb, self.mu)
-            E1 = -0.5*numpy.einsum('ijij,i,j->',Va,foa,foa)
-            E1 = -0.5*numpy.einsum('ijij,i,j->',Vb,fob,fob)
-            E1 = -numpy.einsum('ijij,i,j->',Vabab,foa,fob)
+            E1 = -0.5*numpy.einsum('ijij,i,j->', Va, foa, foa)
+            E1 = -0.5*numpy.einsum('ijij,i,j->', Vb, fob, fob)
+            E1 = -numpy.einsum('ijij,i,j->', Vabab, foa, fob)
             Ia = numpy.identity(na)
             Ib = numpy.identity(nb)
-            dena = numpy.einsum('pi,i,qi->pq',Ia,foa,Ia)
-            denb = numpy.einsum('pi,i,qi->pq',Ib,fob,Ib)
-            JKa = numpy.einsum('prqs,rs->pq',Va,dena)
-            JKa += numpy.einsum('prqs,rs->pq',Vabab,denb)
-            JKb = numpy.einsum('prqs,rs->pq',Vb,denb)
-            JKb += numpy.einsum('prqs,pq->rs',Vabab,dena)
+            dena = numpy.einsum('pi,i,qi->pq', Ia, foa, Ia)
+            denb = numpy.einsum('pi,i,qi->pq', Ib, fob, Ib)
+            JKa = numpy.einsum('prqs,rs->pq', Va, dena)
+            JKa += numpy.einsum('prqs,rs->pq', Vabab, denb)
+            JKb = numpy.einsum('prqs,rs->pq', Vb, denb)
+            JKb += numpy.einsum('prqs,pq->rs', Vabab, dena)
             hcore = self.mf.get_hcore(self.mf.mol)
             hmoa,hmob = scf_utils.u_mo_tran_1e(self.mf, hcore)
-            Fa = hmoa.copy()#numpy.einsum('ij,ip,jq->pq',Ta,self.ua,self.ua)
-            Fb = hmob.copy()#numpy.einsum('ij,ip,jq->pq',Tb,self.ub,self.ub)
+            Fa = hmoa.copy()
+            Fb = hmob.copy()
             Fa += JKa.copy()
             Fb += JKb.copy()
             Fao = Fa - numpy.diag(ea)
             Fbo = Fb - numpy.diag(eb)
-            E1 += numpy.einsum('ii,i->',Fao,foa)
-            E1 += numpy.einsum('ii,i->',Fbo,fob)
+            E1 += numpy.einsum('ii,i->', Fao, foa)
+            E1 += numpy.einsum('ii,i->', Fbo, fob)
             return E1
 
     def u_energies_tot(self):
@@ -84,7 +84,7 @@ class solid_field_system(system):
     def g_energies_tot(self):
         return scf_utils.get_orbital_energies_gen(self.mf)
 
-    def u_fock_tot(self,direc='f'):
+    def u_fock_tot(self, direc='f'):
         beta = 1.0 / self.T if self.T > 0 else 1.0e20
         ea,eb = self.u_energies_tot()
         foa = ft_utils.ff(beta, ea, self.mu)
@@ -122,7 +122,7 @@ class solid_field_system(system):
                 Fb[i] = tempb[ng - i - 1]
         return Fa,Fb
 
-    def g_fock_tot(self,direc='f'):
+    def g_fock_tot(self, direc='f'):
         Fa,Fb = self.u_fock_tot()
         nt,na1,na2 = Fa.shape
         assert(na1 == na2)

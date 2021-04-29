@@ -12,7 +12,7 @@ class mp3(object):
         mu (float): Chemical potential.
         iprint (int): Print level.
     """
-    def __init__(self, sys, T=0,mu=0,iprint=0):
+    def __init__(self, sys, T=0, mu=0, iprint=0):
         self.T = T
         self.mu = mu
         self.iprint = iprint

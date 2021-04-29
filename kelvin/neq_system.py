@@ -8,7 +8,7 @@ class neq_system(object):
         err = "Base class function verify()"
         raise Exception(err)
 
-    def verify(self,T,mu):
+    def verify(self, T, mu):
         """Verify that the system is consistent with the given T,mu."""
         err = "Base class function verify()"
         raise Exception(err)
@@ -28,7 +28,7 @@ class neq_system(object):
         err = "Base class function g_energies()"
         raise Exception(err)
 
-    def g_fock_tot(self,direc='f'):
+    def g_fock_tot(self, direc='f'):
         """Return the general 1-electron operator (Fock matrix including diagonal)."""
         err = "Base class function g_fock_tot()"
         raise Exception(err)
@@ -43,7 +43,7 @@ class NeqSystem(object):
     def __init__(self):
         pass
 
-    def verify(self,T,mu):
+    def verify(self, T, mu):
         """Verify that the system is consistent with the given T,mu."""
         err = "Base class function verify()"
         raise Exception(err)
@@ -78,7 +78,7 @@ class NeqSystem(object):
         err = "Base class function g_energies()"
         raise Exception(err)
 
-    def g_fock_tot(self,t=0.0):
+    def g_fock_tot(self, t=0.0):
         """Return the general 1-electron operator (Fock matrix including diagonal)."""
         err = "Base class function g_fock_tot()"
         raise Exception(err)

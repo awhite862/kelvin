@@ -60,7 +60,7 @@ class fci(object):
             E1 = self.sys.get_mp1()
             return (Efci+En,Efci - E0 - E1)
 
-    def _fci_fixedN(self,nalpha,nbeta):
+    def _fci_fixedN(self, nalpha, nbeta):
         """Run FCI at fixed N."""
         lam = self.lam
         nelec = (nalpha,nbeta)

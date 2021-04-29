@@ -142,7 +142,7 @@ class TDCCSD(object):
     def __del__(self):
         self._rmfile()
 
-    def run(self,response=None):
+    def run(self, response=None):
         """Run CCSD calculation."""
         if self.finite_T:
             if self.iprint > 0:
@@ -197,13 +197,13 @@ class TDCCSD(object):
 
         # higher order contributions
         dvec = -numpy.ones(en.shape) # mu derivative
-        N1 = numpy.einsum('i,i->',dvec, self.ron1)
-        Ncc = numpy.einsum('i,i->',dvec, self.rono + self.ronv)
+        N1 = numpy.einsum('i,i->', dvec, self.ron1)
+        Ncc = numpy.einsum('i,i->', dvec, self.rono + self.ronv)
         N1 *= -1.0 # N = - dG/dmu
         Ncc *= -1.0
         dvec = (en - mu)/beta # beta derivative
-        B1 = numpy.einsum('i,i->',dvec, self.ron1)
-        Bcc = numpy.einsum('i,i->',dvec, self.rono + self.ronv)
+        B1 = numpy.einsum('i,i->', dvec, self.ron1)
+        Bcc = numpy.einsum('i,i->', dvec, self.rono + self.ronv)
 
         # compute other contributions to CC derivative
         Bcc -= self.Gcc/(beta) # derivative from factors of 1/beta
@@ -244,18 +244,18 @@ class TDCCSD(object):
         # higher order contributions
         dveca = -numpy.ones(ea.shape) # mu derivative
         dvecb = -numpy.ones(eb.shape) # mu derivative
-        N1 = numpy.einsum('i,i->',dveca, self.ron1[0])
-        N1 += numpy.einsum('i,i->',dvecb, self.ron1[1])
-        Ncc = numpy.einsum('i,i->',dveca, self.rono[0] + self.ronv[1])
-        Ncc += numpy.einsum('i,i->',dvecb, self.rono[0] + self.ronv[1])
+        N1 = numpy.einsum('i,i->', dveca, self.ron1[0])
+        N1 += numpy.einsum('i,i->', dvecb, self.ron1[1])
+        Ncc = numpy.einsum('i,i->', dveca, self.rono[0] + self.ronv[1])
+        Ncc += numpy.einsum('i,i->', dvecb, self.rono[0] + self.ronv[1])
         N1 *= -1.0 # N = - dG/dmu
         Ncc *= -1.0
         dveca = (ea - mu)/beta
         dvecb = (eb - mu)/beta
-        B1 = numpy.einsum('i,i->',dveca, self.ron1[0])
-        B1 += numpy.einsum('i,i->',dvecb, self.ron1[1])
-        Bcc = numpy.einsum('i,i->',dveca, self.rono[0] + self.ronv[1])
-        Bcc += numpy.einsum('i,i->',dvecb, self.rono[0] + self.ronv[1])
+        B1 = numpy.einsum('i,i->', dveca, self.ron1[0])
+        B1 += numpy.einsum('i,i->', dvecb, self.ron1[1])
+        Bcc = numpy.einsum('i,i->', dveca, self.rono[0] + self.ronv[1])
+        Bcc += numpy.einsum('i,i->', dvecb, self.rono[0] + self.ronv[1])
 
         # compute other contributions to CC derivative
         Bcc -= self.Gcc/(beta)
@@ -293,13 +293,13 @@ class TDCCSD(object):
 
         # higher order contributions
         dvec = -numpy.ones(en.shape) # mu derivative
-        N1 = 2.0*numpy.einsum('i,i->',dvec, self.ron1)
-        Ncc = 2.0*numpy.einsum('i,i->',dvec, self.rono + self.ronv)
+        N1 = 2.0*numpy.einsum('i,i->', dvec, self.ron1)
+        Ncc = 2.0*numpy.einsum('i,i->', dvec, self.rono + self.ronv)
         N1 *= -1.0 # N = - dG/dmu
         Ncc *= -1.0
         dvec = (en - mu)/beta # beta derivative
-        B1 = 2.0*numpy.einsum('i,i->',dvec, self.ron1)
-        Bcc = 2.0*numpy.einsum('i,i->',dvec, self.rono + self.ronv)
+        B1 = 2.0*numpy.einsum('i,i->', dvec, self.ron1)
+        Bcc = 2.0*numpy.einsum('i,i->', dvec, self.rono + self.ronv)
 
         # compute other contributions to CC derivative
         Bcc -= self.Gcc/(beta) # derivative from factors of 1/beta
@@ -349,24 +349,32 @@ class TDCCSD(object):
 
     def _get_l_step(self, h, ltot, tb, te, fLRHS):
         if self.prop["lprop"] == "rk1":
-            LRHS = lambda var: fLRHS(tb, var)
+            def LRHS(var):
+                return fLRHS(tb, var)
             ldtot = propagation.rk1(h, ltot, LRHS)
         elif self.prop["lprop"] == "rk2":
-            LRHS1 = lambda var: fLRHS(tb, var)
-            LRHS2 = lambda var: fLRHS(te, var)
+            def LRHS1(var):
+                return fLRHS(tb, var)
+            def LRHS2(var):
+                return fLRHS(te, var)
             ldtot = propagation.rk2(h, ltot, (LRHS1, LRHS2))
         elif self.prop["lprop"] == "rk4":
             tx = [0.5*(b + e) for b,e in zip(tb,te)]
-            LRHS1 = lambda var: fLRHS(tb, var)
-            LRHS23 = lambda var: fLRHS(tx, var)
-            LRHS4 = lambda var: fLRHS(te, var)
+            def LRHS1(var):
+                return fLRHS(tb, var)
+            def LRHS23(var):
+                return fLRHS(tx, var)
+            def LRHS4(var):
+                return fLRHS(te, var)
             ldtot = propagation.rk4(h, ltot, (LRHS1, LRHS23, LRHS23, LRHS4))
         elif self.prop["lprop"] == "cn":
             mi = self.prop["max_iter"]
             alpha = self.prop["damp"]
             thresh = self.prop["thresh"]
-            LRHS1 = lambda var: fLRHS(tb, var)
-            LRHS2 = lambda var: fLRHS(te, var)
+            def LRHS1(var):
+                return fLRHS(tb, var)
+            def LRHS2(var):
+                return fLRHS(te, var)
             ldtot = propagation.cn(h, ltot, mi, alpha, thresh, (LRHS1,LRHS2), self.iprint)
         else:
             raise Exception("Unrecognized propagation scheme: " + self.prop)
@@ -947,7 +955,7 @@ class TDCCSD(object):
                 k1s = numpy.zeros(k1s.shape, k1s.dtype)
             return [(-1.0)*k1s,(-1.0)*k1d]
 
-        def fLRHS(ttot,var):
+        def fLRHS(ttot, var):
             l1,l2 = var
             t1,t2 = ttot
             l1s = -D1.transpose((1,0))*l1 - F.ov.copy()
@@ -988,7 +996,7 @@ class TDCCSD(object):
             self.rorbv = numpy.zeros(n, dtype=l1.dtype)
             x1 = numpy.zeros(l1.shape, dtype=l1.dtype)
             x2 = numpy.zeros(l2.shape, dtype=l2.dtype)
-            def fXRHS(ltot,var):
+            def fXRHS(ltot, var):
                 l1,l2 = ltot
                 x1,x2 = var
                 l1s = -D1.transpose((1,0))*x1 - l1
@@ -1039,10 +1047,10 @@ class TDCCSD(object):
                 Pkaij += g[ng - 1 - i]*cc_equations.ccsd_2rdm_kaij_opt(t1e, t2e, l1, l2)
                 Pklij += g[ng - 1 - i]*cc_equations.ccsd_2rdm_klij_opt(t1e, t2e, l1, l2)
             if erel:
-                At1i = -(1.0/beta)*einsum('ia,ai->i',x1, d1test)
-                At1a = -(1.0/beta)*einsum('ia,ai->a',x1, d1test)
-                At2i = -(1.0/beta)*0.5*einsum('ijab,abij->i',x2, d2test)
-                At2a = -(1.0/beta)*0.5*einsum('ijab,abij->a',x2, d2test)
+                At1i = -(1.0/beta)*einsum('ia,ai->i', x1, d1test)
+                At1a = -(1.0/beta)*einsum('ia,ai->a', x1, d1test)
+                At2i = -(1.0/beta)*0.5*einsum('ijab,abij->i', x2, d2test)
+                At2a = -(1.0/beta)*0.5*einsum('ijab,abij->a', x2, d2test)
                 self.rorbo[numpy.ix_(self.iocc)] -= g[ng - 1 - i]*(At1i + At2i)
                 self.rorbv[numpy.ix_(self.ivir)] += g[ng - 1 - i]*(At1a + At2a)
 
@@ -1056,10 +1064,10 @@ class TDCCSD(object):
         self.dji = pji
         self.dba = pba
         self.dai = pai
-        self.ndia = numpy.einsum('ia,i,a->ia',self.dia,sfo,sfv)
-        self.ndba = numpy.einsum('ba,b,a->ba',self.dba,sfv,sfv)
-        self.ndji = numpy.einsum('ji,j,i->ji',self.dji,sfo,sfo)
-        self.ndai = numpy.einsum('ai,a,i->ai',self.dai,sfv,sfo)
+        self.ndia = numpy.einsum('ia,i,a->ia', self.dia, sfo, sfv)
+        self.ndba = numpy.einsum('ba,b,a->ba', self.dba, sfv, sfv)
+        self.ndji = numpy.einsum('ji,j,i->ji', self.dji, sfo, sfo)
+        self.ndai = numpy.einsum('ai,a,i->ai', self.dai, sfv, sfo)
         self.n1rdm = numpy.zeros((n,n), dtype=pia.dtype)
         self.n1rdm[numpy.ix_(self.iocc,self.ivir)] += self.ndia/beta
         self.n1rdm[numpy.ix_(self.ivir,self.ivir)] += self.ndba/beta
@@ -1173,7 +1181,7 @@ class TDCCSD(object):
                     Fa, Fb, Ia, Ib, Iabab, (t1a,t1b), (t2aa,t2ab,t2bb), fac=-1.0)
             return [(-1)*k1sa,(-1)*k1sb,(-1)*k1daa,(-1)*k1dab,(-1)*k1dbb]
 
-        def fLRHS(ttot,var):
+        def fLRHS(ttot, var):
             l1a,l1b,l2aa,l2ab,l2bb = var
             t1a,t1b,t2aa,t2ab,t2bb = ttot
             l1sa = -D1a.transpose((1,0))*l1a - Fa.ov.copy()
@@ -1282,7 +1290,7 @@ class TDCCSD(object):
             x2aa = numpy.zeros(l2aa.shape, dtype=l2aa.dtype)
             x2ab = numpy.zeros(l2ab.shape, dtype=l2ab.dtype)
             x2bb = numpy.zeros(l2bb.shape, dtype=l2bb.dtype)
-            def fXRHS(ltot,var):
+            def fXRHS(ltot, var):
                 l1a,l1b,l2aa,l2ab,l2bb = ltot
                 x1a,x1b,x2aa,x2ab,x2bb = var
                 l1sa = -D1a.transpose((1,0))*x1a - l1a
@@ -1412,18 +1420,18 @@ class TDCCSD(object):
                 PkLiJ += g[ng - i - 1]*klij_tot[2]
 
             if erel:
-                At1i_a = -(1.0/beta)*einsum('ia,ai->i',x1a, d1atest)
-                At1i_b = -(1.0/beta)*einsum('ia,ai->i',x1b, d1btest)
-                At1a_a = -(1.0/beta)*einsum('ia,ai->a',x1a, d1atest)
-                At1a_b = -(1.0/beta)*einsum('ia,ai->a',x1b, d1btest)
-                At2i_a = -(1.0/beta)*0.5*einsum('ijab,abij->i',x2aa, d2aatest)
-                At2i_b = -(1.0/beta)*0.5*einsum('ijab,abij->i',x2bb, d2bbtest)
-                At2i_a -= (1.0/beta)*einsum('ijab,abij->i',x2ab, d2abtest)
-                At2i_b -= (1.0/beta)*einsum('ijab,abij->j',x2ab, d2abtest)
-                At2a_a = -(1.0/beta)*0.5*einsum('ijab,abij->a',x2aa, d2aatest)
-                At2a_b = -(1.0/beta)*0.5*einsum('ijab,abij->a',x2bb, d2bbtest)
-                At2a_a -= (1.0/beta)*einsum('ijab,abij->a',x2ab, d2abtest)
-                At2a_b -= (1.0/beta)*einsum('ijab,abij->b',x2ab, d2abtest)
+                At1i_a = -(1.0/beta)*einsum('ia,ai->i', x1a, d1atest)
+                At1i_b = -(1.0/beta)*einsum('ia,ai->i', x1b, d1btest)
+                At1a_a = -(1.0/beta)*einsum('ia,ai->a', x1a, d1atest)
+                At1a_b = -(1.0/beta)*einsum('ia,ai->a', x1b, d1btest)
+                At2i_a = -(1.0/beta)*0.5*einsum('ijab,abij->i', x2aa, d2aatest)
+                At2i_b = -(1.0/beta)*0.5*einsum('ijab,abij->i', x2bb, d2bbtest)
+                At2i_a -= (1.0/beta)*einsum('ijab,abij->i', x2ab, d2abtest)
+                At2i_b -= (1.0/beta)*einsum('ijab,abij->j', x2ab, d2abtest)
+                At2a_a = -(1.0/beta)*0.5*einsum('ijab,abij->a', x2aa, d2aatest)
+                At2a_b = -(1.0/beta)*0.5*einsum('ijab,abij->a', x2bb, d2bbtest)
+                At2a_a -= (1.0/beta)*einsum('ijab,abij->a', x2ab, d2abtest)
+                At2a_b -= (1.0/beta)*einsum('ijab,abij->b', x2ab, d2abtest)
                 rorbo_a[numpy.ix_(self.iocc[0])] -= g[ng - 1 - i]*(At1i_a + At2i_a)
                 rorbo_b[numpy.ix_(self.iocc[1])] -= g[ng - 1 - i]*(At1i_b + At2i_b)
                 rorbv_a[numpy.ix_(self.ivir[0])] += g[ng - 1 - i]*(At1a_a + At2a_a)
@@ -1442,14 +1450,14 @@ class TDCCSD(object):
         self.dji = (pji,pJI)
         self.dba = (pba,pBA)
         self.dai = (pai,pAI)
-        self.ndia = (numpy.einsum('ia,i,a->ia',self.dia[0],sfoa,sfva),
-                numpy.einsum('ia,i,a->ia',self.dia[1],sfob,sfvb))
-        self.ndba = (numpy.einsum('ba,b,a->ba',self.dba[0],sfva,sfva),
-                numpy.einsum('ba,b,a->ba',self.dba[1],sfvb,sfvb))
-        self.ndji = (numpy.einsum('ji,j,i->ji',self.dji[0],sfoa,sfoa),
-                numpy.einsum('ji,j,i->ji',self.dji[1],sfob,sfob))
-        self.ndai = (numpy.einsum('ai,a,i->ai',self.dai[0],sfva,sfoa),
-                numpy.einsum('ai,a,i->ai',self.dai[1],sfvb,sfob))
+        self.ndia = (numpy.einsum('ia,i,a->ia', self.dia[0], sfoa, sfva),
+                numpy.einsum('ia,i,a->ia', self.dia[1], sfob, sfvb))
+        self.ndba = (numpy.einsum('ba,b,a->ba', self.dba[0], sfva, sfva),
+                numpy.einsum('ba,b,a->ba', self.dba[1], sfvb, sfvb))
+        self.ndji = (numpy.einsum('ji,j,i->ji', self.dji[0], sfoa, sfoa),
+                numpy.einsum('ji,j,i->ji', self.dji[1], sfob, sfob))
+        self.ndai = (numpy.einsum('ai,a,i->ai', self.dai[0], sfva, sfoa),
+                numpy.einsum('ai,a,i->ai', self.dai[1], sfvb, sfob))
 
         self.n1rdm = [numpy.zeros((na,na), dtype=self.ndia[0].dtype),
                 numpy.zeros((nb,nb), dtype=self.ndia[1].dtype)]
@@ -1543,7 +1551,7 @@ class TDCCSD(object):
             cc_equations._r_Stanton(k1s,k1d,F,I,t1,t2,fac=-1.0)
             return [(-1.0)*k1s,(-1.0)*k1d]
 
-        def fLRHS(ttot,var):
+        def fLRHS(ttot, var):
             l1,l2 = var
             t1,t2 = ttot
             l1s = -D1.transpose((1,0))*l1 - F.ov.copy()
@@ -1584,7 +1592,7 @@ class TDCCSD(object):
             self.rorbv = numpy.zeros(n, dtype=l1.dtype)
             x1 = numpy.zeros(l1.shape, dtype=l1.dtype)
             x2 = numpy.zeros(l2.shape, dtype=l2.dtype)
-            def fXRHS(ltot,var):
+            def fXRHS(ltot, var):
                 l1,l2 = ltot
                 x1,x2 = var
                 l1s = -D1.transpose((1,0))*x1 - l1
@@ -1633,12 +1641,12 @@ class TDCCSD(object):
                 Pkaij += g[ng - i - 1]*cc_equations.rccsd_2rdm_kaij(t1e, t2e, l1, l2)
                 Pklij += g[ng - i - 1]*cc_equations.rccsd_2rdm_klij(t1e, t2e, l1, l2)
             if erel:
-                At1i = -(1.0/beta)*einsum('ia,ai->i',x1, d1test)
-                At1a = -(1.0/beta)*einsum('ia,ai->a',x1, d1test)
-                At2i = -(1.0/beta)*0.5*einsum('ijab,abij->i',x2 - x2.transpose((0,1,3,2)), d2test - d2test.transpose((0,1,3,2)))
-                At2i -= (1.0/beta)*einsum('ijab,abij->i',x2, d2test)
-                At2a = -(1.0/beta)*0.5*einsum('ijab,abij->a',x2 - x2.transpose((0,1,3,2)), d2test - d2test.transpose((0,1,3,2)))
-                At2a -= (1.0/beta)*einsum('ijab,abij->a',x2, d2test)
+                At1i = -(1.0/beta)*einsum('ia,ai->i', x1, d1test)
+                At1a = -(1.0/beta)*einsum('ia,ai->a', x1, d1test)
+                At2i = -(1.0/beta)*0.5*einsum('ijab,abij->i', x2 - x2.transpose((0,1,3,2)), d2test - d2test.transpose((0,1,3,2)))
+                At2i -= (1.0/beta)*einsum('ijab,abij->i', x2, d2test)
+                At2a = -(1.0/beta)*0.5*einsum('ijab,abij->a', x2 - x2.transpose((0,1,3,2)), d2test - d2test.transpose((0,1,3,2)))
+                At2a -= (1.0/beta)*einsum('ijab,abij->a', x2, d2test)
                 self.rorbo[numpy.ix_(self.iocc)] -= g[ng - 1 - i]*(At1i + At2i)
                 self.rorbv[numpy.ix_(self.ivir)] += g[ng - 1 - i]*(At1a + At2a)
 
@@ -1652,10 +1660,10 @@ class TDCCSD(object):
         self.dji = pji
         self.dba = pba
         self.dai = pai
-        self.ndia = numpy.einsum('ia,i,a->ia',self.dia,sfo,sfv)
-        self.ndba = numpy.einsum('ba,b,a->ba',self.dba,sfv,sfv)
-        self.ndji = numpy.einsum('ji,j,i->ji',self.dji,sfo,sfo)
-        self.ndai = numpy.einsum('ai,a,i->ai',self.dai,sfv,sfo)
+        self.ndia = numpy.einsum('ia,i,a->ia', self.dia, sfo, sfv)
+        self.ndba = numpy.einsum('ba,b,a->ba', self.dba, sfv, sfv)
+        self.ndji = numpy.einsum('ji,j,i->ji', self.dji, sfo, sfo)
+        self.ndai = numpy.einsum('ai,a,i->ai', self.dai, sfv, sfo)
         self.n1rdm = numpy.zeros((n,n), dtype=pia.dtype)
         self.n1rdm[numpy.ix_(self.iocc,self.ivir)] += self.ndia/beta
         self.n1rdm[numpy.ix_(self.ivir,self.ivir)] += self.ndba/beta
@@ -1679,9 +1687,9 @@ class TDCCSD(object):
         ng = self.ngrid
         t1 = self._read_T1(ng - 1)
         t2 = self._read_T2(ng - 1)
-        t2_temp = 0.25*t2 + 0.5*numpy.einsum('ai,bj->abij',t1,t1)
-        Es1 = numpy.einsum('ai,ia->',t1,F.ov)
-        Es2 = numpy.einsum('abij,ijab->',t2_temp,I.oovv)
+        t2_temp = 0.25*t2 + 0.5*numpy.einsum('ai,bj->abij', t1, t1)
+        Es1 = numpy.einsum('ai,ia->', t1, F.ov)
+        Es2 = numpy.einsum('abij,ijab->', t2_temp, I.oovv)
         return (Es1 + Es2)/beta
 
     def _u_gderiv_approx(self):
@@ -1698,15 +1706,15 @@ class TDCCSD(object):
 
         T1a,T1b = self._read_T1(ng - 1)
         T2aa,T2ab,T2bb = self._read_T2(ng - 1)
-        t2aa_temp = 0.25*T2aa + 0.5*einsum('ai,bj->abij',T1a,T1a)
-        t2bb_temp = 0.25*T2bb + 0.5*einsum('ai,bj->abij',T1b,T1b)
-        t2ab_temp = T2ab + einsum('ai,bj->abij',T1a,T1b)
+        t2aa_temp = 0.25*T2aa + 0.5*einsum('ai,bj->abij', T1a, T1a)
+        t2bb_temp = 0.25*T2bb + 0.5*einsum('ai,bj->abij', T1b, T1b)
+        t2ab_temp = T2ab + einsum('ai,bj->abij', T1a, T1b)
 
-        Es1 = einsum('ai,ia->',T1a,Fa.ov)
-        Es1 += einsum('ai,ia->',T1b,Fb.ov)
-        Es2 = einsum('abij,ijab->',t2aa_temp,Ia.oovv)
-        Es2 += einsum('abij,ijab->',t2ab_temp,Iabab.oovv)
-        Es2 += einsum('abij,ijab->',t2bb_temp,Ib.oovv)
+        Es1 = einsum('ai,ia->', T1a, Fa.ov)
+        Es1 += einsum('ai,ia->', T1b, Fb.ov)
+        Es2 = einsum('abij,ijab->', t2aa_temp, Ia.oovv)
+        Es2 += einsum('abij,ijab->', t2ab_temp, Iabab.oovv)
+        Es2 += einsum('abij,ijab->', t2bb_temp, Ib.oovv)
 
         return (Es1 + Es2) / beta
 
@@ -1722,12 +1730,12 @@ class TDCCSD(object):
         ng = self.ngrid
         T1 = self._read_T1(ng - 1)
         T2 = self._read_T2(ng - 1)
-        t2aa_temp = 0.25*(T2 - T2.transpose((0,1,3,2))) + 0.5*einsum('ai,bj->abij',T1,T1)
-        t2ab_temp = T2 + einsum('ai,bj->abij',T1,T1)
+        t2aa_temp = 0.25*(T2 - T2.transpose((0,1,3,2))) + 0.5*einsum('ai,bj->abij', T1, T1)
+        t2ab_temp = T2 + einsum('ai,bj->abij', T1, T1)
 
-        Es1 = 2.0*einsum('ai,ia->',T1,F.ov)
-        Es2 = 2.0*einsum('abij,ijab->',t2aa_temp,I.oovv - I.oovv.transpose((0,1,3,2)))
-        Es2 += einsum('abij,ijab->',t2ab_temp,I.oovv)
+        Es1 = 2.0*einsum('ai,ia->', T1, F.ov)
+        Es2 = 2.0*einsum('abij,ijab->', t2aa_temp, I.oovv - I.oovv.transpose((0,1,3,2)))
+        Es2 += einsum('abij,ijab->', t2ab_temp, I.oovv)
 
         return (Es1 + Es2) / beta
 

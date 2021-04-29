@@ -20,7 +20,8 @@ class hubbard_site_system(system):
         Na (float): Number of alpha electrons.
         Nb (float): Number of beta electrons.
     """
-    def __init__(self,T,model,Pa=None,Pb=None,mu=None,na=None,nb=None):
+    def __init__(self, T, model, Pa=None, Pb=None,
+                 mu=None, na=None, nb=None):
         self.T = T
         self.model = model
         self.Pa = Pa
@@ -51,10 +52,10 @@ class hubbard_site_system(system):
             Va = V - V.transpose((0,1,3,2))
             Fa = self.r_hcore()
             Fb = self.r_hcore()
-            Fa += einsum('pqrs,qs->pq',Va,Pa)
-            Fa += einsum('pqrs,qs->pq',V,Pb)
-            Fb += einsum('pqrs,qs->pq',Va,Pb)
-            Fb += einsum('pqrs,pr->qs',V,Pa)
+            Fa += einsum('pqrs,qs->pq', Va, Pa)
+            Fa += einsum('pqrs,qs->pq', V, Pb)
+            Fb += einsum('pqrs,qs->pq', Va, Pb)
+            Fb += einsum('pqrs,pr->qs', V, Pa)
             self.Fa = Fa
             self.Fb = Fb
 
@@ -70,7 +71,7 @@ class hubbard_site_system(system):
         else:
             return False
 
-    def verify(self,T,mu):
+    def verify(self, T, mu):
         if T > 0.0:
             s = T == self.T and mu == self.mu
         else:
@@ -101,9 +102,9 @@ class hubbard_site_system(system):
             ea,eb = self.u_energies_tot()
             foa = ft_utils.ff(self.beta, ea, self.mu)
             fob = ft_utils.ff(self.beta, eb, self.mu)
-            E1 = 0.5*einsum('ijij,i,j->',Va,foa,foa)
-            E1 += 0.5*einsum('ijij,i,j->',Vb,fob,fob)
-            E1 += einsum('ijij,i,j->',Vabab,foa,fob)
+            E1 = 0.5*einsum('ijij,i,j->', Va, foa, foa)
+            E1 += 0.5*einsum('ijij,i,j->', Vb, fob, fob)
+            E1 += einsum('ijij,i,j->', Vabab, foa, fob)
             return E1
 
     def r_energies(self):
@@ -206,15 +207,15 @@ class hubbard_site_system(system):
         if self.T > 0.0:
             fo = ft_utils.ff(self.beta, d, self.mu)
             I = numpy.identity(n)
-            den = einsum('pi,i,qi->pq',I,fo,I)
+            den = einsum('pi,i,qi->pq', I, fo, I)
         else:
             to = numpy.zeros((n,self.N))
             o,v = self._get_ov()
             for i,io in enumerate(o):
                 to[i,io] = 1.0
-            den = einsum('pi,qi->pq',to,to)
+            den = einsum('pi,qi->pq', to, to)
         V = self.g_aint_tot()
-        JK = einsum('prqs,rs->pq',V,den)
+        JK = einsum('prqs,rs->pq', V, den)
         return T + JK
 
     def u_fock_tot(self):
@@ -228,8 +229,8 @@ class hubbard_site_system(system):
             fob = ft_utils.ff(self.beta, db, self.mu)
             Ia = numpy.identity(na)
             Ib = numpy.identity(nb)
-            dena = einsum('pi,i,qi->pq',Ia,foa,Ia)
-            denb = einsum('pi,i,qi->pq',Ib,fob,Ib)
+            dena = einsum('pi,i,qi->pq', Ia, foa, Ia)
+            denb = einsum('pi,i,qi->pq', Ib, fob, Ib)
         else:
             toa = numpy.zeros((na,self.N))
             tob = numpy.zeros((nb,self.N))
@@ -238,13 +239,13 @@ class hubbard_site_system(system):
                 toa[i,io] = 1.0
             for i,io in enumerate(ob):
                 tob[i,io] = 1.0
-            dena = einsum('pi,qi->pq',toa,toa)
-            denb = einsum('pi,qi->pq',tob,tob)
+            dena = einsum('pi,qi->pq', toa, toa)
+            denb = einsum('pi,qi->pq', tob, tob)
         Va,Vb,Vabab = self.u_aint_tot()
-        JKa = einsum('prqs,rs->pq',Va,dena)
-        JKa += einsum('prqs,rs->pq',Vabab,denb)
-        JKb = einsum('prqs,rs->pq',Vb,denb)
-        JKb += einsum('prqs,rs->pq',Vabab,dena)
+        JKa = einsum('prqs,rs->pq', Va, dena)
+        JKa += einsum('prqs,rs->pq', Vabab, denb)
+        JKb = einsum('prqs,rs->pq', Vb, denb)
+        JKb += einsum('prqs,rs->pq', Vabab, dena)
         return (Ta + JKa),(Tb + JKb)
 
     #def u_fock_d_tot(self,dveca,dvecb):
@@ -324,7 +325,7 @@ class hubbard_site_system(system):
                 oooo=Voooo)
         return Va,Vb,Vabab
 
-    def g_aint(self,code=0):
+    def g_aint(self, code=0):
         Umat = self.model.get_u_tot()
         o,v = self._get_ov()
         Vvvvv = None

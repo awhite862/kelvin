@@ -61,7 +61,7 @@ class lccsd(object):
 
         self.sys = sys
 
-    def run(self,T1=None,T2=None):
+    def run(self, T1=None, T2=None):
         if self.finite_T:
             if self.iprint > 0:
                 print('Running LCCSD at an electronic temperature of %f K'
@@ -116,8 +116,8 @@ class lccsd(object):
             else:
                 T2 = cc_equations.lccd_simple(F, I, T2old)
                 T1 = numpy.zeros(F.vo.shape)
-            T1 = numpy.einsum('ai,ia->ai',T1,Dov)
-            T2 = numpy.einsum('abij,ijab->abij',T2,Doovv)
+            T1 = numpy.einsum('ai,ia->ai', T1, Dov)
+            T2 = numpy.einsum('abij,ijab->abij', T2, Doovv)
             E = cc_energy.cc_energy(T1,T2,F.ov,I.oovv)
             if self.iprint > 0:
                 print(' %d  %.10f' % (i+1,E))
@@ -135,7 +135,7 @@ class lccsd(object):
         self.T2 = T2old
         return Eold
 
-    def _lccsd_rt(self,T1in=None,T2in=None):
+    def _lccsd_rt(self, T1in=None, T2in=None):
         # create energies in spin-orbital basis
         eo,ev = self.sys.g_energies()
         no = eo.shape[0]
@@ -170,11 +170,11 @@ class lccsd(object):
             T2old = T2in
         else:
             if self.singles:
-                T1old = -numpy.einsum('v,ai->vai',Id,F.vo)
+                T1old = -numpy.einsum('v,ai->vai', Id, F.vo)
                 T1old = quadrature.int_tbar1(ng,T1old,ti,Dvo,G)
             else:
                 T1old = numpy.zeros((ng,nv,no))
-            T2old = -numpy.einsum('v,abij->vabij',Id,I.vvoo)
+            T2old = -numpy.einsum('v,abij->vabij', Id, I.vvoo)
             T2old = quadrature.int_tbar2(ng,T2old,ti,Dvvoo,G)
         E2 = ft_cc_energy.ft_cc_energy(T1old, T2old,
             F.ov, I.oovv, g, self.beta_max, Qterm=False)
@@ -192,7 +192,7 @@ class lccsd(object):
         # save and return
         return Eccn
 
-    def _ft_lccsd(self,T1in=None,T2in=None):
+    def _ft_lccsd(self, T1in=None, T2in=None):
         # get T and mu variables
         beta = self.beta
         mu = self.mu
@@ -237,8 +237,8 @@ class lccsd(object):
             T2old = T2in
         else:
             Id = numpy.ones((ng))
-            T1old = -numpy.einsum('v,ai->vai',Id,F.vo)
-            T2old = -numpy.einsum('v,abij->vabij',Id,I.vvoo)
+            T1old = -numpy.einsum('v,ai->vai', Id, F.vo)
+            T2old = -numpy.einsum('v,abij->vabij', Id, I.vvoo)
             T1old = quadrature.int_tbar1(ng,T1old,ti,D1,G)
             T2old = quadrature.int_tbar2(ng,T2old,ti,D2,G)
         if not self.singles:
@@ -261,7 +261,7 @@ class lccsd(object):
         print('total energy: %f' % (Eccn+E01))
         return (Eccn+E01,Eccn)
 
-    def _ft_lccsd_active(self,T1in=None,T2in=None):
+    def _ft_lccsd_active(self, T1in=None, T2in=None):
         # get T and mu variables
         assert(self.beta_max == self.beta)
         beta = self.beta
@@ -325,8 +325,8 @@ class lccsd(object):
             T2old = T2in
         else:
             Id = numpy.ones((ng))
-            T1old = -numpy.einsum('v,ai->vai',Id,F.vo)
-            T2old = -numpy.einsum('v,abij->vabij',Id,I.vvoo)
+            T1old = -numpy.einsum('v,ai->vai', Id, F.vo)
+            T2old = -numpy.einsum('v,abij->vabij', Id, I.vvoo)
             T1old = quadrature.int_tbar1(ng,T1old,ti,D1,G)
             T2old = quadrature.int_tbar2(ng,T2old,ti,D2,G)
         #E2 = ft_cc_energy.ft_cc_energy(T1old,T2old,

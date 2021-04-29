@@ -103,7 +103,7 @@ class ccsd(object):
         # ON- and OE-relaxation contribution to 1-rdm
         self.r1rdm = None
 
-    def run(self,T1=None,T2=None):
+    def run(self, T1=None, T2=None):
         """Run CCSD calculation."""
         if self.finite_T:
             if self.iprint > 0:
@@ -124,7 +124,7 @@ class ccsd(object):
                 else:
                     return self._ccsd()
 
-    def compute_ESN(self,L1=None,L2=None,gderiv=True):
+    def compute_ESN(self, L1=None, L2=None, gderiv=True):
         """Compute energy, entropy, particle number."""
         if not self.finite_T:
             N = self.sys.g_energies()[0].shape[0]
@@ -155,7 +155,7 @@ class ccsd(object):
             else:
                 self._g_ft_ESN(L1,L2,gderiv=gderiv)
 
-    def _g_ft_ESN(self,L1=None,L2=None,gderiv=True):
+    def _g_ft_ESN(self, L1=None, L2=None, gderiv=True):
         # temperature info
         assert(self.beta_max == self.beta)
         beta = self.beta
@@ -172,13 +172,13 @@ class ccsd(object):
 
         # higher order contributions
         dvec = -numpy.ones(en.shape) # mu derivative
-        N1 = numpy.einsum('i,i->',dvec, self.ron1)
-        Ncc = numpy.einsum('i,i->',dvec, self.rono + self.ronv)
+        N1 = numpy.einsum('i,i->', dvec, self.ron1)
+        Ncc = numpy.einsum('i,i->', dvec, self.rono + self.ronv)
         N1 *= -1.0 # N = - dG/dmu
         Ncc *= -1.0
         dvec = (en - mu)/beta # beta derivative
-        B1 = numpy.einsum('i,i->',dvec, self.ron1)
-        Bcc = numpy.einsum('i,i->',dvec, self.rono + self.ronv)
+        B1 = numpy.einsum('i,i->', dvec, self.ron1)
+        Bcc = numpy.einsum('i,i->', dvec, self.rono + self.ronv)
 
         # compute other contributions to CC derivative
         Bcc -= self.Gcc/(beta) # derivative from factors of 1/beta
@@ -204,7 +204,7 @@ class ccsd(object):
         self.S1 = -beta*(self.G1 - self.E1 + mu*self.N1)
         self.Scc = self.S - self.S0 - self.S1
 
-    def _u_ft_ESN(self,L1=None,L2=None,gderiv=True):
+    def _u_ft_ESN(self, L1=None, L2=None, gderiv=True):
         # temperature info
         assert(self.beta_max == self.beta)
         beta = self.beta
@@ -224,18 +224,18 @@ class ccsd(object):
         # higher order contributions
         dveca = -numpy.ones(ea.shape) # mu derivative
         dvecb = -numpy.ones(eb.shape) # mu derivative
-        N1 = numpy.einsum('i,i->',dveca, self.ron1[0])
-        N1 += numpy.einsum('i,i->',dvecb, self.ron1[1])
-        Ncc = numpy.einsum('i,i->',dveca, self.rono[0] + self.ronv[1])
-        Ncc += numpy.einsum('i,i->',dvecb, self.rono[0] + self.ronv[1])
+        N1 = numpy.einsum('i,i->', dveca, self.ron1[0])
+        N1 += numpy.einsum('i,i->', dvecb, self.ron1[1])
+        Ncc = numpy.einsum('i,i->', dveca, self.rono[0] + self.ronv[1])
+        Ncc += numpy.einsum('i,i->', dvecb, self.rono[0] + self.ronv[1])
         N1 *= -1.0 # N = - dG/dmu
         Ncc *= -1.0
         dveca = (ea - mu)/beta
         dvecb = (eb - mu)/beta
-        B1 = numpy.einsum('i,i->',dveca, self.ron1[0])
-        B1 += numpy.einsum('i,i->',dvecb, self.ron1[1])
-        Bcc = numpy.einsum('i,i->',dveca, self.rono[0] + self.ronv[1])
-        Bcc += numpy.einsum('i,i->',dvecb, self.rono[0] + self.ronv[1])
+        B1 = numpy.einsum('i,i->', dveca, self.ron1[0])
+        B1 += numpy.einsum('i,i->', dvecb, self.ron1[1])
+        Bcc = numpy.einsum('i,i->', dveca, self.rono[0] + self.ronv[1])
+        Bcc += numpy.einsum('i,i->', dvecb, self.rono[0] + self.ronv[1])
 
         # compute other contributions to CC derivative
         Bcc -= self.Gcc/(beta)
@@ -294,8 +294,8 @@ class ccsd(object):
         I = self.sys.g_aint()
 
         # get MP2 T-amplitudes
-        T1old = einsum('ai,ia->ai',F.vo,Dov)
-        T2old = einsum('abij,ijab->abij',I.vvoo,Doovv)
+        T1old = einsum('ai,ia->ai', F.vo, Dov)
+        T2old = einsum('abij,ijab->abij', I.vvoo, Doovv)
         Es = cc_energy.cc_energy_s1(T1old, F.vo.transpose(1,0))
         Ed = cc_energy.cc_energy_d(T2old, I.vvoo.transpose(2,3,0,1))
         Emp2 = Es + Ed
@@ -316,8 +316,8 @@ class ccsd(object):
             else:
                 T1 = numpy.zeros(F.vo.shape, dtype=F.vo.dtype)
                 T2 = cc_equations.ccd_simple(F,I,T2old)
-            T1 = einsum('ai,ia->ai',T1,Dov)
-            T2 = einsum('abij,ijab->abij',T2,Doovv)
+            T1 = einsum('ai,ia->ai', T1, Dov)
+            T2 = einsum('abij,ijab->abij', T2, Doovv)
             res1 = numpy.linalg.norm(T1 - T1old) / nl1
             res2 = numpy.linalg.norm(T2 - T2old) / nl2
             T1old = alpha*T1old + (1.0 - alpha)*T1
@@ -341,7 +341,7 @@ class ccsd(object):
         self.T2 = T2old
         return (Eold+Ehf,Eold)
 
-    def _uccsd(self,T1in=None,T2in=None):
+    def _uccsd(self, T1in=None, T2in=None):
         """Simple UCCSD implementation at zero temperature."""
         # create energies and denominators in spin-orbital basis
         eoa,eva,eob,evb = self.sys.u_energies()
@@ -388,11 +388,11 @@ class ccsd(object):
         if not self.singles:
             raise Exception("UCCD is not implemented")
         # get MP2 T-amplitudes
-        T1aold = einsum('ai,ia->ai',Fa.vo,Dova)
-        T1bold = einsum('ai,ia->ai',Fb.vo,Dovb)
-        T2aaold = einsum('abij,ijab->abij',Ia.vvoo,Doovvaa)
-        T2abold = einsum('abij,ijab->abij',Iabab.vvoo,Doovvab)
-        T2bbold = einsum('abij,ijab->abij',Ib.vvoo,Doovvbb)
+        T1aold = einsum('ai,ia->ai', Fa.vo, Dova)
+        T1bold = einsum('ai,ia->ai', Fb.vo, Dovb)
+        T2aaold = einsum('abij,ijab->abij', Ia.vvoo, Doovvaa)
+        T2abold = einsum('abij,ijab->abij', Iabab.vvoo, Doovvab)
+        T2bbold = einsum('abij,ijab->abij', Ib.vvoo, Doovvbb)
         T1olds = (T1aold,T1bold)
         T2olds = (T2aaold,T2abold,T2bbold)
         Emp2 = cc_energy.ump2_energy(T1olds,T2olds,
@@ -421,11 +421,11 @@ class ccsd(object):
         nl2 = numpy.sqrt(T2aaold.size)
         while i < max_iter and not converged:
             (T1a,T1b),(T2aa,T2ab,T2bb) = cc_equations.uccsd_stanton(Fa, Fb, Ia, Ib, Iabab, T1olds, T2olds)
-            T1a = einsum('ai,ia->ai',T1a,Dova)
-            T1b = einsum('ai,ia->ai',T1b,Dovb)
-            T2aa = einsum('abij,ijab->abij',T2aa,Doovvaa)
-            T2ab = einsum('abij,ijab->abij',T2ab,Doovvab)
-            T2bb = einsum('abij,ijab->abij',T2bb,Doovvbb)
+            T1a = einsum('ai,ia->ai', T1a, Dova)
+            T1b = einsum('ai,ia->ai', T1b, Dovb)
+            T2aa = einsum('abij,ijab->abij', T2aa, Doovvaa)
+            T2ab = einsum('abij,ijab->abij', T2ab, Doovvab)
+            T2bb = einsum('abij,ijab->abij', T2bb, Doovvbb)
             E = cc_energy.ucc_energy((T1a,T1b),(T2aa,T2ab,T2bb),
                     Fa.ov,Fb.ov,Ia.oovv,Ib.oovv,Iabab.oovv)
             res1 = numpy.linalg.norm(T1olds[0] - T1a)/nl1
@@ -497,8 +497,8 @@ class ccsd(object):
             else:
                 L1 = numpy.zeros(F.ov.shape, F.ov.dtype)
                 L2 = cc_equations.ccd_lambda_simple(F,I,L2old,self.T2)
-            L1 = einsum('ia,ia->ia',L1,Dov)
-            L2 = einsum('ijab,ijab->ijab',L2,Doovv)
+            L1 = einsum('ia,ia->ia', L1, Dov)
+            L2 = einsum('ijab,ijab->ijab', L2, Doovv)
             res1 = numpy.linalg.norm(L1 - L1old) / nl1
             res2 = numpy.linalg.norm(L2 - L2old) / nl2
             if self.iprint > 0:
@@ -569,11 +569,11 @@ class ccsd(object):
                 raise Exception("UCCD Lambdas not implemented")
                 #L1 = numpy.zeros(F.ov.shape, dtype=F.ov.dtype)
                 #L2 = cc_equations.ccd_lambda_simple(F,I,L2old,self.T2)
-            L1a = einsum('ia,ia->ia',L1a,Dova)
-            L1b = einsum('ia,ia->ia',L1b,Dovb)
-            L2aa = einsum('ijab,ijab->ijab',L2aa,Doovvaa)
-            L2ab = einsum('ijab,ijab->ijab',L2ab,Doovvab)
-            L2bb = einsum('ijab,ijab->ijab',L2bb,Doovvbb)
+            L1a = einsum('ia,ia->ia', L1a, Dova)
+            L1b = einsum('ia,ia->ia', L1b, Dovb)
+            L2aa = einsum('ijab,ijab->ijab', L2aa, Doovvaa)
+            L2ab = einsum('ijab,ijab->ijab', L2ab, Doovvab)
+            L2bb = einsum('ijab,ijab->ijab', L2bb, Doovvbb)
             res1 = numpy.linalg.norm(L1a - L1aold) / nl1
             res1 += numpy.linalg.norm(L1b - L1bold) / nl1
             res2 = numpy.linalg.norm(L2aa - L2olds[0]) / nl2
@@ -601,7 +601,7 @@ class ccsd(object):
         self.L1 = (L1aold,L1bold)
         self.L2 = (L2aaold,L2abold,L2bbold)
 
-    def _ft_ccsd(self,T1in=None,T2in=None):
+    def _ft_ccsd(self, T1in=None, T2in=None):
         """Solve finite temperature coupled cluster equations."""
 
         # get time-grid
@@ -695,11 +695,11 @@ class ccsd(object):
             else:
                 if self.singles:
                     Id = numpy.ones((ng))
-                    T1old = -einsum('v,ai->vai',Id,F.vo)
+                    T1old = -einsum('v,ai->vai', Id, F.vo)
                 else:
                     T1old = numpy.zeros((ng,n,n), dtype=F.vo.dtype)
                 Id = numpy.ones((ng))
-                T2old = -einsum('v,abij->vabij',Id,I.vvoo)
+                T2old = -einsum('v,abij->vabij', Id, I.vvoo)
                 T1old = quadrature.int_tbar1(ng,T1old,ti,D1,G)
                 T2old = quadrature.int_tbar2(ng,T2old,ti,D2,G)
             E2 = ft_cc_energy.ft_cc_energy(T1old, T2old,
@@ -726,7 +726,7 @@ class ccsd(object):
 
         return (Eccn+E01,Eccn)
 
-    def _ft_uccsd(self,T1in=None,T2in=None):
+    def _ft_uccsd(self, T1in=None, T2in=None):
         """Solve finite temperature coupled cluster equations."""
         # get time-grid
         ng = self.ngrid
@@ -867,15 +867,15 @@ class ccsd(object):
             else:
                 if self.singles:
                     Id = numpy.ones((ng))
-                    T1aold = -einsum('v,ai->vai',Id,Fa.vo)
-                    T1bold = -einsum('v,ai->vai',Id,Fb.vo)
+                    T1aold = -einsum('v,ai->vai', Id, Fa.vo)
+                    T1bold = -einsum('v,ai->vai', Id, Fb.vo)
                 else:
                     T1aold = numpy.zeros((ng,na,na), dtype=Fa.vo.dtype)
                     T1bold = numpy.zeros((ng,nb,nb), dtype=Fb.vo.dtype)
                 Id = numpy.ones((ng))
-                T2aaold = -einsum('v,abij->vabij',Id,Ia.vvoo)
-                T2abold = -einsum('v,abij->vabij',Id,Iabab.vvoo)
-                T2bbold = -einsum('v,abij->vabij',Id,Ib.vvoo)
+                T2aaold = -einsum('v,abij->vabij', Id, Ia.vvoo)
+                T2abold = -einsum('v,abij->vabij', Id, Iabab.vvoo)
+                T2bbold = -einsum('v,abij->vabij', Id, Ib.vvoo)
                 T1aold = quadrature.int_tbar1(ng,T1aold,ti,D1a,G)
                 T1bold = quadrature.int_tbar1(ng,T1bold,ti,D1b,G)
                 T2aaold = quadrature.int_tbar2(ng,T2aaold,ti,D2aa,G)
@@ -1175,7 +1175,7 @@ class ccsd(object):
         else:
             F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
 
-        A1 = (1.0/beta)*einsum('ia,ai->',self.dia,F.vo)
+        A1 = (1.0/beta)*einsum('ia,ai->', self.dia, F.vo)
         # get derivative with respect to g
         Eterm = ft_cc_energy.ft_cc_energy(self.T1,self.T2,
             F.ov,I.oovv,gd,beta)
@@ -1186,11 +1186,11 @@ class ccsd(object):
         T1temp,T2temp = ft_cc_equations.ccsd_stanton(F,I,self.T1,self.T2,
                 D1,D2,ti,ng,Gd)
 
-        A1 = (1.0/beta)*einsum('via,vai->v',self.L1, T1temp)
-        A2 = (1.0/beta)*0.25*einsum('vijab,vabij->v',self.L2, T2temp)
+        A1 = (1.0/beta)*einsum('via,vai->v', self.L1, T1temp)
+        A2 = (1.0/beta)*0.25*einsum('vijab,vabij->v', self.L2, T2temp)
 
-        A1g = -einsum('v,v->',A1,g)
-        A2g = -einsum('v,v->',A2,g)
+        A1g = -einsum('v,v->', A1, g)
+        A2g = -einsum('v,v->', A2, g)
         dG = A1g + A2g
 
         # append derivative with respect to ti points
@@ -1206,11 +1206,11 @@ class ccsd(object):
         T1temp *= D1
         T2temp *= D2
 
-        A1 = -(1.0/beta)*einsum('via,vai->v',self.L1, T1temp)
-        A2 = -(1.0/beta)*0.25*einsum('vijab,vabij->v',self.L2, T2temp)
+        A1 = -(1.0/beta)*einsum('via,vai->v', self.L1, T1temp)
+        A2 = -(1.0/beta)*0.25*einsum('vijab,vabij->v', self.L2, T2temp)
 
-        A1g = einsum('v,v->',A1,g)
-        A2g = einsum('v,v->',A2,g)
+        A1g = einsum('v,v->', A1, g)
+        A2g = einsum('v,v->', A2, g)
         dG += A1g + A2g
 
         return dg,dG
@@ -1281,17 +1281,17 @@ class ccsd(object):
         T1t,T2t = ft_cc_equations.uccsd_stanton(Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,
                 T2aaold,T2abold,T2bbold,D1a,D1b,D2aa,D2ab,D2bb,ti,ng,Gd)
 
-        A1a = -(1.0/beta)*einsum('via,vai->v',L1aold, T1t[0])
-        A1b = -(1.0/beta)*einsum('via,vai->v',L1bold, T1t[1])
-        A2a = -(1.0/beta)*0.25*einsum('vijab,vabij->v',L2aaold, T2t[0])
-        A2b = -(1.0/beta)*0.25*einsum('vijab,vabij->v',L2bbold, T2t[2])
-        A2ab = -(1.0/beta)*einsum('vijab,vabij->v',L2abold, T2t[1])
+        A1a = -(1.0/beta)*einsum('via,vai->v', L1aold, T1t[0])
+        A1b = -(1.0/beta)*einsum('via,vai->v', L1bold, T1t[1])
+        A2a = -(1.0/beta)*0.25*einsum('vijab,vabij->v', L2aaold, T2t[0])
+        A2b = -(1.0/beta)*0.25*einsum('vijab,vabij->v', L2bbold, T2t[2])
+        A2ab = -(1.0/beta)*einsum('vijab,vabij->v', L2abold, T2t[1])
 
-        A2g = einsum('v,v->',A2a,g)
-        A2g += einsum('v,v->',A2ab,g)
-        A2g += einsum('v,v->',A2b,g)
-        A1g = einsum('v,v->',A1a,g)
-        A1g += einsum('v,v->',A1b,g)
+        A2g = einsum('v,v->', A2a, g)
+        A2g += einsum('v,v->', A2ab, g)
+        A2g += einsum('v,v->', A2b, g)
+        A1g = einsum('v,v->', A1a, g)
+        A1g += einsum('v,v->', A1b, g)
         dG = A1g + A2g
 
         # append derivative with respect to ti points
@@ -1312,17 +1312,17 @@ class ccsd(object):
         T2ab *= D2ab
         T2bb *= D2bb
 
-        A1a = -(1.0/beta)*einsum('via,vai->v',L1aold, T1a)
-        A1b = -(1.0/beta)*einsum('via,vai->v',L1bold, T1b)
-        A2a = -(1.0/beta)*0.25*einsum('vijab,vabij->v',L2aaold, T2aa)
-        A2b = -(1.0/beta)*0.25*einsum('vijab,vabij->v',L2bbold, T2bb)
-        A2ab = -(1.0/beta)*einsum('vijab,vabij->v',L2abold, T2ab)
+        A1a = -(1.0/beta)*einsum('via,vai->v', L1aold, T1a)
+        A1b = -(1.0/beta)*einsum('via,vai->v', L1bold, T1b)
+        A2a = -(1.0/beta)*0.25*einsum('vijab,vabij->v', L2aaold, T2aa)
+        A2b = -(1.0/beta)*0.25*einsum('vijab,vabij->v', L2bbold, T2bb)
+        A2ab = -(1.0/beta)*einsum('vijab,vabij->v', L2abold, T2ab)
 
-        A2g = einsum('v,v->',A2a,g)
-        A2g += einsum('v,v->',A2ab,g)
-        A2g += einsum('v,v->',A2b,g)
-        A1g = einsum('v,v->',A1a,g)
-        A1g += einsum('v,v->',A1b,g)
+        A2g = einsum('v,v->', A2a, g)
+        A2g += einsum('v,v->', A2ab, g)
+        A2g += einsum('v,v->', A2b, g)
+        A1g = einsum('v,v->', A1a, g)
+        A1g += einsum('v,v->', A1b, g)
         dG += A1g + A2g
 
         return dg,dG
@@ -1350,9 +1350,9 @@ class ccsd(object):
                     self.sys, en, focc, fvir, iocc, ivir)
         else:
             F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
-        t2_temp = 0.25*self.T2[tf] + 0.5*einsum('ai,bj->abij',self.T1[tf],self.T1[tf])
-        Es1 = einsum('ai,ia->',self.T1[tf],F.ov)
-        Es2 = einsum('abij,ijab->',t2_temp,I.oovv)
+        t2_temp = 0.25*self.T2[tf] + 0.5*einsum('ai,bj->abij', self.T1[tf], self.T1[tf])
+        Es1 = einsum('ai,ia->', self.T1[tf], F.ov)
+        Es2 = einsum('abij,ijab->', t2_temp, I.oovv)
         return (Es1 + Es2)/beta
 
     def _u_gderiv_approx(self):
@@ -1386,15 +1386,15 @@ class ccsd(object):
             Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
         T1a,T1b = self.T1
         T2aa,T2ab,T2bb = self.T2
-        t2aa_temp = 0.25*T2aa[tf] + 0.5*einsum('ai,bj->abij',T1a[tf],T1a[tf])
-        t2bb_temp = 0.25*T2bb[tf] + 0.5*einsum('ai,bj->abij',T1b[tf],T1b[tf])
-        t2ab_temp = T2ab[tf] + einsum('ai,bj->abij',T1a[tf],T1b[tf])
+        t2aa_temp = 0.25*T2aa[tf] + 0.5*einsum('ai,bj->abij', T1a[tf], T1a[tf])
+        t2bb_temp = 0.25*T2bb[tf] + 0.5*einsum('ai,bj->abij', T1b[tf], T1b[tf])
+        t2ab_temp = T2ab[tf] + einsum('ai,bj->abij', T1a[tf], T1b[tf])
 
-        Es1 = einsum('ai,ia->',T1a[tf],Fa.ov)
-        Es1 += einsum('ai,ia->',T1b[tf],Fb.ov)
-        Es2 = einsum('abij,ijab->',t2aa_temp,Ia.oovv)
-        Es2 += einsum('abij,ijab->',t2ab_temp,Iabab.oovv)
-        Es2 += einsum('abij,ijab->',t2bb_temp,Ib.oovv)
+        Es1 = einsum('ai,ia->', T1a[tf], Fa.ov)
+        Es1 += einsum('ai,ia->', T1b[tf], Fb.ov)
+        Es2 = einsum('abij,ijab->', t2aa_temp, Ia.oovv)
+        Es2 += einsum('abij,ijab->', t2ab_temp, Iabab.oovv)
+        Es2 += einsum('abij,ijab->', t2bb_temp, Ib.oovv)
 
         return (Es1 + Es2) / beta
 
@@ -1442,10 +1442,10 @@ class ccsd(object):
         self.dai = pai
 
         # multiply unrelaxed RDMs by occupation numbers to form unrelaxed (normal-ordered) RDM
-        self.ndia = einsum('ia,i,a->ia',self.dia,sfo,sfv)
-        self.ndba = einsum('ba,b,a->ba',self.dba,sfv,sfv)
-        self.ndji = einsum('ji,j,i->ji',self.dji,sfo,sfo)
-        self.ndai = einsum('ai,a,i->ai',self.dai,sfv,sfo)
+        self.ndia = einsum('ia,i,a->ia', self.dia, sfo, sfv)
+        self.ndba = einsum('ba,b,a->ba', self.dba, sfv, sfv)
+        self.ndji = einsum('ji,j,i->ji', self.dji, sfo, sfo)
+        self.ndai = einsum('ai,a,i->ai', self.dai, sfv, sfo)
         if self.athresh > 0.0:
             self.n1rdm = numpy.zeros((n,n), dtype=pia.dtype)
             self.n1rdm[numpy.ix_(iocc,ivir)] += self.ndia/beta
@@ -1615,18 +1615,18 @@ class ccsd(object):
             D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
         T1temp,T2temp = ft_cc_equations.ccsd_stanton(F,I,self.T1,self.T2,
                 D1,D2,self.ti,ng,Gnew)
-        At1i = -(1.0/beta)*einsum('via,vai->vi',self.L1, T1temp)
-        At1a = -(1.0/beta)*einsum('via,vai->va',self.L1, T1temp)
-        At2i = -(1.0/beta)*0.25*einsum('vijab,vabij->vi',self.L2, T2temp)
-        At2j = -(1.0/beta)*0.25*einsum('vijab,vabij->vj',self.L2, T2temp)
-        At2a = -(1.0/beta)*0.25*einsum('vijab,vabij->va',self.L2, T2temp)
-        At2b = -(1.0/beta)*0.25*einsum('vijab,vabij->vb',self.L2, T2temp)
+        At1i = -(1.0/beta)*einsum('via,vai->vi', self.L1, T1temp)
+        At1a = -(1.0/beta)*einsum('via,vai->va', self.L1, T1temp)
+        At2i = -(1.0/beta)*0.25*einsum('vijab,vabij->vi', self.L2, T2temp)
+        At2j = -(1.0/beta)*0.25*einsum('vijab,vabij->vj', self.L2, T2temp)
+        At2a = -(1.0/beta)*0.25*einsum('vijab,vabij->va', self.L2, T2temp)
+        At2b = -(1.0/beta)*0.25*einsum('vijab,vabij->vb', self.L2, T2temp)
         if self.athresh > 0.0:
-            self.rorbo[numpy.ix_(iocc)] -= einsum('vi,v->i',At1i+At2i+At2j,self.g)
-            self.rorbv[numpy.ix_(ivir)] += einsum('va,v->a',At1a+At2a+At2b,self.g)
+            self.rorbo[numpy.ix_(iocc)] -= einsum('vi,v->i', At1i+At2i+At2j, self.g)
+            self.rorbv[numpy.ix_(ivir)] += einsum('va,v->a', At1a+At2a+At2b, self.g)
         else:
-            self.rorbo -= einsum('vi,v->i',At1i+At2i+At2j,self.g)
-            self.rorbv += einsum('va,v->a',At1a+At2a+At2b,self.g)
+            self.rorbo -= einsum('vi,v->i', At1i+At2i+At2j, self.g)
+            self.rorbv += einsum('va,v->a', At1a+At2a+At2b, self.g)
 
     def _grel_ft_1rdm(self):
         assert(self.beta == self.beta_max)
@@ -1729,14 +1729,14 @@ class ccsd(object):
         self.dai = pai
 
         # multiply unrelaxed RDMs by occupation numbers to form unrelaxed (normal-ordered) RDM
-        self.ndia = (einsum('ia,i,a->ia',self.dia[0],sfoa,sfva),
-                einsum('ia,i,a->ia',self.dia[1],sfob,sfvb))
-        self.ndba = (einsum('ba,b,a->ba',self.dba[0],sfva,sfva),
-                einsum('ba,b,a->ba',self.dba[1],sfvb,sfvb))
-        self.ndji = (einsum('ji,j,i->ji',self.dji[0],sfoa,sfoa),
-                einsum('ji,j,i->ji',self.dji[1],sfob,sfob))
-        self.ndai = (einsum('ai,a,i->ai',self.dai[0],sfva,sfoa),
-                einsum('ai,a,i->ai',self.dai[1],sfvb,sfob))
+        self.ndia = (einsum('ia,i,a->ia', self.dia[0], sfoa, sfva),
+                einsum('ia,i,a->ia', self.dia[1], sfob, sfvb))
+        self.ndba = (einsum('ba,b,a->ba', self.dba[0], sfva, sfva),
+                einsum('ba,b,a->ba', self.dba[1], sfvb, sfvb))
+        self.ndji = (einsum('ji,j,i->ji', self.dji[0], sfoa, sfoa),
+                einsum('ji,j,i->ji', self.dji[1], sfob, sfob))
+        self.ndai = (einsum('ai,a,i->ai', self.dai[0], sfva, sfoa),
+                einsum('ai,a,i->ai', self.dai[1], sfvb, sfob))
         if self.athresh > 0.0:
             self.n1rdm = [numpy.zeros((na,na), dtype=self.ndia[0].dtype),
                     numpy.zeros((nb,nb), dtype=self.ndia[1].dtype)]
@@ -1996,32 +1996,32 @@ class ccsd(object):
             D2bb = D2bb[numpy.ix_(ivirb,ivirb,ioccb,ioccb)]
         T1t,T2t = ft_cc_equations.uccsd_stanton(Fa,Fb,Ia,Ib,Iabab,self.T1[0],self.T1[1],
                 self.T2[0],self.T2[1],self.T2[2],D1a,D1b,D2aa,D2ab,D2bb,self.ti,ng,Gnew)
-        At1i = -(1.0/beta)*einsum('via,vai->vi',self.L1[0], T1t[0])
-        At1I = -(1.0/beta)*einsum('via,vai->vi',self.L1[1], T1t[1])
-        At1a = -(1.0/beta)*einsum('via,vai->va',self.L1[0], T1t[0])
-        At1A = -(1.0/beta)*einsum('via,vai->va',self.L1[1], T1t[1])
-        At2i = -(1.0/beta)*0.25*einsum('vijab,vabij->vi',self.L2[0], T2t[0])
-        At2I = -(1.0/beta)*0.25*einsum('vijab,vabij->vi',self.L2[2], T2t[2])
-        At2j = -(1.0/beta)*0.25*einsum('vijab,vabij->vj',self.L2[0], T2t[0])
-        At2J = -(1.0/beta)*0.25*einsum('vijab,vabij->vj',self.L2[2], T2t[2])
-        At2a = -(1.0/beta)*0.25*einsum('vijab,vabij->va',self.L2[0], T2t[0])
-        At2A = -(1.0/beta)*0.25*einsum('vijab,vabij->va',self.L2[2], T2t[2])
-        At2b = -(1.0/beta)*0.25*einsum('vijab,vabij->vb',self.L2[0], T2t[0])
-        At2B = -(1.0/beta)*0.25*einsum('vijab,vabij->vb',self.L2[2], T2t[2])
-        At2i -= (1.0/beta)*einsum('viJaB,vaBiJ->vi',self.L2[1], T2t[1])
-        At2J -= (1.0/beta)*einsum('viJaB,vaBiJ->vJ',self.L2[1], T2t[1])
-        At2a -= (1.0/beta)*einsum('viJaB,vaBiJ->va',self.L2[1], T2t[1])
-        At2B -= (1.0/beta)*einsum('viJaB,vaBiJ->vB',self.L2[1], T2t[1])
+        At1i = -(1.0/beta)*einsum('via,vai->vi', self.L1[0], T1t[0])
+        At1I = -(1.0/beta)*einsum('via,vai->vi', self.L1[1], T1t[1])
+        At1a = -(1.0/beta)*einsum('via,vai->va', self.L1[0], T1t[0])
+        At1A = -(1.0/beta)*einsum('via,vai->va', self.L1[1], T1t[1])
+        At2i = -(1.0/beta)*0.25*einsum('vijab,vabij->vi', self.L2[0], T2t[0])
+        At2I = -(1.0/beta)*0.25*einsum('vijab,vabij->vi', self.L2[2], T2t[2])
+        At2j = -(1.0/beta)*0.25*einsum('vijab,vabij->vj', self.L2[0], T2t[0])
+        At2J = -(1.0/beta)*0.25*einsum('vijab,vabij->vj', self.L2[2], T2t[2])
+        At2a = -(1.0/beta)*0.25*einsum('vijab,vabij->va', self.L2[0], T2t[0])
+        At2A = -(1.0/beta)*0.25*einsum('vijab,vabij->va', self.L2[2], T2t[2])
+        At2b = -(1.0/beta)*0.25*einsum('vijab,vabij->vb', self.L2[0], T2t[0])
+        At2B = -(1.0/beta)*0.25*einsum('vijab,vabij->vb', self.L2[2], T2t[2])
+        At2i -= (1.0/beta)*einsum('viJaB,vaBiJ->vi', self.L2[1], T2t[1])
+        At2J -= (1.0/beta)*einsum('viJaB,vaBiJ->vJ', self.L2[1], T2t[1])
+        At2a -= (1.0/beta)*einsum('viJaB,vaBiJ->va', self.L2[1], T2t[1])
+        At2B -= (1.0/beta)*einsum('viJaB,vaBiJ->vB', self.L2[1], T2t[1])
         if self.athresh > 0.0:
-            rorboa[numpy.ix_(iocca)] -= einsum('vi,v->i',At1i+At2i+At2j,self.g)
-            rorbob[numpy.ix_(ioccb)] -= einsum('vi,v->i',At1I+At2I+At2J,self.g)
-            rorbva[numpy.ix_(ivira)] += einsum('va,v->a',At1a+At2a+At2b,self.g)
-            rorbvb[numpy.ix_(ivirb)] += einsum('va,v->a',At1A+At2A+At2B,self.g)
+            rorboa[numpy.ix_(iocca)] -= einsum('vi,v->i', At1i+At2i+At2j, self.g)
+            rorbob[numpy.ix_(ioccb)] -= einsum('vi,v->i', At1I+At2I+At2J, self.g)
+            rorbva[numpy.ix_(ivira)] += einsum('va,v->a', At1a+At2a+At2b, self.g)
+            rorbvb[numpy.ix_(ivirb)] += einsum('va,v->a', At1A+At2A+At2B, self.g)
         else:
-            rorboa -= einsum('vi,v->i',At1i+At2i+At2j,self.g)
-            rorbob -= einsum('vi,v->i',At1I+At2I+At2J,self.g)
-            rorbva += einsum('va,v->a',At1a+At2a+At2b,self.g)
-            rorbvb += einsum('va,v->a',At1A+At2A+At2B,self.g)
+            rorboa -= einsum('vi,v->i', At1i+At2i+At2j, self.g)
+            rorbob -= einsum('vi,v->i', At1I+At2I+At2J, self.g)
+            rorbva += einsum('va,v->a', At1a+At2a+At2b, self.g)
+            rorbvb += einsum('va,v->a', At1A+At2A+At2B, self.g)
         self.rorbo = [rorboa, rorbob]
         self.rorbv = [rorbva, rorbvb]
 
