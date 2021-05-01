@@ -78,8 +78,8 @@ class TDCCSDLambdaTest(unittest.TestCase):
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
             - en[None,None,:,None] - en[None,None,None,:]
-        L1new = quadrature.int_L1(ng,L1,ti,D1,g,G)
-        L2new = quadrature.int_L2(ng,L2,ti,D2,g,G)
+        L1new = quadrature.int_L1(ng, L1, ti, D1, g, G)
+        L2new = quadrature.int_L2(ng, L2, ti, D2, g, G)
 
         # compute \bar{Lambda} from propagation using rk1
         prop = {"tprop": "rk1", "lprop": "rk1"}
@@ -120,8 +120,8 @@ class TDCCSDLambdaTest(unittest.TestCase):
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
             - en[None,None,:,None] - en[None,None,None,:]
-        L1new = quadrature.int_L1(ng,L1,ti,D1,g,G)
-        L2new = quadrature.int_L2(ng,L2,ti,D2,g,G)
+        L1new = quadrature.int_L1(ng, L1, ti, D1, g, G)
+        L2new = quadrature.int_L2(ng, L2, ti, D2, g, G)
 
         # compute \bar{Lambda} from propagation using rk1
         prop = {"tprop": "rk4", "lprop": "rk4"}
@@ -162,8 +162,8 @@ class TDCCSDLambdaTest(unittest.TestCase):
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
             - en[None,None,:,None] - en[None,None,None,:]
-        L1new = quadrature.int_L1(ng,L1,ti,D1,g,G)
-        L2new = quadrature.int_L2(ng,L2,ti,D2,g,G)
+        L1new = quadrature.int_L1(ng, L1, ti, D1, g, G)
+        L2new = quadrature.int_L2(ng, L2, ti, D2, g, G)
 
         # compute \bar{Lambda} from propagation using rk1
         prop = {"tprop": "cn", "lprop": "cn", "max_iter": 200, "damp": 0.3, "thresh": 1e-5}
@@ -342,7 +342,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         en = sys.g_energies_tot()
         D2 = en[:,None,None,None] + en[None,:,None,None] \
             - en[None,None,:,None] - en[None,None,None,:]
-        L2new = quadrature.int_L2(ng,L2,ti,D2,g,G)
+        L2new = quadrature.int_L2(ng, L2, ti, D2, g, G)
 
         # compute \bar{Lambda} from propagation using rk1
         prop = {"tprop": "rk4", "lprop": "rk4"}

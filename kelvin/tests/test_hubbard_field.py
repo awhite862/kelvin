@@ -27,7 +27,7 @@ def buildH(hub, phase=None):
     H31 = myfci.getH(phase=phase)
     myfci = FCISimple(hub, 4, m_s=0)
     H4 = myfci.getH(phase=phase)
-    H = numpy.zeros((dim,dim),dtype=complex)
+    H = numpy.zeros((dim,dim), dtype=complex)
     x = 1
     y = 3
     z = 5
@@ -85,7 +85,7 @@ class HubbardFieldTest(unittest.TestCase):
         Pb = numpy.zeros((2,2))
         Pa[0,0] = 1.0
         Pb[1,1] = 1.0
-        sys = hubbard_field_system(T,hub,ti,A0,t0,sigma,omega,mu=mu,Pa=Pa,Pb=Pb)
+        sys = hubbard_field_system(T, hub, ti, A0, t0, sigma, omega, mu=mu, Pa=Pa, Pb=Pb)
         cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-9, max_iter=40, damp=0.1, ngr=ng, ngi=ngi, iprint=0)
         E,Ecc = cc.run()
 
@@ -168,7 +168,7 @@ class HubbardFieldTest(unittest.TestCase):
             dt = t - t0
             ex = dt*dt/(2*sigma*sigma)
             phase = A0*numpy.exp(-ex)*numpy.cos(omega*dt + phi)
-            Ht = buildH(hub,phase=phase)
+            Ht = buildH(hub, phase=phase)
             e,v = numpy.linalg.eigh(Ht)
             ee = numpy.exp(-deltat*1.j*e)
             ee2 = numpy.exp(deltat*1.j*e)
@@ -183,7 +183,7 @@ class HubbardFieldTest(unittest.TestCase):
         Pb = numpy.zeros((2,2))
         Pa[0,0] = 1.0
         Pb[1,1] = 1.0
-        sys = hubbard_field_system(T,hub,ti,A0,t0,sigma,omega,mu=mu,Pa=Pa,Pb=Pb)
+        sys = hubbard_field_system(T, hub, ti, A0, t0, sigma, omega, mu=mu, Pa=Pa, Pb=Pb)
         m = numpy.zeros((2,2))
         m[0,0] = 1.0
         ma = numpy.einsum('ij,ip,jq->pq', m, sys.ua, sys.ua)
@@ -275,7 +275,7 @@ class HubbardFieldTest(unittest.TestCase):
             dt = (i)*deltat - t0
             ex = dt*dt/(2*sigma*sigma)
             phase = A0*numpy.exp(-ex)*numpy.cos(omega*dt + phi)
-            Ht = buildH(hub,phase=phase)
+            Ht = buildH(hub, phase=phase)
             e,v = numpy.linalg.eigh(Ht)
             ee = numpy.exp(-deltat*1.j*e)
             ee2 = numpy.exp(deltat*1.j*e)
@@ -290,7 +290,7 @@ class HubbardFieldTest(unittest.TestCase):
         Pb = numpy.zeros((2,2))
         Pa[0,0] = 1.0
         Pb[1,1] = 1.0
-        sys = hubbard_field_system(T,hub,ti,A0,t0,sigma,omega,mu=mu,Pa=Pa,Pb=Pb)
+        sys = hubbard_field_system(T, hub, ti, A0, t0, sigma, omega, mu=mu, Pa=Pa, Pb=Pb)
         m = numpy.zeros((2,2))
         m[0,0] = 1.0
         ma = numpy.einsum('ij,ip,jq->pq', m, sys.ua, sys.ua)

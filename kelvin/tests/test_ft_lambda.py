@@ -33,8 +33,8 @@ def test_L1(cc, thresh):
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
             - en[None,None,:,None] - en[None,None,None,:]
-        D1 = D1[numpy.ix_(ivir,iocc)]
-        D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
+        D1 = D1[numpy.ix_(ivir, iocc)]
+        D2 = D2[numpy.ix_(ivir, ivir, iocc, iocc)]
     else:
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \

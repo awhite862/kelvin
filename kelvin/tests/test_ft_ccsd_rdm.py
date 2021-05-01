@@ -13,7 +13,7 @@ def compute_ref(T1, T2, L1, L2, F, I, D1, D2, ti, ng, g, G, beta):
     T1temp,T2temp = ft_cc_equations.ccsd_simple(
         F, I, T1, T2, D1, D2, ti, ng, G)
 
-    Eterm = ft_cc_energy.ft_cc_energy(T1,T2,F.ov, I.oovv,g,beta)
+    Eterm = ft_cc_energy.ft_cc_energy(T1, T2, F.ov, I.oovv, g,beta)
     A1 = (1.0/beta)*einsum('via,vai->v', L1, T1temp)
     A2 = (1.0/beta)*0.25*einsum('vijab,vabij->v', L2, T2temp)
     A1g = einsum('v,v->', A1, g)
@@ -498,7 +498,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
         urdm1 = ft_cc_equations.uccsd_1rdm(
             T1a, T1b, T2aa, T2ab, T2bb, L1a, L1b, L2aa, L2ab, L2bb,
             D1a, D1b, D2aa, D2ab, D2bb, ti, ng, g, G)
-        grdm1 = ft_cc_equations.ccsd_1rdm(T1,T2,L1,L2,D1,D2,ti,ng,g,G)
+        grdm1 = ft_cc_equations.ccsd_1rdm(T1, T2, L1, L2, D1, D2, ti, ng, g, G)
 
         # test ia
         refa = grdm1[0][:na,:na]

@@ -87,9 +87,9 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         D1, D2 = test_utils.make_random_ft_D(n)
 
         # compute dL/dt1 from Lagrangian directly
-        dT1i = numpy.zeros((ngi,n,n),dtype=complex)
-        dT1b = numpy.zeros((ngr,n,n),dtype=complex)
-        dT1f = numpy.zeros((ngr,n,n),dtype=complex)
+        dT1i = numpy.zeros((ngi,n,n), dtype=complex)
+        dT1b = numpy.zeros((ngr,n,n), dtype=complex)
+        dT1f = numpy.zeros((ngr,n,n), dtype=complex)
         for y in range(ngi):
             for i in range(n):
                 for a in range(n):
@@ -211,9 +211,9 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         tir,gr,Gr = quadrature.simpsons(ngr, tmax)
 
         # compute dL/dt2 from Lagrangian directly
-        dT2i = numpy.zeros((ngi,n,n,n,n),dtype=complex)
-        dT2b = numpy.zeros((ngr,n,n,n,n),dtype=complex)
-        dT2f = numpy.zeros((ngr,n,n,n,n),dtype=complex)
+        dT2i = numpy.zeros((ngi,n,n,n,n), dtype=complex)
+        dT2b = numpy.zeros((ngr,n,n,n,n), dtype=complex)
+        dT2f = numpy.zeros((ngr,n,n,n,n), dtype=complex)
         for y in range(ngi):
             for i in range(n):
                 for j in range(n):

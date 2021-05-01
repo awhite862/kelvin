@@ -7,7 +7,7 @@ import numpy
 
 def rs_to_L(rs, N):
     x = 4.0*numpy.pi*N/(3.0)
-    return rs*pow(x,1.0/3.0)
+    return rs*pow(x, 1.0/3.0)
 
 
 def ueg_fci(L, Emax, norb, na, nb):

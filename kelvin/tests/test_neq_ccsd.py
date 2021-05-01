@@ -78,11 +78,11 @@ class NEQ_CCSDTest(unittest.TestCase):
             deltat = tmax / (ng)
             d = 1e-4
             ti = numpy.asarray([deltat/2 + float(j)*deltat for j in range(ng)])
-            sys = h2_field_system(T,mu,omega,ti,O=(d*field),ot=ng - 1)
+            sys = h2_field_system(T, mu, omega, ti, O=(d*field), ot=ng - 1)
             cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-10, max_iter=40, damp=0.0, ngr=ng, ngi=ngi, iprint=0)
             Ef = cc.run()
 
-            sys = h2_field_system(T,mu,omega,ti,O=(-d*field),ot=ng - 1)
+            sys = h2_field_system(T, mu, omega, ti, O=(-d*field), ot=ng - 1)
             cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-10, max_iter=40, damp=0.0, ngr=ng, ngi=ngi, iprint=0)
             Eb = cc.run()
             A.append((Ef[0] - Eb[0])/(2*d))
@@ -163,7 +163,7 @@ class NEQ_CCSDTest(unittest.TestCase):
         tmax = 10*0.1
         deltat = tmax / (ng)
         ti = numpy.asarray([deltat/2 + float(j)*deltat for j in range(ng)])
-        sys = h2_field_system(T,mu,omega,ti)
+        sys = h2_field_system(T, mu, omega, ti)
         cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-10, max_iter=40, damp=0.0, ngr=ng, ngi=ngi, iprint=0)
         cc.run()
         cc._neq_ccsd_lambda()

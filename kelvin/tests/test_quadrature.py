@@ -48,10 +48,10 @@ class QuadTest(unittest.TestCase):
             T2b[y] = T2f[ngr - y - 1]
         make_t(T1i, tii)
         make_t(T2i, tii)
-        t1ref = quadrature.int_tbar1(ngi,T1i,tii,D1,Gi)
-        t2ref = quadrature.int_tbar2(ngi,T2i,tii,D2,Gi)
-        t1f,t1b,t1i = quadrature.int_tbar1_keldysh(ngr,ngi,T1f,T1b,T1i,tir,tii,D1,Gr,Gi)
-        t2f,t2b,t2i = quadrature.int_tbar2_keldysh(ngr,ngi,T2f,T2b,T2i,tir,tii,D2,Gr,Gi)
+        t1ref = quadrature.int_tbar1(ngi, T1i, tii, D1, Gi)
+        t2ref = quadrature.int_tbar2(ngi, T2i, tii, D2, Gi)
+        t1f, t1b, t1i = quadrature.int_tbar1_keldysh(ngr, ngi, T1f, T1b, T1i, tir, tii, D1, Gr, Gi)
+        t2f, t2b, t2i = quadrature.int_tbar2_keldysh(ngr, ngi, T2f, T2b, T2i, tir, tii, D2, Gr, Gi)
 
         diff1 = numpy.linalg.norm(t1i - t1ref) / t1i.size
         diff2 = numpy.linalg.norm(t2i - t2ref) / t2i.size
@@ -79,10 +79,10 @@ class QuadTest(unittest.TestCase):
             L2b[y] = L2f[ngr - y - 1]
         make_l(L1i, tii)
         make_l(L2i, tii)
-        l1ref = quadrature.int_L1(ngi,L1i,tii,D1,gi,Gi)
-        l2ref = quadrature.int_L2(ngi,L2i,tii,D2,gi,Gi)
-        l1f,l1b,l1i = quadrature.int_L1_keldysh(ngr,ngi,L1f,L1b,L1i,tir,tii,D1,gr,gi,Gr,Gi)
-        l2f,l2b,l2i = quadrature.int_L2_keldysh(ngr,ngi,L2f,L2b,L2i,tir,tii,D2,gr,gi,Gr,Gi)
+        l1ref = quadrature.int_L1(ngi, L1i, tii, D1, gi, Gi)
+        l2ref = quadrature.int_L2(ngi, L2i, tii, D2, gi, Gi)
+        l1f, l1b, l1i = quadrature.int_L1_keldysh(ngr, ngi, L1f, L1b, L1i, tir, tii, D1, gr, gi, Gr, Gi)
+        l2f, l2b, l2i = quadrature.int_L2_keldysh(ngr, ngi, L2f, L2b, L2i, tir, tii, D2, gr, gi, Gr, Gi)
 
         diff1 = numpy.linalg.norm(l1i - l1ref) / l1i.size
         diff2 = numpy.linalg.norm(l2i - l2ref) / l2i.size

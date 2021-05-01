@@ -303,7 +303,7 @@ class NEQPropTest(unittest.TestCase):
         self.assertTrue(Dl < self.fd_thresh, "Error in lagrangian response: {}".format(Dl))
 
         # evaluate with the density
-        out = cc.compute_prop(field,ngr - 1)
+        out = cc.compute_prop(field, ngr - 1)
         Dp = abs(out - L - E1)
         self.assertTrue(Dp < self.fd_thresh, "Error in response density: {}".format(Dp))
 
@@ -366,7 +366,7 @@ class NEQPropTest(unittest.TestCase):
 
         for i,ref in enumerate(Aref):
             t = (i+1)*int(0.1/deltat)
-            out = cc.compute_prop(field,t - 1)
+            out = cc.compute_prop(field, t - 1)
             diff = abs(ref - out)
             msg = "{} -- Expected: {}  Actual: {} ".format(i, ref, out)
             self.assertTrue(diff < self.fd_thresh, msg)
@@ -445,7 +445,7 @@ class NEQPropTest(unittest.TestCase):
         for i,ref in enumerate(Aref):
             t = i*int(0.1/deltat)
             tg = t if i == 0 else t - 1
-            out = cc.compute_prop(field,tg)
+            out = cc.compute_prop(field, tg)
             diff = abs(ref - out)
             msg = "{} -- Expected: {}  Actual: {} ".format(i, ref, out)
             self.assertTrue(diff < self.thresh, msg)
@@ -520,7 +520,7 @@ class NEQPropTest(unittest.TestCase):
     #    cc._neq_1rdm()
 
     #    for i,ref in enumerate(Aref):
-    #        out = cc.compute_prop(field,6*int(0.1/deltat) - 2)
+    #        out = cc.compute_prop(field, 6*int(0.1/deltat) - 2)
     #        diff = abs(ref - out)
     #        #print((i + 1)*int(0.1/deltat))
     #        print("{} -- Expected: {}  Actual: {} ".format(i,ref,out))

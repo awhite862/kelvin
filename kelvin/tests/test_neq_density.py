@@ -73,8 +73,8 @@ class NEQDensityTest(unittest.TestCase):
         Avv = Avv.astype(complex)
         Aoo = Aoo.astype(complex)
         Avo = Avo.astype(complex)
-        zzr = numpy.zeros((ngr,n,n),dtype=complex)
-        zzi = numpy.zeros((n,n),dtype=complex)
+        zzr = numpy.zeros((ngr,n,n), dtype=complex)
+        zzi = numpy.zeros((n,n), dtype=complex)
         for i in range(ngr):
             if i != tf:
                 Aov[i] = numpy.zeros((n,n))
@@ -85,7 +85,7 @@ class NEQDensityTest(unittest.TestCase):
         Ftemp = one_e_blocks(Aoo/gr[tf], Aov/gr[tf], Avo/gr[tf], Avv/gr[tf])
         Fzr = one_e_blocks(zzr, zzr, zzr, zzr)
         Fzi = one_e_blocks(zzi, zzi, zzi, zzi)
-        Inull = numpy.zeros((n,n,n,n),dtype=complex)
+        Inull = numpy.zeros((n,n,n,n), dtype=complex)
         I = two_e_blocks(
             vvvv=Inull, vvvo=Inull, vovv=Inull,
             vvoo=Inull, vovo=Inull, oovv=Inull,
