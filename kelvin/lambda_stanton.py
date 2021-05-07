@@ -2,6 +2,7 @@ import numpy
 
 einsum = numpy.einsum
 
+
 def _Lambda_Stanton(L1, L2, F, I, L1old, L2old, T1old, T2old, fac=1.0):
     FI_vv = F.vv - 0.5*einsum('bi,ia->ba', T1old, F.ov)
     FI_oo = F.oo - 0.5*einsum('bj,ib->ij', T1old, F.ov)

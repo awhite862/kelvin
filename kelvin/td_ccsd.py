@@ -9,8 +9,9 @@ from . import zt_mp
 from . import quadrature
 from . import propagation
 
-einsum = numpy.einsum
-#einsum = lib.einsum
+#einsum = numpy.einsum
+einsum = lib.einsum
+
 
 def _get_active(athresh, fthresh, beta, mu, sys, iprint):
     if sys.has_r():
@@ -70,6 +71,7 @@ def _get_active(athresh, fthresh, beta, mu, sys, iprint):
             print('  nocc: {:d}'.format(nocc))
             print('  nvir: {:d}'.format(nvir))
     return focc,fvir,iocc,ivir
+
 
 class TDCCSD(object):
     """Time-dependent coupled cluster singles and doubles (CCSD) driver.
@@ -349,21 +351,27 @@ class TDCCSD(object):
 
     def _get_l_step(self, h, ltot, tb, te, fLRHS):
         if self.prop["lprop"] == "rk1":
+
             def LRHS(var):
                 return fLRHS(tb, var)
             ldtot = propagation.rk1(h, ltot, LRHS)
         elif self.prop["lprop"] == "rk2":
+
             def LRHS1(var):
                 return fLRHS(tb, var)
+
             def LRHS2(var):
                 return fLRHS(te, var)
             ldtot = propagation.rk2(h, ltot, (LRHS1, LRHS2))
         elif self.prop["lprop"] == "rk4":
             tx = [0.5*(b + e) for b,e in zip(tb,te)]
+
             def LRHS1(var):
                 return fLRHS(tb, var)
+
             def LRHS23(var):
                 return fLRHS(tx, var)
+
             def LRHS4(var):
                 return fLRHS(te, var)
             ldtot = propagation.rk4(h, ltot, (LRHS1, LRHS23, LRHS23, LRHS4))
@@ -371,10 +379,13 @@ class TDCCSD(object):
             mi = self.prop["max_iter"]
             alpha = self.prop["damp"]
             thresh = self.prop["thresh"]
+
             def LRHS1(var):
                 return fLRHS(tb, var)
+
             def LRHS2(var):
                 return fLRHS(te, var)
+
             ldtot = propagation.cn(h, ltot, mi, alpha, thresh, (LRHS1,LRHS2), self.iprint)
         else:
             raise Exception("Unrecognized propagation scheme: " + self.prop)
@@ -996,6 +1007,7 @@ class TDCCSD(object):
             self.rorbv = numpy.zeros(n, dtype=l1.dtype)
             x1 = numpy.zeros(l1.shape, dtype=l1.dtype)
             x2 = numpy.zeros(l2.shape, dtype=l2.dtype)
+
             def fXRHS(ltot, var):
                 l1,l2 = ltot
                 x1,x2 = var
@@ -1290,6 +1302,7 @@ class TDCCSD(object):
             x2aa = numpy.zeros(l2aa.shape, dtype=l2aa.dtype)
             x2ab = numpy.zeros(l2ab.shape, dtype=l2ab.dtype)
             x2bb = numpy.zeros(l2bb.shape, dtype=l2bb.dtype)
+
             def fXRHS(ltot, var):
                 l1a,l1b,l2aa,l2ab,l2bb = ltot
                 x1a,x1b,x2aa,x2ab,x2bb = var
@@ -1592,6 +1605,7 @@ class TDCCSD(object):
             self.rorbv = numpy.zeros(n, dtype=l1.dtype)
             x1 = numpy.zeros(l1.shape, dtype=l1.dtype)
             x2 = numpy.zeros(l2.shape, dtype=l2.dtype)
+
             def fXRHS(ltot, var):
                 l1,l2 = ltot
                 x1,x2 = var

@@ -5,6 +5,7 @@ from cqcpy import utils
 from .system import system
 from .neq_system import NeqSystem
 
+
 class hubbard_field_system(system):
     """Hubbard model system with a time-dependent Pierls phase
 
@@ -237,6 +238,7 @@ class hubbard_field_system(system):
         Umat2 = numpy.einsum('ijrs,jq->iqrs', Umat1, u2)
         Umat1 = numpy.einsum('iqrs,ip->pqrs', Umat2, u1)
         return Umat1
+
 
 class HubbardFieldSystem(NeqSystem):
     """Hubbard model system with a time-dependent Pierls phase

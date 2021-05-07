@@ -15,6 +15,7 @@ from . import zt_mp
 from . import ft_mp
 from .system import system
 
+
 class scf_system(system):
     """Object representing a molecular mean-field system.
 

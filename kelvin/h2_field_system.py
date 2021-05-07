@@ -5,6 +5,7 @@ from cqcpy import integrals
 from .system import system
 from .neq_system import NeqSystem
 
+
 class h2_field_system(system):
     """H2 molecule in a TD field (deprecated)"""
     def __init__(self, T, mu, omega, ti, O=None, ot=None):
@@ -97,6 +98,7 @@ class h2_field_system(system):
 
     def g_aint_tot(self):
         return (self.eri - self.eri.transpose((0,1,3,2)))
+
 
 class H2FieldSystem(NeqSystem):
     """H2 molecule in a TD field (deprecated)"""

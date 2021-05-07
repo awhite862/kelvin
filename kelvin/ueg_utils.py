@@ -1,18 +1,22 @@
 import numpy
 from cqcpy import utils
 
+
 def scaled_energy(x):
     """Return the square the reduced k-vector (x)."""
     return x[0]*x[0] + x[1]*x[1] + x[2]*x[2]
+
 
 def computek(x, L):
     """Return the actual k-vector given a reduced vector (x)."""
     ccc = 2.0*numpy.pi/L
     return numpy.array((ccc*x[0],ccc*x[1],ccc*x[2]))
 
+
 def computeE(k):
     """Return the energy of a given k-vector."""
     return (k[0]*k[0] + k[1]*k[1] + k[2]*k[2]) / 2.0
+
 
 class ueg_basis(object):
     """UEG plane-wave basis set.
@@ -103,7 +107,6 @@ class ueg_basis(object):
         if anti:
             Va = V - numpy.transpose(V,(0,1,3,2))
         return Va,Va,V
-
 
     def build_g2e_matrix(self, anti=True):
         nbsf = self.get_nbsf()

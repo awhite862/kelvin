@@ -3,11 +3,14 @@ from pyscf.scf import uhf
 from pyscf.scf import hf
 from cqcpy import utils
 
+
 def is_uhf(mf):
     return isinstance(mf, uhf.UHF)
 
+
 def is_rhf(mf):
     return isinstance(mf, hf.RHF)
+
 
 def get_r_orbital_energies(mf):
     """Get restricted orbital energies in o-v blocks."""
@@ -19,6 +22,7 @@ def get_r_orbital_energies(mf):
         return (eo, ev)
     else:
         raise Exception("Mean-field object is not restricted")
+
 
 def get_u_orbital_energies(mf):
     """Get unrestricted orbital energies in o-v blocks."""
@@ -36,6 +40,7 @@ def get_u_orbital_energies(mf):
         return (eoa, eva, eob, evb)
     else:
         raise Exception("Unexpected size of mo_coeffs")
+
 
 def get_orbital_energies(mf):
     """Get spin-orbital orbital energies in o-v blocks."""
@@ -60,12 +65,14 @@ def get_orbital_energies(mf):
     else:
         raise Exception("unrecognized SCF type")
 
+
 def get_r_orbital_energies_tot(mf):
     """Get all restricted orbital energies."""
     if is_rhf(mf):
         return mf.mo_energy
     else:
         raise Exception("Mean-field object is not restricted")
+
 
 def get_u_orbital_energies_tot(mf):
     """Get all restricted orbital energies."""
@@ -75,6 +82,7 @@ def get_u_orbital_energies_tot(mf):
         return mf.mo_energy[0],mf.mo_energy[1]
     else:
         raise Exception("Unexpected size of mo_energy")
+
 
 def get_orbital_energies_gen(mf):
     """Get all spin-orbital orbital energies."""
@@ -99,6 +107,7 @@ def get_ao_den(mf):
     else:
         raise Exception("unrecognized SCF type")
 
+
 def get_ao_ft_den(mf, fo):
     if is_rhf(mf):
         n = fo.shape[0]//2
@@ -115,6 +124,7 @@ def get_ao_ft_den(mf, fo):
     else:
         raise Exception("unrecognized SCF type")
 
+
 def get_ao_fock(mf):
     if is_rhf(mf):
         f = mf.get_fock()
@@ -124,12 +134,7 @@ def get_ao_fock(mf):
         pa,pb = mf.make_rdm1()
         dm = numpy.array((pa,pb))
         h1 = mf.get_hcore(mf.mol)
-        pbc = False
-        try:
-            ktemp = mf.kpt
-            pbc = True
-        except AttributeError:
-            pbc = False
+        pbc = hasattr(mf, "kpt")
         if pbc:
             veff = mf.get_veff(mf.cell, dm)
         else:
@@ -139,6 +144,7 @@ def get_ao_fock(mf):
 
     else:
         raise Exception("unrecognized SCF type")
+
 
 def mo_tran_1e(mf, h):
     if is_rhf(mf):
@@ -155,6 +161,7 @@ def mo_tran_1e(mf, h):
         hb = numpy.einsum('mp,mn,nq->pq', numpy.conj(mob), h, mob)
         return utils.block_diag(ha,hb)
 
+
 def u_mo_tran_1e(mf, h):
     if is_rhf(mf):
         mo = mf.mo_coeff
@@ -170,6 +177,7 @@ def u_mo_tran_1e(mf, h):
         hb = numpy.einsum('mp,mn,nq->pq', numpy.conj(mob), h, mob)
         return ha,hb
 
+
 def r_mo_tran_1e(mf, h):
     if is_rhf(mf):
         mo = mf.mo_coeff
@@ -180,14 +188,10 @@ def r_mo_tran_1e(mf, h):
     else:
         raise Exception("r_mo_tran_1e requires a restricted reference")
 
+
 def get_ao_ft_fock(mf, fo):
     n = fo.shape[0]//2
-    pbc = False
-    try:
-        ktemp = mf.kpt
-        pbc = True
-    except AttributeError:
-        pbc = False
+    pbc = hasattr(mf, "kpt")
     if is_rhf(mf):
         mo = mf.mo_coeff
         p = numpy.dot(numpy.dot(mo,numpy.diag(fo[:n])),numpy.conj(mo.T))
@@ -216,14 +220,10 @@ def get_ao_ft_fock(mf, fo):
     else:
         raise Exception("unrecognized SCF type")
 
+
 def get_r_ft_fock(mf, fo):
     n = fo.shape[0]
-    pbc = False
-    try:
-        ktemp = mf.kpt
-        pbc = True
-    except AttributeError:
-        pbc = False
+    pbc = hasattr(mf, "kpt")
     if is_rhf(mf):
         mo = mf.mo_coeff
         p = numpy.dot(numpy.dot(mo,numpy.diag(fo[:n])),numpy.conj(mo.T))
@@ -238,13 +238,9 @@ def get_r_ft_fock(mf, fo):
     else:
         raise Exception("SCF is not resstricted")
 
+
 def get_u_ft_fock(mf, foa, fob):
-    pbc = False
-    try:
-        ktemp = mf.kpt
-        pbc = True
-    except AttributeError:
-        pbc = False
+    pbc = hasattr(mf, "kpt")
     h1 = mf.get_hcore(mf.mol)
     if is_rhf(mf):
         mo = mf.mo_coeff
@@ -279,12 +275,7 @@ def get_u_ft_fock(mf, foa, fob):
 
 def get_mo_ft_fock(mf, fo):
     n = fo.shape[0]//2
-    pbc = False
-    try:
-        ktemp = mf.kpt
-        pbc = True
-    except AttributeError:
-        pbc = False
+    pbc = hasattr(mf, "kpt")
     h1 = mf.get_hcore(mf.mol)
     if is_rhf(mf):
         mo = mf.mo_coeff
@@ -316,15 +307,11 @@ def get_mo_ft_fock(mf, fo):
     else:
         raise Exception("unrecognized SCF type")
 
+
 def get_mo_d_ft_fock(mf, fo, fv, dvec):
     n = fo.shape[0]//2
     fov = dvec*fo*fv
-    pbc = False
-    try:
-        ktemp = mf.kpt
-        pbc = True
-    except AttributeError:
-        pbc = False
+    pbc = hasattr(mf, "kpt")
     if is_rhf(mf):
         mo = mf.mo_coeff
         p = numpy.dot(numpy.dot(mo,numpy.diag(fov[:n])),numpy.conj(mo.T))
@@ -355,15 +342,11 @@ def get_mo_d_ft_fock(mf, fo, fv, dvec):
     else:
         raise Exception("unrecognized SCF type")
 
+
 def u_mo_d_ft_fock(mf, foa, fva, fob, fvb, dveca, dvecb):
     fova = dveca*foa*fva
     fovb = dvecb*fob*fvb
-    pbc = False
-    try:
-        ktemp = mf.kpt
-        pbc = True
-    except AttributeError:
-        pbc = False
+    pbc = hasattr(mf, "kpt")
     if is_rhf(mf):
         mo = mf.mo_coeff
         p = numpy.dot(numpy.dot(mo,numpy.diag(fova)),numpy.conj(mo.T))
@@ -392,6 +375,7 @@ def u_mo_d_ft_fock(mf, foa, fva, fob, fvb, dveca, dvecb):
     else:
         raise Exception("unrecognized SCF type")
 
+
 class r_fock_blocks(object):
     def __init__(self, mf, orb='a'):
         mo_occ = mf.mo_occ
@@ -419,15 +403,11 @@ class r_fock_blocks(object):
         self.vo = numpy.einsum('mv,mn,no->vo', numpy.conj(v), f, o)
         self.vv = numpy.einsum('mv,mn,nu->vu', numpy.conj(v), f, v)
 
+
 class g_fock_blocks(object):
     def __init__(self, mf):
         mo_occ = mf.mo_occ
-        pbc = False
-        try:
-            ktemp = mf.kpt
-            pbc = True
-        except AttributeError:
-            pbc = False
+        pbc = hasattr(mf, "kpt")
         if is_rhf(mf):
             o = mf.mo_coeff[:,mo_occ > 0]
             v = mf.mo_coeff[:,mo_occ == 0]

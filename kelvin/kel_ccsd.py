@@ -8,6 +8,7 @@ from .td_ccsd import _get_active
 #einsum = numpy.einsum
 einsum = lib.einsum
 
+
 class KelCCSD(object):
     """Keldysh-contour CCSD class. This should be used in preference
     to 'neq_ccsd.'"""
@@ -145,6 +146,7 @@ class KelCCSD(object):
         for i in range(1,nstep):
             t = t0 + step
             h = step
+
             def fRHSt(t, ts):
                 t1, t2 = ts
                 F = cc_utils.ft_integrals_neq_1e(self.sys, en, beta, mu, t)

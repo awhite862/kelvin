@@ -38,6 +38,7 @@ class neq_system(object):
         err = "Base class function g_int_tot()"
         raise Exception(err)
 
+
 class NeqSystem(object):
     """Base class representing a physical system."""
     def __init__(self):

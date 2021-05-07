@@ -3,6 +3,7 @@ from pyscf import lib
 einsum = lib.einsum
 #einsum = numpy.einsum
 
+
 def integrate1a(t1, n, ng, delta):
     """Integrate a function of t' from 0 to t."""
     t1_temp = numpy.zeros(t1.shape)
@@ -12,6 +13,7 @@ def integrate1a(t1, n, ng, delta):
                 + 4.0*t1[y - 1] + t1[y])
     return t1_temp
 
+
 def get_G_midpoint(ng, delta):
     G = numpy.zeros((ng,ng))
     G[0,0] = delta
@@ -20,10 +22,12 @@ def get_G_midpoint(ng, delta):
         G[y,y] += delta
     return G
 
+
 def get_g_midpoint(ng, delta):
     g = numpy.zeros(ng)
     g.fill(delta)
     return g
+
 
 def get_G(ng, delta):
     """Return 0 to t quadrature weight tensor for uniform grid."""
@@ -36,6 +40,7 @@ def get_G(ng, delta):
         G[y,y] += delta/3.0
 
     return G
+
 
 def get_gint(ng, delta):
     """Return 0 to beta quadrature weight tensor for uniform grid."""
@@ -54,11 +59,13 @@ def get_gint(ng, delta):
             g[y] += delta / 3.0
     return g
 
+
 def get_gL(ng, delta):
     g = numpy.zeros(ng)
     for i in range(ng - 1):
         g[i] = delta
     return g
+
 
 def get_GL(ng, delta):
     G = numpy.zeros((ng,ng))
@@ -67,12 +74,14 @@ def get_GL(ng, delta):
             G[i,j] = delta
     return G
 
+
 def left(ng, beta):
     delta = beta/(ng - 1.)
     ti = numpy.asarray([float(i)*delta for i in range(ng)])
     g = get_gL(ng,delta)
     G = get_GL(ng,delta)
     return ti,g,G
+
 
 def d_left(ng, beta):
     delta = beta/(ng - 1.0)
@@ -81,12 +90,14 @@ def d_left(ng, beta):
     gd = get_gL(ng, ddelta)
     return gd,Gd
 
+
 def midpoint(ng, beta):
     delta = beta/ng
     ti = numpy.asarray([float(i)*delta + delta/2 for i in range(ng)])
     G = get_G_midpoint(ng, delta)
     g = get_g_midpoint(ng, delta)
     return ti,g,G
+
 
 def simpsons(ng, beta):
     delta = beta/(ng - 1.0)
@@ -95,12 +106,14 @@ def simpsons(ng, beta):
     G = get_G(ng,delta)
     return ti,g,G
 
+
 def d_simpsons(ng, beta):
     delta = beta/(ng - 1.0)
     ddelta = delta/beta
     Gd = get_G(ng, ddelta)
     gd = get_gint(ng, ddelta)
     return gd,Gd
+
 
 def simpsons_ln(ng, beta):
     e = numpy.exp(1)
@@ -114,6 +127,7 @@ def simpsons_ln(ng, beta):
         G[i] = beta*G[i]/si
     return ti,g,G
 
+
 def d_simpsons_ln(ng, beta):
     e = numpy.exp(1)
     delta = (e - 1.0)/(ng - 1.0)
@@ -126,6 +140,7 @@ def d_simpsons_ln(ng, beta):
 
     return g,G
 
+
 def simpsons_sin(ng, beta):
     delta = numpy.pi/(ng - 1.0)
     si = numpy.asarray([(float(i)*delta - numpy.pi/2) for i in range(ng)])
@@ -137,6 +152,7 @@ def simpsons_sin(ng, beta):
         G[i] = beta*G[i]*numpy.cos(si)/2.0
     return ti,g,G
 
+
 def d_simpsons_sin(ng, beta):
     delta = numpy.pi/(ng - 1.0)
     si = numpy.asarray([(float(i)*delta - numpy.pi/2) for i in range(ng)])
@@ -146,6 +162,7 @@ def d_simpsons_sin(ng, beta):
     for i in range(ng):
         G[i] = G[i]*numpy.cos(si)/2.0
     return g,G
+
 
 def simpsons_exp(ng, beta):
     ln2 = numpy.log(2.0)
@@ -159,6 +176,7 @@ def simpsons_exp(ng, beta):
         G[i] = beta*G[i]*numpy.exp(si)
     return ti,g,G
 
+
 def d_simpsons_exp(ng, beta):
     ln2 = numpy.log(2.0)
     delta = ln2/(ng - 1.0)
@@ -169,6 +187,7 @@ def d_simpsons_exp(ng, beta):
     for i in range(ng):
         G[i] = G[i]*numpy.exp(si)
     return g,G
+
 
 def simpsons_p(ng, beta, n=2):
     delta = 1.0/(ng - 1.0)
@@ -181,6 +200,7 @@ def simpsons_p(ng, beta, n=2):
         G[i] = beta*G[i]*(numpy.power(si,n - 1)*float(n) + 1.0)/2.0
     return ti,g,G
 
+
 def d_simpsons_p(ng, beta, n=2):
     delta = 1.0/(ng - 1.0)
     si = numpy.asarray([float(i)*delta for i in range(ng)])
@@ -190,6 +210,7 @@ def d_simpsons_p(ng, beta, n=2):
     for i in range(ng):
         G[i] = G[i]*(numpy.power(si,n - 1)*float(n) + 1.0)/2.0
     return g,G
+
 
 def ft_quad(ng, beta, quad):
     if quad == 'lin':
@@ -213,6 +234,7 @@ def ft_quad(ng, beta, quad):
     else:
         raise Exception("Unrecognized quadrature rule: {}".format(quad))
 
+
 def d_ft_quad(ng, beta, quad):
     if quad == 'lin':
         return d_simpsons(ng, beta)
@@ -233,12 +255,14 @@ def d_ft_quad(ng, beta, quad):
     else:
         raise Exception("Unrecognized quadrature rule: {}".format(quad))
 
+
 #def integrate_new(T,G,ng):
 #    shape = T.shape
 #    T = T.reshape((ng,-1))
 #    temp = (einsum('yx,xp->yp',G,T)).reshape(shape)
 #    T = T.reshape(shape)
 #    return temp
+
 
 #def integrate1(t1,n,ng,delta):
 #    t1_temp = numpy.zeros(t1.shape)
@@ -264,6 +288,7 @@ def d_ft_quad(ng, beta, quad):
 #            + 4.0*t2[y - 1,:,:,:,:] + t2[y,:,:,:,:])
 #    return t2_temp
 
+
 def int_tbar1(ng, t1bar, ti, D1, G):
     """Integrate t1bar with exponential factor."""
     t1_out = numpy.zeros(t1bar.shape, dtype=t1bar.dtype)
@@ -276,6 +301,7 @@ def int_tbar1(ng, t1bar, ti, D1, G):
         t1_out[y] = einsum('x,xai->ai', G[y], t1_temp)
 
     return t1_out
+
 
 def int_tbar2(ng, t2bar, ti, D2, G):
     """Integrate t2bar with exponential factor."""
@@ -290,6 +316,7 @@ def int_tbar2(ng, t2bar, ti, D2, G):
 
     return t2_out
 
+
 def int_L1(ng, L1old, ti, D1, g, G):
     """Return L1bar."""
     L1_out = numpy.zeros(L1old.shape, dtype=L1old.dtype)
@@ -302,6 +329,7 @@ def int_L1(ng, L1old, ti, D1, g, G):
         L1_out[s] = einsum('y,yia,y->ia', g, L1temp, G[:,s])/g[s]
 
     return L1_out
+
 
 def int_L2(ng, L2old, ti, D2, g, G):
     """Return L2bar."""
@@ -316,6 +344,7 @@ def int_L2(ng, L2old, ti, D2, g, G):
 
     return L2_out
 
+
 def int_tbar1_single(ng, ig, t1bar, ti, D1, G):
     """Integrate t1bar with exponential factor."""
     t1_out = numpy.zeros(t1bar.shape)
@@ -328,6 +357,7 @@ def int_tbar1_single(ng, ig, t1bar, ti, D1, G):
 
     return t1_out
 
+
 def int_tbar2_single(ng, ig, t2bar, ti, D2, G):
     """Integrate t1bar with exponential factor."""
     t2_out = numpy.zeros(t2bar.shape)
@@ -339,6 +369,7 @@ def int_tbar2_single(ng, ig, t2bar, ti, D2, G):
     t2_out = einsum('x,xabij->abij', G[ig,:], t2_temp)
 
     return t2_out
+
 
 def int_tbar1_keldysh(ngr, ngi, t1barf, t1barb, t1bari, tir, tii, D1, Gr, Gi):
     """Integrate t1bar with exponential factor."""
@@ -375,6 +406,7 @@ def int_tbar1_keldysh(ngr, ngi, t1barf, t1barb, t1bari, tir, tii, D1, Gr, Gi):
 
     return t1_outf,t1_outb,t1_outi
 
+
 def int_tbar2_keldysh(ngr, ngi, t2barf, t2barb, t2bari, tir, tii, D2, Gr, Gi):
     """Integrate t1bar with exponential factor."""
     t2_outf = numpy.zeros(t2barf.shape,dtype=complex)
@@ -409,6 +441,7 @@ def int_tbar2_keldysh(ngr, ngi, t2barf, t2barb, t2bari, tir, tii, D2, Gr, Gi):
         t2_outi[y] = einsum('x,xabij->abij', Gi[y], t2_temp) + t2_outb[ngr - 1]*numpy.exp(D2*(1.j*tir[0] - tii[y]))
 
     return t2_outf,t2_outb,t2_outi
+
 
 def int_L1_keldysh(ngr, ngi, L1f, L1b, L1i, tir, tii, D1, gr, gi, Gr, Gi):
     """Return L1bar."""
@@ -449,6 +482,7 @@ def int_L1_keldysh(ngr, ngi, L1f, L1b, L1i, tir, tii, D1, gr, gi, Gr, Gi):
         L1f_out[s] += numpy.einsum('y,yia,yai->ia', gi, L1i, add)*Gr[ngr - 1,s]
 
     return L1f_out,L1b_out,L1i_out
+
 
 def int_L2_keldysh(ngr, ngi, L2f, L2b, L2i, tir, tii, D2, gr, gi, Gr, Gi):
     """Return L2bar."""

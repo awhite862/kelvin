@@ -7,6 +7,7 @@ from . import ft_cc_equations
 from . import ft_mp
 from . import quadrature
 
+
 class neq_ccsd(object):
     """Non-equilibrium coupled cluster singles and doubles"""
     def __init__(self, sys, T, mu=0.0, tmax=0.0, econv=1e-8,
@@ -288,7 +289,6 @@ class neq_ccsd(object):
         Gr = self.Gr
         gr = self.gr
 
-
         # get energies and occupation numbers
         en = self.sys.g_energies_tot()
 
@@ -322,7 +322,6 @@ class neq_ccsd(object):
         gi = self.gi
         Gr = self.Gr
         gr = self.gr
-
 
         # get energies and occupation numbers
         en = self.sys.g_energies_tot()

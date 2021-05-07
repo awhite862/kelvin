@@ -12,6 +12,7 @@ from . import quadrature
 einsum = lib.einsum
 #einsum = einsum
 
+
 def form_new_ampl(method, F, I, T1old, T2old, D1, D2, ti, ng, G):
     """Form new amplitudes.
 
@@ -45,6 +46,7 @@ def form_new_ampl(method, F, I, T1old, T2old, D1, D2, ti, ng, G):
         raise Exception("Unrecognized method keyword")
 
     return T1,T2
+
 
 def form_new_ampl_u(method, Fa, Fb, Ia, Ib, Iabab, T1aold, T1bold, T2aaold, T2abold, T2bbold,
         D1a, D1b, D2aa, D2ab, D2bb, ti, ng, G):
@@ -81,6 +83,7 @@ def form_new_ampl_u(method, Fa, Fb, Ia, Ib, Iabab, T1aold, T1bold, T2aaold, T2ab
 
     return T1out,T2out
 
+
 def form_new_ampl_extrap(ig, method, F, I, T1, T2, T1bar, T2bar, D1, D2, ti, ng, G):
     if method == "CCSD":
         T1,T2 = ft_cc_equations.ccsd_stanton_single(ig,F,I,T1,T2,
@@ -88,6 +91,7 @@ def form_new_ampl_extrap(ig, method, F, I, T1, T2, T1bar, T2bar, D1, D2, ti, ng,
     else:
         raise Exception("Unrecognized method keyword")
     return T1,T2
+
 
 def form_new_ampl_extrap_u(ig, method, Fa, Fb, Ia, Ib, Iabab,
                            T1a, T1b, T2aa, T2ab, T2bb, T1bara, T1barb,
@@ -100,6 +104,7 @@ def form_new_ampl_extrap_u(ig, method, Fa, Fb, Ia, Ib, Iabab,
     else:
         raise Exception("Unrecognized method keyword")
     return T1,T2
+
 
 def ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G, beta, ng, ti,
         iprint, conv_options):
@@ -166,6 +171,7 @@ def ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G, beta, ng, ti,
         print("Total {} time: {:.4f} s".format(method,(tend - tbeg)))
 
     return Eold,T1old,T2old
+
 
 def ft_cc_iter_extrap(method, F, I, D1, D2, g, G, beta, ng, ti,
         iprint, conv_options):
@@ -236,6 +242,7 @@ def ft_cc_iter_extrap(method, F, I, D1, D2, g, G, beta, ng, ti,
             if res1 + res2 < thresh:
                 converged = True
     return T1new,T2new
+
 
 def ft_ucc_iter(method, T1aold, T1bold, T2aaold, T2abold, T2bbold, Fa, Fb, Ia, Ib, Iabab,
         D1a, D1b, D2aa, D2ab, D2bb, g, G, beta, ng, ti, iprint, conv_options):
@@ -311,6 +318,7 @@ def ft_ucc_iter(method, T1aold, T1bold, T2aaold, T2abold, T2bbold, Fa, Fb, Ia, I
         print("Total {} time: {:.4f} s".format(method,(tend - tbeg)))
 
     return Eold,(T1aold,T1bold),(T2aaold,T2abold,T2bbold)
+
 
 def ft_ucc_iter_extrap(method, Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb,
         g, G, beta, ng, ti, iprint, conv_options):
@@ -407,6 +415,7 @@ def ft_ucc_iter_extrap(method, Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb
                 converged = True
     return (T1newa,T1newb),(T2newaa,T2newab,T2newbb)
 
+
 def ft_lambda_iter(method, L1old, L2old, T1, T2, F, I, D1, D2,
         g, G, beta, ng, ti, iprint, conv_options):
     """Form new amplitudes.
@@ -476,6 +485,7 @@ def ft_lambda_iter(method, L1old, L2old, T1, T2, F, I, D1, D2,
         print("Total CCSD Lambda time: %f s" % (tend - tbeg))
 
     return L1old,L2old
+
 
 def ft_ulambda_iter(method, L1ain, L1bin, L2aain, L2abin, L2bbin, T1aold, T1bold,
         T2aaold, T2abold, T2bbold, Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb,
@@ -564,6 +574,7 @@ def ft_ulambda_iter(method, L1ain, L1bin, L2aain, L2abin, L2bbin, T1aold, T1bold
 
     return L1aold,L1bold,L2aaold,L2abold,L2bbold
 
+
 def ft_integrals(sys, en, beta, mu):
     """Return one and two-electron integrals in the general spin orbital basis."""
     fo = ft_utils.ff(beta, en, mu)
@@ -598,6 +609,7 @@ def ft_integrals(sys, en, beta, mu):
             vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
     return F,I
 
+
 def ft_integrals_2e(sys, en, beta, mu):
     """Return one and two-electron integrals in the general spin orbital basis."""
     fo = ft_utils.ff(beta, en, mu)
@@ -620,6 +632,7 @@ def ft_integrals_2e(sys, en, beta, mu):
     I = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
             vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
     return I
+
 
 def ft_integrals_neq_1e(sys, en, beta, mu, t):
     """Return one and two-electron integrals in the general spin orbital basis."""
@@ -684,6 +697,7 @@ def get_ft_integrals_neq(sys, en, beta, mu):
     I = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
             vovo=Ivovo,oovv=eri,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
     return F,Ff,Fb,I
+
 
 def uft_integrals(sys, ea, eb, beta, mu):
     """Return one and two-electron integrals in the general spin orbital basis."""
@@ -768,6 +782,7 @@ def uft_integrals(sys, ea, eb, beta, mu):
 
     return Fa,Fb,Ia,Ib,Iabab
 
+
 def rft_integrals(sys, en, beta, mu):
     """Return one and two-electron integrals in the general spin orbital basis."""
     fo = ft_utils.ff(beta, en, mu)
@@ -816,6 +831,7 @@ def rft_integrals(sys, en, beta, mu):
             oooo=Ioooo)
     return F,I
 
+
 def ft_active_integrals(sys, en, focc, fvir, iocc, ivir):
     """Return one and two-electron integrals in the general spin orbital basis
     with small occupations excluded."""
@@ -849,6 +865,7 @@ def ft_active_integrals(sys, en, focc, fvir, iocc, ivir):
             vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
 
     return F,I
+
 
 def uft_active_integrals(sys, ea, eb, foa, fva, fob, fvb, iocca, ivira, ioccb, ivirb):
     """Return one and two-electron integrals in the general spin orbital basis
@@ -931,6 +948,7 @@ def uft_active_integrals(sys, ea, eb, foa, fva, fob, fvb, iocca, ivira, ioccb, i
 
     return Fa,Fb,Ia,Ib,Iabab
 
+
 def rft_active_integrals(sys, en, focc, fvir, iocc, ivir):
     """Return one and two-electron integrals in the general spin orbital basis."""
     # get FT fock matrix
@@ -977,6 +995,7 @@ def rft_active_integrals(sys, en, focc, fvir, iocc, ivir):
             oovo=Ioovo,ooov=Iooov,
             oooo=Ioooo)
     return F,I
+
 
 def _form_ft_d_eris(eri, sfo, sfv, dso, dsv):
     Ivvvv = einsum('abcd,a,b,c,d->abcd', eri, dsv, sfv, sfv, sfv)\
@@ -1028,6 +1047,7 @@ def _form_ft_d_eris(eri, sfo, sfv, dso, dsv):
             vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
     return I
 
+
 def _form_ft_d_active_eris(eri, sfo, sfv, dso, dsv, iocc, ivir):
     Ivvvv = einsum('abcd,a,b,c,d->abcd', eri[numpy.ix_(ivir, ivir, ivir, ivir)], dsv, sfv, sfv, sfv)\
           + einsum('abcd,a,b,c,d->abcd', eri[numpy.ix_(ivir, ivir, ivir, ivir)], sfv, dsv, sfv, sfv)\
@@ -1078,6 +1098,7 @@ def _form_ft_d_active_eris(eri, sfo, sfv, dso, dsv, iocc, ivir):
             vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
     return I
 
+
 def ft_d_integrals(sys, en, fo, fv, dvec):
     """form integrals contracted with derivatives of occupation numbers in the
     spin-orbital basis."""
@@ -1111,6 +1132,7 @@ def ft_d_integrals(sys, en, fo, fv, dvec):
 
     I = _form_ft_d_eris(eri,sfo,sfv,dso,dsv)
     return F,I
+
 
 def u_ft_d_integrals(sys, ea, eb, foa, fva, fob, fvb, dveca, dvecb):
     """form unrestricted integrals contracted with derivatives of occupation numbers."""
@@ -1257,6 +1279,7 @@ def u_ft_d_integrals(sys, ea, eb, foa, fva, fob, fvb, dveca, dvecb):
 
     return Fa,Fb,Ia,Ib,Iabab
 
+
 def ft_d_active_integrals(sys, en, fo, fv, iocc, ivir, dvec):
     """Return one and two-electron integrals in the general spin orbital basis
     with small occupations excluded."""
@@ -1291,6 +1314,7 @@ def ft_d_active_integrals(sys, en, fo, fv, iocc, ivir, dvec):
     eri = sys.g_aint_tot()
     I = _form_ft_d_active_eris(eri, sfo, sfv, dso, dsv, iocc, ivir)
     return F,I
+
 
 def uft_d_active_integrals(
     sys, ea, eb, foa, fva, fob, fvb,
@@ -1443,6 +1467,7 @@ def uft_d_active_integrals(
 
     return Fa,Fb,Ia,Ib,Iabab
 
+
 def g_n2rdm_full(beta, sfo, sfv, P2):
     n2rdm =  (1.0/beta)*einsum('cdab,c,d,a,b->cdab', P2[0], sfv, sfv, sfv, sfv)
     n2rdm += (1.0/beta)*einsum('ciab,c,i,a,b->ciab', P2[1], sfv, sfo, sfv, sfv)
@@ -1461,6 +1486,7 @@ def g_n2rdm_full(beta, sfo, sfv, P2):
     n2rdm -= (1.0/beta)*einsum('kaij,k,a,i,j->akij', P2[7], sfo, sfv, sfo, sfo)
     n2rdm += (1.0/beta)*einsum('klij,k,l,i,j->klij', P2[8], sfo, sfo, sfo, sfo)
     return n2rdm
+
 
 def g_n2rdm_full_active(beta, n, iocc, ivir, sfo, sfv, P2):
     n2rdm = numpy.zeros((n,n,n,n), dtype=P2[0].dtype)
@@ -1497,6 +1523,7 @@ def g_n2rdm_full_active(beta, n, iocc, ivir, sfo, sfv, P2):
     n2rdm[numpy.ix_(iocc, iocc, iocc, iocc)] += \
        (1.0/beta)*einsum('klij,k,l,i,j->klij', P2[8], sfo, sfo, sfo, sfo)
     return n2rdm
+
 
 def u_n2rdm_full(beta, sfoa, sfva, sfob, sfvb, P2):
     na = sfoa.size
@@ -1559,6 +1586,7 @@ def u_n2rdm_full(beta, sfoa, sfva, sfob, sfvb, P2):
     P2ab += (1.0/beta)*einsum('bjai,b,j,a,i->bjai', P2[4][5], sfvb, sfoa, sfvb, sfoa).transpose((1,0,3,2))
     return (P2aa, P2bb, P2ab)
 
+
 def u_n2rdm_full_active(beta, na, nb, iocca, ivira, ioccb, ivirb, sfoa, sfva, sfob, sfvb, P2):
     P2aa = numpy.zeros((na,na,na,na), dtype=P2[0][0].dtype)
     P2aa[numpy.ix_(ivira, ivira, ivira, ivira)] += (1.0/beta)*einsum('cdab,c,d,a,b->cdab', P2[0][0], sfva, sfva, sfva, sfva)
@@ -1618,12 +1646,14 @@ def u_n2rdm_full_active(beta, na, nb, iocca, ivira, ioccb, ivirb, sfoa, sfva, sf
     P2ab[numpy.ix_(iocca, ivirb, iocca, ivirb)] += (1.0/beta)*einsum('bjai,b,j,a,i->bjai', P2[4][5], sfvb, sfoa, sfvb, sfoa).transpose((1,0,3,2))
     return (P2aa, P2bb, P2ab)
 
+
 def g_Fd_on(Fd, ndia, ndba, ndji, ndai):
     temp = -einsum('ia,aik->k', ndia, Fd)
     temp -= einsum('ba,abk->k', ndba, Fd)
     temp -= einsum('ji,ijk->k', ndji, Fd)
     temp -= einsum('ai,iak->k', ndai, Fd)
     return temp
+
 
 def g_Fd_on_active(Fd, iocc, ivir, ndia, ndba, ndji, ndai):
     Fdai = Fd[numpy.ix_(ivir, iocc)]
@@ -1635,6 +1665,7 @@ def g_Fd_on_active(Fd, iocc, ivir, ndia, ndba, ndji, ndai):
     temp -= einsum('ji,ijk->k', ndji, Fdij)
     temp -= einsum('ai,iak->k', ndai, Fdia)
     return temp
+
 
 def g_d_on_oo(dso, F, I, dia, dji, dai, P2, jitemp):
     jitemp -= 0.5*einsum('ia,ai->i', dia, F.vo)*dso
@@ -1655,6 +1686,7 @@ def g_d_on_oo(dso, F, I, dia, dji, dai, P2, jitemp):
     jitemp -= 0.5*0.5*einsum('klij,ijkl->i', P2[8], I.oooo)*dso
     jitemp -= 0.5*0.5*einsum('klij,ijkl->k', P2[8], I.oooo)*dso
 
+
 def g_d_on_vv(dsv, F, I, dia, dba, dai, P2, batemp):
     batemp += 0.50*einsum('ia,ai->a', dia, F.vo)*dsv
     batemp += 0.50*einsum('ba,ab->b', dba, F.vv)*dsv
@@ -1673,6 +1705,7 @@ def g_d_on_vv(dsv, F, I, dia, dba, dai, P2, batemp):
     batemp += 0.5*0.5*einsum('abij,ijab->a', P2[5], I.oovv)*dsv
     batemp += 0.5*0.50*einsum('jkai,aijk->a', P2[6], I.vooo)*dsv
     batemp += 0.5*0.50*einsum('kaij,ijka->a', P2[7], I.ooov)*dsv
+
 
 def u_Fd_on(Fdaa, Fdab, Fdba, Fdbb, ndia, ndba, ndji, ndai):
     tempA = -einsum('ia,aik->k', ndia[0], Fdaa)
@@ -1693,6 +1726,7 @@ def u_Fd_on(Fdaa, Fdab, Fdba, Fdbb, ndia, ndba, ndji, ndai):
     tempB -= einsum('ai,iak->k', ndai[0], Fdab)
 
     return tempA, tempB
+
 
 def u_Fd_on_active(Fdaa, Fdab, Fdba, Fdbb, iocca, ivira, ioccb, ivirb, ndia, ndba, ndji, ndai):
     Fdaik = Fdaa[numpy.ix_(ivira, iocca)]
@@ -1729,6 +1763,7 @@ def u_Fd_on_active(Fdaa, Fdab, Fdba, Fdbb, iocca, ivira, ioccb, ivirb, ndia, ndb
     tempB -= einsum('ai,iak->k', ndai[0], FdiaK)
 
     return tempA, tempB
+
 
 def u_d_on_oo(dsoa, dsob, Fa, Fb, Ia, Ib, Iabab, dia, dji, dai, P2, jitempa, jitempb):
     jitempa -= 0.5*einsum('ia,ai->i', dia[0], Fa.vo)*dsoa
@@ -1805,6 +1840,7 @@ def u_d_on_oo(dsoa, dsob, Fa, Fb, Ia, Ib, Iabab, dia, dji, dai, P2, jitempa, jit
     jitempa -= 0.5*1.0*einsum('aBiJ,iJaB->i', P2[5][2], Iabab.oovv)*dsoa
     jitempb -= 0.5*1.0*einsum('aBiJ,iJaB->J', P2[5][2], Iabab.oovv)*dsob
 
+
 def u_d_on_vv(dsva, dsvb, Fa, Fb, Ia, Ib, Iabab, dia, dba, dai, P2, batempa, batempb):
     batempa += 0.5*einsum('ia,ai->a', dia[0], Fa.vo)*dsva
     batempa += 0.5*einsum('ba,ab->a', dba[0], Fa.vv)*dsva
@@ -1880,6 +1916,7 @@ def u_d_on_vv(dsva, dsvb, Fa, Fb, Ia, Ib, Iabab, dia, dba, dai, P2, batempa, bat
     batempa += 0.5*1.0*einsum('aBiJ,iJaB->a', P2[5][2], Iabab.oovv)*dsva
     batempb += 0.5*1.0*einsum('aBiJ,iJaB->B', P2[5][2], Iabab.oovv)*dsvb
 
+
 def r_Fd_on(Fdss, Fdos, ndia, ndba, ndji, ndai):
     temp = -einsum('ia,aik->k', ndia, Fdss)
     temp -= einsum('ba,abk->k', ndba, Fdss)
@@ -1891,6 +1928,7 @@ def r_Fd_on(Fdss, Fdos, ndia, ndba, ndji, ndai):
     temp -= einsum('ai,iak->k', ndai, Fdos)
 
     return temp
+
 
 def r_Fd_on_active(Fdss, Fdos, iocc, ivir, ndia, ndba, ndji, ndai):
     Fdaik = Fdss[numpy.ix_(ivir, iocc)]
@@ -1911,6 +1949,7 @@ def r_Fd_on_active(Fdss, Fdos, iocc, ivir, ndia, ndba, ndji, ndai):
     temp -= einsum('ai,iak->k', ndai, FdIAk)
 
     return temp
+
 
 def r_d_on_oo(dso, F, I, dia, dji, dai, P2, jitemp):
     jitemp -= 0.5*einsum('ia,ai->i', dia, F.vo)*dso
@@ -1954,6 +1993,7 @@ def r_d_on_oo(dso, F, I, dia, dji, dai, P2, jitemp):
     jitemp -= 0.5*0.5*einsum('abij,ijab->i', P2[6] - P2[6].transpose((1,0,2,3)), I.oovv - I.oovv.transpose((0,1,3,2)))*dso
     jitemp -= 0.5*1.0*einsum('aBiJ,iJaB->i', P2[6], I.oovv)*dso
 
+
 def r_d_on_vv(dsv, F, I, dia, dba, dai, P2, batemp):
     batemp += 0.5*einsum('ia,ai->a', dia, F.vo)*dsv
     batemp += 0.5*einsum('ba,ab->a', dba, F.vv)*dsv
@@ -1996,6 +2036,7 @@ def r_d_on_vv(dsv, F, I, dia, dba, dai, P2, batemp):
     batemp += 0.5*0.5*einsum('abij,ijab->a', P2[6] - P2[6].transpose((0,1,3,2)), I.oovv - I.oovv.transpose((0,1,3,2)))*dsv
     batemp += 0.5*1.0*einsum('aBiJ,iJaB->a', P2[6], I.oovv)*dsv
 
+
 def g_full_rdm2(fo, n1rdm, rdm2):
     rdm2 += einsum('pr,qs->pqrs', numpy.diag(fo), numpy.diag(fo))
     rdm2 -= einsum('pr,qs->pqsr', numpy.diag(fo), numpy.diag(fo))
@@ -2004,6 +2045,7 @@ def g_full_rdm2(fo, n1rdm, rdm2):
     rdm2 += 0.5*einsum('pr,qs->pqrs', n1rdm, numpy.diag(fo))
     rdm2 -= 0.5*einsum('pr,qs->pqsr', n1rdm, numpy.diag(fo))
 
+
 def g_full_rdm2_active(focc, iocc, iall, n1rdm, rdm2):
     rdm2[numpy.ix_(iocc, iocc, iocc, iocc)] += einsum('pr,qs->pqrs', numpy.diag(focc), numpy.diag(focc))
     rdm2[numpy.ix_(iocc, iocc, iocc, iocc)] -= einsum('pr,qs->pqsr', numpy.diag(focc), numpy.diag(focc))
@@ -2011,6 +2053,7 @@ def g_full_rdm2_active(focc, iocc, iall, n1rdm, rdm2):
     rdm2[numpy.ix_(iocc, iall, iall, iocc)] -= 0.5*einsum('pr,qs->pqsr', numpy.diag(focc), n1rdm)
     rdm2[numpy.ix_(iall, iocc, iall, iocc)] += 0.5*einsum('pr,qs->pqrs', n1rdm, numpy.diag(focc))
     rdm2[numpy.ix_(iall, iocc, iocc, iall)] -= 0.5*einsum('pr,qs->pqsr', n1rdm, numpy.diag(focc))
+
 
 def u_full_rdm2(foa, fob, n1rdm, rdm2):
     rdm2[0] += einsum('pr,qs->pqrs', numpy.diag(foa), numpy.diag(foa))
@@ -2030,6 +2073,7 @@ def u_full_rdm2(foa, fob, n1rdm, rdm2):
     rdm2[2] += einsum('pr,qs->pqrs', numpy.diag(foa), numpy.diag(fob))
     rdm2[2] += 0.5*einsum('pr,qs->pqrs', numpy.diag(foa), n1rdm[1])
     rdm2[2] += 0.5*einsum('pr,qs->pqrs', n1rdm[0], numpy.diag(fob))
+
 
 def u_full_rdm2_active(focca, foccb, iocca, ioccb, ialla, iallb, n1rdm, rdm2):
     rdm2[0][numpy.ix_(iocca, iocca, iocca, iocca)] += einsum('pr,qs->pqrs', numpy.diag(focca), numpy.diag(focca))

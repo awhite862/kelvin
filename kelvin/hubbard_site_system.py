@@ -8,6 +8,7 @@ from .system import system
 
 einsum = numpy.einsum
 
+
 class hubbard_site_system(system):
     """Hubbard model system in the site basis
 

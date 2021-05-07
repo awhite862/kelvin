@@ -7,13 +7,16 @@ from . import ft_cc_energy
 from . import ft_cc_equations
 from . import quadrature
 
+
 def mp0(g0):
     """Return 0th order free energy."""
     return g0.sum()
 
+
 def ump0(g0a, g0b):
     """Return 0th order free energy."""
     return (g0a.sum() + g0b.sum())
+
 
 def mp1(p, f, h):
     """Return 1st order free energy."""
@@ -24,6 +27,7 @@ def mp1(p, f, h):
     # compute free energy at 1st order
     return 0.5*(ec1 - ec2)
 
+
 def get_D1c(e):
     """Return conventional 1-electron denominators."""
     n = e.shape[0]
@@ -33,6 +37,7 @@ def get_D1c(e):
             if numpy.abs(D1[i,j]) < 1e-8:
                 D1[i,j] = 1e16
     return 1.0/D1
+
 
 def get_D1a(e, T):
     """Return anomalous 1-electron denominators."""
@@ -60,6 +65,7 @@ def get_D2c(e):
                         D2[i,j,k,l] = 1e32
     return 1.0/D2
 
+
 def get_D2a(e, T):
     """Return anomalous 2-electron denominators."""
     n = e.shape[0]
@@ -75,11 +81,13 @@ def get_D2a(e, T):
                         D2[i,j,k,l] = 1e32
     return 1.0/D2
 
+
 def get_D1exp(e, T):
     """Return 1-electron propagator."""
     beta = 1.0/T
     D1 = e[:,None] - e[None,:]
     return numpy.exp(beta*D1) - 1.0
+
 
 def get_D2exp(e, T):
     """Return 2-electron propagator."""
@@ -87,6 +95,7 @@ def get_D2exp(e, T):
     D2 = e[:,None,None,None] + e[None,:,None,None] \
         - e[None,None,:,None] - e[None,None,None,:]
     return numpy.exp(beta*D2) - 1.0
+
 
 def mp2(en, no, f, eri, T, returnT=False):
     """Return 2nd order correction to the free energy."""
@@ -173,6 +182,7 @@ def mp2(en, no, f, eri, T, returnT=False):
 #    else:
 #        return Es + Ed
 
+
 def mp2_a(D1a, D2a, no, f, eri, T):
     """Return anomalous 2nd order correction to the free energy."""
     nv = (1.0 - no)
@@ -220,6 +230,7 @@ def mp2_sep(en, no, f, eri, T, returnT=False):
     else:
         return Es + Ed
 
+
 def mp3_doubles(no, eri, D21, D22):
     """Return conventional doubles piece of the 3rd order
     correction to the free energy.
@@ -235,6 +246,7 @@ def mp3_doubles(no, eri, D21, D22):
         'i,j,k,a,b,c,ijab,kjac,ijab,kbic,ackj->',
         no, no, no, nv, nv, nv, D21, D22, eri, eri, eri)
     return F1 + F2 + F3
+
 
 def mp3_doubles1N(no, eri, D21, D22):
     """Return anomalous doubles piece of the 3rd order
@@ -252,6 +264,7 @@ def mp3_doubles1N(no, eri, D21, D22):
         no, no, no, nv, nv, nv, D21, D22, eri, eri, eri)
     return F1 + F2 + F3
 
+
 def mp3_doubles2N(no, eri, D21, D22):
     """Return the doubly anomalous doubles piece of the 3rd order
     correction to the free energy.
@@ -267,6 +280,7 @@ def mp3_doubles2N(no, eri, D21, D22):
         'i,j,k,a,b,c,ickb,kjac,ijab,kbic,ackj->',
         no, no, no, nv, nv, nv, D21, D22, eri, eri, eri)
     return F1 + F2 + F3
+
 
 def mp3_singles(no, f, eri, D11, D12, D21, D22):
     """Return the conventional singles piece of the 3rd order
@@ -310,6 +324,7 @@ def mp3_singles(no, f, eri, D11, D12, D21, D22):
 
     return dtot
 
+
 def mp3_singles1N(no, f, eri, D11, D12, D21, D22):
     """Return the anomalous singles piece of the 3rd order
     correction to the free energy.
@@ -351,6 +366,7 @@ def mp3_singles1N(no, f, eri, D11, D12, D21, D22):
     dtot = dA + dB + dC + dD + dE + dF + dG + dH + dI + dJ + dK
 
     return dtot
+
 
 def mp3_singles2N(no, f, eri, D11, D12, D21, D22):
     """Return the doubly anomalous singles piece of the 3rd order
@@ -394,6 +410,7 @@ def mp3_singles2N(no, f, eri, D11, D12, D21, D22):
 
     return dtot
 
+
 def mp3(e, no, f, eri, T):
     """Return the total 3rd order correction to the free energy."""
     raise Exception("This MP3 code is incorrect")
@@ -426,6 +443,7 @@ def mp3(e, no, f, eri, T):
     return E3d + E3s + E3da1 + E3da2 + E3sa1 + E3sa2 + E3da12 + E3sa12 + \
             E3daa1 + E3daa2 + E3saa1 + E3saa2
 
+
 def mp3_a(D1, D2, D1a, D2a, no, f, eri, T):
     """Return the total anomalous contribution to the 3rd order
     correction to the free energy.
@@ -449,6 +467,7 @@ def mp3_a(D1, D2, D1a, D2a, no, f, eri, T):
     E3saa2 = T*mp3_singles(no, f, eri, D1, D1a, D2, D2a)
 
     return E3da1 + E3da2 + E3sa1 + E3sa2 + E3da12 + E3sa12 + E3daa1 + E3daa2 + E3saa1 + E3saa2
+
 
 def mp3_new(e, no, f, eri, T):
     """Return the total 3rd order correction to the free energy."""

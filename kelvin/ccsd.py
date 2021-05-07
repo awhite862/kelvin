@@ -14,6 +14,7 @@ from . import quadrature
 einsum = lib.einsum
 #einsum = numpy.einsum
 
+
 class ccsd(object):
     """Coupled cluster singles and doubles (CCSD) driver.
 
@@ -888,7 +889,6 @@ class ccsd(object):
             if self.iprint > 0:
                 print('MP2 Energy: {:.10f}'.format(E2))
 
-
             # run CC iterations
             Eccn,T1,T2 = cc_utils.ft_ucc_iter(method, T1aold, T1bold, T2aaold, T2abold, T2bbold,
                     Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb,
@@ -1500,7 +1500,6 @@ class ccsd(object):
             self.n2rdm = cc_utils.g_n2rdm_full_active(beta, n, iocc, ivir, sfo, sfv, P2)
         else:
             self.n2rdm = cc_utils.g_n2rdm_full(beta, sfo, sfv, P2)
-
 
     def _g_ft_ron(self):
         # temperature info

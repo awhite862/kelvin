@@ -6,6 +6,7 @@ from cqcpy import integrals
 from .system import system
 from . import scf_utils
 
+
 class solid_field_system(system):
 
     def __init__(self, T, mf, ti, A0, t0, sigma, omega, mu=0.0):

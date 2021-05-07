@@ -5,6 +5,7 @@ from cqcpy.ov_blocks import two_e_blocks
 from .ueg_utils import ueg_basis
 from .system import system
 
+
 class pueg_system(system):
     """The polarized uniform electron gas in a plane-wave basis set.
 

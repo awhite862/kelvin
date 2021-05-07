@@ -2,19 +2,23 @@ import numpy
 from cqcpy.cc_energy import cc_energy_d
 from cqcpy.cc_energy import cc_energy_s1
 
+
 def mp0(en):
     """Return the 0th order energy."""
     return en.sum()
 
+
 def ump0(ea, eb):
     """Return the 0th order energy."""
     return ea.sum() + eb.sum()
+
 
 def mp1(p, f, h):
     """Return the 1st order energy."""
     ec1 = numpy.tensordot(h,p,axes=([0,1],[0,1]))
     ec2 = numpy.tensordot(f,p,axes=([0,1],[0,1]))
     return 0.5*(ec1 - ec2)
+
 
 def mp2(eo, ev, fvo, Ivvoo, returnT=False):
     """Return the 2nd order energy, and optionally T-amplitudes."""
@@ -32,6 +36,7 @@ def mp2(eo, ev, fvo, Ivvoo, returnT=False):
         return (Es + Ed,T1,T2)
     else:
         return Es + Ed
+
 
 def mp3_singles(D1, D2, F, I):
     """Return the singles contribution to the 3rd order energy."""
@@ -73,6 +78,7 @@ def mp3_singles(D1, D2, F, I):
 
     return dtot
 
+
 def mp3_doubles(D2, I):
     """Return the doubles contribution to the 3rd order energy."""
     dX = (1.0/8.0)*numpy.einsum(
@@ -86,6 +92,7 @@ def mp3_doubles(D2, I):
         I.oovv, I.vovo, I.vvoo, D2, D2)
 
     return dX + dY + dZ
+
 
 def mp3(eo, ev, F, I):
     """Return the total 3rd order contribution to the energy."""

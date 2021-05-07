@@ -8,6 +8,7 @@ from .system import system
 
 einsum = numpy.einsum
 
+
 class HubbardSystem(system):
     """Hubbard model system in a mean-field basis
 

@@ -3,6 +3,7 @@ from cqcpy import ft_utils
 from . import ft_mp
 from . import zt_mp
 
+
 class mp3(object):
     """MP3 driver.
 

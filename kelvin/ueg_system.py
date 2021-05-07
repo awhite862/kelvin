@@ -10,6 +10,7 @@ from .ueg_utils import ueg_basis
 einsum = lib.einsum
 #einsum = einsum
 
+
 class ueg_system(system):
     """The uniform electron gas in a plane-wave basis set.
 

@@ -6,6 +6,7 @@ from . import scf_utils
 from . import ft_mp
 from .system import system
 
+
 class mol_field_system(system):
     """Object representing a molecular system in a TD field (deprecated).
 

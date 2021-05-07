@@ -4,6 +4,7 @@ from pyscf.fci import fci_slow
 from cqcpy import ft_utils
 from . import ft_mp
 
+
 class fci(object):
     """Full configuration interaction (FCI) driver.
 
