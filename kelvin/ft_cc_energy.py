@@ -72,8 +72,8 @@ def ft_ucc_energy(T1a, T1b, T2aa, T2ab, T2bb, fa, fb, Ia, Ib, Iabab, g, beta, Qt
 
 
 def ft_cc_energy_neq(
-        T1f,T1b,T1i,T2f,T2b,T2i,
-        Ff,Fb,F,eri,gr,gi,beta,Qterm=True):
+        T1f, T1b, T1i, T2f, T2b, T2i,
+        Ff, Fb, F, eri, gr, gi, beta, Qterm=True):
 
     t1f_temp = T1f
     t1b_temp = T1b

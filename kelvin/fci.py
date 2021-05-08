@@ -1,11 +1,12 @@
 import numpy
+import logging
 from pyscf.fci import cistring
 from pyscf.fci import fci_slow
 from cqcpy import ft_utils
 from . import ft_mp
 
 
-class fci(object):
+class FCI(object):
     """Full configuration interaction (FCI) driver.
 
     Attributes:
@@ -81,7 +82,7 @@ class fci(object):
         H = numpy.zeros((N,N))
         I = numpy.identity(N)
         for i in range(N):
-            hc = fci_slow.contract_2e(h2e,I[:,i],n,nelec)
+            hc = fci_slow.contract_2e(h2e, I[:,i], n, nelec)
             hc.reshape(-1)
             H[:,i] = hc
 
@@ -97,10 +98,19 @@ class fci(object):
         n = self.sys.g_energies_tot().shape[0]//2
         for nalpha in range(0,n + 1):
             for nbeta in range(0,n + 1):
-                e = self._fci_fixedN(nalpha,nbeta)
+                e = self._fci_fixedN(nalpha, nbeta)
                 nel = nalpha + nbeta
                 for ej in e:
                     ex = beta*(nel*mu - ej)
                     Z += numpy.exp(ex)
 
         return -T*numpy.log(Z)
+
+class fci(FCI):
+    def __init__(self, sys, T=0, mu=0, iprint=0, lam=1.0,
+                 nalpha=None, nbeta=None):
+        
+        logging.warning("This class is deprecated, use FCI instead")
+        FCI.__init__(
+            self, sys, T=T, mu=mu, iprint=iprint,
+            lam=lam, nalpha=nalpha, nbeta=nbeta)

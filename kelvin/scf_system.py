@@ -182,21 +182,22 @@ class scf_system(system):
     def r_fock(self):
         if self.T > 0.0:
             raise Exception("Undefined ov blocks at FT")
-        F = scf_utils.r_fock_blocks(self.mf)
-        return one_e_blocks(F.oo,F.ov,F.vo,F.vv)
+        F = scf_utils.RFockBlocks(self.mf)
+        return one_e_blocks(F.oo, F.ov, F.vo, F.vv)
 
     def u_fock(self):
         if self.T > 0.0:
             raise Exception("Undefined ov blocks at FT")
-        Fa = scf_utils.r_fock_blocks(self.mf,orb='a')
-        Fb = scf_utils.r_fock_blocks(self.mf,orb='b')
-        return (one_e_blocks(Fa.oo,Fa.ov,Fa.vo,Fa.vv),one_e_blocks(Fb.oo,Fb.ov,Fb.vo,Fb.vv))
+        Fa = scf_utils.RFockBlocks(self.mf, orb='a')
+        Fb = scf_utils.RFockBlocks(self.mf, orb='b')
+        return (one_e_blocks(Fa.oo, Fa.ov, Fa.vo, Fa.vv),
+                one_e_blocks(Fb.oo, Fb.ov, Fb.vo, Fb.vv))
 
     def g_fock(self):
         if self.T > 0.0:
             raise Exception("Undefined ov blocks at FT")
-        F = scf_utils.g_fock_blocks(self.mf)
-        return one_e_blocks(F.oo,F.ov,F.vo,F.vv)
+        F = scf_utils.GFockBlocks(self.mf)
+        return one_e_blocks(F.oo, F.ov, F.vo, F.vv)
 
     def r_fock_tot(self):
         beta = 1.0 / self.T
@@ -294,10 +295,10 @@ class scf_system(system):
             nvb = mo_occb[mo_occb == 0].size
         else:
             raise Exception("incompatible MF type")
-        Ia = make_two_e_blocks(_Ia,noa,nva,noa,nva,noa,nva,noa,nva)
-        Ib = make_two_e_blocks(_Ib,nob,nvb,nob,nvb,nob,nvb,nob,nvb)
-        Iabab = make_two_e_blocks_full(_Iabab,
-                noa,nva,nob,nvb,noa,nva,nob,nvb)
+        Ia = make_two_e_blocks(_Ia, noa, nva, noa, nva, noa, nva, noa, nva)
+        Ib = make_two_e_blocks(_Ib, nob, nvb, nob, nvb, nob, nvb, nob, nvb)
+        Iabab = make_two_e_blocks_full(
+            _Iabab, noa, nva, nob, nvb, noa, nva, nob, nvb)
 
         return Ia, Ib, Iabab
 
@@ -325,7 +326,7 @@ class scf_system(system):
 
     def r_int_tot(self):
         mo = self.mf.mo_coeff
-        I = integrals.get_phys_gen(self.mf,mo,mo,mo,mo,anti=False)
+        I = integrals.get_phys_gen(self.mf, mo, mo, mo, mo, anti=False)
         return I
 
     def u_aint_tot(self):
@@ -339,11 +340,11 @@ class scf_system(system):
             raise Exception("Incompatible MF type")
 
         mf = self.mf
-        Ia = integrals.get_phys_gen(mf,moa,moa,moa,moa,anti=True)
-        Ib = integrals.get_phys_gen(mf,mob,mob,mob,mob,anti=True)
-        Iabab = integrals.get_phys_gen(mf,moa,mob,moa,mob,anti=False)
+        Ia = integrals.get_phys_gen(mf, moa, moa, moa, moa, anti=True)
+        Ib = integrals.get_phys_gen(mf, mob, mob, mob, mob, anti=True)
+        Iabab = integrals.get_phys_gen(mf, moa, mob, moa, mob, anti=False)
 
         return Ia,Ib,Iabab
 
     def g_int_tot(self):
-        return integrals.get_physu_all_gen(self.mf,anti=False)
+        return integrals.get_physu_all_gen(self.mf, anti=False)

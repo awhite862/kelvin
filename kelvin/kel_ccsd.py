@@ -115,16 +115,16 @@ class KelCCSD(object):
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
                 - en[None,None,:,None] - en[None,None,None,:]
-        D1 = D1[numpy.ix_(self.ivir,self.iocc)]
-        D2 = D2[numpy.ix_(self.ivir,self.ivir,self.iocc,self.iocc)]
+        D1 = D1[numpy.ix_(self.ivir, self.iocc)]
+        D2 = D2[numpy.ix_(self.ivir, self.ivir, self.iocc, self.iocc)]
         sfo = numpy.sqrt(self.focc)
         sfv = numpy.sqrt(self.fvir)
 
         # compute initial density matrix
         pia = self.L1.copy()
-        pji = cc_equations.ccsd_1rdm_ji_opt(self.T1,self.T2,self.L1,self.L2)
-        pba = cc_equations.ccsd_1rdm_ba_opt(self.T1,self.T2,self.L1,self.L2)
-        pai = cc_equations.ccsd_1rdm_ai_opt(self.T1,self.T2,self.L1,self.L2)
+        pji = cc_equations.ccsd_1rdm_ji_opt(self.T1, self.T2, self.L1, self.L2)
+        pba = cc_equations.ccsd_1rdm_ba_opt(self.T1, self.T2, self.L1, self.L2)
+        pai = cc_equations.ccsd_1rdm_ai_opt(self.T1, self.T2, self.L1, self.L2)
 
         ndia = numpy.einsum('ia,i,a->ia', pia, sfo, sfv)
         ndba = numpy.einsum('ba,b,a->ba', pba, sfv, sfv)
@@ -132,11 +132,11 @@ class KelCCSD(object):
         ndai = numpy.einsum('ai,a,i->ai', pai, sfv, sfo)
 
         n1rdm = numpy.zeros((n,n), dtype=complex)
-        n1rdm[numpy.ix_(self.iocc,self.iocc)] += ndji
-        n1rdm[numpy.ix_(self.iocc,self.ivir)] += ndia
-        n1rdm[numpy.ix_(self.ivir,self.iocc)] += ndai
-        n1rdm[numpy.ix_(self.ivir,self.ivir)] += ndba
-        n1rdm[numpy.ix_(self.iocc,self.iocc)] += numpy.diag(self.focc)
+        n1rdm[numpy.ix_(self.iocc, self.iocc)] += ndji
+        n1rdm[numpy.ix_(self.iocc, self.ivir)] += ndia
+        n1rdm[numpy.ix_(self.ivir, self.iocc)] += ndai
+        n1rdm[numpy.ix_(self.ivir, self.ivir)] += ndba
+        n1rdm[numpy.ix_(self.iocc, self.iocc)] += numpy.diag(self.focc)
         self.P.append(n1rdm)
         self.ti.append(t0)
 
@@ -152,7 +152,7 @@ class KelCCSD(object):
                 F = cc_utils.ft_integrals_neq_1e(self.sys, en, beta, mu, t)
                 k1s = -1.j*D1*t1 - 1.j*F.vo.copy()
                 k1d = -1.j*D2*t2 - 1.j*I.vvoo.copy()
-                cc_equations._Stanton(k1s,k1d,F,I,t1,t2,fac=-1.j)
+                cc_equations._Stanton(k1s, k1d, F, I, t1, t2, fac=-1.j)
                 if not self.singles:
                     k1s = numpy.zeros(k1s.shape, k1s.dtype)
                 return [k1s,k1d]
@@ -183,9 +183,9 @@ class KelCCSD(object):
 
             # compute density matrix
             pia = L1.copy()
-            pji = cc_equations.ccsd_1rdm_ji_opt(T1,T2,L1,L2)
-            pba = cc_equations.ccsd_1rdm_ba_opt(T1,T2,L1,L2)
-            pai = cc_equations.ccsd_1rdm_ai_opt(T1,T2,L1,L2)
+            pji = cc_equations.ccsd_1rdm_ji_opt(T1, T2, L1, L2)
+            pba = cc_equations.ccsd_1rdm_ba_opt(T1, T2, L1, L2)
+            pai = cc_equations.ccsd_1rdm_ai_opt(T1, T2, L1, L2)
 
             ndia = numpy.einsum('ia,i,a->ia', pia, sfo, sfv)
             ndba = numpy.einsum('ba,b,a->ba', pba, sfv, sfv)
@@ -200,11 +200,11 @@ class KelCCSD(object):
 
             # save density matrix
             n1rdm = numpy.zeros((n,n), dtype=complex)
-            n1rdm[numpy.ix_(self.iocc,self.iocc)] += ndji
-            n1rdm[numpy.ix_(self.iocc,self.ivir)] += ndia
-            n1rdm[numpy.ix_(self.ivir,self.iocc)] += ndai
-            n1rdm[numpy.ix_(self.ivir,self.ivir)] += ndba
-            n1rdm[numpy.ix_(self.iocc,self.iocc)] += numpy.diag(self.focc)
+            n1rdm[numpy.ix_(self.iocc, self.iocc)] += ndji
+            n1rdm[numpy.ix_(self.iocc, self.ivir)] += ndia
+            n1rdm[numpy.ix_(self.ivir, self.iocc)] += ndai
+            n1rdm[numpy.ix_(self.ivir, self.ivir)] += ndba
+            n1rdm[numpy.ix_(self.iocc, self.iocc)] += numpy.diag(self.focc)
             if i % save == 0:
                 self.P.append(n1rdm)
                 self.ti.append(t)

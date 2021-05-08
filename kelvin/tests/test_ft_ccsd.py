@@ -2,7 +2,7 @@ import unittest
 import numpy
 from pyscf import gto, scf
 from kelvin.ccsd import ccsd
-from kelvin.fci import fci
+from kelvin.fci import FCI
 from kelvin.scf_system import scf_system
 from kelvin.ueg_system import ueg_system
 from kelvin.pueg_system import pueg_system
@@ -39,7 +39,7 @@ class FTCCSDTest(unittest.TestCase):
         ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=24, econv=1e-11, ngrid=320)
         Ecc = ccsdT.run()
 
-        fciT = fci(sys, T=T, mu=mu)
+        fciT = FCI(sys, T=T, mu=mu)
         Efci = fciT.run()
         error = "Expected: {}  Actual: {}".format(Efci[1], Ecc[1])
         diff = abs(Efci[1] - Ecc[1])

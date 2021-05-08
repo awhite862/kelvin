@@ -376,7 +376,7 @@ def u_mo_d_ft_fock(mf, foa, fva, fob, fvb, dveca, dvecb):
         raise Exception("unrecognized SCF type")
 
 
-class r_fock_blocks(object):
+class RFockBlocks(object):
     def __init__(self, mf, orb='a'):
         mo_occ = mf.mo_occ
         if is_rhf(mf):
@@ -404,7 +404,7 @@ class r_fock_blocks(object):
         self.vv = numpy.einsum('mv,mn,nu->vu', numpy.conj(v), f, v)
 
 
-class g_fock_blocks(object):
+class GFockBlocks(object):
     def __init__(self, mf):
         mo_occ = mf.mo_occ
         pbc = hasattr(mf, "kpt")

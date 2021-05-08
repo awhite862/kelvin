@@ -1,6 +1,6 @@
 import unittest
 import numpy
-from kelvin.fci import fci
+from kelvin.fci import FCI
 from kelvin.ccsd import ccsd
 try:
     from kelvin.hubbard_site_system import hubbard_site_system
@@ -24,7 +24,7 @@ def compute_fci_kelvin(hub, nelec):
     Pa = None
     Pb = None
     sys = hubbard_site_system(0.0, hub, Pa, Pb, na=na, nb=nb)
-    myfci = fci(sys, nalpha=na, nbeta=nb)
+    myfci = FCI(sys, nalpha=na, nbeta=nb)
     return myfci.run()[0]
 
 
@@ -32,7 +32,7 @@ def compute_fci_kelvinT(hub, T, mu):
     Pa = None
     Pb = None
     sys = hubbard_site_system(T, hub, Pa, Pb, mu=mu)
-    myfci = fci(sys, T=T, mu=mu)
+    myfci = FCI(sys, T=T, mu=mu)
     return myfci.run()[0]
 
 
