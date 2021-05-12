@@ -2,10 +2,10 @@ import numpy
 from pyscf import gto, scf
 from cqcpy import ft_utils
 from cqcpy import integrals
-from .system import system
+from .system import System
 
 
-class h2_pol_system(system):
+class h2_pol_system(System):
     def __init__(self, T, mu):
         mol = gto.M(
             verbose=0,

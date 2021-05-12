@@ -4,10 +4,10 @@ from cqcpy import utils
 from . import integrals
 from . import scf_utils
 from . import ft_mp
-from .system import system
+from .system import System
 
 
-class mol_field_system(system):
+class mol_field_system(System):
     """Object representing a molecular system in a TD field (deprecated).
 
     Attributes:

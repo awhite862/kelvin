@@ -2,11 +2,11 @@ import numpy
 from pyscf import gto, scf
 from cqcpy import ft_utils
 from cqcpy import integrals
-from .system import system
+from .system import System
 from .neq_system import NeqSystem
 
 
-class h2_field_system(system):
+class h2_field_system(System):
     """H2 molecule in a TD field (deprecated)"""
     def __init__(self, T, mu, omega, ti, O=None, ot=None):
         mol = gto.M(

@@ -4,12 +4,12 @@ from cqcpy.ov_blocks import one_e_blocks
 from cqcpy.ov_blocks import two_e_blocks
 from cqcpy.ov_blocks import two_e_blocks_full
 from cqcpy import utils
-from .system import system
+from .system import System
 
 einsum = numpy.einsum
 
 
-class hubbard_site_system(system):
+class hubbard_site_system(System):
     """Hubbard model system in the site basis
 
     Attributes:

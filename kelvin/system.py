@@ -1,4 +1,4 @@
-class system(object):
+class System(object):
     """Base class representing a physical system."""
     def __init__(self):
         pass

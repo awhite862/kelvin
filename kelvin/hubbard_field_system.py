@@ -2,11 +2,11 @@ import numpy
 from cqcpy import ft_utils
 from cqcpy import utils
 
-from .system import system
+from .system import System
 from .neq_system import NeqSystem
 
 
-class hubbard_field_system(system):
+class hubbard_field_system(System):
     """Hubbard model system with a time-dependent Pierls phase
 
     Attributes:

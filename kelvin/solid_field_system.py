@@ -3,11 +3,11 @@ from cqcpy import ft_utils
 from cqcpy import utils
 from cqcpy import integrals
 
-from .system import system
+from .system import System
 from . import scf_utils
 
 
-class solid_field_system(system):
+class solid_field_system(System):
 
     def __init__(self, T, mf, ti, A0, t0, sigma, omega, mu=0.0):
         self.A0 = A0

@@ -4,14 +4,14 @@ from cqcpy import ft_utils
 from cqcpy.ov_blocks import one_e_blocks
 from cqcpy.ov_blocks import two_e_blocks
 from cqcpy.ov_blocks import two_e_blocks_full
-from .system import system
+from .system import System
 from .ueg_utils import ueg_basis
 
 einsum = lib.einsum
 #einsum = einsum
 
 
-class ueg_system(system):
+class ueg_system(System):
     """The uniform electron gas in a plane-wave basis set.
 
     Attributes:

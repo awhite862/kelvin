@@ -13,10 +13,10 @@ from cqcpy import utils
 from . import scf_utils
 from . import zt_mp
 from . import ft_mp
-from .system import system
+from .system import System
 
 
-class scf_system(system):
+class scf_system(System):
     """Object representing a molecular mean-field system.
 
     Attributes:
