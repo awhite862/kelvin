@@ -2,7 +2,7 @@ import numpy
 from cqcpy import ft_utils
 from cqcpy.ov_blocks import one_e_blocks
 from cqcpy.ov_blocks import two_e_blocks
-from .ueg_utils import ueg_basis
+from .ueg_utils import UEGBasis
 from .system import System
 
 
@@ -23,7 +23,7 @@ class pueg_system(System):
     def __init__(self, T, L, Emax, mu=None, n=None, norb=None):
         self.T = T
         self.L = L
-        self.basis = ueg_basis(L,Emax,norb=norb)
+        self.basis = UEGBasis(L,Emax,norb=norb)
         if n is None:
             assert(mu is not None)
             self.mu = mu

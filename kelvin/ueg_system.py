@@ -5,7 +5,7 @@ from cqcpy.ov_blocks import one_e_blocks
 from cqcpy.ov_blocks import two_e_blocks
 from cqcpy.ov_blocks import two_e_blocks_full
 from .system import System
-from .ueg_utils import ueg_basis
+from .ueg_utils import UEGBasis
 
 einsum = lib.einsum
 #einsum = einsum
@@ -31,7 +31,7 @@ class ueg_system(System):
                  norb=None, orbtype='u', madelung=None):
         self.T = T
         self.L = L
-        self.basis = ueg_basis(L,Emax,norb=norb)
+        self.basis = UEGBasis(L,Emax,norb=norb)
         if na is None:
             assert(nb is None)
             assert(mu is not None)
