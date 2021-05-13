@@ -39,9 +39,9 @@ class ccsd(object):
         L2: Saved L2 amplitudes
     """
     def __init__(self, sys, T=0.0, mu=0.0, iprint=0,
-        singles=True, econv=1e-8, tconv=None, max_iter=40,
-        damp=0.0, ngrid=10, realtime=False, athresh=0.0,
-        quad='lin', rt_iter="all"):
+                 singles=True, econv=1e-8, tconv=None, max_iter=40,
+                 damp=0.0, ngrid=10, realtime=False, athresh=0.0,
+                 quad='lin', rt_iter="all"):
 
         self.T = T
         self.mu = mu
@@ -281,7 +281,7 @@ class ccsd(object):
         nv = ev.shape[0]
         mem1e = no*no + 5*no*nv + nv*nv  # include memory for D1
         mem2e = 6*no*no*nv*nv + nv*nv*nv*nv + 2*nv*nv*nv*no + \
-                2*nv*no*no*no + no*no*no*no # include memory for D2
+            2*nv*no*no*no + no*no*no*no # include memory for D2
         mem_mb = 2.0*(mem1e + mem2e)*8.0/1024.0/1024.0
         if self.iprint > 0:
             print('  CCSD will use %f mb' % mem_mb)
@@ -370,7 +370,7 @@ class ccsd(object):
         nv = nva + nvb
         mem1e = no*no + 5*no*nv + nv*nv  # include memory for D1
         mem2e = 6*no*no*nv*nv + nv*nv*nv*nv + 2*nv*nv*nv*no + \
-                2*nv*no*no*no + no*no*no*no # include memory for D2
+            2*nv*no*no*no + no*no*no*no # include memory for D2
         mem_mb = 2.0*(mem1e + mem2e)*8.0/1024.0/1024.0
         if self.iprint > 0:
             print('  CCSD will use %f mb' % mem_mb)
@@ -667,7 +667,7 @@ class ccsd(object):
                 # get exponentials
                 D1 = en[:,None] - en[None,:]
                 D2 = en[:,None,None,None] + en[None,:,None,None] \
-                        - en[None,None,:,None] - en[None,None,None,:]
+                    - en[None,None,:,None] - en[None,None,None,:]
                 D1 = D1[numpy.ix_(ivir,iocc)]
                 D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
 
@@ -678,7 +678,7 @@ class ccsd(object):
                 # get energy differences
                 D1 = en[:,None] - en[None,:]
                 D2 = en[:,None,None,None] + en[None,:,None,None] \
-                        - en[None,None,:,None] - en[None,None,None,:]
+                    - en[None,None,:,None] - en[None,None,None,:]
 
         method = "CCSD" if self.singles else "CCD"
         conv_options = {
@@ -786,11 +786,11 @@ class ccsd(object):
                 D1a = ea[:,None] - ea[None,:]
                 D1b = eb[:,None] - eb[None,:]
                 D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
-                        - ea[None,None,:,None] - ea[None,None,None,:]
+                    - ea[None,None,:,None] - ea[None,None,None,:]
                 D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
-                        - ea[None,None,:,None] - eb[None,None,None,:]
+                    - ea[None,None,:,None] - eb[None,None,None,:]
                 D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
-                        - eb[None,None,:,None] - eb[None,None,None,:]
+                    - eb[None,None,:,None] - eb[None,None,None,:]
                 D1a = D1a[numpy.ix_(ivira,iocca)]
                 D1b = D1b[numpy.ix_(ivirb,ioccb)]
                 D2aa = D2aa[numpy.ix_(ivira,ivira,iocca,iocca)]
@@ -812,18 +812,16 @@ class ccsd(object):
                 D1a = ea[:,None] - ea[None,:]
                 D1b = eb[:,None] - eb[None,:]
                 D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
-                        - ea[None,None,:,None] - ea[None,None,None,:]
+                    - ea[None,None,:,None] - ea[None,None,None,:]
                 D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
-                        - ea[None,None,:,None] - eb[None,None,None,:]
+                    - ea[None,None,:,None] - eb[None,None,None,:]
                 D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
-                        - eb[None,None,:,None] - eb[None,None,None,:]
+                    - eb[None,None,:,None] - eb[None,None,None,:]
                 T1ashape = (ng,na,na)
                 T1bshape = (ng,nb,nb)
         else:
             # create energies in spin-orbital basis
             eoa,eva,eob,evb = self.sys.u_energies()
-            #no = eo.shape[0]
-            #nv = ev.shape[0]
             D1a = (eva[:,None] - eoa[None,:])
             D1b = (evb[:,None] - eob[None,:])
             D2aa = (eva[:,None,None,None] + eva[None,:,None,None]
@@ -955,7 +953,7 @@ class ccsd(object):
             # get exponentials
             D1 = en[:,None] - en[None,:]
             D2 = en[:,None,None,None] + en[None,:,None,None] \
-                    - en[None,None,:,None] - en[None,None,None,:]
+                - en[None,None,:,None] - en[None,None,None,:]
             D1 = D1[numpy.ix_(ivir,iocc)]
             D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
         else:
@@ -965,7 +963,7 @@ class ccsd(object):
             # get energy differences
             D1 = en[:,None] - en[None,:]
             D2 = en[:,None,None,None] + en[None,:,None,None] \
-                    - en[None,None,:,None] - en[None,None,None,:]
+                - en[None,None,:,None] - en[None,None,None,:]
 
         if L2 is None and L1 is None:
             if self.singles:
@@ -1058,11 +1056,11 @@ class ccsd(object):
             D1a = ea[:,None] - ea[None,:]
             D1b = eb[:,None] - eb[None,:]
             D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
-                    - ea[None,None,:,None] - ea[None,None,None,:]
+                - ea[None,None,:,None] - ea[None,None,None,:]
             D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
-                    - ea[None,None,:,None] - eb[None,None,None,:]
+                - ea[None,None,:,None] - eb[None,None,None,:]
             D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
-                    - eb[None,None,:,None] - eb[None,None,None,:]
+                - eb[None,None,:,None] - eb[None,None,None,:]
             D1a = D1a[numpy.ix_(ivira,iocca)]
             D1b = D1b[numpy.ix_(ivirb,ioccb)]
             D2aa = D2aa[numpy.ix_(ivira,ivira,iocca,iocca)]
@@ -1081,11 +1079,11 @@ class ccsd(object):
             D1a = ea[:,None] - ea[None,:]
             D1b = eb[:,None] - eb[None,:]
             D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
-                    - ea[None,None,:,None] - ea[None,None,None,:]
+                - ea[None,None,:,None] - ea[None,None,None,:]
             D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
-                    - ea[None,None,:,None] - eb[None,None,None,:]
+                - ea[None,None,:,None] - eb[None,None,None,:]
             D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
-                    - eb[None,None,:,None] - eb[None,None,None,:]
+                - eb[None,None,:,None] - eb[None,None,None,:]
 
         T1aold,T1bold = self.T1
         T2aaold,T2abold,T2bbold = self.T2
@@ -1419,7 +1417,7 @@ class ccsd(object):
         # get energy differences
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
-                - en[None,None,:,None] - en[None,None,None,:]
+            - en[None,None,:,None] - en[None,None,None,:]
         if self.athresh > 0.0:
             athresh = self.athresh
             focc = [x for x in fo if x > athresh]
@@ -1476,7 +1474,7 @@ class ccsd(object):
         # get energy differences
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
-                - en[None,None,:,None] - en[None,None,None,:]
+            - en[None,None,:,None] - en[None,None,None,:]
         if self.athresh > 0.0:
             athresh = self.athresh
             focc = [x for x in fo if x > athresh]
@@ -1608,7 +1606,7 @@ class ccsd(object):
         ng = self.ti.shape[0]
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
-                - en[None,None,:,None] - en[None,None,None,:]
+            - en[None,None,:,None] - en[None,None,None,:]
         if self.athresh > 0.0:
             D1 = D1[numpy.ix_(ivir,iocc)]
             D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]

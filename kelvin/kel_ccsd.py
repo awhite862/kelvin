@@ -114,7 +114,7 @@ class KelCCSD(object):
         # get exponentials
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
-                - en[None,None,:,None] - en[None,None,None,:]
+            - en[None,None,:,None] - en[None,None,None,:]
         D1 = D1[numpy.ix_(self.ivir, self.iocc)]
         D2 = D2[numpy.ix_(self.ivir, self.ivir, self.iocc, self.iocc)]
         sfo = numpy.sqrt(self.focc)

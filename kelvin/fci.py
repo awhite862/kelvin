@@ -18,8 +18,8 @@ class FCI(object):
         nalpha (int): Number of alpha electrons.
         nbeta (int): Number of beta electrons.
     """
-    def __init__(self, sys, T=0, mu=0, iprint=0, lam=1.0,
-        nalpha=None,nbeta=None):
+    def __init__(self, sys, T=0, mu=0, iprint=0,
+                 lam=1.0, nalpha=None,nbeta=None):
 
         self.sys = sys
         self.T = T
@@ -106,10 +106,11 @@ class FCI(object):
 
         return -T*numpy.log(Z)
 
+
 class fci(FCI):
     def __init__(self, sys, T=0, mu=0, iprint=0, lam=1.0,
                  nalpha=None, nbeta=None):
-        
+
         logging.warning("This class is deprecated, use FCI instead")
         FCI.__init__(
             self, sys, T=T, mu=mu, iprint=iprint,

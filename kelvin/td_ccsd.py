@@ -76,9 +76,9 @@ def _get_active(athresh, fthresh, beta, mu, sys, iprint):
 class TDCCSD(object):
     """Time-dependent coupled cluster singles and doubles (CCSD) driver.
     """
-    def __init__(self, sys, prop, T=0.0, mu=0.0, iprint=0,
-        singles=True, ngrid=10, athresh=0.0, fthresh=0.0, quad='lin', saveT=False,
-        saveL=False, tmem="mem", scratch=""):
+    def __init__(self, sys, prop, T=0.0, mu=0.0, iprint=0, singles=True,
+                 ngrid=10, athresh=0.0, fthresh=0.0, quad='lin',
+                 saveT=False, saveL=False, tmem="mem", scratch=""):
 
         self.T = T
         self.mu = mu
@@ -625,7 +625,7 @@ class TDCCSD(object):
             # get exponentials
             D1 = en[:,None] - en[None,:]
             D2 = en[:,None,None,None] + en[None,:,None,None] \
-                    - en[None,None,:,None] - en[None,None,None,:]
+                - en[None,None,:,None] - en[None,None,None,:]
             D1 = D1[numpy.ix_(self.ivir,self.iocc)]
             D2 = D2[numpy.ix_(self.ivir,self.ivir,self.iocc,self.iocc)]
             t1shape = (nvir,nocc)
@@ -720,7 +720,7 @@ class TDCCSD(object):
             # get 0th and 1st order contributions
             En = self.sys.const_energy()
             g0 = ft_utils.uGP0(beta, ea, eb, mu)
-            E0 = ft_mp.ump0(g0[0],g0[1]) + En
+            E0 = ft_mp.ump0(g0[0], g0[1]) + En
             E1 = self.sys.get_mp1()
             E01 = E0 + E1
 
@@ -736,16 +736,16 @@ class TDCCSD(object):
             D1a = ea[:,None] - ea[None,:]
             D1b = eb[:,None] - eb[None,:]
             D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
-                    - ea[None,None,:,None] - ea[None,None,None,:]
+                - ea[None,None,:,None] - ea[None,None,None,:]
             D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
-                    - ea[None,None,:,None] - eb[None,None,None,:]
+                - ea[None,None,:,None] - eb[None,None,None,:]
             D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
-                    - eb[None,None,:,None] - eb[None,None,None,:]
-            D1a = D1a[numpy.ix_(self.ivir[0],self.iocc[0])]
-            D1b = D1b[numpy.ix_(self.ivir[1],self.iocc[1])]
-            D2aa = D2aa[numpy.ix_(self.ivir[0],self.ivir[0],self.iocc[0],self.iocc[0])]
-            D2ab = D2ab[numpy.ix_(self.ivir[0],self.ivir[1],self.iocc[0],self.iocc[1])]
-            D2bb = D2bb[numpy.ix_(self.ivir[1],self.ivir[1],self.iocc[1],self.iocc[1])]
+                - eb[None,None,:,None] - eb[None,None,None,:]
+            D1a = D1a[numpy.ix_(self.ivir[0], self.iocc[0])]
+            D1b = D1b[numpy.ix_(self.ivir[1], self.iocc[1])]
+            D2aa = D2aa[numpy.ix_(self.ivir[0], self.ivir[0], self.iocc[0], self.iocc[0])]
+            D2ab = D2ab[numpy.ix_(self.ivir[0], self.ivir[1], self.iocc[0], self.iocc[1])]
+            D2bb = D2bb[numpy.ix_(self.ivir[1], self.ivir[1], self.iocc[1], self.iocc[1])]
 
             # get scaled integrals
             Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
@@ -855,7 +855,7 @@ class TDCCSD(object):
             # get exponentials
             D1 = en[:,None] - en[None,:]
             D2 = en[:,None,None,None] + en[None,:,None,None] \
-                    - en[None,None,:,None] - en[None,None,None,:]
+                - en[None,None,:,None] - en[None,None,None,:]
             D1 = D1[numpy.ix_(self.ivir,self.iocc)]
             D2 = D2[numpy.ix_(self.ivir,self.ivir,self.iocc,self.iocc)]
             t1shape = (nvir,nocc)
@@ -949,7 +949,7 @@ class TDCCSD(object):
             # get exponentials
             D1 = en[:,None] - en[None,:]
             D2 = en[:,None,None,None] + en[None,:,None,None] \
-                    - en[None,None,:,None] - en[None,None,None,:]
+                - en[None,None,:,None] - en[None,None,None,:]
             D1 = D1[numpy.ix_(self.ivir,self.iocc)]
             D2 = D2[numpy.ix_(self.ivir,self.ivir,self.iocc,self.iocc)]
             sfo = numpy.sqrt(self.focc)
@@ -1162,16 +1162,16 @@ class TDCCSD(object):
             D1a = ea[:,None] - ea[None,:]
             D1b = eb[:,None] - eb[None,:]
             D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
-                    - ea[None,None,:,None] - ea[None,None,None,:]
+                - ea[None,None,:,None] - ea[None,None,None,:]
             D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
-                    - ea[None,None,:,None] - eb[None,None,None,:]
+                - ea[None,None,:,None] - eb[None,None,None,:]
             D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
-                    - eb[None,None,:,None] - eb[None,None,None,:]
-            D1a = D1a[numpy.ix_(self.ivir[0],self.iocc[0])]
-            D1b = D1b[numpy.ix_(self.ivir[1],self.iocc[1])]
-            D2aa = D2aa[numpy.ix_(self.ivir[0],self.ivir[0],self.iocc[0],self.iocc[0])]
-            D2ab = D2ab[numpy.ix_(self.ivir[0],self.ivir[1],self.iocc[0],self.iocc[1])]
-            D2bb = D2bb[numpy.ix_(self.ivir[1],self.ivir[1],self.iocc[1],self.iocc[1])]
+                - eb[None,None,:,None] - eb[None,None,None,:]
+            D1a = D1a[numpy.ix_(self.ivir[0], self.iocc[0])]
+            D1b = D1b[numpy.ix_(self.ivir[1], self.iocc[1])]
+            D2aa = D2aa[numpy.ix_(self.ivir[0], self.ivir[0], self.iocc[0], self.iocc[0])]
+            D2ab = D2ab[numpy.ix_(self.ivir[0], self.ivir[1], self.iocc[0], self.iocc[1])]
+            D2bb = D2bb[numpy.ix_(self.ivir[1], self.ivir[1], self.iocc[1], self.iocc[1])]
 
             # get scaled integrals
             Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
@@ -1551,7 +1551,7 @@ class TDCCSD(object):
             # get exponentials
             D1 = en[:,None] - en[None,:]
             D2 = en[:,None,None,None] + en[None,:,None,None] \
-                    - en[None,None,:,None] - en[None,None,None,:]
+                - en[None,None,:,None] - en[None,None,None,:]
             D1 = D1[numpy.ix_(self.ivir,self.iocc)]
             D2 = D2[numpy.ix_(self.ivir,self.ivir,self.iocc,self.iocc)]
             sfo = numpy.sqrt(self.focc)

@@ -11,7 +11,7 @@ from . import quadrature
 class neq_ccsd(object):
     """Non-equilibrium coupled cluster singles and doubles"""
     def __init__(self, sys, T, mu=0.0, tmax=0.0, econv=1e-8,
-        max_iter=40, damp=0.0, ngr=100, ngi=10, iprint=1):
+                 max_iter=40, damp=0.0, ngr=100, ngi=10, iprint=1):
 
         self.T = T
         self.mu = mu
@@ -73,7 +73,7 @@ class neq_ccsd(object):
         # get energy differences
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
-                - en[None,None,:,None] - en[None,None,None,:]
+            - en[None,None,:,None] - en[None,None,None,:]
 
         # get MP2 T-amplitudes
         if T1in is not None and T2in is not None:
@@ -197,7 +197,7 @@ class neq_ccsd(object):
         # get energy differences
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
-                - en[None,None,:,None] - en[None,None,None,:]
+            - en[None,None,:,None] - en[None,None,None,:]
 
         if L2 is None:
             # Use T^{\dagger} as a guess for Lambda
@@ -295,14 +295,14 @@ class neq_ccsd(object):
         # get energy differences
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
-                - en[None,None,:,None] - en[None,None,None,:]
+            - en[None,None,:,None] - en[None,None,None,:]
 
         pia,pba,pji,pai = ft_cc_equations.neq_1rdm(
-                self.T1f,self.T1b,self.T1i,
-                self.T2f,self.T2b,self.T2i,
-                self.L1f,self.L1b,self.L1i,
-                self.L2f,self.L2b,self.L2i,
-                D1,D2,tir,tii,ngr,ngi,gr,gi,Gr,Gi)
+                self.T1f, self.T1b, self.T1i,
+                self.T2f, self.T2b, self.T2i,
+                self.L1f, self.L1b, self.L1i,
+                self.L2f, self.L2b, self.L2i,
+                D1, D2, tir, tii, ngr, ngi, gr, gi, Gr, Gi)
 
         self.dia = pia
         self.dba = pba
@@ -329,14 +329,14 @@ class neq_ccsd(object):
         # get energy differences
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
-                - en[None,None,:,None] - en[None,None,None,:]
+            - en[None,None,:,None] - en[None,None,None,:]
 
         P2 = ft_cc_equations.neq_2rdm(
-                self.T1f,self.T1b,self.T1i,
-                self.T2f,self.T2b,self.T2i,
-                self.L1f,self.L1b,self.L1i,
-                self.L2f,self.L2b,self.L2i,
-                D1,D2,tir,tii,ngr,ngi,gr,gi,Gr,Gi,t)
+                self.T1f, self.T1b, self.T1i,
+                self.T2f, self.T2b, self.T2i,
+                self.L1f, self.L1b, self.L1i,
+                self.L2f, self.L2b, self.L2i,
+                D1, D2, tir, tii, ngr, ngi, gr, gi, Gr, Gi, t)
         return P2
 
     def compute_prop(self, A, t):

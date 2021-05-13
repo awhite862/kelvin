@@ -45,7 +45,7 @@ class mp3(object):
         nv = ev.shape[0]
         mem1e = no*no + 3*no*nv + nv*nv  # include memory for D1
         mem2e = 4*no*no*nv*nv + nv*nv*nv*nv + 2*nv*nv*nv*no + \
-                2*nv*no*no*no + no*no*no*no # include memory for D2
+            2*nv*no*no*no + no*no*no*no # include memory for D2
         mem_mb = (mem1e + mem2e)*8.0/1024.0/1024.0
         assert(mem_mb < 4000)
         if self.iprint > 0:

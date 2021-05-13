@@ -229,7 +229,7 @@ class lccsd(object):
         # get energy differences
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
-                - en[None,None,:,None] - en[None,None,None,:]
+            - en[None,None,:,None] - en[None,None,None,:]
 
         # get MP2 T-amplitudes
         if T1in is not None and T2in is not None:
@@ -315,7 +315,7 @@ class lccsd(object):
         # get exponentials
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
-                - en[None,None,:,None] - en[None,None,None,:]
+            - en[None,None,:,None] - en[None,None,None,:]
         D1 = D1[numpy.ix_(ivir,iocc)]
         D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
 
@@ -375,7 +375,7 @@ class lccsd(object):
         # get energy differences
         D1 = en[:,None] - en[None,:]
         D2 = en[:,None,None,None] + en[None,:,None,None] \
-                - en[None,None,:,None] - en[None,None,None,:]
+            - en[None,None,:,None] - en[None,None,None,:]
 
         # run Lambda iterations
         if self.singles:

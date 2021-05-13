@@ -393,7 +393,7 @@ def int_tbar1_keldysh(ngr, ngi, t1barf, t1barb, t1bari, tir, tii, D1, Gr, Gi):
         gtemp = numpy.exp(1.j*dt[:,None,None]*D1[None,:,:])
         t1_temp = gtemp*t1barb
         t1_outb[y] = -1.j*einsum('x,xai->ai', Gr[y], t1_temp)\
-                + t1_outf[ngr - 1]*numpy.exp(1.j*(tir[ngr - 1] - tib[y])*D1)
+            + t1_outf[ngr - 1]*numpy.exp(1.j*(tir[ngr - 1] - tib[y])*D1)
 
     t1_outi = numpy.zeros(t1bari.shape,dtype=complex)
     dt = numpy.zeros((ngi))
@@ -429,7 +429,7 @@ def int_tbar2_keldysh(ngr, ngi, t2barf, t2barb, t2bari, tir, tii, D2, Gr, Gi):
         gtemp = numpy.exp(1.j*dt[:,None,None,None,None]*D2[None,:,:,:,:])
         t2_temp = gtemp*t2barb
         t2_outb[y] = -1.j*einsum('x,xabij->abij', Gr[y,:], t2_temp)\
-                + t2_outf[ngr - 1]*numpy.exp(1.j*(tir[ngr - 1] - tib[y])*D2)
+            + t2_outf[ngr - 1]*numpy.exp(1.j*(tir[ngr - 1] - tib[y])*D2)
 
     t2_outi = numpy.zeros(t2bari.shape,dtype=complex)
     dt = numpy.zeros((ngi))

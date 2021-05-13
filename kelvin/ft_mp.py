@@ -440,8 +440,8 @@ def mp3(e, no, f, eri, T):
     E3saa2 = 2*T*mp3_singles(no, f, eri, D1, D1a, D2, D2a)
     #print(E3d,E3daa1,E3daa2,E3da12)
 
-    return E3d + E3s + E3da1 + E3da2 + E3sa1 + E3sa2 + E3da12 + E3sa12 + \
-            E3daa1 + E3daa2 + E3saa1 + E3saa2
+    return E3d + E3s + E3da1 + E3da2 + E3sa1 + E3sa2 \
+        + E3da12 + E3sa12 + E3daa1 + E3daa2 + E3saa1 + E3saa2
 
 
 def mp3_a(D1, D2, D1a, D2a, no, f, eri, T):
@@ -529,7 +529,7 @@ def mp23_int(e, no, nv, f, eri, T, ngrid=10):
     # get exponentials
     D1 = e[:,None] - e[None,:]
     D2 = e[:,None,None,None] + e[None,:,None,None] \
-            - e[None,None,:,None] - e[None,None,None,:]
+        - e[None,None,:,None] - e[None,None,None,:]
 
     # get MP2 (1st order) T-amplitudes
     Id = numpy.ones((ng))

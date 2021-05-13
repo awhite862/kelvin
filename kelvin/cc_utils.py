@@ -1316,9 +1316,8 @@ def ft_d_active_integrals(sys, en, fo, fv, iocc, ivir, dvec):
     return F,I
 
 
-def uft_d_active_integrals(
-    sys, ea, eb, foa, fva, fob, fvb,
-    iocca, ivira, ioccb, ivirb, dveca, dvecb):
+def uft_d_active_integrals(sys, ea, eb, foa, fva, fob, fvb,
+                           iocca, ivira, ioccb, ivirb, dveca, dvecb):
     """Return derivatives of unrestricted one and two-electron integrals
     with small occupations excluded."""
 
@@ -1491,37 +1490,37 @@ def g_n2rdm_full(beta, sfo, sfv, P2):
 def g_n2rdm_full_active(beta, n, iocc, ivir, sfo, sfv, P2):
     n2rdm = numpy.zeros((n,n,n,n), dtype=P2[0].dtype)
     n2rdm[numpy.ix_(ivir, ivir, ivir, ivir)] += \
-       (1.0/beta)*einsum('cdab,c,d,a,b->cdab', P2[0], sfv, sfv, sfv, sfv)
+        (1.0/beta)*einsum('cdab,c,d,a,b->cdab', P2[0], sfv, sfv, sfv, sfv)
     n2rdm[numpy.ix_(ivir, iocc, ivir, ivir)] += \
-       (1.0/beta)*einsum('ciab,c,i,a,b->ciab', P2[1], sfv, sfo, sfv, sfv)
+        (1.0/beta)*einsum('ciab,c,i,a,b->ciab', P2[1], sfv, sfo, sfv, sfv)
     n2rdm[numpy.ix_(iocc, ivir, ivir, ivir)] -= \
-       (1.0/beta)*einsum('ciab,c,i,a,b->icab', P2[1], sfv, sfo, sfv, sfv)
+        (1.0/beta)*einsum('ciab,c,i,a,b->icab', P2[1], sfv, sfo, sfv, sfv)
     n2rdm[numpy.ix_(ivir, ivir, ivir, iocc)] += \
-       (1.0/beta)*einsum('bcai,b,c,a,i->bcai', P2[2], sfv, sfv, sfv, sfo)
+        (1.0/beta)*einsum('bcai,b,c,a,i->bcai', P2[2], sfv, sfv, sfv, sfo)
     n2rdm[numpy.ix_(ivir, ivir, iocc, ivir)] -= \
-       (1.0/beta)*einsum('bcai,b,c,a,i->bcia', P2[2], sfv, sfv, sfv, sfo)
+        (1.0/beta)*einsum('bcai,b,c,a,i->bcia', P2[2], sfv, sfv, sfv, sfo)
     n2rdm[numpy.ix_(iocc, iocc, ivir, ivir)] += \
-       (1.0/beta)*einsum('ijab,i,j,a,b->ijab', P2[3], sfo, sfo, sfv, sfv)
+        (1.0/beta)*einsum('ijab,i,j,a,b->ijab', P2[3], sfo, sfo, sfv, sfv)
     n2rdm[numpy.ix_(ivir, iocc, ivir, iocc)] += \
-       (1.0/beta)*einsum('bjai,b,j,a,i->bjai', P2[4], sfv, sfo, sfv, sfo)
+        (1.0/beta)*einsum('bjai,b,j,a,i->bjai', P2[4], sfv, sfo, sfv, sfo)
     n2rdm[numpy.ix_(ivir, iocc, iocc, ivir)] -= \
-       (1.0/beta)*einsum('bjai,b,j,a,i->bjia', P2[4], sfv, sfo, sfv, sfo)
+        (1.0/beta)*einsum('bjai,b,j,a,i->bjia', P2[4], sfv, sfo, sfv, sfo)
     n2rdm[numpy.ix_(iocc, ivir, ivir, iocc)] -= \
-       (1.0/beta)*einsum('bjai,b,j,a,i->jbai', P2[4], sfv, sfo, sfv, sfo)
+        (1.0/beta)*einsum('bjai,b,j,a,i->jbai', P2[4], sfv, sfo, sfv, sfo)
     n2rdm[numpy.ix_(iocc, ivir, iocc, ivir)] += \
-       (1.0/beta)*einsum('bjai,b,j,a,i->jbia', P2[4], sfv, sfo, sfv, sfo)
+        (1.0/beta)*einsum('bjai,b,j,a,i->jbia', P2[4], sfv, sfo, sfv, sfo)
     n2rdm[numpy.ix_(ivir, ivir, iocc, iocc)] += \
-       (1.0/beta)*einsum('abij,a,b,i,j->abij', P2[5], sfv, sfv, sfo, sfo)
+        (1.0/beta)*einsum('abij,a,b,i,j->abij', P2[5], sfv, sfv, sfo, sfo)
     n2rdm[numpy.ix_(iocc, iocc, ivir, iocc)] += \
-       (1.0/beta)*einsum('jkai,j,k,a,i->jkai', P2[6], sfo, sfo, sfv, sfo)
+        (1.0/beta)*einsum('jkai,j,k,a,i->jkai', P2[6], sfo, sfo, sfv, sfo)
     n2rdm[numpy.ix_(iocc, iocc, iocc, ivir)] -= \
-       (1.0/beta)*einsum('jkai,j,k,a,i->jkia', P2[6], sfo, sfo, sfv, sfo)
+        (1.0/beta)*einsum('jkai,j,k,a,i->jkia', P2[6], sfo, sfo, sfv, sfo)
     n2rdm[numpy.ix_(iocc, ivir, iocc, iocc)] += \
-       (1.0/beta)*einsum('kaij,k,a,i,j->kaij', P2[7], sfo, sfv, sfo, sfo)
+        (1.0/beta)*einsum('kaij,k,a,i,j->kaij', P2[7], sfo, sfv, sfo, sfo)
     n2rdm[numpy.ix_(ivir, iocc, iocc, iocc)] -= \
-       (1.0/beta)*einsum('kaij,k,a,i,j->akij', P2[7], sfo, sfv, sfo, sfo)
+        (1.0/beta)*einsum('kaij,k,a,i,j->akij', P2[7], sfo, sfv, sfo, sfo)
     n2rdm[numpy.ix_(iocc, iocc, iocc, iocc)] += \
-       (1.0/beta)*einsum('klij,k,l,i,j->klij', P2[8], sfo, sfo, sfo, sfo)
+        (1.0/beta)*einsum('klij,k,l,i,j->klij', P2[8], sfo, sfo, sfo, sfo)
     return n2rdm
 
 
