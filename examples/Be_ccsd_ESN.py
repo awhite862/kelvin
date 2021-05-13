@@ -1,5 +1,5 @@
 from pyscf import gto, scf, cc
-from kelvin.mp3 import mp3
+from kelvin.mp3 import MP3
 from kelvin.ccsd import ccsd
 from kelvin.scf_system import scf_system
 
@@ -21,7 +21,7 @@ T = 2.0
 mu = 0.0
 ng = 10
 sys = scf_system(m,T,mu)
-mp3T = mp3(sys,iprint=1,T=T,mu=mu)
+mp3T = MP3(sys,iprint=1,T=T,mu=mu)
 E0T,E1T,E2T,E3T = mp3T.run()
 print('HF energy: %.8f' % (E0T + E1T))
 print('MP3 correlation energy: %.8f' % (E2T + E3T))

@@ -4,7 +4,7 @@ from . import ft_mp
 from . import zt_mp
 
 
-class mp2(object):
+class MP2(object):
     """MP2 driver.
 
     Attributes:

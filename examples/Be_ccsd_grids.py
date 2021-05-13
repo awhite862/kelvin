@@ -1,5 +1,4 @@
 from pyscf import gto, scf, cc
-from kelvin.mp3 import mp3
 from kelvin.ccsd import ccsd
 from kelvin.scf_system import scf_system
 

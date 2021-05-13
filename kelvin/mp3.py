@@ -4,7 +4,7 @@ from . import ft_mp
 from . import zt_mp
 
 
-class mp3(object):
+class MP3(object):
     """MP3 driver.
 
     Attributes:

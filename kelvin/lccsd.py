@@ -7,7 +7,7 @@ from . import ft_mp
 from . import ft_cc_energy
 from . import quadrature
 from . import zt_mp
-from .mp2 import mp2
+from .mp2 import MP2 
 
 
 class lccsd(object):
@@ -28,7 +28,7 @@ class lccsd(object):
     """
     def __init__(self, sys, T=0, mu=0, iprint=0,
             singles=True, econv=1e-8, tconv=None, max_iter=40,
-            damp=0.0, ngrid=10, realtime=False, athresh=0.0):
+            damp=0.0, ngrid=10, realtime=False, athresh=0.0, quad='lin'):
         self.T = T
         self.mu = mu
         self.finite_T = False if T == 0 else True
@@ -41,6 +41,7 @@ class lccsd(object):
         self.ngrid = ngrid
         self.realtime = realtime
         self.athresh = athresh
+        self.quad = quad
         if self.finite_T:
             self.realtime = True
         if not sys.verify(self.T,self.mu):
@@ -99,7 +100,7 @@ class lccsd(object):
         I = self.sys.g_aint()
 
         # get MP2 T-amplitudes
-        mp20 = mp2(self.sys,saveT=True)
+        mp20 = MP2(self.sys,saveT=True)
         mp20.run()
         T1old = (mp20.T1 if self.singles else numpy.zeros(F.vo.shape))
         T2old = mp20.T2
