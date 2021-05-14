@@ -4,7 +4,7 @@ from pyscf import gto, scf
 from kelvin.td_ccsd import TDCCSD
 from kelvin.ccsd import ccsd
 from kelvin.scf_system import scf_system
-from kelvin.ueg_system import ueg_system
+from kelvin.ueg_system import UEGSystem
 
 
 class TDCCSDESNTest(unittest.TestCase):
@@ -47,7 +47,7 @@ class TDCCSDESNTest(unittest.TestCase):
         damp = 0.2
         mi = 50
         ng = 30
-        ueg = ueg_system(T, L, cut, mu=mu, norb=norb, orbtype='g')
+        ueg = UEGSystem(T, L, cut, mu=mu, norb=norb, orbtype='g')
         ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=ng)
         Ecctot, ecc = ccsdT.run()
         ccsdT.compute_ESN()
@@ -117,7 +117,7 @@ class TDCCSDESNTest(unittest.TestCase):
         damp = 0.2
         mi = 50
         ng = 30
-        ueg = ueg_system(T, L, cut, mu=mu, norb=norb, orbtype='u')
+        ueg = UEGSystem(T, L, cut, mu=mu, norb=norb, orbtype='u')
         ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=ng)
         Ecctot, ecc = ccsdT.run()
         ccsdT.compute_ESN()
@@ -151,7 +151,7 @@ class TDCCSDESNTest(unittest.TestCase):
         damp = 0.2
         mi = 50
         ng = 30
-        ueg = ueg_system(T, L, cut, mu=mu, norb=norb, orbtype='u')
+        ueg = UEGSystem(T, L, cut, mu=mu, norb=norb, orbtype='u')
         ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=ng)
         Ecctot, ecc = ccsdT.run()
         ccsdT.compute_ESN()
@@ -219,7 +219,7 @@ class TDCCSDESNTest(unittest.TestCase):
         norb = 7
         cut = 1.2
         ng = 40
-        ueg = ueg_system(T, L, cut, mu=mu, norb=norb, orbtype='u')
+        ueg = UEGSystem(T, L, cut, mu=mu, norb=norb, orbtype='u')
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(ueg, prop, T=T, mu=mu, ngrid=ng)
         Ecctot, ecc = tdccsdT.run()
@@ -227,7 +227,7 @@ class TDCCSDESNTest(unittest.TestCase):
         Eref = tdccsdT.E
         Sref = tdccsdT.S
         Nref = tdccsdT.N
-        ueg = ueg_system(T, L, cut, mu=mu, norb=norb, orbtype='r')
+        ueg = UEGSystem(T, L, cut, mu=mu, norb=norb, orbtype='r')
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(ueg, prop, T=T, mu=mu, ngrid=ng)
         Eout, eccout = tdccsdT.run()

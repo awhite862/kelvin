@@ -1,6 +1,6 @@
 from kelvin.fci import fci
 from kelvin.ccsd import ccsd
-from kelvin.ueg_system import ueg_system
+from kelvin.ueg_system import UEGSystem
 import numpy
 import sys
 
@@ -11,7 +11,7 @@ norb = 19
 cut = 1.2
 damp = 0.2
 mi = 50
-ueg = ueg_system(T,L,cut,mu=mu,norb=norb,orbtype='u')
+ueg = UEGSystem(T,L,cut,mu=mu,norb=norb,orbtype='u')
 print('Norb: {}'.format(len(ueg.basis.basis)))
 print('L: {:.10f}'.format(L))
 print('N0: {:.10f}'.format(ueg.N))

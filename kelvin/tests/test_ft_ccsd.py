@@ -4,7 +4,7 @@ from pyscf import gto, scf
 from kelvin.ccsd import ccsd
 from kelvin.fci import FCI
 from kelvin.scf_system import scf_system
-from kelvin.ueg_system import ueg_system
+from kelvin.ueg_system import UEGSystem
 from kelvin.pueg_system import pueg_system
 
 
@@ -123,7 +123,7 @@ class FTCCSDTest(unittest.TestCase):
         cut = 1.2
         damp = 0.2
         mi = 50
-        ueg = ueg_system(T, L, cut, mu=mu, norb=norb, orbtype='g')
+        ueg = UEGSystem(T, L, cut, mu=mu, norb=norb, orbtype='g')
         ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=10)
         Ecctot,Ecc = ccsdT.run()
         diff = abs(self.ueg_ref - Ecc)
@@ -138,7 +138,7 @@ class FTCCSDTest(unittest.TestCase):
         cut = 1.2
         damp = 0.2
         mi = 50
-        ueg = ueg_system(T, L, cut, mu=mu, norb=norb)
+        ueg = UEGSystem(T, L, cut, mu=mu, norb=norb)
         ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=10)
         Ecctot,Ecc = ccsdT.run()
         diff = abs(self.ueg_ref - Ecc)
@@ -168,7 +168,7 @@ class FTCCSDTest(unittest.TestCase):
         cut = 1.2
         damp = 0.2
         mi = 50
-        ueg = ueg_system(T, L, cut, mu=mu, norb=norb, orbtype='g')
+        ueg = UEGSystem(T, L, cut, mu=mu, norb=norb, orbtype='g')
         ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, tconv=1e-8, ngrid=10)
         Ecctot1, Ecc1 = ccsdT.run()
         ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, tconv=1e-8, rt_iter="point")
@@ -185,7 +185,7 @@ class FTCCSDTest(unittest.TestCase):
         cut = 1.2
         damp = 0.2
         mi = 50
-        ueg = ueg_system(T, L, cut, mu=mu, norb=norb, orbtype='u')
+        ueg = UEGSystem(T, L, cut, mu=mu, norb=norb, orbtype='u')
         ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, tconv=1e-8, ngrid=10)
         Ecctot1,Ecc1 = ccsdT.run()
         ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, tconv=1e-8, rt_iter="point")

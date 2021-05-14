@@ -1,6 +1,6 @@
 import numpy
 from kelvin.ueg_scf_system import ueg_scf_system
-from kelvin.ueg_system import ueg_system
+from kelvin.ueg_system import UEGSystem
 from kelvin.ccsd import ccsd
 
 T = 0.0
@@ -15,7 +15,7 @@ print('r_s: {}'.format(ueg.rs))
 cc = ccsd(ueg,T=T,mu=mu,iprint=1)
 E = cc.run()
 print(E)
-ueg = ueg_system(T,L,9.4,mu=mu,norb=33,orbtype='u')
+ueg = UEGSystem(T,L,9.4,mu=mu,norb=33,orbtype='u')
 print('density: {}'.format(ueg.den))
 print('r_s: {}'.format(ueg.rs))
 cc = ccsd(ueg,T=T,mu=mu,iprint=1)

@@ -1,3 +1,4 @@
+import logging
 import numpy
 from pyscf import lib
 from cqcpy import ft_utils
@@ -11,7 +12,7 @@ einsum = lib.einsum
 #einsum = einsum
 
 
-class ueg_system(System):
+class UEGSystem(System):
     """The uniform electron gas in a plane-wave basis set.
 
     Attributes:
@@ -659,3 +660,11 @@ class ueg_system(System):
 
     def g_int_tot(self):
         return self.basis.build_g2e_matrix(anti=False)
+
+
+class ueg_system(UEGSystem):
+    def __init__(self, T, L, Emax, mu=None, na=None, nb=None,
+                 norb=None, orbtype='u', madelung=None):
+        logging.warning("This class is deprecated, use UEGSystem instead")
+        UEGSystem.__init__(self, T, L, Emax, mu=mu, na=na, nb=nb,
+            norb=norb, orbtype=orbtype, madelung=madelung)

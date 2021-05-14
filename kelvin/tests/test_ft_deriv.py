@@ -3,7 +3,7 @@ import numpy
 from pyscf import gto, scf
 from kelvin.ccsd import ccsd
 from kelvin.scf_system import scf_system
-from kelvin.ueg_system import ueg_system
+from kelvin.ueg_system import UEGSystem
 from kelvin.ueg_scf_system import ueg_scf_system
 from kelvin.pueg_system import pueg_system
 
@@ -215,7 +215,7 @@ class FTDerivTest(unittest.TestCase):
         damp = 0.2
         mi = 50
         ng = 10
-        ueg = ueg_system(T, L, cut, mu=mu, norb=norb)
+        ueg = UEGSystem(T, L, cut, mu=mu, norb=norb)
         ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=ng)
         Ecctot,Ecc = ccsdT.run()
         ccsdT.compute_ESN()
@@ -225,10 +225,10 @@ class FTDerivTest(unittest.TestCase):
         delta = 1e-4
         muf = mu + delta
         mub = mu - delta
-        ueg = ueg_system(T, L, cut, mu=muf, norb=norb)
+        ueg = UEGSystem(T, L, cut, mu=muf, norb=norb)
         ccsdT = ccsd(ueg, iprint=0, T=T, mu=muf, max_iter=35, damp=0.0, ngrid=ng, econv=1e-10)
         Ef,Ecf = ccsdT.run()
-        ueg = ueg_system(T, L, cut, mu=mub, norb=norb)
+        ueg = UEGSystem(T, L, cut, mu=mub, norb=norb)
         ccsdT = ccsd(ueg, iprint=0, T=T, mu=mub, max_iter=35, damp=0.0, ngrid=ng, econv=1e-10)
         Eb,Ecb = ccsdT.run()
 
@@ -236,10 +236,10 @@ class FTDerivTest(unittest.TestCase):
 
         Tf = T + delta
         Tb = T - delta
-        ueg = ueg_system(Tf, L, cut, mu=mu, norb=norb)
+        ueg = UEGSystem(Tf, L, cut, mu=mu, norb=norb)
         ccsdT = ccsd(ueg, iprint=0, T=Tf, mu=mu, max_iter=35, damp=0.0, ngrid=ng, econv=1e-10)
         Ef,Ecf = ccsdT.run()
-        ueg = ueg_system(Tb, L, cut, mu=mu, norb=norb)
+        ueg = UEGSystem(Tb, L, cut, mu=mu, norb=norb)
         ccsdT = ccsd(ueg, iprint=0, T=Tb, mu=mu, max_iter=35, damp=0.0, ngrid=ng, econv=1e-10)
         Eb,Ecb = ccsdT.run()
 
@@ -315,7 +315,7 @@ class FTDerivTest(unittest.TestCase):
         damp = 0.2
         mi = 50
         ng = 10
-        ueg = ueg_system(T, L, cut, mu=mu, norb=norb, orbtype='g')
+        ueg = UEGSystem(T, L, cut, mu=mu, norb=norb, orbtype='g')
         ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=ng)
         Ecctot,Ecc = ccsdT.run()
         ccsdT.compute_ESN()
@@ -325,10 +325,10 @@ class FTDerivTest(unittest.TestCase):
         delta = 1e-4
         muf = mu + delta
         mub = mu - delta
-        ueg = ueg_system(T, L, cut, mu=muf, norb=norb)
+        ueg = UEGSystem(T, L, cut, mu=muf, norb=norb)
         ccsdT = ccsd(ueg, iprint=0, T=T, mu=muf, max_iter=35, damp=0.0, ngrid=ng, econv=1e-10)
         Ef,Ecf = ccsdT.run()
-        ueg = ueg_system(T, L, cut, mu=mub, norb=norb)
+        ueg = UEGSystem(T, L, cut, mu=mub, norb=norb)
         ccsdT = ccsd(ueg, iprint=0, T=T, mu=mub, max_iter=35, damp=0.0, ngrid=ng, econv=1e-10)
         Eb,Ecb = ccsdT.run()
 
@@ -336,10 +336,10 @@ class FTDerivTest(unittest.TestCase):
 
         Tf = T + delta
         Tb = T - delta
-        ueg = ueg_system(Tf, L, cut, mu=mu, norb=norb)
+        ueg = UEGSystem(Tf, L, cut, mu=mu, norb=norb)
         ccsdT = ccsd(ueg, iprint=0, T=Tf, mu=mu, max_iter=35, damp=0.0, ngrid=ng, econv=1e-10)
         Ef,Ecf = ccsdT.run()
-        ueg = ueg_system(Tb, L, cut, mu=mu, norb=norb)
+        ueg = UEGSystem(Tb, L, cut, mu=mu, norb=norb)
         ccsdT = ccsd(ueg, iprint=0, T=Tb, mu=mu, max_iter=35, damp=0.0, ngrid=ng, econv=1e-10)
         Eb,Ecb = ccsdT.run()
 
