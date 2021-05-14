@@ -1,6 +1,10 @@
+import numpy
+import h5py
+from kelvin.solid_field_system import solid_field_system
+from kelvin.neq_ccsd import neq_ccsd
 from pyscf.pbc.gto import Cell
-from pyscf.pbc.tools.lattice import get_ase_atom, get_bandpath_fcc
-from pyscf.pbc import gto, scf, dft
+from pyscf.pbc.tools.lattice import get_ase_atom
+from pyscf.pbc import scf
 
 formula = 'si'
 bas = 'gth-szv'
@@ -15,16 +19,15 @@ elif formula.lower() == 'c':
 elif formula.lower() == 'ge':
     ke_cutoff = 40
 else:
-    raise RuntimeError('No recommended kinetic energy cutoff for formula ', formula)
-cell.from_ase(ase_atom).build(unit='B', ke_cutoff=ke_cutoff, basis=bas, precision=1e-8, verbose=9, pseudo='gth-pade')
-mf = scf.RHF(cell,exxdiv=None)
+    raise RuntimeError(
+        'No recommended kinetic energy cutoff for formula ', formula)
+cell.from_ase(ase_atom).build(
+    unit='B', ke_cutoff=ke_cutoff, basis=bas,
+    precision=1e-8, verbose=9, pseudo='gth-pade')
+mf = scf.RHF(cell, exxdiv=None)
 ehf = mf.kernel()
 print("HF energy (per unit cell) = %.17g" % ehf)
 
-import numpy
-from kelvin.scf_system import scf_system
-from kelvin.solid_field_system import solid_field_system
-from kelvin.neq_ccsd import neq_ccsd
 T = 0.2
 mu = 0.5527
 A0 = 40*0.0168803
@@ -38,13 +41,14 @@ deltat = tmax / ng
 
 ti = numpy.asarray([deltat/2 + float(j)*deltat for j in range(ng)])
 sys = solid_field_system(T, mf, ti, A0, t0, sigma, omega, mu=mu)
-cc = neq_ccsd(sys,T,mu=mu,tmax=tmax,econv=1e-8,max_iter=1000,damp=0.6,ngr=ng,ngi=ngi,iprint=1)
-E,Ecc = cc.run()
+cc = neq_ccsd(
+    sys, T, mu=mu, tmax=tmax, econv=1e-8, max_iter=1000,
+    damp=0.6, ngr=ng, ngi=ngi, iprint=1)
+E, Ecc = cc.run()
 cc._neq_ccsd_lambda()
 cc._neq_1rdm()
 p = cc.compute_1rdm()
 
-import h5py
-hf = h5py.File('den20_040.h5','w')
-hf.create_dataset("density",data=p)
+hf = h5py.File('den20_040.h5', 'w')
+hf.create_dataset("density", data=p)
 hf.close()

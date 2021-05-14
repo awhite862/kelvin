@@ -7,7 +7,7 @@ from . import ft_mp
 from . import ft_cc_energy
 from . import quadrature
 from . import zt_mp
-from .mp2 import MP2 
+from .mp2 import MP2
 
 
 class lccsd(object):
