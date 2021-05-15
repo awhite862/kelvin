@@ -5,7 +5,7 @@ from cqcpy import ft_utils
 from cqcpy import spin_utils
 from cqcpy import test_utils
 from kelvin.ccsd import ccsd
-from kelvin.scf_system import scf_system
+from kelvin.scf_system import SCFSystem
 from kelvin import cc_utils
 from kelvin import ft_cc_energy
 from kelvin import ft_cc_equations
@@ -136,7 +136,7 @@ class FTLambdaTest(unittest.TestCase):
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
         m.scf()
-        sys = scf_system(m, self.T, self.mu, orbtype='g')
+        sys = SCFSystem(m, self.T, self.mu, orbtype='g')
         ccsdT = ccsd(sys, T=self.T, mu=self.mu, iprint=0, max_iter=44, econv=1e-12)
         Etot,Ecc = ccsdT.run()
         ccsdT._ft_ccsd_lambda()
@@ -153,7 +153,7 @@ class FTLambdaTest(unittest.TestCase):
         m.scf()
         T = 0.03
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, damp=0.45, max_iter=240, ngrid=25, econv=1e-10, tconv=1e-9, athresh=1e-20)
         Etot,Ecc = ccsdT.run()
         ccsdT._ft_ccsd_lambda()
@@ -169,7 +169,7 @@ class FTLambdaTest(unittest.TestCase):
         m.conv_tol = 1e-13
         m.scf()
         ng = 10
-        sys = scf_system(m, self.T, self.mu, orbtype='u')
+        sys = SCFSystem(m, self.T, self.mu, orbtype='u')
         ccsdT = ccsd(sys, T=self.T, mu=self.mu, ngrid=ng, iprint=0, max_iter=44, econv=1e-12)
         Etot,Ecc = ccsdT.run()
         ccsdT._ft_uccsd_lambda()
@@ -211,7 +211,7 @@ class FTLambdaTest(unittest.TestCase):
         ng = 10
         T = self.T
         mu = self.mu
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         cc = ccsd(sys, T=T, mu=mu, iprint=0, max_iter=44, ngrid=ng, econv=1e-12)
         Etot,Ecc = cc.run()
         n = sys.g_energies_tot().shape[0]

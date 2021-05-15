@@ -6,7 +6,7 @@ from cqcpy import ft_utils
 from cqcpy import utils
 
 from kelvin.ccsd import ccsd
-from kelvin.scf_system import scf_system
+from kelvin.scf_system import SCFSystem
 from kelvin import cc_utils
 from numpy import einsum
 
@@ -118,7 +118,7 @@ class FTCC2RDMTest(unittest.TestCase):
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
         m.scf()
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(sys, T=T, mu=mu, iprint=0)
         ccsdT.run()
         ccsdT._ft_ccsd_lambda()
@@ -154,7 +154,7 @@ class FTCC2RDMTest(unittest.TestCase):
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
         m.scf()
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         athresh = 1e-20
         ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, damp=0.2, tconv=1e-11, athresh=athresh, ngrid=40, max_iter=80)
         ccsdT.run()
@@ -197,14 +197,14 @@ class FTCC2RDMTest(unittest.TestCase):
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
         m.scf()
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, tconv=1e-11)
         ccsdT.run()
         ccsdT._ft_ccsd_lambda()
         ccsdT._g_ft_2rdm()
         P2g = ccsdT.n2rdm
 
-        sys = scf_system(m, T, mu, orbtype='u')
+        sys = SCFSystem(m, T, mu, orbtype='u')
         na = sys.u_energies_tot()[0].shape[0]
         ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, tconv=1e-11)
         ccsdT.run()
@@ -238,14 +238,14 @@ class FTCC2RDMTest(unittest.TestCase):
         ng = 40
         m.conv_tol = 1e-12
         m.scf()
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, tconv=1e-11, athresh=athresh, ngrid=ng, damp=0.25, max_iter=80)
         ccsdT.run()
         ccsdT._ft_ccsd_lambda()
         ccsdT._g_ft_2rdm()
         P2g = ccsdT.n2rdm
 
-        sys = scf_system(m, T, mu, orbtype='u')
+        sys = SCFSystem(m, T, mu, orbtype='u')
         na = sys.u_energies_tot()[0].shape[0]
         ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, tconv=1e-11, athresh=athresh, ngrid=ng, damp=0.25, max_iter=80)
         ccsdT.run()
@@ -279,12 +279,12 @@ class FTCC2RDMTest(unittest.TestCase):
         ng = 40
         m.conv_tol = 1e-12
         m.scf()
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, tconv=1e-11, athresh=athresh, ngrid=ng, damp=0.25, max_iter=80)
         ccsdT.run()
         P2g = ccsdT.full_2rdm()
 
-        sys = scf_system(m, T, mu, orbtype='u')
+        sys = SCFSystem(m, T, mu, orbtype='u')
         na = sys.u_energies_tot()[0].shape[0]
         ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, tconv=1e-11, athresh=athresh, ngrid=ng, damp=0.25, max_iter=80)
         ccsdT.run()

@@ -2,7 +2,7 @@ import unittest
 from pyscf import gto, scf
 from kelvin.td_ccsd import TDCCSD
 from kelvin.ccsd import ccsd
-from kelvin.scf_system import scf_system
+from kelvin.scf_system import SCFSystem
 
 
 class TDCCSDTest(unittest.TestCase):
@@ -20,7 +20,7 @@ class TDCCSDTest(unittest.TestCase):
         m.scf()
         T = 0.5
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(sys, T=T, mu=mu, ngrid=40, iprint=0)
         Eref,Eccref = ccsdT.run()
         prop = {"tprop": "rk1"}
@@ -42,7 +42,7 @@ class TDCCSDTest(unittest.TestCase):
         T = 0.5
         mu = 0.0
         ng = 40
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(sys, T=T, mu=mu, ngrid=ng, iprint=0)
         Eref,Eccref = ccsdT.run()
         prop = {"tprop": "rk2"}
@@ -63,7 +63,7 @@ class TDCCSDTest(unittest.TestCase):
         m.scf()
         T = 0.5
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(sys, T=T, mu=mu, ngrid=80, iprint=0)
         Eref,Eccref = ccsdT.run()
         prop = {"tprop": "rk4"}
@@ -84,7 +84,7 @@ class TDCCSDTest(unittest.TestCase):
         m.scf()
         T = 0.5
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         prop = {"tprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
         Eref,Eccref = tdccsdT.run()
@@ -106,7 +106,7 @@ class TDCCSDTest(unittest.TestCase):
         m.scf()
         T = 0.5
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         prop = {"tprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
         Eref,Eccref = tdccsdT.run()
@@ -128,7 +128,7 @@ class TDCCSDTest(unittest.TestCase):
         m.scf()
         T = 0.05
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(sys, T=T, mu=mu, ngrid=100, iprint=0, athresh=1e-20)
         Eref,Eccref = ccsdT.run()
         prop = {"tprop": "rk4"}
@@ -149,11 +149,11 @@ class TDCCSDTest(unittest.TestCase):
         m.scf()
         T = 0.5
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         prop = {"tprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80)
         Eref,Eccref = tdccsdT.run()
-        sys = scf_system(m, T, mu, orbtype='u')
+        sys = SCFSystem(m, T, mu, orbtype='u')
         prop = {"tprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80)
         Eout,Eccout = tdccsdT.run()
@@ -172,11 +172,11 @@ class TDCCSDTest(unittest.TestCase):
         m.scf()
         T = 0.05
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         prop = {"tprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=120, athresh=1e-20)
         Eref,Eccref = tdccsdT.run()
-        sys = scf_system(m, T, mu, orbtype='u')
+        sys = SCFSystem(m, T, mu, orbtype='u')
         prop = {"tprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=120, athresh=1e-20)
         Eout,Eccout = tdccsdT.run()
@@ -195,11 +195,11 @@ class TDCCSDTest(unittest.TestCase):
         m.scf()
         T = 0.5
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='u')
+        sys = SCFSystem(m, T, mu, orbtype='u')
         prop = {"tprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80)
         Eref,Eccref = tdccsdT.run()
-        sys = scf_system(m, T, mu, orbtype='r')
+        sys = SCFSystem(m, T, mu, orbtype='r')
         prop = {"tprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80)
         Eout,Eccout = tdccsdT.run()
@@ -218,11 +218,11 @@ class TDCCSDTest(unittest.TestCase):
         m.scf()
         T = 0.05
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='u')
+        sys = SCFSystem(m, T, mu, orbtype='u')
         prop = {"tprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=120, athresh=1e-20)
         Eref,Eccref = tdccsdT.run()
-        sys = scf_system(m, T, mu, orbtype='r')
+        sys = SCFSystem(m, T, mu, orbtype='r')
         prop = {"tprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=120, athresh=1e-20)
         Eout,Eccout = tdccsdT.run()
@@ -241,7 +241,7 @@ class TDCCSDTest(unittest.TestCase):
         m.scf()
         T = 0.5
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(sys, T=T, mu=mu, ngrid=80, iprint=0, singles=False)
         Eref,Eccref = ccsdT.run()
         prop = {"tprop": "rk4"}

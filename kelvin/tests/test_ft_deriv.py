@@ -2,7 +2,7 @@ import unittest
 import numpy
 from pyscf import gto, scf
 from kelvin.ccsd import ccsd
-from kelvin.scf_system import scf_system
+from kelvin.scf_system import SCFSystem
 from kelvin.ueg_system import UEGSystem
 from kelvin.ueg_scf_system import ueg_scf_system
 from kelvin.pueg_system import pueg_system
@@ -18,10 +18,10 @@ except ImportError:
 def fd_ESN(m, T, mu, ng, Ecctot, athresh=0.0, quad='lin', damp=0.0, mi=35, delta=5e-4):
     muf = mu + delta
     mub = mu - delta
-    sys = scf_system(m, T, muf, orbtype='g')
+    sys = SCFSystem(m, T, muf, orbtype='g')
     ccsdT = ccsd(sys, iprint=0, T=T, mu=muf, max_iter=mi, damp=damp, ngrid=ng, econv=1e-10, athresh=athresh, quad=quad)
     Ef,Ecf = ccsdT.run()
-    sys = scf_system(m, T, mub, orbtype='g')
+    sys = SCFSystem(m, T, mub, orbtype='g')
     ccsdT = ccsd(sys, iprint=0, T=T, mu=mub, max_iter=mi, damp=damp, ngrid=ng, econv=1e-10, athresh=athresh, quad=quad)
     Eb,Ecb = ccsdT.run()
 
@@ -29,10 +29,10 @@ def fd_ESN(m, T, mu, ng, Ecctot, athresh=0.0, quad='lin', damp=0.0, mi=35, delta
 
     Tf = T + delta
     Tb = T - delta
-    sys = scf_system(m, Tf, mu, orbtype='g')
+    sys = SCFSystem(m, Tf, mu, orbtype='g')
     ccsdT = ccsd(sys, iprint=0, T=Tf, mu=mu, max_iter=mi, damp=damp, ngrid=ng, econv=1e-10, athresh=athresh, quad=quad)
     Ef,Ecf = ccsdT.run()
-    sys = scf_system(m, Tb, mu, orbtype='g')
+    sys = SCFSystem(m, Tb, mu, orbtype='g')
     ccsdT = ccsd(sys, iprint=0, T=Tb, mu=mu, max_iter=mi, damp=damp, ngrid=ng, econv=1e-10, athresh=athresh, quad=quad)
     Eb,Ecb = ccsdT.run()
 
@@ -59,7 +59,7 @@ class FTDerivTest(unittest.TestCase):
         T = 2.0
         mu = 0.0
         ng = 10
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=35, damp=0.0, ngrid=ng, econv=1e-10, singles=True)
         Ecctot,Ecc = ccsdT.run()
         ccsdT.compute_ESN()
@@ -85,7 +85,7 @@ class FTDerivTest(unittest.TestCase):
         T = 2.0
         mu = 0.0
         ng = 10
-        sys = scf_system(m, T, mu, orbtype='u')
+        sys = SCFSystem(m, T, mu, orbtype='u')
         ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=35, damp=0.0, ngrid=ng, econv=1e-10, singles=True)
         Ecctot,Ecc = ccsdT.run()
         ccsdT.compute_ESN()
@@ -112,7 +112,7 @@ class FTDerivTest(unittest.TestCase):
         mu = 0.0
         ng = 40
         athresh = 1e-20
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=100, damp=0.3, ngrid=ng, econv=1e-10, athresh=athresh, singles=True)
         Ecctot,Ecc = ccsdT.run()
         ccsdT.compute_ESN()
@@ -139,7 +139,7 @@ class FTDerivTest(unittest.TestCase):
         mu = 0.0
         ng = 40
         athresh = 1e-20
-        sys = scf_system(m, T, mu, orbtype='u')
+        sys = SCFSystem(m, T, mu, orbtype='u')
         ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=100, damp=0.3, ngrid=ng, econv=1e-10, athresh=athresh, singles=True)
         Ecctot,Ecc = ccsdT.run()
         ccsdT.compute_ESN()
@@ -165,7 +165,7 @@ class FTDerivTest(unittest.TestCase):
         T = 2.0
         mu = 0.0
         ng = 10
-        sys = scf_system(m, T, mu, orbtype='u')
+        sys = SCFSystem(m, T, mu, orbtype='u')
         ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=35, damp=0.0, ngrid=ng, econv=1e-10, quad='ln')
         Ecctot,Ecc = ccsdT.run()
         ccsdT.compute_ESN()
@@ -191,7 +191,7 @@ class FTDerivTest(unittest.TestCase):
         T = 2.0
         mu = 0.0
         ng = 10
-        sys = scf_system(m, T, mu, orbtype='u')
+        sys = SCFSystem(m, T, mu, orbtype='u')
         ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=35, damp=0.0, ngrid=ng, econv=1e-10, quad='sin')
         Ecctot,Ecc = ccsdT.run()
         ccsdT.compute_ESN()

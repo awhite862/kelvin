@@ -3,7 +3,7 @@ import numpy
 from pyscf import gto, scf
 from kelvin.td_ccsd import TDCCSD
 from kelvin.ccsd import ccsd
-from kelvin.scf_system import scf_system
+from kelvin.scf_system import SCFSystem
 
 
 class TDCCSD2RDMTest(unittest.TestCase):
@@ -18,7 +18,7 @@ class TDCCSD2RDMTest(unittest.TestCase):
         m.scf()
         T = 0.5
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
 
         # compute normal-ordered 1-rdm
         ccsdT = ccsd(sys, T=T, mu=mu, ngrid=220, iprint=0)
@@ -47,7 +47,7 @@ class TDCCSD2RDMTest(unittest.TestCase):
         m.scf()
         T = 0.05
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
 
         # compute normal-ordered 1-rdm
         ccsdT = ccsd(sys, T=T, mu=mu, ngrid=220, iprint=0, athresh=1e-20)
@@ -77,12 +77,12 @@ class TDCCSD2RDMTest(unittest.TestCase):
         T = 0.5
         mu = 0.0
         # compute normal-order 1-rdm from propagation (g)
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         prop = {"tprop": "rk4", "lprop": "rk4"}
         ccg = TDCCSD(sys, prop, T=T, mu=mu, ngrid=320)
         Eout, Eccout = ccg.run()
         Etmp, Ecctmp = ccg._ccsd_lambda(rdm2=True)
-        sys = scf_system(m, T, mu, orbtype='u')
+        sys = SCFSystem(m, T, mu, orbtype='u')
         prop = {"tprop": "rk4", "lprop": "rk4"}
         ccu = TDCCSD(sys, prop, T=T, mu=mu, ngrid=320)
         Eout, Eccout = ccu.run()
@@ -203,12 +203,12 @@ class TDCCSD2RDMTest(unittest.TestCase):
         T = 0.5
         mu = 0.0
         # compute normal-order 1/n-rdm from propagation (u)
-        sys = scf_system(m, T, mu, orbtype='u')
+        sys = SCFSystem(m, T, mu, orbtype='u')
         prop = {"tprop": "rk4", "lprop": "rk4"}
         ccu = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80)
         Eout, Eccout = ccu.run()
         Etmp, Ecctmp = ccu._uccsd_lambda(rdm2=True)
-        sys = scf_system(m, T, mu, orbtype='r')
+        sys = SCFSystem(m, T, mu, orbtype='r')
         prop = {"tprop": "rk4", "lprop": "rk4"}
         ccr = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80)
         Eout, Eccout = ccr.run()

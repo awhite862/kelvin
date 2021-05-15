@@ -2,7 +2,7 @@ import unittest
 import numpy
 from pyscf import gto, scf
 from kelvin.ccsd import ccsd
-from kelvin.scf_system import scf_system
+from kelvin.scf_system import SCFSystem
 from kelvin.ueg_system import UEGSystem
 from kelvin.ueg_scf_system import ueg_scf_system
 from kelvin.pueg_system import pueg_system
@@ -31,7 +31,7 @@ class FTCCReldenTest(unittest.TestCase):
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
         m.scf()
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(sys, T=T, mu=mu, iprint=0)
         ccsdT.run()
         ccsdT.compute_ESN()
@@ -67,13 +67,13 @@ class FTCCReldenTest(unittest.TestCase):
         alpha = 8e-4
         m.get_hcore = lambda *args: h + alpha*field
         m.mo_energy += alpha*fdiag[:na]
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, econv=1e-9, ngrid=ngrid, damp=damp, max_iter=mi)
         ccf = ccsdT.run()
 
         m.get_hcore = lambda *args: h - alpha*field
         m.mo_energy -= 2.0*alpha*fdiag[:na]
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, econv=1e-9, ngrid=ngrid, damp=damp, max_iter=mi)
         ccb = ccsdT.run()
 
@@ -81,7 +81,7 @@ class FTCCReldenTest(unittest.TestCase):
 
         m.get_hcore = lambda *args: h
         m.mo_energy += alpha*fdiag[:na]
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, econv=1e-9, ngrid=ngrid, damp=damp, max_iter=mi)
         ccsdT.run()
         Dm = ccsdT.full_1rdm(relax=True)
@@ -102,7 +102,7 @@ class FTCCReldenTest(unittest.TestCase):
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
         m.scf()
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(sys, T=T, mu=mu, damp=0.1, ngrid=80, athresh=1e-30, iprint=0)
         ccsdT.run()
         ccsdT.compute_ESN()
@@ -137,7 +137,7 @@ class FTCCReldenTest(unittest.TestCase):
         alpha = 4e-4
         m.get_hcore = lambda *args: h + alpha*field
         m.mo_energy += alpha*fdiag[:na]
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(
             sys, T=T, mu=mu, iprint=0, damp=0.1, ngrid=ngrid,
             athresh=1e-30, econv=1e-10, max_iter=mi)
@@ -145,7 +145,7 @@ class FTCCReldenTest(unittest.TestCase):
 
         m.get_hcore = lambda *args: h - alpha*field
         m.mo_energy -= 2.0*alpha*fdiag[:na]
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(
             sys, T=T, mu=mu, iprint=0, damp=0.1, ngrid=ngrid,
             athresh=1e-30, econv=1e-10, max_iter=mi)
@@ -155,7 +155,7 @@ class FTCCReldenTest(unittest.TestCase):
 
         m.get_hcore = lambda *args: h
         m.mo_energy += alpha*fdiag[:na]
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(
             sys, T=T, mu=mu, iprint=0, damp=0.1, ngrid=ngrid,
             athresh=1e-30, econv=1e-10, max_iter=mi)
@@ -312,12 +312,12 @@ class FTCCReldenTest(unittest.TestCase):
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
         m.scf()
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(sys, T=T, mu=mu, damp=0.1, ngrid=80, athresh=1e-30, iprint=0, econv=ethresh, max_iter=mi)
         ccsdT.run()
         ccsdT._grel_ft_1rdm()
 
-        sys = scf_system(m, T, mu, orbtype='u')
+        sys = SCFSystem(m, T, mu, orbtype='u')
         uccsdT = ccsd(sys, T=T, mu=mu, damp=0.1, ngrid=80, athresh=1e-30, iprint=0, econv=ethresh, max_iter=mi)
         uccsdT.run()
         uccsdT._urel_ft_1rdm()
@@ -357,12 +357,12 @@ class FTCCReldenTest(unittest.TestCase):
         m = scf.UHF(mol)
         m.conv_tol = 1e-12
         m.scf()
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(sys, T=T, mu=mu, damp=0.1, ngrid=40, iprint=0, econv=ethresh, max_iter=mi)
         ccsdT.run()
         ccsdT._grel_ft_1rdm()
 
-        sys = scf_system(m, T, mu, orbtype='u')
+        sys = SCFSystem(m, T, mu, orbtype='u')
         uccsdT = ccsd(sys, T=T, mu=mu, damp=0.1, ngrid=40, iprint=0, econv=ethresh, max_iter=mi)
         uccsdT.run()
         uccsdT._urel_ft_1rdm()

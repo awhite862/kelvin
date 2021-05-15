@@ -1,25 +1,25 @@
 import unittest
 from kelvin.mp2 import MP2
 from kelvin.fci import FCI
-from kelvin.scf_system import scf_system
+from kelvin.scf_system import SCFSystem
 
 
 def compute_ft_mp2(m, T, mu):
-    sys = scf_system(m, T, mu)
+    sys = SCFSystem(m, T, mu)
     mp2T = MP2(sys, T=T, mu=mu, iprint=0)
     E0T, E1T, E2T = mp2T.run()
     return (E0T, E1T, E2T)
 
 
 def compute_zt_mp2(m):
-    sys = scf_system(m, 0.0, 0.0)
+    sys = SCFSystem(m, 0.0, 0.0)
     mp20 = MP2(sys, iprint=0)
     E00, E10, E20 = mp20.run()
     return (E00, E10, E20)
 
 
 def compute_G012_fci(m, T, mu):
-    sys = scf_system(m, T, mu)
+    sys = SCFSystem(m, T, mu)
     fciT = FCI(sys, T=T, mu=mu)
     delta = 1e-4
     fciT.lam = delta

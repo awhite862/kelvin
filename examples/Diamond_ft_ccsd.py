@@ -1,5 +1,5 @@
 from kelvin.ccsd import ccsd
-from kelvin.scf_system import scf_system
+from kelvin.scf_system import SCFSystem
 from pyscf.pbc import gto, scf
 
 T = 0.1
@@ -22,7 +22,7 @@ mf = scf.RHF(cell, exxdiv=None)
 mf.conv_tol_grad = 1e-8
 mf.conv_tol = 1e-12
 Escf = mf.kernel()
-sys = scf_system(mf, T, mu)
+sys = SCFSystem(mf, T, mu)
 ccsdT = ccsd(sys, iprint=1, max_iter=100, econv=1e-11, damp=0.0, T=T, mu=mu)
 Etot, Ecc = ccsdT.run()
 ccsdT.compute_ESN()

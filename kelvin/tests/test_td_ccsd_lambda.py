@@ -3,7 +3,7 @@ import numpy
 from pyscf import gto, scf
 from kelvin.td_ccsd import TDCCSD
 from kelvin.ccsd import ccsd
-from kelvin.scf_system import scf_system
+from kelvin.scf_system import SCFSystem
 from kelvin import quadrature
 
 
@@ -22,7 +22,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         m.scf()
         T = 0.5
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=120)
         Eref,Eccref = tdccsdT.run()
@@ -42,7 +42,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         m.scf()
         T = 0.05
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160, athresh=1e-20, iprint=0, saveT=True)
         Eref,Eccref = tdccsdT.run()
@@ -62,7 +62,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         m.scf()
         T = 2.0
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
 
         # compute \bar{Lambda} at \tau = 0
         ccsdT = ccsd(sys, T=T, mu=mu, ngrid=80, iprint=0, quad="mid")
@@ -104,7 +104,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         m.scf()
         T = 2.0
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
 
         # compute \bar{Lambda} at \tau = 0
         ccsdT = ccsd(sys, T=T, mu=mu, ngrid=320, iprint=0, quad="mid")
@@ -146,7 +146,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         m.scf()
         T = 2.0
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
 
         # compute \bar{Lambda} at \tau = 0
         ccsdT = ccsd(sys, T=T, mu=mu, ngrid=320, iprint=0, quad="mid")
@@ -188,7 +188,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         m.scf()
         T = 0.5
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
 
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT4 = TDCCSD(sys, prop, T=T, mu=mu, ngrid=320)
@@ -227,7 +227,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         m.scf()
         T = 0.5
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
 
         prop = {"tprop": "rk4", "lprop": "rk4"}
         ccP = TDCCSD(sys, prop, T=T, mu=mu, ngrid=320)
@@ -256,7 +256,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         mu = 0.0
 
         # compute normal-order 1-rdm from propagation
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         ea,eb = sys.u_energies_tot()
         na = ea.shape[0]
         prop = {"tprop": "rk4", "lprop": "rk4"}
@@ -269,7 +269,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         l2abref = tdccsdT.L2[:na,na:,:na,na:]
         l2bbref = tdccsdT.L2[na:,na:,na:,na:]
         # compute normal-order 1-rdm from propagation
-        sys = scf_system(m, T, mu, orbtype='u')
+        sys = SCFSystem(m, T, mu, orbtype='u')
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
         Etmp,Ecctmp = tdccsdT.run()
@@ -301,7 +301,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         m.scf()
         T = 0.5
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
 
         prop = {"tprop": "rk4", "lprop": "rk4"}
         ccP = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80)
@@ -328,7 +328,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         m.scf()
         T = 2.0
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
 
         # compute \bar{Lambda} at \tau = 0
         ccsdT = ccsd(sys, T=T, mu=mu, ngrid=320, iprint=0, quad="mid", singles=False)

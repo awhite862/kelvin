@@ -3,7 +3,7 @@ import numpy
 from pyscf import gto, scf
 from cqcpy import ft_utils
 
-from kelvin.scf_system import scf_system
+from kelvin.scf_system import SCFSystem
 from kelvin import cc_utils
 
 
@@ -31,7 +31,7 @@ class CCUtilsTest(unittest.TestCase):
         athresh = 1e-40
         m.conv_tol = 1e-12
         m.scf()
-        sys = scf_system(m, T, mu+delta, orbtype='u')
+        sys = SCFSystem(m, T, mu+delta, orbtype='u')
         ea, eb = sys.u_energies_tot()
         foa = ft_utils.ff(beta, ea, mu)
         fva = ft_utils.ffv(beta, ea, mu)
@@ -195,14 +195,14 @@ class CCUtilsTest(unittest.TestCase):
         thresh = 1e-8
         m.conv_tol = 1e-12
         m.scf()
-        sys = scf_system(m, T, mu+delta, orbtype='g')
+        sys = SCFSystem(m, T, mu+delta, orbtype='g')
         en = sys.g_energies_tot()
         Ff, If = cc_utils.ft_integrals(sys, en, beta, mu + delta)
-        sys = scf_system(m, T, mu-delta, orbtype='g')
+        sys = SCFSystem(m, T, mu-delta, orbtype='g')
         en = sys.g_energies_tot()
         Fb, Ib = cc_utils.ft_integrals(sys, en, beta, mu - delta)
 
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         en = sys.g_energies_tot()
         fo = ft_utils.ff(beta, en, mu)
         fv = ft_utils.ffv(beta, en, mu)
@@ -238,14 +238,14 @@ class CCUtilsTest(unittest.TestCase):
         thresh = 1e-8
         m.conv_tol = 1e-12
         m.scf()
-        sys = scf_system(m, T, mu+delta, orbtype='u')
+        sys = SCFSystem(m, T, mu+delta, orbtype='u')
         ea, eb = sys.u_energies_tot()
         Faf, Fbf, Iaf, Ibf, Iababf = cc_utils.uft_integrals(sys, ea, eb, beta, mu + delta)
-        sys = scf_system(m, T, mu-delta, orbtype='u')
+        sys = SCFSystem(m, T, mu-delta, orbtype='u')
         ea, eb = sys.u_energies_tot()
         Fab, Fbb, Iab, Ibb, Iababb = cc_utils.uft_integrals(sys, ea, eb, beta, mu - delta)
 
-        sys = scf_system(m, T, mu, orbtype='u')
+        sys = SCFSystem(m, T, mu, orbtype='u')
         ea, eb = sys.u_energies_tot()
         foa = ft_utils.ff(beta, ea, mu)
         fva = ft_utils.ffv(beta, ea, mu)
@@ -318,7 +318,7 @@ class CCUtilsTest(unittest.TestCase):
         athresh = 1e-40
         m.conv_tol = 1e-12
         m.scf()
-        sys = scf_system(m, T, mu+delta, orbtype='g')
+        sys = SCFSystem(m, T, mu+delta, orbtype='g')
         en = sys.g_energies_tot()
         dvec = -beta*numpy.ones(en.shape)
         fo = ft_utils.ff(beta, en, mu)
@@ -386,7 +386,7 @@ class CCUtilsTest(unittest.TestCase):
         athresh = 1e-40
         m.conv_tol = 1e-12
         m.scf()
-        sys = scf_system(m, T, mu+delta, orbtype='u')
+        sys = SCFSystem(m, T, mu+delta, orbtype='u')
         ea, eb = sys.u_energies_tot()
         dveca = -beta*numpy.ones(ea.shape)
         dvecb = -beta*numpy.ones(eb.shape)

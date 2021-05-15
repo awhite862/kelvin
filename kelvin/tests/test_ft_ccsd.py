@@ -3,13 +3,13 @@ import numpy
 from pyscf import gto, scf
 from kelvin.ccsd import ccsd
 from kelvin.fci import FCI
-from kelvin.scf_system import scf_system
+from kelvin.scf_system import SCFSystem
 from kelvin.ueg_system import UEGSystem
 from kelvin.pueg_system import pueg_system
 
 
 def compute_ft_ccsd(m, T, mu):
-    sys = scf_system(m, T, mu)
+    sys = SCFSystem(m, T, mu)
     ccsdT = ccsd(sys, T=T, mu=mu, iprint=0)
     return ccsdT.run()
 
@@ -35,7 +35,7 @@ class FTCCSDTest(unittest.TestCase):
 
         T = 1.0
         mu = 0.0
-        sys = scf_system(m, T, mu)
+        sys = SCFSystem(m, T, mu)
         ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=24, econv=1e-11, ngrid=320)
         Ecc = ccsdT.run()
 
@@ -68,7 +68,7 @@ class FTCCSDTest(unittest.TestCase):
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
         m.scf()
-        sys = scf_system(m, 0.0, 0.0)
+        sys = SCFSystem(m, 0.0, 0.0)
         ccsdT = ccsd(sys, realtime=True, ngrid=160, iprint=0)
         cc = ccsdT.run()
         diff = abs(self.Be_ref_rt - cc[1])
@@ -86,7 +86,7 @@ class FTCCSDTest(unittest.TestCase):
         m.scf()
         T = 0.02
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(
                 sys, iprint=0, singles=True, T=T, mu=mu, damp=0.1,
                 max_iter=80, ngrid=160, athresh=1e-30)
@@ -106,7 +106,7 @@ class FTCCSDTest(unittest.TestCase):
         m.scf()
         T = 0.02
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='u')
+        sys = SCFSystem(m, T, mu, orbtype='u')
         ccsdT = ccsd(
                 sys, iprint=0, singles=True, T=T, mu=mu, damp=0.1,
                 max_iter=80, ngrid=160, athresh=1e-30)

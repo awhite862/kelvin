@@ -1,7 +1,7 @@
 import unittest
 import numpy
 from kelvin import zt_mp
-from kelvin.scf_system import scf_system
+from kelvin.scf_system import SCFSystem
 
 
 def get_Be_sto3g():
@@ -68,7 +68,7 @@ class SCFTest(unittest.TestCase):
     def test_Be_sto3g_energy(self):
         m = get_Be_sto3g()
         Escf = m.scf()
-        sys = scf_system(m, 0.0, 0.0)
+        sys = SCFSystem(m, 0.0, 0.0)
         eo, ev = sys.g_energies()
         En = sys.const_energy()
         E0 = zt_mp.mp0(eo) + En
@@ -80,7 +80,7 @@ class SCFTest(unittest.TestCase):
     def test_diamond_energy(self):
         mf = get_diamond()
         Escf = mf.kernel()
-        sys = scf_system(mf, 0.0, 0.0)
+        sys = SCFSystem(mf, 0.0, 0.0)
         eo, ev = sys.g_energies()
         En = sys.const_energy()
         E0 = zt_mp.mp0(eo) + En
@@ -95,7 +95,7 @@ class SCFTest(unittest.TestCase):
         beta = 1.0/T
         m = get_Be_sto3g()
         m.scf()
-        sys = scf_system(m, T, mu)
+        sys = SCFSystem(m, T, mu)
 
         # derivative with respect to mu
         en = sys.g_energies_tot()
@@ -103,9 +103,9 @@ class SCFTest(unittest.TestCase):
         Fda = sys.g_fock_d_tot(dvec)
 
         delta = 5e-4
-        sysf = scf_system(m, T, mu + delta)
+        sysf = SCFSystem(m, T, mu + delta)
         Ff = sysf.g_fock_tot()
-        sysb = scf_system(m, T, mu - delta)
+        sysb = SCFSystem(m, T, mu - delta)
         Fb = sysb.g_fock_tot()
         Fdd = 0.5*(Ff - Fb)/delta
         diff = numpy.linalg.norm(Fdd - Fda)
@@ -117,7 +117,7 @@ class SCFTest(unittest.TestCase):
         beta = 1.0/T
         m = get_diamond()
         m.scf()
-        sys = scf_system(m, T, mu)
+        sys = SCFSystem(m, T, mu)
 
         # derivative with respect to mu
         en = sys.g_energies_tot()
@@ -125,9 +125,9 @@ class SCFTest(unittest.TestCase):
         Fda = sys.g_fock_d_tot(dvec)
 
         delta = 5e-4
-        sysf = scf_system(m, T, mu + delta)
+        sysf = SCFSystem(m, T, mu + delta)
         Ff = sysf.g_fock_tot()
-        sysb = scf_system(m, T, mu - delta)
+        sysb = SCFSystem(m, T, mu - delta)
         Fb = sysb.g_fock_tot()
         Fdd = 0.5*(Ff - Fb)/delta
         diff = numpy.linalg.norm(Fdd - Fda)
@@ -139,7 +139,7 @@ class SCFTest(unittest.TestCase):
         beta = 1.0/T
         m = get_Be_sto3g()
         m.scf()
-        sys = scf_system(m, T, mu)
+        sys = SCFSystem(m, T, mu)
 
         # derivative with respect to mu
         en = sys.g_energies_tot()
@@ -147,9 +147,9 @@ class SCFTest(unittest.TestCase):
         dMP1a = sys.g_d_mp1(dvec)
 
         delta = 5e-4
-        sysf = scf_system(m, T, mu + delta)
+        sysf = SCFSystem(m, T, mu + delta)
         MP1f = sysf.get_mp1()
-        sysb = scf_system(m, T, mu - delta)
+        sysb = SCFSystem(m, T, mu - delta)
         MP1b = sysb.get_mp1()
         dMP1d = 0.5*(MP1f - MP1b)/delta
         diff = abs(dMP1a - dMP1d)
@@ -161,7 +161,7 @@ class SCFTest(unittest.TestCase):
         beta = 1.0/T
         m = get_diamond()
         m.scf()
-        sys = scf_system(m, T, mu)
+        sys = SCFSystem(m, T, mu)
 
         # derivative with respect to mu
         en = sys.g_energies_tot()
@@ -173,9 +173,9 @@ class SCFTest(unittest.TestCase):
         dMP1a = sys.g_d_mp1(dvec)
 
         delta = 5e-4
-        sysf = scf_system(m, T, mu + delta)
+        sysf = SCFSystem(m, T, mu + delta)
         MP1f = sysf.get_mp1()
-        sysb = scf_system(m, T, mu - delta)
+        sysb = SCFSystem(m, T, mu - delta)
         MP1b = sysb.get_mp1()
         dMP1d = 0.5*(MP1f - MP1b)/delta
         diff = abs(dMP1a - dMP1d)
@@ -189,7 +189,7 @@ class SCFTest(unittest.TestCase):
         beta = 1.0/T
         m = get_diamond_k()
         m.scf()
-        sys = scf_system(m, T, mu)
+        sys = SCFSystem(m, T, mu)
 
         # derivative with respect to mu
         en = sys.g_energies_tot()
@@ -201,9 +201,9 @@ class SCFTest(unittest.TestCase):
         dMP1a = sys.g_d_mp1(dvec)
 
         delta = 5e-4
-        sysf = scf_system(m, T, mu + delta)
+        sysf = SCFSystem(m, T, mu + delta)
         MP1f = sysf.get_mp1()
-        sysb = scf_system(m, T, mu - delta)
+        sysb = SCFSystem(m, T, mu - delta)
         MP1b = sysb.get_mp1()
         dMP1d = 0.5*(MP1f - MP1b)/delta
         diff = abs(dMP1a - dMP1d)

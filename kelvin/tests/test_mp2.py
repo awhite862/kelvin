@@ -1,11 +1,11 @@
 import unittest
 from pyscf import gto, scf, mp
 from kelvin.mp2 import MP2
-from kelvin.scf_system import scf_system
+from kelvin.scf_system import SCFSystem
 
 
 def test_mp2(m):
-    sys = scf_system(m, 0.0, 0.0)
+    sys = SCFSystem(m, 0.0, 0.0)
     mp20 = MP2(sys, iprint=0)
     E00,E10,E20 = mp20.run()
 
@@ -72,7 +72,7 @@ class MP2Test(unittest.TestCase):
         mf.kernel()
         pt = mp.MP2(mf)
         Emp, temp = pt.kernel()
-        sys = scf_system(mf, 0.0, 0.0)
+        sys = SCFSystem(mf, 0.0, 0.0)
         mp20 = MP2(sys, iprint=0)
         E00,E10,E20 = mp20.run()
         diff = abs(E20 - Emp)

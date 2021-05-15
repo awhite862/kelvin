@@ -2,14 +2,14 @@ import unittest
 from pyscf import gto, scf, cc
 from pyscf.pbc import cc as pbc_cc
 from kelvin.ccsd import ccsd
-from kelvin.scf_system import scf_system
+from kelvin.scf_system import SCFSystem
 
 
 def test_ccsd_gen(m):
     mycc = cc.CCSD(m)
     mycc.conv_tol = 1e-12
     mycc.run()
-    sys = scf_system(m, 0.0, 0.0, orbtype='g')
+    sys = SCFSystem(m, 0.0, 0.0, orbtype='g')
     ccsd0 = ccsd(sys, iprint=0, max_iter=44, econv=1e-12)
     Etot,Ecc = ccsd0.run()
 
@@ -20,7 +20,7 @@ def test_ccsd(m):
     mycc = cc.CCSD(m)
     mycc.conv_tol = 1e-12
     mycc.run()
-    sys = scf_system(m, 0.0, 0.0)
+    sys = SCFSystem(m, 0.0, 0.0)
     ccsd0 = ccsd(sys, iprint=0, max_iter=44, econv=1e-12)
     Etot,Ecc = ccsd0.run()
 
@@ -118,7 +118,7 @@ class CCSDTest(unittest.TestCase):
         mycc.conv_tol = 1e-11
         mycc.conv_tol_normt = 1e-9
         Ecc = mycc.kernel()
-        sys = scf_system(mf, 0.0, 0.0, orbtype='g')
+        sys = SCFSystem(mf, 0.0, 0.0, orbtype='g')
         ccsd0 = ccsd(sys, iprint=0, max_iter=100, econv=1e-11, damp=0.0)
         Etot,Ecc2 = ccsd0.run()
         diff = abs(Ecc[0] - Ecc2)
@@ -153,7 +153,7 @@ class CCSDTest(unittest.TestCase):
         mycc.conv_tol = 1e-11
         mycc.conv_tol_normt = 1e-9
         Ecc = mycc.kernel()
-        sys = scf_system(mf, 0.0, 0.0)
+        sys = SCFSystem(mf, 0.0, 0.0)
         ccsd0 = ccsd(sys, iprint=0, max_iter=100, econv=1e-11, damp=0.0)
         Etot,Ecc2 = ccsd0.run()
         diff = abs(Ecc[0] - Ecc2)
@@ -189,7 +189,7 @@ class CCSDTest(unittest.TestCase):
         mycc.conv_tol = 1e-11
         mycc.conv_tol_normt = 1e-9
         Ecc = mycc.kernel()
-        sys = scf_system(mf, 0.0, 0.0)
+        sys = SCFSystem(mf, 0.0, 0.0)
         ccsd0 = ccsd(sys, iprint=1, max_iter=100, econv=1e-11, damp=0.0)
         Etot,Ecc2 = ccsd0.run()
         diff = abs(Ecc[0] - Ecc2)

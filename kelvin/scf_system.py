@@ -1,3 +1,4 @@
+import logging
 import numpy
 import functools
 from pyscf.scf import uhf
@@ -16,7 +17,7 @@ from . import ft_mp
 from .system import System
 
 
-class scf_system(System):
+class SCFSystem(System):
     """Object representing a molecular mean-field system.
 
     Attributes:
@@ -348,3 +349,9 @@ class scf_system(System):
 
     def g_int_tot(self):
         return integrals.get_physu_all_gen(self.mf, anti=False)
+
+
+class scf_system(SCFSystem):
+    def __init__(self, mf, T, mu, orbtype='u'):
+        logging.warning("This class is deprecated, use SCFSystem instead")
+        SCFSystem.__init__(self, mf, T, mu, orbtype=orbtype)

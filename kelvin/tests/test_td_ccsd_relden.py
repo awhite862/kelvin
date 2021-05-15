@@ -3,7 +3,7 @@ import numpy
 from pyscf import gto, scf
 from kelvin.td_ccsd import TDCCSD
 from kelvin.ccsd import ccsd
-from kelvin.scf_system import scf_system
+from kelvin.scf_system import SCFSystem
 
 
 class TDCCSDReldenTest(unittest.TestCase):
@@ -18,7 +18,7 @@ class TDCCSDReldenTest(unittest.TestCase):
         m.scf()
         T = 1.0
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
 
         # compute normal-ordered 1-rdm
         ccsdT = ccsd(sys, T=T, mu=mu, ngrid=80, iprint=0)
@@ -57,7 +57,7 @@ class TDCCSDReldenTest(unittest.TestCase):
         m.scf()
         T = 0.05
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
 
         # compute normal-ordered 1-rdm
         ccsdT = ccsd(sys, T=T, mu=mu, ngrid=120, iprint=0, athresh=1e-20)
@@ -96,7 +96,7 @@ class TDCCSDReldenTest(unittest.TestCase):
         m.scf()
         T = 1.0
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
 
         # compute normal-order 1-rdm from propagation
         prop = {"tprop": "rk4", "lprop": "rk4"}
@@ -110,7 +110,7 @@ class TDCCSDReldenTest(unittest.TestCase):
         rorbo = tdccsdT.rorbo
         rorbv = tdccsdT.rorbv
 
-        sys = scf_system(m, T, mu, orbtype='u')
+        sys = SCFSystem(m, T, mu, orbtype='u')
         # compute normal-order 1-rdm from propagation
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
@@ -145,7 +145,7 @@ class TDCCSDReldenTest(unittest.TestCase):
         m.scf()
         T = 1.0
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='r')
+        sys = SCFSystem(m, T, mu, orbtype='r')
 
         # compute normal-order 1-rdm from propagation
         prop = {"tprop": "rk4", "lprop": "rk4"}
@@ -159,7 +159,7 @@ class TDCCSDReldenTest(unittest.TestCase):
         rorbo = tdccsdT.rorbo
         rorbv = tdccsdT.rorbv
 
-        sys = scf_system(m, T, mu, orbtype='u')
+        sys = SCFSystem(m, T, mu, orbtype='u')
         # compute normal-order 1-rdm from propagation
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80)
@@ -195,7 +195,7 @@ class TDCCSDReldenTest(unittest.TestCase):
         T = 0.05
         mu = 0.0
         athresh = 1e-20
-        sys = scf_system(m, T, mu, orbtype='r')
+        sys = SCFSystem(m, T, mu, orbtype='r')
 
         # compute normal-order 1-rdm from propagation
         prop = {"tprop": "rk4", "lprop": "rk4"}
@@ -209,7 +209,7 @@ class TDCCSDReldenTest(unittest.TestCase):
         rorbo = tdccsdT.rorbo
         rorbv = tdccsdT.rorbv
 
-        sys = scf_system(m, T, mu, orbtype='u')
+        sys = SCFSystem(m, T, mu, orbtype='u')
         # compute normal-order 1-rdm from propagation
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160, athresh=athresh, saveT=True)
@@ -244,7 +244,7 @@ class TDCCSDReldenTest(unittest.TestCase):
         m.scf()
         T = 1.0
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='u')
+        sys = SCFSystem(m, T, mu, orbtype='u')
 
         # compute normal-ordered 1-rdm
         ccsdT = ccsd(sys, T=T, mu=mu, ngrid=80, iprint=0)
@@ -280,7 +280,7 @@ class TDCCSDReldenTest(unittest.TestCase):
         mu = 0.0
 
         # compute normal-ordered 1-rdm (U)
-        sys = scf_system(m, T, mu, orbtype='u')
+        sys = SCFSystem(m, T, mu, orbtype='u')
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
         Eout,Eccout = tdccsdT.run()
@@ -288,7 +288,7 @@ class TDCCSDReldenTest(unittest.TestCase):
         rdm1_ref = tdccsdT.full_1rdm(relax=True)
 
         # compute normal-order 1-rdm (R)
-        sys = scf_system(m, T, mu, orbtype='r')
+        sys = SCFSystem(m, T, mu, orbtype='r')
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
         Eout,Eccout = tdccsdT.run()

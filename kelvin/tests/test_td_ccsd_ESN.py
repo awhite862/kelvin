@@ -3,7 +3,7 @@ import numpy
 from pyscf import gto, scf
 from kelvin.td_ccsd import TDCCSD
 from kelvin.ccsd import ccsd
-from kelvin.scf_system import scf_system
+from kelvin.scf_system import SCFSystem
 from kelvin.ueg_system import UEGSystem
 
 
@@ -19,7 +19,7 @@ class TDCCSDESNTest(unittest.TestCase):
         T = 2.0
         mu = 0.0
         ng = 30
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=35, damp=0.0, ngrid=ng, econv=1e-10, singles=True)
         Ecctot, ecc = ccsdT.run()
         ccsdT.compute_ESN()
@@ -84,7 +84,7 @@ class TDCCSDESNTest(unittest.TestCase):
         mu = 0.0
         ng = 200
         athresh = 1e-20
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=100, damp=0.1, ngrid=ng, econv=1e-10, athresh=athresh, singles=True)
         Ecctot, ecc = ccsdT.run()
         ccsdT.compute_ESN()
@@ -188,7 +188,7 @@ class TDCCSDESNTest(unittest.TestCase):
         mu = 0.0
         ng = 200
         athresh = 1e-20
-        sys = scf_system(m, T, mu, orbtype='u')
+        sys = SCFSystem(m, T, mu, orbtype='u')
         ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=100, damp=0.1, ngrid=ng, econv=1e-10, athresh=athresh, singles=True)
         Ecctot, ecc = ccsdT.run()
         ccsdT.compute_ESN()
@@ -258,7 +258,7 @@ class TDCCSDESNTest(unittest.TestCase):
         mu = 0.0
         ng = 280
         athresh = 1e-20
-        sys = scf_system(m, T, mu, orbtype='u')
+        sys = SCFSystem(m, T, mu, orbtype='u')
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=ng, athresh=athresh, saveT=True)
         Ecctot, ecc = tdccsdT.run()
@@ -266,7 +266,7 @@ class TDCCSDESNTest(unittest.TestCase):
         Eref = tdccsdT.E
         Sref = tdccsdT.S
         Nref = tdccsdT.N
-        sys = scf_system(m, T, mu, orbtype='r')
+        sys = SCFSystem(m, T, mu, orbtype='r')
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=ng, athresh=athresh, saveT=True)
         Eout, eccout = tdccsdT.run()

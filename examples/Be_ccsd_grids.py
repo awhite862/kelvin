@@ -1,6 +1,6 @@
 from pyscf import gto, scf
 from kelvin.ccsd import ccsd
-from kelvin.scf_system import scf_system
+from kelvin.scf_system import SCFSystem
 
 mol = gto.M(
     verbose=0,
@@ -14,7 +14,7 @@ print('SCF energy: %f' % m.scf())
 
 T = 0.1
 mu = -0.2
-sys = scf_system(m, T, mu)
+sys = SCFSystem(m, T, mu)
 ccsdT = ccsd(
     sys, iprint=1, T=T, mu=mu, max_iter=45,
     damp=0.2, ngrid=100, econv=1e-9)

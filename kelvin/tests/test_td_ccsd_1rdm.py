@@ -3,7 +3,7 @@ import numpy
 from pyscf import gto, scf
 from kelvin.td_ccsd import TDCCSD
 from kelvin.ccsd import ccsd
-from kelvin.scf_system import scf_system
+from kelvin.scf_system import SCFSystem
 
 
 class TDCCSD1RDMTest(unittest.TestCase):
@@ -18,7 +18,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
         m.scf()
         T = 2.0
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
 
         # compute normal-ordered 1-rdm
         ccsdT = ccsd(sys, T=T, mu=mu, ngrid=40, iprint=0)
@@ -54,7 +54,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
         m.scf()
         T = 0.5
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
 
         # compute normal-ordered 1-rdm
         ccsdT = ccsd(sys, T=T, mu=mu, ngrid=40, iprint=0)
@@ -90,7 +90,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
         m.scf()
         T = 0.5
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
 
         # compute normal-ordered 1-rdm
         ccsdT = ccsd(sys, T=T, mu=mu, ngrid=80, iprint=0)
@@ -126,7 +126,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
         m.scf()
         T = 0.05
         mu = 0.0
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
 
         # compute normal-ordered 1-rdm
         ccsdT = ccsd(sys, T=T, mu=mu, ngrid=100, iprint=0, damp=0.4, athresh=1e-20)
@@ -164,7 +164,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
         mu = 0.0
 
         # compute normal-order 1-rdm from propagation
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
         tdccsdT.run()
@@ -174,7 +174,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
         dba = tdccsdT.dba
         dai = tdccsdT.dai
         # compute normal-order 1-rdm from propagation
-        sys = scf_system(m, T, mu, orbtype='u')
+        sys = SCFSystem(m, T, mu, orbtype='u')
         ea, eb = sys.u_energies_tot()
         na = ea.shape[0]
         prop = {"tprop": "rk4", "lprop": "rk4"}
@@ -219,7 +219,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
         mu = 0.0
 
         # compute normal-order 1-rdm from propagation
-        sys = scf_system(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=320, athresh=1e-20, saveT=True)
         tdccsdT.run()
@@ -229,7 +229,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
         dba = tdccsdT.dba
         dai = tdccsdT.dai
         # compute normal-order 1-rdm from propagation
-        sys = scf_system(m, T, mu, orbtype='u')
+        sys = SCFSystem(m, T, mu, orbtype='u')
         ea, eb = sys.u_energies_tot()
         na = ea.shape[0]
         noa = na
@@ -276,7 +276,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
         mu = 0.0
 
         # compute normal-order 1-rdm from propagation
-        sys = scf_system(m, T, mu, orbtype='u')
+        sys = SCFSystem(m, T, mu, orbtype='u')
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
         tdccsdT.run()
@@ -286,7 +286,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
         dba = tdccsdT.dba
         dai = tdccsdT.dai
         # compute normal-order 1-rdm from propagation
-        sys = scf_system(m, T, mu, orbtype='r')
+        sys = SCFSystem(m, T, mu, orbtype='r')
         ea, eb = sys.u_energies_tot()
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
