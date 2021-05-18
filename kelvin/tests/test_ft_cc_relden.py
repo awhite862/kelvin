@@ -5,7 +5,7 @@ from kelvin.ccsd import ccsd
 from kelvin.scf_system import SCFSystem
 from kelvin.ueg_system import UEGSystem
 from kelvin.ueg_scf_system import ueg_scf_system
-from kelvin.pueg_system import pueg_system
+from kelvin.pueg_system import PUEGSystem
 from kelvin import scf_utils
 
 try:
@@ -174,7 +174,7 @@ class FTCCReldenTest(unittest.TestCase):
         cut = 1.2
         damp = 0.2
         mi = 50
-        ueg = pueg_system(T, L, cut, mu=mu, norb=norb)
+        ueg = PUEGSystem(T, L, cut, mu=mu, norb=norb)
         ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=10)
         ccsdT.run()
         ccsdT.compute_ESN()

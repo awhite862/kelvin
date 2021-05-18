@@ -1,3 +1,4 @@
+import logging
 import numpy
 from cqcpy import ft_utils
 from cqcpy.ov_blocks import one_e_blocks
@@ -6,7 +7,7 @@ from .ueg_utils import UEGBasis
 from .system import System
 
 
-class pueg_system(System):
+class PUEGSystem(System):
     """The polarized uniform electron gas in a plane-wave basis set.
 
     Attributes:
@@ -246,3 +247,8 @@ class pueg_system(System):
             vovo=Vvovo,oovv=Voovv,
             vooo=Vvooo,ooov=Vooov,
             oooo=Voooo)
+
+class pueg_system(PUEGSystem):
+    def __init__(self, T, L, Emax, mu=None, n=None, norb=None):
+        logging.warning("This class is deprecated, use PUEGSystem instead")
+        PUEGSystem.__init__(self, T, L, Emax, mu=mu, n=n, norb=norb)

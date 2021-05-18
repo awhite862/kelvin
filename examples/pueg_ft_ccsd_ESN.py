@@ -1,5 +1,5 @@
 from kelvin.ccsd import ccsd
-from kelvin.pueg_system import pueg_system
+from kelvin.pueg_system import PUEGSystem
 import numpy
 
 T = 0.5
@@ -9,7 +9,7 @@ norb = 19
 cut = 1.2
 damp = 0.2
 mi = 50
-ueg = pueg_system(T, L, cut, mu=mu, norb=norb)
+ueg = PUEGSystem(T, L, cut, mu=mu, norb=norb)
 print('Norb: {}'.format(len(ueg.basis.basis)))
 print('L: {:.10f}'.format(L))
 print('N0: {:.10f}'.format(ueg.N))
