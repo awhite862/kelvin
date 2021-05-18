@@ -84,7 +84,7 @@ class TDCCSDESNTest(unittest.TestCase):
         mu = 0.0
         ng = 200
         athresh = 1e-20
-        sys = SCFystem(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=100, damp=0.1, ngrid=ng, econv=1e-10, athresh=athresh, singles=True)
         Ecctot, ecc = ccsdT.run()
         ccsdT.compute_ESN()

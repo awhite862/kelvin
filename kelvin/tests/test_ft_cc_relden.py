@@ -4,7 +4,7 @@ from pyscf import gto, scf
 from kelvin.ccsd import ccsd
 from kelvin.scf_system import SCFSystem
 from kelvin.ueg_system import UEGSystem
-from kelvin.ueg_scf_system import ueg_scf_system
+from kelvin.ueg_scf_system import UEGSCFSystem
 from kelvin.pueg_system import PUEGSystem
 from kelvin import scf_utils
 
@@ -212,7 +212,7 @@ class FTCCReldenTest(unittest.TestCase):
         cut = 1.2
         damp = 0.2
         mi = 50
-        ueg = ueg_scf_system(T, L, cut, mu=mu, norb=norb, orbtype='g')
+        ueg = UEGSCFSystem(T, L, cut, mu=mu, norb=norb, orbtype='g')
         ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=10)
         ccsdT.run()
         ccsdT.compute_ESN()
@@ -271,12 +271,12 @@ class FTCCReldenTest(unittest.TestCase):
         mi = 50
         econv = 1e-12
         thresh = 1e-12
-        ueg = ueg_scf_system(T, L, cut, mu=mu, norb=norb, orbtype='g')
+        ueg = UEGSCFSystem(T, L, cut, mu=mu, norb=norb, orbtype='g')
         ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, econv=econv, damp=damp, ngrid=10)
         ccsdT.run()
         ccsdT._grel_ft_1rdm()
 
-        ueg = ueg_scf_system(T, L, cut, mu=mu, norb=norb, orbtype='u')
+        ueg = UEGSCFSystem(T, L, cut, mu=mu, norb=norb, orbtype='u')
         uccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, econv=econv, damp=damp, ngrid=10)
         uccsdT.run()
         uccsdT._urel_ft_1rdm()

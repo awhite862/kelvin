@@ -248,6 +248,7 @@ class PUEGSystem(System):
             vooo=Vvooo,ooov=Vooov,
             oooo=Voooo)
 
+
 class pueg_system(PUEGSystem):
     def __init__(self, T, L, Emax, mu=None, n=None, norb=None):
         logging.warning("This class is deprecated, use PUEGSystem instead")

@@ -1,6 +1,6 @@
 from kelvin.ccsd import ccsd
-from kelvin.ueg_system import ueg_system
-from kelvin.ueg_scf_system import ueg_scf_system
+from kelvin.ueg_system import UEGSystem
+from kelvin.ueg_scf_system import UEGSCFSystem
 import numpy
 
 T = 0.1
@@ -11,7 +11,7 @@ norb = 7
 cut = 1.2
 damp = 0.1
 mi = 50
-ueg = ueg_system(T, L, cut, mu=mu, norb=norb, orbtype='u')
+ueg = UEGSystem(T, L, cut, mu=mu, norb=norb, orbtype='u')
 print('Norb: {}'.format(len(ueg.basis.basis)))
 print('L: {:.10f}'.format(L))
 print('N0: {:.10f}'.format(ueg.N))
@@ -38,7 +38,7 @@ norb = 7
 cut = 1.2
 damp = 0.1
 mi = 50
-ueg = ueg_scf_system(T, L, cut, mu=mu, norb=norb, orbtype='u')
+ueg = UEGSCFSystem(T, L, cut, mu=mu, norb=norb, orbtype='u')
 print('Norb: {}'.format(len(ueg.basis.basis)))
 print('L: {:.10f}'.format(L))
 print('N0: {:.10f}'.format(ueg.N))
