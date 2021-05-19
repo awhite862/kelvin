@@ -1,3 +1,4 @@
+import logging
 import numpy
 import time
 from pyscf import lib
@@ -107,16 +108,14 @@ class ccsd(object):
     def run(self, T1=None, T2=None):
         """Run CCSD calculation."""
         if self.finite_T:
-            if self.iprint > 0:
-                print('Running CCSD at an electronic temperature of %f K'
-                    % ft_utils.HtoK(self.T))
+            logging.info('Running CCSD at an electronic temperature of %f K'
+                % ft_utils.HtoK(self.T))
             if self.sys.has_u():
                 return self._ft_uccsd(T1in=T1,T2in=T2)
             else:
                 return self._ft_ccsd(T1in=T1,T2in=T2)
         else:
-            if self.iprint > 0:
-                print('Running CCSD at zero Temperature')
+            logging.info('Running CCSD at zero Temperature')
             if self.realtime:
                 return self._ft_ccsd()
             else:
@@ -128,11 +127,25 @@ class ccsd(object):
     def compute_ESN(self, L1=None, L2=None, gderiv=True):
         """Compute energy, entropy, particle number."""
         if not self.finite_T:
+            logging.warning(
+                "Computing thermodynamic quantities at zero temperature")
             N = self.sys.g_energies()[0].shape[0]
-            print("T = 0: ")
-            print('  E = {}'.format(self.Etot))
-            print('  S = {}'.format(0.0))
-            print('  N = {}'.format(N))
+            self.N0 = N
+            self.N1 = 0
+            self.Ncc = 0
+            self.N = Ncc + N0 + N1
+            self.E0 = self.G0
+            self.E1 = self.G1
+            self.Ecc = self.Gcc
+            self.E = E0 + E1 + Ecc
+            self.S = 0
+            self.S0 = 0
+            self.S1 = 0
+            self.Scc = 0
+            #print("T = 0: ")
+            #print('  E = {}'.format(self.Etot))
+            #print('  S = {}'.format(0.0))
+            #print('  N = {}'.format(N))
         else:
             if self.L1 is None:
                 if self.sys.has_u():
@@ -141,8 +154,7 @@ class ccsd(object):
                     self._u_ft_1rdm()
                     self._u_ft_2rdm()
                     tf = time.time()
-                    if self.iprint > 0:
-                        print("RDM construction time: {} s".format(tf - ti))
+                    logging.info("RDM construction time: {} s".format(tf - ti))
                 else:
                     self._ft_ccsd_lambda(L1=L1,L2=L2)
                     self._g_ft_1rdm()
@@ -151,8 +163,7 @@ class ccsd(object):
                 ti = time.time()
                 self._u_ft_ESN(L1,L2,gderiv=gderiv)
                 tf = time.time()
-                if self.iprint > 0:
-                    print("Total derivative time: {} s".format(tf - ti))
+                logging.info("Total derivative time: {} s".format(tf - ti))
             else:
                 self._g_ft_ESN(L1,L2,gderiv=gderiv)
 
@@ -283,8 +294,7 @@ class ccsd(object):
         mem2e = 6*no*no*nv*nv + nv*nv*nv*nv + 2*nv*nv*nv*no + \
             2*nv*no*no*no + no*no*no*no # include memory for D2
         mem_mb = 2.0*(mem1e + mem2e)*8.0/1024.0/1024.0
-        if self.iprint > 0:
-            print('  CCSD will use %f mb' % mem_mb)
+        logging.info('  CCSD will use %f mb' % mem_mb)
 
         # get Fock matrix
         F = self.sys.g_fock()
@@ -300,8 +310,7 @@ class ccsd(object):
         Es = cc_energy.cc_energy_s1(T1old, F.vo.transpose(1,0))
         Ed = cc_energy.cc_energy_d(T2old, I.vvoo.transpose(2,3,0,1))
         Emp2 = Es + Ed
-        if self.iprint > 0:
-            print('MP2 Energy {:.10f}'.format(Emp2))
+        logging.info('MP2 Energy {:.10f}'.format(Emp2))
 
         # run CC iterations
         converged = False
@@ -324,8 +333,7 @@ class ccsd(object):
             T1old = alpha*T1old + (1.0 - alpha)*T1
             T2old = alpha*T2old + (1.0 - alpha)*T2
             E = cc_energy.cc_energy(T1old,T2old,F.ov,I.oovv)
-            if self.iprint > 0:
-                print(' {:2d}  {:.10f}  {:.10f}'.format(i+1,E,res1+res2))
+            logging.info(' {:2d}  {:.10f}  {:.10f}'.format(i+1,E,res1+res2))
             i = i + 1
             if numpy.abs(E - Eold) < self.econv and res1+res2 < self.tconv:
                 converged = True
@@ -372,8 +380,7 @@ class ccsd(object):
         mem2e = 6*no*no*nv*nv + nv*nv*nv*nv + 2*nv*nv*nv*no + \
             2*nv*no*no*no + no*no*no*no # include memory for D2
         mem_mb = 2.0*(mem1e + mem2e)*8.0/1024.0/1024.0
-        if self.iprint > 0:
-            print('  CCSD will use %f mb' % mem_mb)
+        logging.info('  CCSD will use %f mb' % mem_mb)
 
         # get Fock matrix
         Fa,Fb = self.sys.u_fock()
@@ -409,8 +416,7 @@ class ccsd(object):
             T2bbold = T2in[2]
         T1olds = (T1aold,T1bold)
         T2olds = (T2aaold,T2abold,T2bbold)
-        if self.iprint > 0:
-            print('MP2 Energy {:.10f}'.format(Emp2))
+        logging.info('MP2 Energy {:.10f}'.format(Emp2))
 
         # run CC iterations
         converged = False
@@ -439,8 +445,7 @@ class ccsd(object):
             T2aa = alpha*T2olds[0] + (1.0 - alpha)*T2aa
             T2ab = alpha*T2olds[1] + (1.0 - alpha)*T2ab
             T2bb = alpha*T2olds[2] + (1.0 - alpha)*T2bb
-            if self.iprint > 0:
-                print(' %2d  %.10f' % (i+1,E))
+            logging.info(' %2d  %.10f' % (i+1,E))
             i = i + 1
             if numpy.abs(E - Eold) < self.econv and res1+res2 < self.tconv:
                 converged = True
@@ -502,8 +507,7 @@ class ccsd(object):
             L2 = einsum('ijab,ijab->ijab', L2, Doovv)
             res1 = numpy.linalg.norm(L1 - L1old) / nl1
             res2 = numpy.linalg.norm(L2 - L2old) / nl2
-            if self.iprint > 0:
-                print(' %2d  %.10f' % (i+1,res1 + res2))
+            logging.info(' %2d  %.10f' % (i+1,res1 + res2))
             i = i + 1
             if res1 + res2 < self.tconv:
                 converged = True
@@ -580,8 +584,7 @@ class ccsd(object):
             res2 = numpy.linalg.norm(L2aa - L2olds[0]) / nl2
             res2 += numpy.linalg.norm(L2ab - L2olds[1]) / nl2
             res2 += numpy.linalg.norm(L2bb - L2olds[2]) / nl2
-            if self.iprint > 0:
-                print(' %2d  %.10f' % (i+1,res1 + res2))
+            logging.info(' %2d  %.10f' % (i+1,res1 + res2))
             i = i + 1
             if res1 + res2 < self.tconv:
                 converged = True
@@ -655,11 +658,10 @@ class ccsd(object):
                 nocc = len(focc)
                 nvir = len(fvir)
                 nact = nocc + nvir - n
-                if self.iprint > 0:
-                    print("FT-CCSD orbital info:")
-                    print('  nocc: {:d}'.format(nocc))
-                    print('  nvir: {:d}'.format(nvir))
-                    print('  nact: {:d}'.format(nact))
+                logging.info("FT-CCSD orbital info:")
+                logging.info('  nocc: {:d}'.format(nocc))
+                logging.info('  nvir: {:d}'.format(nvir))
+                logging.info('  nact: {:d}'.format(nact))
 
                 # get scaled active space integrals
                 F,I = cc_utils.ft_active_integrals(self.sys, en, focc, fvir, iocc, ivir)
@@ -687,8 +689,8 @@ class ccsd(object):
                 "max_iter":self.max_iter,
                 "damp":self.damp}
         if self.rt_iter[0] == 'a' or T2in is not None:
-            if self.rt_iter[0] != 'a' and self.iprint > 0:
-                print("WARNING: Converngece scheme ({}) is being ignored.".format(self.rt_iter))
+            if self.rt_iter[0] != 'a':
+                logging.warning("Converngece scheme ({}) is being ignored.".format(self.rt_iter))
             # get MP2 T-amplitudes
             if T1in is not None and T2in is not None:
                 T1old = T1in if self.singles else numpy.zeros((ng,n,n), dtype=F.vo.dtype)
@@ -705,8 +707,7 @@ class ccsd(object):
                 T2old = quadrature.int_tbar2(ng,T2old,ti,D2,G)
             E2 = ft_cc_energy.ft_cc_energy(T1old, T2old,
                 F.ov, I.oovv, g, self.beta_max, Qterm=False)
-            if self.iprint > 0:
-                print('MP2 Energy: {:.10f}'.format(E2))
+            logging.info('MP2 Energy: {:.10f}'.format(E2))
 
             # run CC iterations
             Eccn,T1,T2 = cc_utils.ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G,
@@ -773,14 +774,13 @@ class ccsd(object):
                 nvirb = len(fvirb)
                 nacta = nocca + nvira - na
                 nactb = noccb + nvirb - nb
-                if self.iprint > 0:
-                    print("FT-UCCSD orbital info:")
-                    print('  nocca: {:d}'.format(nocca))
-                    print('  nvira: {:d}'.format(nvira))
-                    print('  nacta: {:d}'.format(nacta))
-                    print('  noccb: {:d}'.format(noccb))
-                    print('  nvirb: {:d}'.format(nvirb))
-                    print('  nactb: {:d}'.format(nactb))
+                logging.info("FT-UCCSD orbital info:")
+                logging.info('  nocca: {:d}'.format(nocca))
+                logging.info('  nvira: {:d}'.format(nvira))
+                logging.info('  nacta: {:d}'.format(nacta))
+                logging.info('  noccb: {:d}'.format(noccb))
+                logging.info('  nvirb: {:d}'.format(nvirb))
+                logging.info('  nactb: {:d}'.format(nactb))
 
                 # get energy differences
                 D1a = ea[:,None] - ea[None,:]
@@ -855,7 +855,7 @@ class ccsd(object):
                 "damp":self.damp}
         if self.rt_iter[0] == 'a' or T2in is not None:
             if self.rt_iter[0] != 'a':
-                print("WARNING: Converngece scheme ({}) is being ignored.".format(self.rt_iter))
+                logging.warning("Converngece scheme ({}) is being ignored.".format(self.rt_iter))
             # get MP2 T-amplitudes
             if T1in is not None and T2in is not None:
                 T1aold = T1in[0] if self.singles else numpy.zeros(T1ashape, dtype=Fa.vo.dtype)
@@ -884,8 +884,7 @@ class ccsd(object):
             # MP2 energy
             E2 = ft_cc_energy.ft_ucc_energy(T1aold,T1bold,T2aaold,T2abold,T2bbold,
                 Fa.ov,Fb.ov,Ia.oovv,Ib.oovv,Iabab.oovv,g,self.beta_max,Qterm=False)
-            if self.iprint > 0:
-                print('MP2 Energy: {:.10f}'.format(E2))
+            logging.info('MP2 Energy: {:.10f}'.format(E2))
 
             # run CC iterations
             Eccn,T1,T2 = cc_utils.ft_ucc_iter(method, T1aold, T1bold, T2aaold, T2abold, T2bbold,
@@ -941,11 +940,10 @@ class ccsd(object):
             nocc = len(focc)
             nvir = len(fvir)
             nact = nocc + nvir - n
-            if self.iprint > 0:
-                print("FT-CCSD orbital info:")
-                print('  nocc: {:d}'.format(nocc))
-                print('  nvir: {:d}'.format(nvir))
-                print('  nact: {:d}'.format(nact))
+            logging.info("FT-CCSD orbital info:")
+            logging.info('  nocc: {:d}'.format(nocc))
+            logging.info('  nvir: {:d}'.format(nvir))
+            logging.info('  nact: {:d}'.format(nact))
 
             # get scaled active space integrals
             F,I = cc_utils.ft_active_integrals(self.sys, en, focc, fvir, iocc, ivir)
@@ -1043,14 +1041,13 @@ class ccsd(object):
             nvirb = len(fvirb)
             nacta = nocca + nvira - na
             nactb = noccb + nvirb - nb
-            if self.iprint > 0:
-                print("FT-UCCSD orbital info:")
-                print('  nocca: {:d}'.format(nocca))
-                print('  nvira: {:d}'.format(nvira))
-                print('  nacta: {:d}'.format(nacta))
-                print('  noccb: {:d}'.format(noccb))
-                print('  nvirb: {:d}'.format(nvirb))
-                print('  nactb: {:d}'.format(nactb))
+            logging.info("FT-UCCSD orbital info:")
+            logging.info('  nocca: {:d}'.format(nocca))
+            logging.info('  nvira: {:d}'.format(nvira))
+            logging.info('  nacta: {:d}'.format(nacta))
+            logging.info('  noccb: {:d}'.format(noccb))
+            logging.info('  nvirb: {:d}'.format(nvirb))
+            logging.info('  nactb: {:d}'.format(nactb))
 
             # get energy differences
             D1a = ea[:,None] - ea[None,:]

@@ -1,3 +1,4 @@
+import logging
 import numpy
 from cqcpy import ft_utils
 from . import ft_mp
@@ -28,12 +29,11 @@ class MP3(object):
 
     def run(self):
         if self.finite_T:
-            print('Running MP3 at an electronic temperature of %f K'
+            logging.info('Running MP3 at an electronic temperature of %f K'
                 % ft_utils.HtoK(self.T))
             return self._ft_mp3()
         else:
-            if self.iprint > 0:
-                print('Running MP3 at zero Temperature')
+            logging.info('Running MP3 at zero Temperature')
             return self._mp3()
 
     def _mp3(self):
@@ -48,8 +48,7 @@ class MP3(object):
             2*nv*no*no*no + no*no*no*no # include memory for D2
         mem_mb = (mem1e + mem2e)*8.0/1024.0/1024.0
         assert(mem_mb < 4000)
-        if self.iprint > 0:
-            print('  RMP3 will use %f mb' % mem_mb)
+        logging.info('  RMP3 will use %f mb' % mem_mb)
 
         # compute zero order energy
         En = self.sys.const_energy()
@@ -92,8 +91,7 @@ class MP3(object):
         mem2e = 3*n*n*n*n # include memory for D2
         mem_mb = (mem1e + mem2e)*8.0/1024.0/1024.0
         assert(mem_mb < 4000)
-        if self.iprint > 0:
-            print('  FT-RMP3 will use %f mb' % mem_mb)
+        logging.info('  FT-RMP3 will use %f mb' % mem_mb)
 
         # compute zero order quantities
         En = self.sys.const_energy()

@@ -1,3 +1,4 @@
+import logging
 import numpy
 from cqcpy import ft_utils
 from cqcpy.ov_blocks import one_e_blocks
@@ -156,7 +157,7 @@ class HubbardSystem(System):
             D += einsum('ii,i->', Fb, fob)
             return D
         else:
-            print("WARNING: Derivative of MP1 energy is zero at OK")
+            logging.warning("Derivative of MP1 energy is zero at OK")
             return 0.0
 
     def g_d_mp1(self, dvec):
@@ -173,7 +174,7 @@ class HubbardSystem(System):
             D += einsum('ii->i', F, fo)
             return D
         else:
-            print("WARNING: Derivative of MP1 energy is zero at OK")
+            logging.warning("Derivative of MP1 energy is zero at OK")
             return 0.0
 
     def u_mp1_den(self):
@@ -198,7 +199,7 @@ class HubbardSystem(System):
             Db += -beta*einsum('ijij,i,j->j', Vabab, foa, vecb)
             return Da,Db
         else:
-            print("WARNING: Derivative of MP1 energy is zero at OK")
+            logging.warning("Derivative of MP1 energy is zero at OK")
             return 0.0
 
     def g_mp1_den(self):
@@ -216,7 +217,7 @@ class HubbardSystem(System):
             D += -beta*numpy.einsum('ijij,i,j->i', V, vec, fo)
             return D
         else:
-            print("WARNING: Derivative of MP1 energy is zero at OK")
+            logging.warning("Derivative of MP1 energy is zero at OK")
             return 0.0
 
     def r_energies(self):
@@ -386,7 +387,7 @@ class HubbardSystem(System):
         na = da.shape[0]
         nb = db.shape[0]
         if self.T == 0.0:
-            print("WARNING: Occupation derivatives are zero at 0K")
+            logging.warning("Occupation derivatives are zero at 0K")
             return numpy.zeros((na,na)),numpy.zeros((nb,nb))
         foa = ft_utils.ff(self.beta, da, self.mu)
         fob = ft_utils.ff(self.beta, db, self.mu)
@@ -411,7 +412,7 @@ class HubbardSystem(System):
         d = self.g_energies_tot()
         n = d.shape[0]
         if self.T == 0.0:
-            print("WARNING: Occupations derivatives are zero at 0K")
+            logging.warning("Occupations derivatives are zero at 0K")
             return numpy.zeros((n,n))
         fo = ft_utils.ff(self.beta, d, self.mu)
         fv = ft_utils.ffv(self.beta, d, self.mu)
@@ -427,7 +428,7 @@ class HubbardSystem(System):
         na = da.shape[0]
         nb = db.shape[0]
         if self.T == 0.0:
-            print("WARNING: Occupation derivatives are zero at 0K")
+            logging.warning("Occupation derivatives are zero at 0K")
             return (numpy.zeros((na,na,na)),
                     numpy.zeros((na,na,nb)),
                     numpy.zeros((nb,nb,na)),
@@ -449,7 +450,7 @@ class HubbardSystem(System):
         d = self.g_energies_tot()
         n = d.shape[0]
         if self.T == 0.0:
-            print("WARNING: Occupations derivatives are zero at 0K")
+            logging.warning("Occupations derivatives are zero at 0K")
             return numpy.zeros((n,n))
         fo = ft_utils.ff(self.beta, d, self.mu)
         fv = ft_utils.ffv(self.beta, d, self.mu)

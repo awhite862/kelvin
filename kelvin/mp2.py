@@ -1,3 +1,4 @@
+import logging
 import numpy
 from cqcpy import ft_utils
 from . import ft_mp
@@ -30,13 +31,11 @@ class MP2(object):
 
     def run(self):
         if self.finite_T:
-            if self.iprint > 0:
-                print('Running MP2 at an electronic temperature of %f K'
-                    % ft_utils.HtoK(self.T))
+            logging.info('Running MP2 at an electronic temperature of %f K'
+                % ft_utils.HtoK(self.T))
             return self._ft_mp2()
         else:
-            if self.iprint > 0:
-                print('Running MP2 at zero Temperature')
+            logging.info('Running MP2 at zero Temperature')
             return self._mp2()
 
     def _mp2(self):
@@ -54,8 +53,7 @@ class MP2(object):
             + 3*no*no*nv*nv
         mem_mb = mem*8/1024.0/1024.0
         assert(mem_mb < 2000)
-        if self.iprint > 0:
-            print('  RMP2 will use %f mb' % mem_mb)
+        logging.info('  RMP2 will use %f mb' % mem_mb)
 
         # get ERIs
         I = self.sys.g_aint(code=4)
@@ -98,8 +96,7 @@ class MP2(object):
         mem2e = 2*n*n*n*n # include memory for D2
         mem_mb = (mem1e + mem2e)*8.0/1024.0/1024.0
         assert(mem_mb < 4000)
-        if self.iprint > 0:
-            print('  FT-RMP2 will use %f mb' % mem_mb)
+        logging.info('  FT-RMP2 will use %f mb' % mem_mb)
 
         # get FT Fock matrix
         fmo = self.sys.g_fock_tot()

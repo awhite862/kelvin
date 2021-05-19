@@ -1,3 +1,4 @@
+import logging
 import numpy
 
 
@@ -64,12 +65,12 @@ def ab2(h, var, k2, RHS):
 def be_step(h, var, k1, mi, alpha, thresh, RHS, iprint):
     dold = k1
     converged = False
+    logging.debug("Backward Euler iterations:")
     for k in range(mi):
         d = RHS([x + y for x,y in zip(var,dold)])
         d = [h*x for x in d]
         error = sum([numpy.linalg.norm(x - y)/(numpy.linalg.norm(x) + 0.01) for x,y in zip(d,dold)])
-        if iprint > 1:
-            print(' %2d  %.4E' % (k+1,error))
+        logging.debug(" %2d  %.4E" % (k+1,error))
         dold = [(1.0 - alpha)*x + alpha*y for x,y in zip(d,dold)]
         if error < thresh:
             converged = True
@@ -98,12 +99,12 @@ def am2(h, var, mi, alpha, thresh, RHS, iprint):
     k1 = [h*x for x in k1]
     dold = k1
     converged = False
+    logging.debug("Adams-Moulton iterations:")
     for k in range(mi):
         d = RHS([x + y for x,y in zip(var,dold)])
         d = [0.5*(h*x + y) for x,y in zip(d,k1)]
         error = sum([numpy.linalg.norm(x - y)/(numpy.linalg.norm(x) + 0.01) for x,y in zip(d,dold)])
-        if iprint > 1:
-            print(' %2d  %.4E' % (k+1,error))
+        logging.debug(" %2d  %.4E" % (k+1,error))
         dold = [(1.0 - alpha)*x + alpha*y for x,y in zip(d,dold)]
         if error < thresh:
             converged = True

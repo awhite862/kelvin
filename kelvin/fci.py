@@ -1,3 +1,4 @@
+import logging
 import numpy
 import logging
 from pyscf.fci import cistring
@@ -44,9 +45,8 @@ class FCI(object):
         En = self.sys.const_energy()
         T = self.T
         if self.T > 0.0:
-            if self.iprint > 0:
-                print("Running FCI at finite T")
-                print('   T = {}'.format(T))
+            logging.info("Running FCI at finite T")
+            logging.info('   T = {}'.format(T))
             beta = 1.0 / self.T
             en = self.sys.g_energies_tot()
             g0 = ft_utils.GP0(beta, en, self.mu)
@@ -55,8 +55,7 @@ class FCI(object):
             Efci = self._ft_fci()
             return (Efci+En,Efci - E0 - E1)
         else:
-            if self.iprint > 0:
-                print("Running FCI at T=0")
+            logging.info("Running FCI at T=0")
             Efci = self._fci_fixedN(self.nalpha,self.nbeta)[0]
             E0 = self.sys.g_energies()[0].sum() + En
             E1 = self.sys.get_mp1()

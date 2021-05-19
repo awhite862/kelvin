@@ -1,3 +1,4 @@
+import logging
 import numpy
 from cqcpy import cc_energy
 from cqcpy import cc_equations
@@ -64,16 +65,14 @@ class lccsd(object):
 
     def run(self, T1=None, T2=None):
         if self.finite_T:
-            if self.iprint > 0:
-                print('Running LCCSD at an electronic temperature of %f K'
-                    % ft_utils.HtoK(self.T))
+            logging.info('Running LCCSD at an electronic temperature of %f K'
+                % ft_utils.HtoK(self.T))
             if self.athresh > 0.0:
                 return self._ft_lccsd_active(T1in=T1,T2in=T2)
             else:
                 return self._ft_lccsd(T1in=T1,T2in=T2)
         else:
-            if self.iprint > 0:
-                print('Running LCCSD at zero Temperature')
+            logging.info('Running LCCSD at zero Temperature')
             if self.realtime:
                 return self._lccsd_rt()
             else:
@@ -120,8 +119,7 @@ class lccsd(object):
             T1 = numpy.einsum('ai,ia->ai', T1, Dov)
             T2 = numpy.einsum('abij,ijab->abij', T2, Doovv)
             E = cc_energy.cc_energy(T1,T2,F.ov,I.oovv)
-            if self.iprint > 0:
-                print(' %d  %.10f' % (i+1,E))
+            logging.info(' %d  %.10f' % (i+1,E))
             i = i + 1
             if numpy.abs(E - Eold) < thresh:
                 converged = True
@@ -179,8 +177,7 @@ class lccsd(object):
             T2old = quadrature.int_tbar2(ng,T2old,ti,Dvvoo,G)
         E2 = ft_cc_energy.ft_cc_energy(T1old, T2old,
             F.ov, I.oovv, g, self.beta_max, Qterm=False)
-        if self.iprint > 0:
-            print('MP2 energy: {:.10f}'.format(E2))
+        logging.info('MP2 energy: {:.10f}'.format(E2))
 
         # run CC iterations
         conv_options = {"econv":self.econv, "max_iter":self.max_iter, "damp":self.damp}
@@ -214,8 +211,7 @@ class lccsd(object):
         mem2e = 3*n*n*n*n + 3*ng*n*n*n*n
         mem_mb = 2.0*(mem1e + mem2e)*8.0/1024.0/1024.0
         #assert(mem_mb < 4000)
-        if self.iprint > 0:
-            print('  FT-LCCSD will use %f mb' % mem_mb)
+        logging.info('  FT-LCCSD will use %f mb' % mem_mb)
 
         # 0th and 1st order contributions
         En = self.sys.const_energy()
@@ -259,7 +255,7 @@ class lccsd(object):
         self.T1 = T1
         self.T2 = T2
 
-        print('total energy: %f' % (Eccn+E01))
+        logging.info('total energy: %f' % (Eccn+E01))
         return (Eccn+E01,Eccn)
 
     def _ft_lccsd_active(self, T1in=None, T2in=None):
@@ -289,19 +285,17 @@ class lccsd(object):
         nocc = len(focc)
         nvir = len(fvir)
         nact = nocc + nvir - n
-        if self.iprint > 0:
-            print("FT-LCCSD orbital info:")
-            print('  nocc: {:d}'.format(nocc))
-            print('  nvir: {:d}'.format(nvir))
-            print('  nact: {:d}'.format(nact))
+        logging.info("FT-LCCSD orbital info:")
+        logging.info('  nocc: {:d}'.format(nocc))
+        logging.info('  nvir: {:d}'.format(nvir))
+        logging.info('  nact: {:d}'.format(nact))
 
         # compute requisite memory
         n = en.shape[0]
         mem1e = 6*n*n + 3*ng*n*n
         mem2e = 3*n*n*n*n + 3*ng*n*n*n*n
         mem_mb = 2.0*(mem1e + mem2e)*8.0/1024.0/1024.0
-        if self.iprint > 0:
-            print('  FT-LCCSD will use %f mb' % mem_mb)
+        logging.info('  FT-LCCSD will use %f mb' % mem_mb)
 
         # get 0th and 1st order contributions
         En = self.sys.const_energy()
@@ -367,8 +361,7 @@ class lccsd(object):
         mem1e = 6*n*n + 3*ng*n*n
         mem2e = 3*n*n*n*n + 3*ng*n*n*n*n
         mem_mb = 2.0*(mem1e + mem2e)*8.0/1024.0/1024.0
-        if self.iprint > 0:
-            print('  FT-LCCSD will use %f mb' % mem_mb)
+        logging.info('  FT-LCCSD will use %f mb' % mem_mb)
 
         # get scaled integrals
         F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)

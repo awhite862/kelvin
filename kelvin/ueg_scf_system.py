@@ -177,7 +177,7 @@ class UEGSCFSystem(System):
             D += -einsum('ijij,i,j->', Vabab, foa, vecb)
             return D
         else:
-            print("WARNING: Derivative of MP1 energy is zero at OK")
+            logging.warning("Derivative of MP1 energy is zero at OK")
             return 0.0
 
     def u_mp1_den(self):
@@ -200,7 +200,8 @@ class UEGSCFSystem(System):
             Db += -beta*einsum('ijij,i,j->j', Vabab, foa, vecb)
             return Da,Db
         else:
-            print("WARNING: Derivative of MP1 energy is zero at OK")
+            logging.warning("Derivative of MP1 energy is zero at OK")
+            return 0.0
 
     def g_d_mp1(self, dvec):
         if self.T > 0:
@@ -215,7 +216,7 @@ class UEGSCFSystem(System):
             E1_1 = -einsum('ii,i->', tmat - numpy.diag(en), vec)
             return E1_2 + E1_1
         else:
-            print("WARNING: Derivative of MP1 energy is zero at OK")
+            logging.warning("Derivative of MP1 energy is zero at OK")
             return 0.0
 
     def g_mp1_den(self):
@@ -231,7 +232,7 @@ class UEGSCFSystem(System):
             E1_1 = -beta*einsum('ii,i->i', tmat - numpy.diag(en), vec)
             return E1_1 + E1_2
         else:
-            print("WARNING: Derivative of MP1 energy is zero at OK")
+            logging.warning("Derivative of MP1 energy is zero at OK")
             return numpy.zeros((self.g_energies_tot().shape))
 
     def r_energies(self):
@@ -319,12 +320,12 @@ class UEGSCFSystem(System):
         Vd = V[numpy.ix_(numpy.arange(n),oidx,numpy.arange(n),oidx)]
         Vx = V[numpy.ix_(numpy.arange(n),oidx,oidx,numpy.arange(n))]
         F = F + 2*einsum('piri->pr', Vd) - einsum('piir->pr', Vx)
-        Foo = F[numpy.ix_(oidx,oidx)]
-        Fvv = F[numpy.ix_(vidx,vidx)]
-        Fov = F[numpy.ix_(oidx,vidx)]
-        Fvo = F[numpy.ix_(vidx,oidx)]
-        Fa = one_e_blocks(Foo,Fov,Fvo,Fvv)
-        Fb = one_e_blocks(Foo,Fov,Fvo,Fvv)
+        Foo = F[numpy.ix_(oidx, oidx)]
+        Fvv = F[numpy.ix_(vidx, vidx)]
+        Fov = F[numpy.ix_(oidx, vidx)]
+        Fvo = F[numpy.ix_(vidx, oidx)]
+        Fa = one_e_blocks(Foo, Fov, Fvo, Fvv)
+        Fb = one_e_blocks(Foo, Fov, Fvo, Fvv)
         return Fa,Fb
 
     def g_fock(self):
@@ -337,11 +338,11 @@ class UEGSCFSystem(System):
         V = self.g_aint_tot()
         V = V[numpy.ix_(numpy.arange(n),goidx,numpy.arange(n),goidx)]
         F = F + einsum('piri->pr', V)
-        Foo = F[numpy.ix_(goidx,goidx)]
-        Fvv = F[numpy.ix_(gvidx,gvidx)]
-        Fov = F[numpy.ix_(goidx,gvidx)]
-        Fvo = F[numpy.ix_(gvidx,goidx)]
-        return one_e_blocks(Foo,Fov,Fvo,Fvv)
+        Foo = F[numpy.ix_(goidx, goidx)]
+        Fvv = F[numpy.ix_(gvidx, gvidx)]
+        Fov = F[numpy.ix_(goidx, gvidx)]
+        Fvo = F[numpy.ix_(gvidx, goidx)]
+        return one_e_blocks(Foo, Fov, Fvo, Fvv)
 
     def r_fock_tot(self):
         T = self.r_hcore()
@@ -416,7 +417,7 @@ class UEGSCFSystem(System):
         na = da.shape[0]
         nb = db.shape[0]
         if self.T == 0.0:
-            print("WARNING: Occupations derivatives are zero at 0K")
+            logging.warning("Occupations derivatives are zero at 0K")
             return numpy.zeros((na,na)),numpy.zeros((nb,nb))
         beta = 1.0 / self.T
         foa = ft_utils.ff(beta, da, self.mu)
@@ -441,7 +442,7 @@ class UEGSCFSystem(System):
         na = da.shape[0]
         nb = db.shape[0]
         if self.T == 0.0:
-            print("WARNING: Occupations derivatives are zero at 0K")
+            logging.warning("Occupations derivatives are zero at 0K")
             return numpy.zeros((na,na)),numpy.zeros((nb,nb))
         beta = 1.0 / self.T
         foa = ft_utils.ff(beta, da, self.mu)
@@ -461,7 +462,7 @@ class UEGSCFSystem(System):
         d = self.g_energies_tot()
         n = d.shape[0]
         if self.T == 0.0:
-            print("WARNING: Occupations derivatives are zero at 0K")
+            logging.warning("Occupations derivatives are zero at 0K")
             return numpy.zeros((n,n))
         beta = 1.0 / self.T
         fo = ft_utils.ff(beta, d, self.mu)
@@ -477,7 +478,7 @@ class UEGSCFSystem(System):
         d = self.g_energies_tot()
         n = d.shape[0]
         if self.T == 0.0:
-            print("WARNING: Occupations derivatives are zero at 0K")
+            loggin.warning("Occupations derivatives are zero at 0K")
             return numpy.zeros((n,n))
         beta = 1.0 / self.T
         fo = ft_utils.ff(beta, d, self.mu)
@@ -502,62 +503,62 @@ class UEGSCFSystem(System):
         obidx = self.oidx
         vbidx = self.vidx
 
-        Vvvvv = Va[numpy.ix_(vaidx,vaidx,vaidx,vaidx)]
-        Vvvvo = Va[numpy.ix_(vaidx,vaidx,vaidx,oaidx)]
-        Vvovv = Va[numpy.ix_(vaidx,oaidx,vaidx,vaidx)]
-        Vvvoo = Va[numpy.ix_(vaidx,vaidx,oaidx,oaidx)]
-        Vvovo = Va[numpy.ix_(vaidx,oaidx,vaidx,oaidx)]
-        Voovv = Va[numpy.ix_(oaidx,oaidx,vaidx,vaidx)]
-        Vvooo = Va[numpy.ix_(vaidx,oaidx,oaidx,oaidx)]
-        Vooov = Va[numpy.ix_(oaidx,oaidx,oaidx,vaidx)]
-        Voooo = Va[numpy.ix_(oaidx,oaidx,oaidx,oaidx)]
+        Vvvvv = Va[numpy.ix_(vaidx, vaidx, vaidx, vaidx)]
+        Vvvvo = Va[numpy.ix_(vaidx, vaidx, vaidx, oaidx)]
+        Vvovv = Va[numpy.ix_(vaidx, oaidx, vaidx, vaidx)]
+        Vvvoo = Va[numpy.ix_(vaidx, vaidx, oaidx, oaidx)]
+        Vvovo = Va[numpy.ix_(vaidx, oaidx, vaidx, oaidx)]
+        Voovv = Va[numpy.ix_(oaidx, oaidx, vaidx, vaidx)]
+        Vvooo = Va[numpy.ix_(vaidx, oaidx, oaidx, oaidx)]
+        Vooov = Va[numpy.ix_(oaidx, oaidx, oaidx, vaidx)]
+        Voooo = Va[numpy.ix_(oaidx, oaidx, oaidx, oaidx)]
         Va = two_e_blocks(
-            vvvv=Vvvvv,vvvo=Vvvvo,
-            vovv=Vvovv,vvoo=Vvvoo,
-            vovo=Vvovo,oovv=Voovv,
-            vooo=Vvooo,ooov=Vooov,
+            vvvv=Vvvvv, vvvo=Vvvvo,
+            vovv=Vvovv, vvoo=Vvvoo,
+            vovo=Vvovo, oovv=Voovv,
+            vooo=Vvooo, ooov=Vooov,
             oooo=Voooo)
-        Vvvvv = Vb[numpy.ix_(vbidx,vbidx,vbidx,vbidx)]
-        Vvvvo = Vb[numpy.ix_(vbidx,vbidx,vbidx,obidx)]
-        Vvovv = Vb[numpy.ix_(vbidx,obidx,vbidx,vbidx)]
-        Vvvoo = Vb[numpy.ix_(vbidx,vbidx,obidx,obidx)]
-        Vvovo = Vb[numpy.ix_(vbidx,obidx,vbidx,obidx)]
-        Voovv = Vb[numpy.ix_(obidx,obidx,vbidx,vbidx)]
-        Vvooo = Vb[numpy.ix_(vbidx,obidx,obidx,obidx)]
-        Vooov = Vb[numpy.ix_(obidx,obidx,obidx,vbidx)]
-        Voooo = Vb[numpy.ix_(obidx,obidx,obidx,obidx)]
+        Vvvvv = Vb[numpy.ix_(vbidx, vbidx, vbidx, vbidx)]
+        Vvvvo = Vb[numpy.ix_(vbidx, vbidx, vbidx, obidx)]
+        Vvovv = Vb[numpy.ix_(vbidx, obidx, vbidx, vbidx)]
+        Vvvoo = Vb[numpy.ix_(vbidx, vbidx, obidx, obidx)]
+        Vvovo = Vb[numpy.ix_(vbidx, obidx, vbidx, obidx)]
+        Voovv = Vb[numpy.ix_(obidx, obidx, vbidx, vbidx)]
+        Vvooo = Vb[numpy.ix_(vbidx, obidx, obidx, obidx)]
+        Vooov = Vb[numpy.ix_(obidx, obidx, obidx, vbidx)]
+        Voooo = Vb[numpy.ix_(obidx, obidx, obidx, obidx)]
         Vb = two_e_blocks(
-            vvvv=Vvvvv,vvvo=Vvvvo,
-            vovv=Vvovv,vvoo=Vvvoo,
-            vovo=Vvovo,oovv=Voovv,
-            vooo=Vvooo,ooov=Vooov,
+            vvvv=Vvvvv, vvvo=Vvvvo,
+            vovv=Vvovv, vvoo=Vvvoo,
+            vovo=Vvovo, oovv=Voovv,
+            vooo=Vvooo, ooov=Vooov,
             oooo=Voooo)
 
-        Vvvvv = Vabab[numpy.ix_(vaidx,vbidx,vaidx,vbidx)]
-        Vvvvo = Vabab[numpy.ix_(vaidx,vbidx,vaidx,obidx)]
-        Vvvov = Vabab[numpy.ix_(vaidx,vbidx,oaidx,vbidx)]
-        Vvovv = Vabab[numpy.ix_(vaidx,obidx,vaidx,vbidx)]
-        Vovvv = Vabab[numpy.ix_(oaidx,vbidx,vaidx,vbidx)]
-        Vvvoo = Vabab[numpy.ix_(vaidx,vbidx,oaidx,obidx)]
-        Vvoov = Vabab[numpy.ix_(vaidx,obidx,oaidx,vbidx)]
-        Vvovo = Vabab[numpy.ix_(vaidx,obidx,vaidx,obidx)]
-        Vovvo = Vabab[numpy.ix_(oaidx,vbidx,vaidx,obidx)]
-        Vovov = Vabab[numpy.ix_(oaidx,vbidx,oaidx,vbidx)]
-        Voovv = Vabab[numpy.ix_(oaidx,obidx,vaidx,vbidx)]
-        Vvooo = Vabab[numpy.ix_(vaidx,obidx,oaidx,obidx)]
-        Vovoo = Vabab[numpy.ix_(oaidx,vbidx,oaidx,obidx)]
-        Voovo = Vabab[numpy.ix_(oaidx,obidx,vaidx,obidx)]
-        Vooov = Vabab[numpy.ix_(oaidx,obidx,oaidx,vbidx)]
-        Voooo = Vabab[numpy.ix_(oaidx,obidx,oaidx,obidx)]
-        Vabab = two_e_blocks_full(vvvv=Vvvvv,
-                vvvo=Vvvvo,vvov=Vvvov,
-                vovv=Vvovv,ovvv=Vovvv,
-                vvoo=Vvvoo,vovo=Vvovo,
-                ovvo=Vovvo,voov=Vvoov,
-                ovov=Vovov,oovv=Voovv,
-                vooo=Vvooo,ovoo=Vovoo,
-                oovo=Voovo,ooov=Vooov,
-                oooo=Voooo)
+        Vvvvv = Vabab[numpy.ix_(vaidx, vbidx, vaidx, vbidx)]
+        Vvvvo = Vabab[numpy.ix_(vaidx, vbidx, vaidx, obidx)]
+        Vvvov = Vabab[numpy.ix_(vaidx, vbidx, oaidx, vbidx)]
+        Vvovv = Vabab[numpy.ix_(vaidx, obidx, vaidx, vbidx)]
+        Vovvv = Vabab[numpy.ix_(oaidx, vbidx, vaidx, vbidx)]
+        Vvvoo = Vabab[numpy.ix_(vaidx, vbidx, oaidx, obidx)]
+        Vvoov = Vabab[numpy.ix_(vaidx, obidx, oaidx, vbidx)]
+        Vvovo = Vabab[numpy.ix_(vaidx, obidx, vaidx, obidx)]
+        Vovvo = Vabab[numpy.ix_(oaidx, vbidx, vaidx, obidx)]
+        Vovov = Vabab[numpy.ix_(oaidx, vbidx, oaidx, vbidx)]
+        Voovv = Vabab[numpy.ix_(oaidx, obidx, vaidx, vbidx)]
+        Vvooo = Vabab[numpy.ix_(vaidx, obidx, oaidx, obidx)]
+        Vovoo = Vabab[numpy.ix_(oaidx, vbidx, oaidx, obidx)]
+        Voovo = Vabab[numpy.ix_(oaidx, obidx, vaidx, obidx)]
+        Vooov = Vabab[numpy.ix_(oaidx, obidx, oaidx, vbidx)]
+        Voooo = Vabab[numpy.ix_(oaidx, obidx, oaidx, obidx)]
+        Vabab = two_e_blocks_full(
+            vvvv=Vvvvv, vvvo=Vvvvo,
+            vvov=Vvvov, vovv=Vvovv,
+            ovvv=Vovvv, vvoo=Vvvoo,
+            vovo=Vvovo, ovvo=Vovvo,
+            voov=Vvoov, ovov=Vovov,
+            oovv=Voovv, vooo=Vvooo,
+            ovoo=Vovoo, oovo=Voovo,
+            ooov=Vooov, oooo=Voooo)
         return Va,Vb,Vabab
 
     def g_aint(self, code=0):
@@ -576,28 +577,28 @@ class UEGSCFSystem(System):
         goidx = self.goidx
         gvidx = self.gvidx
         if code == 0 or code == 1:
-            Vvvvv = V[numpy.ix_(gvidx,gvidx,gvidx,gvidx)]
+            Vvvvv = V[numpy.ix_(gvidx, gvidx, gvidx, gvidx)]
         if code == 0 or code == 2:
-            Vvvvo = V[numpy.ix_(gvidx,gvidx,gvidx,goidx)]
+            Vvvvo = V[numpy.ix_(gvidx, gvidx, gvidx, goidx)]
         if code == 0 or code == 3:
-            Vvovv = V[numpy.ix_(gvidx,goidx,gvidx,gvidx)]
+            Vvovv = V[numpy.ix_(gvidx, goidx, gvidx, gvidx)]
         if code == 0 or code == 4:
-            Vvvoo = V[numpy.ix_(gvidx,gvidx,goidx,goidx)]
+            Vvvoo = V[numpy.ix_(gvidx, gvidx, goidx, goidx)]
         if code == 0 or code == 5:
-            Vvovo = V[numpy.ix_(gvidx,goidx,gvidx,goidx)]
+            Vvovo = V[numpy.ix_(gvidx, goidx, gvidx, goidx)]
         if code == 0 or code == 6:
-            Voovv = V[numpy.ix_(goidx,goidx,gvidx,gvidx)]
+            Voovv = V[numpy.ix_(goidx, goidx, gvidx, gvidx)]
         if code == 0 or code == 7:
-            Vvooo = V[numpy.ix_(gvidx,goidx,goidx,goidx)]
+            Vvooo = V[numpy.ix_(gvidx, goidx, goidx, goidx)]
         if code == 0 or code == 8:
-            Vooov = V[numpy.ix_(goidx,goidx,goidx,gvidx)]
+            Vooov = V[numpy.ix_(goidx, goidx, goidx, gvidx)]
         if code == 0 or code == 9:
-            Voooo = V[numpy.ix_(goidx,goidx,goidx,goidx)]
+            Voooo = V[numpy.ix_(goidx, goidx, goidx, goidx)]
         return two_e_blocks(
-            vvvv=Vvvvv,vvvo=Vvvvo,
-            vovv=Vvovv,vvoo=Vvvoo,
-            vovo=Vvovo,oovv=Voovv,
-            vooo=Vvooo,ooov=Vooov,
+            vvvv=Vvvvv, vvvo=Vvvvo,
+            vovv=Vvovv, vvoo=Vvvoo,
+            vovo=Vvovo, oovv=Voovv,
+            vooo=Vvooo, ooov=Vooov,
             oooo=Voooo)
 
     def u_aint_tot(self):

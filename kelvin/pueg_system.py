@@ -89,7 +89,7 @@ class PUEGSystem(System):
             vec = dvec*fo*fv
             return -numpy.einsum('ijij,i,j->', V, vec, fo)
         else:
-            print("WARNING: Derivative of MP1 energy is zero at OK")
+            logging.warning("Derivative of MP1 energy is zero at OK")
             return 0.0
 
     def g_mp1_den(self):
@@ -163,7 +163,7 @@ class PUEGSystem(System):
         d = self.g_energies_tot()
         n = d.shape[0]
         if self.T == 0.0:
-            print("WARNING: Occupation derivatives are zero at 0K")
+            logging.warning("Derivative of MP1 energy is zero at OK")
             return numpy.zeros((n,n))
         beta = 1.0 / self.T
         fo = ft_utils.ff(beta, d, self.mu)
@@ -179,7 +179,7 @@ class PUEGSystem(System):
         d = self.g_energies_tot()
         n = d.shape[0]
         if self.T == 0.0:
-            print("WARNING: Occupation derivatives are zero at 0K")
+            logging.warning("Derivative of MP1 energy is zero at OK")
             return numpy.zeros((n,n))
         beta = 1.0 / self.T
         fo = ft_utils.ff(beta, d, self.mu)

@@ -1,3 +1,4 @@
+import logging
 import time
 import numpy
 from cqcpy import ft_utils
@@ -153,22 +154,20 @@ def ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G, beta, ng, ti,
             F.ov,I.oovv,g,beta)
 
         # determine convergence
-        if iprint > 0:
-            if isinstance(E, complex):
-                print(' %2d  %.10f  %.3E %.4E' % (i+1,E.real,E.imag,res1+res2))
-            else:
-                print(' %2d  %.10f   %.4E' % (i+1,E,res1+res2))
+        if isinstance(E, complex):
+            logging.info(' %2d  %.10f  %.3E %.4E' % (i+1,E.real,E.imag,res1+res2))
+        else:
+            logging.info(' %2d  %.10f   %.4E' % (i+1,E,res1+res2))
         i = i + 1
         if numpy.abs(E - Eold) < ethresh and res1+res2 < tthresh:
             converged = True
         Eold = E
 
     if not converged:
-        print("WARNING: {} did not converge!".format(method))
+        logging.warning("{} did not converge!".format(method))
 
     tend = time.time()
-    if iprint > 0:
-        print("Total {} time: {:.4f} s".format(method,(tend - tbeg)))
+    logging.info("Total {} time: {:.4f} s".format(method,(tend - tbeg)))
 
     return Eold,T1old,T2old
 
@@ -221,8 +220,7 @@ def ft_cc_iter_extrap(method, F, I, D1, D2, g, G, beta, ng, ti,
         converged = False
         nl1 = numpy.sqrt(float(T1new[ig].size))
         nl2 = numpy.sqrt(float(T2new[ig].size))
-        if iprint > 0:
-            print("Time point {}".format(ig))
+        logging.info("Time point {}".format(ig))
         i = 0
         while i < max_iter and not converged:
             # form new T1 and T2
@@ -236,8 +234,7 @@ def ft_cc_iter_extrap(method, F, I, D1, D2, g, G, beta, ng, ti,
             T2new[ig] = alpha*T2new[ig] + (1.0 - alpha)*T2.copy()
 
             # determine convergence
-            if iprint > 0:
-                print(' %2d  %.4E' % (i+1,res1+res2))
+            logging.info(' %2d  %.4E' % (i+1,res1+res2))
             i = i + 1
             if res1 + res2 < thresh:
                 converged = True
@@ -300,22 +297,20 @@ def ft_ucc_iter(method, T1aold, T1bold, T2aaold, T2abold, T2bbold, Fa, Fb, Ia, I
             Fa.ov,Fb.ov,Ia.oovv,Ib.oovv,Iabab.oovv,g,beta)
 
         # determine convergence
-        if iprint > 0:
-            if isinstance(E, complex):
-                print(' %2d  %.10f  %.3E %.4E' % (i+1,E.real,E.imag,res1+res2))
-            else:
-                print(' %2d  %.10f   %.4E' % (i+1,E,res1+res2))
+        if isinstance(E, complex):
+            logging.info(' %2d  %.10f  %.3E %.4E' % (i+1,E.real,E.imag,res1+res2))
+        else:
+            logging.info(' %2d  %.10f   %.4E' % (i+1,E,res1+res2))
         i = i + 1
         if numpy.abs(E - Eold) < ethresh and res1+res2 < tthresh:
             converged = True
         Eold = E
 
     if not converged:
-        print("WARNING: {} did not converge!".format(method))
+        logging.warning("{} did not converge!".format(method))
 
     tend = time.time()
-    if iprint > 0:
-        print("Total {} time: {:.4f} s".format(method,(tend - tbeg)))
+    logging.info("Total {} time: {:.4f} s".format(method,(tend - tbeg)))
 
     return Eold,(T1aold,T1bold),(T2aaold,T2abold,T2bbold)
 
@@ -386,8 +381,7 @@ def ft_ucc_iter_extrap(method, Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb
         converged = False
         nl1 = numpy.sqrt(float(T1newa[ig].size))
         nl2 = numpy.sqrt(float(T2newaa[ig].size))
-        if iprint > 0:
-            print("Time point {}".format(ig))
+        logging.info("Time point {}".format(ig))
         i = 0
         while i < max_iter and not converged:
             # form new T1 and T2
@@ -408,8 +402,7 @@ def ft_ucc_iter_extrap(method, Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb
             T2newbb[ig] = alpha*T2newbb[ig] + (1.0 - alpha)*T2bb.copy()
 
             # determine convergence
-            if iprint > 0:
-                print(' %2d  %.4E' % (i+1,res1+res2))
+            logging.info(' %2d  %.4E' % (i+1,res1+res2))
             i = i + 1
             if res1 + res2 < thresh:
                 converged = True
@@ -471,18 +464,16 @@ def ft_lambda_iter(method, L1old, L2old, T1, T2, F, I, D1, D2,
         L2 = None
 
         # determine convergence
-        if iprint > 0:
-            print(' %2d  %.10f' % (i+1,res1 + res2))
+        logging.info(' %2d  %.10f' % (i+1,res1 + res2))
         i = i + 1
         if res1 + res2 < thresh:
             converged = True
 
     if not converged:
-        print("WARNING: CCSD Lambda-equations did not converge!")
+        logging.warning("CCSD Lambda-equations did not converge!")
 
     tend = time.time()
-    if iprint > 0:
-        print("Total CCSD Lambda time: %f s" % (tend - tbeg))
+    logging.info("Total CCSD Lambda time: %f s" % (tend - tbeg))
 
     return L1old,L2old
 
@@ -559,18 +550,16 @@ def ft_ulambda_iter(method, L1ain, L1bin, L2aain, L2abin, L2bbin, T1aold, T1bold
         L2bb = None
 
         # determine convergence
-        if iprint > 0:
-            print(' %2d  %.10f' % (i+1,res1 + res2))
+        logging.info(' %2d  %.10f' % (i+1,res1 + res2))
         i = i + 1
         if res1 + res2 < thresh:
             converged = True
 
     if not converged:
-        print("WARNING: CCSD Lambda-equations did not converge!")
+        logging.warning("CCSD Lambda-equations did not converge!")
 
     tend = time.time()
-    if iprint > 0:
-        print("Total CCSD Lambda time: %f s" % (tend - tbeg))
+    logging.info("Total CCSD Lambda time: %f s" % (tend - tbeg))
 
     return L1aold,L1bold,L2aaold,L2abold,L2bbold
 

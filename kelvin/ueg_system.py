@@ -146,7 +146,7 @@ class UEGSystem(System):
             #Den -= beta*einsum('ijij,i,j->i',V,vec,fo)
             return Den
         else:
-            print("WARNING: Derivative of MP1 energy is zero at OK")
+            logging.warning("Derivative of MP1 energy is zero at OK")
             return numpy.zeros(en.shape)
 
     def u_d_mp1(self, dveca, dvecb):
@@ -166,7 +166,7 @@ class UEGSystem(System):
             D -= einsum('ijij,i,j->', Vabab, foa, vecb)
             return D
         else:
-            print("WARNING: Derivative of MP1 energy is zero at OK")
+            logging.warning("Derivative of MP1 energy is zero at OK")
             return 0.0
 
     def u_mp1_den(self):
@@ -186,7 +186,7 @@ class UEGSystem(System):
             Db -= beta*einsum('ijij,i,j->j', Vabab, foa, vecb)
             return Da,Db
         else:
-            print("WARNING: Derivative of MP1 energy is zero at OK")
+            logging.warning("Derivative of MP1 energy is zero at OK")
             return numpy.zeros(ea.shape),numpy.zeros(eb.shape)
 
     def g_d_mp1(self, dvec):
@@ -199,7 +199,7 @@ class UEGSystem(System):
             vec = dvec*fo*fv
             return -einsum('ijij,i,j->', V, vec, fo)
         else:
-            print("WARNING: Derivative of MP1 energy is zero at OK")
+            logging.warning("Derivative of MP1 energy is zero at OK")
             return 0.0
 
     def g_mp1_den(self):
@@ -212,7 +212,7 @@ class UEGSystem(System):
             vec = fo*fv
             return -beta*einsum('ijij,i,j->i', V, vec, fo)
         else:
-            print("WARNING: Derivative of MP1 energy is zero at OK")
+            logging.warning("Derivative of MP1 energy is zero at OK")
             return numpy.zeros(self.g_energies_tot.shape)
 
     def r_energies(self):
@@ -423,7 +423,7 @@ class UEGSystem(System):
         d = self.r_energies_tot()
         n = d.shape[0]
         if self.T == 0.0:
-            print("WARNING: Occupations derivatives are zero at 0K")
+            logging.warning("Occupations derivatives are zero at 0K")
             return numpy.zeros((n,n))
         beta = 1.0 / self.T
         fo = ft_utils.ff(beta, d, self.mu)
@@ -439,7 +439,7 @@ class UEGSystem(System):
         na = da.shape[0]
         nb = db.shape[0]
         if self.T == 0.0:
-            print("WARNING: Occupations derivatives are zero at 0K")
+            logging.warning("Occupations derivatives are zero at 0K")
             return numpy.zeros((na,na)),numpy.zeros((nb,nb))
         beta = 1.0 / self.T
         foa = ft_utils.ff(beta, da, self.mu)
@@ -464,7 +464,7 @@ class UEGSystem(System):
         na = da.shape[0]
         nb = db.shape[0]
         if self.T == 0.0:
-            print("WARNING: Occupations derivatives are zero at 0K")
+            logging.warning("Occupations derivatives are zero at 0K")
             return numpy.zeros((na,na)),numpy.zeros((nb,nb))
         beta = 1.0 / self.T
         foa = ft_utils.ff(beta, da, self.mu)
@@ -484,7 +484,7 @@ class UEGSystem(System):
         d = self.g_energies_tot()
         n = d.shape[0]
         if self.T == 0.0:
-            print("WARNING: Occupations derivatives are zero at 0K")
+            logging.warning("Occupations derivatives are zero at 0K")
             return numpy.zeros((n,n))
         beta = 1.0 / self.T
         fo = ft_utils.ff(beta, d, self.mu)
@@ -500,7 +500,7 @@ class UEGSystem(System):
         d = self.g_energies_tot()
         n = d.shape[0]
         if self.T == 0.0:
-            print("WARNING: Occupations derivatives are zero at 0K")
+            logging.warning("Occupations derivatives are zero at 0K")
             return numpy.zeros((n,n))
         beta = 1.0 / self.T
         fo = ft_utils.ff(beta, d, self.mu)

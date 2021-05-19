@@ -1,3 +1,4 @@
+import logging
 import numpy
 from pyscf import lib
 from cqcpy import cc_equations
@@ -24,10 +25,9 @@ def _get_active(athresh, fthresh, beta, mu, sys, iprint):
         ivir = [i for i,x in enumerate(fv) if x > athresh and fo[i] > fthresh]
         nocc = len(focc)
         nvir = len(fvir)
-        if iprint > 0:
-            print("FT-CCSD orbital info:")
-            print('  nocc: {:d}'.format(nocc))
-            print('  nvir: {:d}'.format(nvir))
+        logging.info("FT-CCSD orbital info:")
+        logging.info("  nocc: {:d}".format(nocc))
+        logging.info("  nvir: {:d}".format(nvir))
     elif sys.has_u():
         ea,eb = sys.u_energies_tot()
         foa = ft_utils.ff(beta, ea, mu)
@@ -50,12 +50,11 @@ def _get_active(athresh, fthresh, beta, mu, sys, iprint):
         nvira = len(fvira)
         noccb = len(foccb)
         nvirb = len(fvirb)
-        if iprint > 0:
-            print("FT-UCCSD orbital info:")
-            print('  nocca: {:d}'.format(nocca))
-            print('  nvira: {:d}'.format(nvira))
-            print('  noccb: {:d}'.format(noccb))
-            print('  nvirb: {:d}'.format(nvirb))
+        logging.info("FT-UCCSD orbital info:")
+        logging.info("  nocca: {:d}".format(nocca))
+        logging.info("  nvira: {:d}".format(nvira))
+        logging.info("  noccb: {:d}".format(noccb))
+        logging.info("  nvirb: {:d}".format(nvirb))
     else:
         en = sys.g_energies_tot()
         fo = ft_utils.ff(beta, en, mu)
@@ -66,10 +65,9 @@ def _get_active(athresh, fthresh, beta, mu, sys, iprint):
         ivir = [i for i,x in enumerate(fv) if x > athresh and fo[i] > fthresh]
         nocc = len(focc)
         nvir = len(fvir)
-        if iprint > 0:
-            print("FT-CCSD orbital info:")
-            print('  nocc: {:d}'.format(nocc))
-            print('  nvir: {:d}'.format(nvir))
+        logging.info("FT-CCSD orbital info:")
+        logging.info("  nocc: {:d}".format(nocc))
+        logging.info("  nvir: {:d}".format(nvir))
     return focc,fvir,iocc,ivir
 
 
@@ -147,12 +145,11 @@ class TDCCSD(object):
     def run(self, response=None):
         """Run CCSD calculation."""
         if self.finite_T:
-            if self.iprint > 0:
-                print('Running CCSD at an electronic temperature of %f K'
+            #if self.iprint > 0:
+            logging.info('Running CCSD at an electronic temperature of %f K'
                     % ft_utils.HtoK(self.T))
         else:
-            if self.iprint > 0:
-                print('Running CCSD at zero Temperature')
+            logging.info("Running CCSD at zero Temperature")
         if self.sys.has_r():
             return self._rccsd()
         elif self.sys.has_u():
@@ -164,10 +161,20 @@ class TDCCSD(object):
         """Compute energy, entropy, particle number."""
         if not self.finite_T:
             N = self.sys.g_energies()[0].shape[0]
-            print("T = 0: ")
-            print('  E = {}'.format(self.Etot))
-            print('  S = {}'.format(0.0))
-            print('  N = {}'.format(N))
+            logging.warning(
+                "Computing thermodynamic quantities at zero temperature")
+            self.N0 = N
+            self.N1 = 0
+            self.Ncc = 0
+            self.N = Ncc + N0 + N1
+            self.E0 = self.G0
+            self.E1 = self.G1
+            self.Ecc = self.Gcc
+            self.E = E0 + E1 + Ecc
+            self.S = 0
+            self.S0 = 0
+            self.S1 = 0
+            self.Scc = 0
         else:
             if self.L1[0] is None:
                 if self.sys.has_r():

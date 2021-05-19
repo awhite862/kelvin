@@ -1,3 +1,4 @@
+import logging
 import numpy
 from cqcpy import ft_utils
 from pyscf.lib import einsum
@@ -101,8 +102,7 @@ class neq_ccsd(object):
         Ei = ft_cc_energy.ft_cc_energy_neq(
             T1oldf,T1oldb,T1oldi,T2oldf,T2oldb,T2oldi,
             Ff.ov,Fb.ov,F.ov,I.oovv,gr,gi,beta,Qterm=False)
-        if self.iprint > 0:
-            print('MP2 Energy {:.10f}'.format(Ei))
+        logging.info("MP2 Energy {:.10f}".format(Ei))
 
         converged = False
         thresh = self.econv
@@ -144,19 +144,18 @@ class neq_ccsd(object):
 
             # compute energy
             E = ft_cc_energy.ft_cc_energy_neq(
-                T1oldf,T1oldb,T1oldi,T2oldf,T2oldb,T2oldi,
-                Ff.ov,Fb.ov,F.ov,I.oovv,gr,gi,beta)
+                T1oldf, T1oldb, T1oldi, T2oldf, T2oldb, T2oldi,
+                Ff.ov, Fb.ov, F.ov, I.oovv, gr, gi, beta)
 
             # determine convergence
-            if self.iprint > 0:
-                print(' %2d  (%.8f,%.8f)   %.4E' % (i+1,E.real,E.imag,res1+res2))
+            logging.info(' %2d  (%.8f,%.8f)   %.4E' % (i+1,E.real,E.imag,res1+res2))
             i = i + 1
             if numpy.abs(E - Eold) < thresh:
                 converged = True
             Eold = E
 
         if not converged:
-            print("WARNING: NEQ-CCSD did not converge!")
+            logging.warning("NEQ-CCSD did not converge!")
 
         self.T1f = T1oldf
         self.T1b = T1oldb
@@ -260,8 +259,7 @@ class neq_ccsd(object):
             nl2 += numpy.linalg.norm(L2oldi)
 
             # determine convergence
-            if self.iprint > 0:
-                print(' %2d  %.6E' % (i+1,res1+res2))
+            logging.info(' %2d  %.6E' % (i+1,res1+res2))
             i = i + 1
             if res1 + res2 < thresh:
                 converged = True
