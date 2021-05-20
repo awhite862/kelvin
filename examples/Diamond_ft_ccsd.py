@@ -1,6 +1,13 @@
+import logging
+import sys as csys
 from kelvin.ccsd import ccsd
 from kelvin.scf_system import SCFSystem
 from pyscf.pbc import gto, scf
+
+logging.basicConfig(
+    format='%(message)s',
+    level=logging.INFO,
+    stream=csys.stdout)
 
 T = 0.1
 mu = 0.11
@@ -26,6 +33,6 @@ sys = SCFSystem(mf, T, mu)
 ccsdT = ccsd(sys, iprint=1, max_iter=100, econv=1e-11, damp=0.0, T=T, mu=mu)
 Etot, Ecc = ccsdT.run()
 ccsdT.compute_ESN()
-print('N = {}'.format(ccsdT.N))
-print('E = {}'.format(ccsdT.E))
-print('S = {}'.format(ccsdT.S))
+logging.info('N = {}'.format(ccsdT.N))
+logging.info('E = {}'.format(ccsdT.E))
+logging.info('S = {}'.format(ccsdT.S))

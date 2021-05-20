@@ -1,7 +1,14 @@
+import logging
+import sys as csys
 from pyscf import gto, scf
 from kelvin.mp3 import MP3
 from kelvin.ccsd import ccsd
 from kelvin.scf_system import SCFSystem
+
+logging.basicConfig(
+    format='%(message)s',
+    level=logging.INFO,
+    stream=csys.stdout)
 
 mol = gto.M(
     verbose=0,
@@ -11,7 +18,7 @@ mol = gto.M(
 m = scf.RHF(mol)
 scf.conv_tol_grad = 1e-12
 m.conv_tol = 1e-12
-print('SCF energy: %f' % m.scf())
+logging.info('SCF energy: %f' % m.scf())
 
 sys = SCFSystem(m, 0.0, 0.0)
 ccsd0 = ccsd(sys, iprint=1, max_iter=14, econv=1e-10)
@@ -23,17 +30,17 @@ ng = 10
 sys = SCFSystem(m, T, mu)
 mp3T = MP3(sys, iprint=1, T=T, mu=mu)
 E0T, E1T, E2T, E3T = mp3T.run()
-print('HF energy: %.8f' % (E0T + E1T))
-print('MP3 correlation energy: %.8f' % (E2T + E3T))
+logging.info('HF energy: %.8f' % (E0T + E1T))
+logging.info('MP3 correlation energy: %.8f' % (E2T + E3T))
 
 ccsdT = ccsd(
     sys, iprint=1, T=T, mu=mu, max_iter=35,
     damp=0.0, ngrid=ng, econv=1e-10, singles=True)
 Ecctot, Ecc = ccsdT.run()
 ccsdT.compute_ESN()
-print('N = {}'.format(ccsdT.N))
-print('E = {}'.format(ccsdT.E))
-print('S = {}'.format(ccsdT.S))
+logging.info('N = {}'.format(ccsdT.N))
+logging.info('E = {}'.format(ccsdT.E))
+logging.info('S = {}'.format(ccsdT.S))
 
 delta = 5e-4
 muf = mu + delta
@@ -49,7 +56,7 @@ Eb, Ecb = ccsdT.run()
 
 Nccx = -(Ecf - Ecb)/(2*delta)
 Nx = -(Ef - Eb)/(2*delta)
-print(Nx - Nccx, Nccx)
+logging.info("{}  {}".format(Nx - Nccx, Nccx))
 
 Tf = T + delta
 Tb = T - delta
@@ -64,10 +71,10 @@ Eb, Ecb = ccsdT.run()
 
 Sccx = -(Ecf - Ecb)/(2*delta)
 Sx = -(Ef - Eb)/(2*delta)
-print(Sx, Sccx)
+logging.info("{}  {}".format(Sx, Sccx))
 Eccx = Ecc + T*Sccx + mu*Nccx
 Ex = Ecctot + T*Sx + mu*Nx
 
-print('N = {}'.format(Nx))
-print('E = {}'.format(Ex))
-print('S = {}'.format(Sx))
+logging.info('N = {}'.format(Nx))
+logging.info('E = {}'.format(Ex))
+logging.info('S = {}'.format(Sx))

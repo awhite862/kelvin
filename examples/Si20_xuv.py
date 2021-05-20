@@ -1,3 +1,5 @@
+import logging
+import sys as csys
 import numpy
 import h5py
 from kelvin.solid_field_system import solid_field_system
@@ -5,6 +7,11 @@ from kelvin.neq_ccsd import neq_ccsd
 from pyscf.pbc.gto import Cell
 from pyscf.pbc.tools.lattice import get_ase_atom
 from pyscf.pbc import scf
+
+logging.basicConfig(
+    format='%(message)s',
+    level=logging.INFO,
+    stream=csys.stdout)
 
 formula = 'si'
 bas = 'gth-szv'
@@ -26,7 +33,7 @@ cell.from_ase(ase_atom).build(
     precision=1e-8, verbose=9, pseudo='gth-pade')
 mf = scf.RHF(cell, exxdiv=None)
 ehf = mf.kernel()
-print("HF energy (per unit cell) = %.17g" % ehf)
+logging.info("HF energy (per unit cell) = %.17g" % ehf)
 
 T = 0.2
 mu = 0.5527

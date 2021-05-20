@@ -1,0 +1,363 @@
+arg.atm = [[ 4 20  1 23  0  0]
+ [ 4 24  1 27  0  0]]
+arg.bas = [[ 0  0  4  1  0 28 32  0]
+ [ 0  1  4  1  0 36 40  0]
+ [ 1  0  4  1  0 28 32  0]
+ [ 1  1  4  1  0 36 40  0]]
+arg.env = [ 1.37036000e+02  0.00000000e+00  0.00000000e+00  0.00000000e+00
+  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00
+  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00
+  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00
+  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00
+  0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00
+  2.56577546e+00  2.56577546e+00  2.56577546e+00  0.00000000e+00
+  1.20324036e+00  4.68838597e-01  1.67985391e-01  5.75616890e-02
+  9.55041638e-01 -3.62614873e-01 -5.21789181e-01 -5.67046954e-02
+  1.20324036e+00  4.68838597e-01  1.67985391e-01  5.75616890e-02
+  1.74459430e-01 -2.93640872e-01 -1.70705338e-01 -2.98083305e-02]
+ecpbas  = []
+#INFO: **** input file is /home/alec/Source/kelvin/examples/Si20_xuv.py ****
+import logging
+import sys as csys
+import numpy
+import h5py
+from kelvin.solid_field_system import solid_field_system
+from kelvin.neq_ccsd import neq_ccsd
+from pyscf.pbc.gto import Cell
+from pyscf.pbc.tools.lattice import get_ase_atom
+from pyscf.pbc import scf
+
+logging.basicConfig(
+    format='%(message)s',
+    level=logging.INFO,
+    stream=csys.stdout)
+
+formula = 'si'
+bas = 'gth-szv'
+
+ase_atom = get_ase_atom(formula)
+
+cell = Cell()
+if formula.lower() == 'si':
+    ke_cutoff = 40
+elif formula.lower() == 'c':
+    ke_cutoff = 40
+elif formula.lower() == 'ge':
+    ke_cutoff = 40
+else:
+    raise RuntimeError(
+        'No recommended kinetic energy cutoff for formula ', formula)
+cell.from_ase(ase_atom).build(
+    unit='B', ke_cutoff=ke_cutoff, basis=bas,
+    precision=1e-8, verbose=9, pseudo='gth-pade')
+mf = scf.RHF(cell, exxdiv=None)
+ehf = mf.kernel()
+logging.info("HF energy (per unit cell) = %.17g" % ehf)
+
+T = 0.2
+mu = 0.5527
+A0 = 40*0.0168803
+t0 = 15.0
+sigma = 2.0
+omega = 0.97529
+tmax = 30.0
+ng = 200
+ngi = 20
+deltat = tmax / ng
+
+ti = numpy.asarray([deltat/2 + float(j)*deltat for j in range(ng)])
+sys = solid_field_system(T, mf, ti, A0, t0, sigma, omega, mu=mu)
+cc = neq_ccsd(
+    sys, T, mu=mu, tmax=tmax, econv=1e-8, max_iter=1000,
+    damp=0.6, ngr=ng, ngi=ngi, iprint=1)
+E, Ecc = cc.run()
+cc._neq_ccsd_lambda()
+cc._neq_1rdm()
+p = cc.compute_1rdm()
+
+hf = h5py.File('den20_040.h5', 'w')
+hf.create_dataset("density", data=p)
+hf.close()
+#INFO: ******************** input file end ********************
+
+
+System: ('Linux', 'alec-Precision-T1650', '4.15.0-140-generic', '#144-Ubuntu SMP Fri Mar 19 14:12:35 UTC 2021', 'x86_64', 'x86_64')  Threads 1
+Python 2.7.17 (default, Feb 27 2021, 15:10:58) 
+[GCC 7.5.0]
+numpy 1.16.6  scipy 1.2.3
+Date: Wed May 19 18:11:03 2021
+PySCF version 1.7.4
+PySCF path  /home/alec/pyscf_pyscf/pyscf
+GIT ORIG_HEAD ead2836c86bd0505ac851de9b644ed0f2ef93be0
+GIT HEAD      ref: refs/heads/master
+GIT master branch  3872975e1a47c942335e5cd3b742246f66c5efd0
+
+[CONFIG] DEBUG = False
+[CONFIG] MAX_MEMORY = 4000
+[CONFIG] TMPDIR = .
+[CONFIG] UNIT = angstrom
+[CONFIG] VERBOSE = 3
+[CONFIG] conf_file = None
+[INPUT] verbose = 9
+[INPUT] max_memory = 4000 
+[INPUT] num. atoms = 2
+[INPUT] num. electrons = 8
+[INPUT] charge = 0
+[INPUT] spin (= nelec alpha-beta = 2S) = 0
+[INPUT] symmetry False subgroup None
+[INPUT] Mole.unit = B
+[INPUT]  1 Si     0.000000000000   0.000000000000   0.000000000000 AA    0.000000000000   0.000000000000   0.000000000000 Bohr
+[INPUT]  2 Si     1.357749902598   1.357749902598   1.357749902598 AA    2.565775461565   2.565775461565   2.565775461565 Bohr
+[INPUT] ---------------- BASIS SET ---------------- 
+[INPUT] l, kappa, [nprim/nctr], expnt,             c_1 c_2 ...
+[INPUT] Si
+[INPUT] 0    0    [4    /1   ]  1.20324036        0.3290356759
+                                0.468838597       -0.2533162616
+                                0.167985391       -0.7870936517
+                                0.057561689       -0.1909870193
+[INPUT] 1    0    [4    /1   ]  1.20324036        0.0474536439
+                                0.468838597       -0.2594495462
+                                0.167985391       -0.5440932235
+                                0.057561689       -0.3623984652
+
+Ewald components = 1.60203992177182e-06, -15.7676591151163, 7.36973162275279
+nuclear repulsion = -8.39792589032358
+number of shells = 4
+number of NR pGTOs = 32
+number of NR cGTOs = 8
+basis = gth-szv
+ecp = {}
+bas 0, expnt(s) = [1.20324036 0.4688386  0.16798539 0.05756169]
+bas 1, expnt(s) = [1.20324036 0.4688386  0.16798539 0.05756169]
+bas 2, expnt(s) = [1.20324036 0.4688386  0.16798539 0.05756169]
+bas 3, expnt(s) = [1.20324036 0.4688386  0.16798539 0.05756169]
+CPU time:         0.19
+lattice vectors  a1 [0.000000000, 5.131550923, 5.131550923]
+                 a2 [5.131550923, 0.000000000, 5.131550923]
+                 a3 [5.131550923, 5.131550923, 0.000000000]
+dimension = 3
+low_dim_ft_type = None
+Cell volume = 270.256
+rcut = 27.71105468599684 (nimgs = [5 5 5])
+lattice sum = 815 cells
+precision = 1e-08
+pseudo = gth-pade
+ke_cutoff = 40
+    = [17 17 17] mesh (4913 PWs)
+ew_eta = 0.844465
+ew_cut = 7.844737202449984 (nimgs = [2 2 2])
+
+
+******** <class 'pyscf.pbc.scf.hf.RHF'> ********
+method = RHF-SCF-RHF
+initial guess = minao
+damping factor = 0
+level_shift factor = 0
+DIIS = <class 'pyscf.scf.diis.CDIIS'>
+diis_start_cycle = 1
+diis_space = 8
+SCF conv_tol = 1e-07
+SCF conv_tol_grad = None
+SCF max_cycles = 50
+direct_scf = False
+chkfile to save SCF result = /home/alec/Source/kelvin/examples/tmpx1lf10
+max_memory 4000 MB (current use 71 MB)
+******** PBC SCF flags ********
+kpt = [0. 0. 0.]
+Exchange divergence treatment (exxdiv) = None
+DF object = <pyscf.pbc.df.fft.FFTDF object at 0x7fd4a06bbf50>
+
+
+******** <class 'pyscf.pbc.df.fft.FFTDF'> ********
+mesh = [17 17 17] (4913 PWs)
+len(kpts) = 1
+    kpts = [[0. 0. 0.]]
+
+WARN: ke_cutoff/mesh (40 / [17 17 17]) is not enough for FFTDF to get integral accuracy 1e-08.
+Coulomb integral error is ~ 0.0039 Eh.
+Recommended ke_cutoff/mesh are 70.6237 / [23 23 23].
+
+Set gradient conv threshold to 0.000316228
+Nelec from initial guess = 8.193032399689717
+Big error detected in the electron number of initial guess density matrix (Ne/cell = 8.19303)!
+  This can cause huge error in Fock matrix and lead to instability in SCF for low-dimensional systems.
+  DM is normalized wrt the number of electrons 8
+Building PBC AO integrals incore
+    CPU time for vj and vk      0.19 sec, wall time      0.19 sec
+Ewald components = 1.60203992177182e-06, -15.7676591151163, 7.36973162275279
+E1 = 1.651491632239031  E_coul = -0.024140897948057252
+init E= -6.7705751560326
+cond(S) = 10.95076501420809
+    CPU time for initialize scf      0.41 sec, wall time      0.41 sec
+  HOMO = 0.44579589655727  LUMO = 0.558917964681165
+  mo_energy =
+[0.0679384  0.44579577 0.4457959  0.4457959  0.55891796 0.55891816
+ 0.55891816 0.5628587 ]
+    CPU time for vj and vk      0.00 sec, wall time      0.00 sec
+Ewald components = 1.60203992177182e-06, -15.7676591151163, 7.36973162275279
+E1 = 2.9387076967937693  E_coul = 0.14941996689166293
+cycle= 1 E= -5.30979822663814  delta_E= 1.46  |g|= 5.37e-08  |ddm|= 5.38
+    CPU time for cycle= 1      0.00 sec, wall time      0.00 sec
+diis-norm(errvec)=4.18484e-08
+diis-c [-1.7512915e-15  1.0000000e+00]
+  HOMO = 0.532397085524958  LUMO = 0.605790951749716
+  mo_energy =
+[0.02158269 0.53239696 0.53239709 0.53239709 0.60579095 0.60579115
+ 0.60579115 0.64792603]
+    CPU time for vj and vk      0.00 sec, wall time      0.00 sec
+Ewald components = 1.60203992177182e-06, -15.7676591151163, 7.36973162275279
+E1 = 2.938707696793795  E_coul = 0.1494199668916865
+cycle= 2 E= -5.30979822663809  delta_E= 4.97e-14  |g|= 2.35e-07  |ddm|= 2.01e-06
+    CPU time for cycle= 2      0.00 sec, wall time      0.00 sec
+  HOMO = 0.532397085524921  LUMO = 0.605790951749748
+  mo_energy =
+[0.02158269 0.53239696 0.53239709 0.53239709 0.60579095 0.60579115
+ 0.60579115 0.64792603]
+    CPU time for vj and vk      0.00 sec, wall time      0.00 sec
+Ewald components = 1.60203992177182e-06, -15.7676591151163, 7.36973162275279
+E1 = 2.9387076967941397  E_coul = 0.14941996689239057
+Extra cycle  E= -5.30979822663705  delta_E= 1.05e-12  |g|= 1.06e-06  |ddm|= 8.33e-06
+    CPU time for scf_cycle      0.42 sec, wall time      0.42 sec
+    CPU time for SCF      0.42 sec, wall time      0.42 sec
+converged SCF energy = -5.30979822663705
+HF energy (per unit cell) = -5.3097982266370458
+    CPU time for vj and vk      0.00 sec, wall time      0.00 sec
+    CPU time for vj and vk      0.00 sec, wall time      0.00 sec
+MP2 Energy -0.0113935211+0.0000000000j
+  1  (-0.02785157,-0.00586390)   2.2148E+00
+  2  (-0.03378128,-0.00477678)   1.5409E+00
+  3  (-0.03497653,-0.00203840)   1.1314E+00
+  4  (-0.03411673,0.00001625)   8.8417E-01
+  5  (-0.03306594,0.00096933)   7.2626E-01
+  6  (-0.03271993,0.00147170)   6.1678E-01
+  7  (-0.03295094,0.00221111)   5.3401E-01
+  8  (-0.03324995,0.00336657)   4.6628E-01
+  9  (-0.03325839,0.00475207)   4.0741E-01
+ 10  (-0.03287122,0.00610271)   3.5445E-01
+ 11  (-0.03215051,0.00721670)   3.0628E-01
+ 12  (-0.03123355,0.00798946)   2.6262E-01
+ 13  (-0.03026852,0.00840581)   2.2340E-01
+ 14  (-0.02937502,0.00851385)   1.8850E-01
+ 15  (-0.02862816,0.00839377)   1.5772E-01
+ 16  (-0.02805964,0.00813216)   1.3081E-01
+ 17  (-0.02766715,0.00780537)   1.0750E-01
+ 18  (-0.02742662,0.00747092)   8.7551E-02
+ 19  (-0.02730394,0.00716547)   7.0678E-02
+ 20  (-0.02726415,0.00690746)   5.6590E-02
+ 21  (-0.02727700,0.00670195)   4.4968E-02
+ 22  (-0.02731926,0.00654584)   3.5489E-02
+ 23  (-0.02737470,0.00643199)   2.7834E-02
+ 24  (-0.02743295,0.00635206)   2.1708E-02
+ 25  (-0.02748802,0.00629810)   1.6844E-02
+ 26  (-0.02753690,0.00626330)   1.3010E-02
+ 27  (-0.02757849,0.00624218)   1.0007E-02
+ 28  (-0.02761281,0.00623052)   7.6676E-03
+ 29  (-0.02764046,0.00622521)   5.8550E-03
+ 30  (-0.02766231,0.00622400)   4.4567E-03
+ 31  (-0.02767929,0.00622532)   3.3826E-03
+ 32  (-0.02769226,0.00622807)   2.5606E-03
+ 33  (-0.02770202,0.00623154)   1.9336E-03
+ 34  (-0.02770921,0.00623523)   1.4568E-03
+ 35  (-0.02771440,0.00623886)   1.0953E-03
+ 36  (-0.02771803,0.00624223)   8.2182E-04
+ 37  (-0.02772048,0.00624525)   6.1547E-04
+ 38  (-0.02772204,0.00624787)   4.6011E-04
+ 39  (-0.02772295,0.00625007)   3.4338E-04
+ 40  (-0.02772339,0.00625189)   2.5585E-04
+ 41  (-0.02772352,0.00625335)   1.9034E-04
+ 42  (-0.02772344,0.00625448)   1.4139E-04
+ 43  (-0.02772324,0.00625535)   1.0487E-04
+ 44  (-0.02772298,0.00625599)   7.7683E-05
+ 45  (-0.02772270,0.00625645)   5.7466E-05
+ 46  (-0.02772242,0.00625677)   4.2455E-05
+ 47  (-0.02772217,0.00625697)   3.1326E-05
+ 48  (-0.02772196,0.00625710)   2.3086E-05
+ 49  (-0.02772178,0.00625716)   1.6993E-05
+ 50  (-0.02772163,0.00625719)   1.2493E-05
+ 51  (-0.02772152,0.00625719)   9.1747E-06
+ 52  (-0.02772143,0.00625717)   6.7298E-06
+ 53  (-0.02772137,0.00625715)   4.9309E-06
+ 54  (-0.02772132,0.00625713)   3.6088E-06
+ 55  (-0.02772129,0.00625710)   2.6382E-06
+ 56  (-0.02772127,0.00625708)   1.9266E-06
+ 57  (-0.02772126,0.00625706)   1.4053E-06
+ 58  (-0.02772126,0.00625705)   1.0240E-06
+ 59  (-0.02772125,0.00625703)   7.4538E-07
+ 60  (-0.02772125,0.00625702)   5.4199E-07
+    CPU time for vj and vk      0.00 sec, wall time      0.00 sec
+    CPU time for vj and vk      0.00 sec, wall time      0.00 sec
+  1  4.831047E+00
+  2  3.399086E+00
+  3  2.783038E+00
+  4  1.820374E+00
+  5  1.182815E+00
+  6  7.692629E-01
+  7  4.964879E-01
+  8  3.268394E-01
+  9  2.381017E-01
+ 10  1.944537E-01
+ 11  1.630490E-01
+ 12  1.337546E-01
+ 13  1.061286E-01
+ 14  8.150631E-02
+ 15  6.085046E-02
+ 16  4.444281E-02
+ 17  3.205834E-02
+ 18  2.317692E-02
+ 19  1.711267E-02
+ 20  1.308595E-02
+ 21  1.034290E-02
+ 22  8.324278E-03
+ 23  6.720278E-03
+ 24  5.393214E-03
+ 25  4.286439E-03
+ 26  3.371785E-03
+ 27  2.627653E-03
+ 28  2.032327E-03
+ 29  1.563337E-03
+ 30  1.198623E-03
+ 31  9.178185E-04
+ 32  7.031061E-04
+ 33  5.395755E-04
+ 34  4.151847E-04
+ 35  3.204728E-04
+ 36  2.481558E-04
+ 37  1.927050E-04
+ 38  1.499687E-04
+ 39  1.168566E-04
+ 40  9.108387E-05
+ 41  7.096037E-05
+ 42  5.522433E-05
+ 43  4.291862E-05
+ 44  3.330492E-05
+ 45  2.580623E-05
+ 46  1.996805E-05
+ 47  1.543122E-05
+ 48  1.191195E-05
+ 49  9.186411E-06
+ 50  7.078545E-06
+ 51  5.450341E-06
+ 52  4.193928E-06
+ 53  3.225236E-06
+ 54  2.478910E-06
+ 55  1.904253E-06
+ 56  1.462008E-06
+ 57  1.121824E-06
+ 58  8.602601E-07
+ 59  6.592337E-07
+ 60  5.048028E-07
+ 61  3.862257E-07
+ 62  2.952295E-07
+ 63  2.254444E-07
+ 64  1.719669E-07
+ 65  1.310220E-07
+ 66  9.970362E-08
+ 67  7.577442E-08
+ 68  5.751248E-08
+ 69  4.359292E-08
+ 70  3.299700E-08
+ 71  2.494195E-08
+ 72  1.882690E-08
+ 73  1.419113E-08
+ 74  1.068178E-08
+ 75  8.028938E-09

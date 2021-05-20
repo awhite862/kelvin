@@ -1,7 +1,14 @@
+import logging
+import sys as csys
 import numpy
 from kelvin.ccsd import ccsd
-from kelvin.hubbard_system import hubbard_system
+from kelvin.hubbard_system import HubbardSystem
 from lattice.hubbard import Hubbard1D
+
+logging.basicConfig(
+    format='%(message)s',
+    level=logging.INFO,
+    stream=csys.stdout)
 
 L = 6
 U = 1.0
@@ -18,7 +25,7 @@ for i in range(L):
         Ob[i] = 1.0
 Pa = numpy.einsum('i,j->ij', Oa, Oa)
 Pb = numpy.einsum('i,j->ij', Ob, Ob)
-sys = hubbard_system(T, hub, Pa, Pb, mu=mu)
+sys = HubbardSystem(T, hub, Pa, Pb, mu=mu)
 cc = ccsd(sys, iprint=1, max_iter=80, econv=1e-11, T=T, mu=mu)
 Eout, Ecc = cc.run()
-print(Eout-Ecc, Ecc)
+logging.info("{} {}".format(Eout-Ecc, Ecc))
