@@ -478,7 +478,7 @@ class UEGSCFSystem(System):
         d = self.g_energies_tot()
         n = d.shape[0]
         if self.T == 0.0:
-            loggin.warning("Occupations derivatives are zero at 0K")
+            logging.warning("Occupations derivatives are zero at 0K")
             return numpy.zeros((n,n))
         beta = 1.0 / self.T
         fo = ft_utils.ff(beta, d, self.mu)

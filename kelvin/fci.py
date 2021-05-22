@@ -1,6 +1,5 @@
 import logging
 import numpy
-import logging
 from pyscf.fci import cistring
 from pyscf.fci import fci_slow
 from cqcpy import ft_utils

@@ -209,8 +209,8 @@ def ft_cc_iter_extrap(method, F, I, D1, D2, g, G, beta, ng, ti,
         elif ig == 1:
             t1bar[ig] = -F.vo
             t2bar[ig] = -I.vvoo
-            T1new[ig] = quadrature.int_tbar1_single(ng,ig,t1bar,ti,D1,G)
-            T2new[ig] = quadrature.int_tbar2_single(ng,ig,t2bar,ti,D2,G)
+            T1new[ig] = quadrature.int_tbar1_single(ng, ig, t1bar, ti, D1, G)
+            T2new[ig] = quadrature.int_tbar2_single(ng, ig, t2bar, ti, D2, G)
         else:
             # linear extrapolation
             T1new[ig] = T1new[ig - 1]\
@@ -270,8 +270,9 @@ def ft_ucc_iter(method, T1aold, T1bold, T2aaold, T2abold, T2bbold, Fa, Fb, Ia, I
     i = 0
     Eold = 888888888.888888888
     while i < max_iter and not converged:
-        T1out,T2out = form_new_ampl_u(method,Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,
-                T2aaold,T2abold,T2bbold, D1a,D1b,D2aa,D2ab,D2bb,ti,ng,G)
+        T1out,T2out = form_new_ampl_u(
+            method, Fa, Fb, Ia, Ib, Iabab, T1aold, T1bold, T2aaold,
+            T2abold, T2bbold, D1a, D1b, D2aa, D2ab, D2bb, ti, ng, G)
 
         nl1 = numpy.linalg.norm(T1aold) + 0.1
         nl1 += numpy.linalg.norm(T1bold)
@@ -1173,85 +1174,85 @@ def u_ft_d_integrals(sys, ea, eb, foa, fva, fob, fvb, dveca, dvecb):
     # get ERIs
     Ia,Ib,Iabab = sys.u_aint_tot()
 
-    Ia = _form_ft_d_eris(Ia,sfoa,sfva,dsoa,dsva)
-    Ib = _form_ft_d_eris(Ib,sfob,sfvb,dsob,dsvb)
+    Ia = _form_ft_d_eris(Ia, sfoa, sfva, dsoa, dsva)
+    Ib = _form_ft_d_eris(Ib, sfob, sfvb, dsob, dsvb)
 
-    Ivvvv =  einsum('abcd,a,b,c,d->abcd', Iabab, dsva, sfvb, sfva, sfvb)
+    Ivvvv = +einsum('abcd,a,b,c,d->abcd', Iabab, dsva, sfvb, sfva, sfvb)
     Ivvvv += einsum('abcd,a,b,c,d->abcd', Iabab, sfva, dsvb, sfva, sfvb)
     Ivvvv += einsum('abcd,a,b,c,d->abcd', Iabab, sfva, sfvb, dsva, sfvb)
     Ivvvv += einsum('abcd,a,b,c,d->abcd', Iabab, sfva, sfvb, sfva, dsvb)
 
-    Ivvvo =  einsum('abci,a,b,c,i->abci', Iabab, dsva, sfvb, sfva, sfob)
+    Ivvvo = +einsum('abci,a,b,c,i->abci', Iabab, dsva, sfvb, sfva, sfob)
     Ivvvo += einsum('abci,a,b,c,i->abci', Iabab, sfva, dsvb, sfva, sfob)
     Ivvvo += einsum('abci,a,b,c,i->abci', Iabab, sfva, sfvb, dsva, sfob)
     Ivvvo += einsum('abci,a,b,c,i->abci', Iabab, sfva, sfvb, sfva, dsob)
 
-    Ivvov =  einsum('abic,a,b,i,c->abic', Iabab, dsva, sfvb, sfoa, sfvb)
+    Ivvov = +einsum('abic,a,b,i,c->abic', Iabab, dsva, sfvb, sfoa, sfvb)
     Ivvov += einsum('abic,a,b,i,c->abic', Iabab, sfva, dsvb, sfoa, sfvb)
     Ivvov += einsum('abic,a,b,i,c->abic', Iabab, sfva, sfvb, dsoa, sfvb)
     Ivvov += einsum('abic,a,b,i,c->abic', Iabab, sfva, sfvb, sfoa, dsvb)
 
-    Ivovv =  einsum('aibc,a,i,b,c->aibc', Iabab, dsva, sfob, sfva, sfvb)
+    Ivovv = +einsum('aibc,a,i,b,c->aibc', Iabab, dsva, sfob, sfva, sfvb)
     Ivovv += einsum('aibc,a,i,b,c->aibc', Iabab, sfva, dsob, sfva, sfvb)
     Ivovv += einsum('aibc,a,i,b,c->aibc', Iabab, sfva, sfob, dsva, sfvb)
     Ivovv += einsum('aibc,a,i,b,c->aibc', Iabab, sfva, sfob, sfva, dsvb)
 
-    Iovvv =  einsum('iabc,i,a,b,c->iabc', Iabab, dsoa, sfvb, sfva, sfvb)
+    Iovvv = +einsum('iabc,i,a,b,c->iabc', Iabab, dsoa, sfvb, sfva, sfvb)
     Iovvv += einsum('iabc,i,a,b,c->iabc', Iabab, sfoa, dsvb, sfva, sfvb)
     Iovvv += einsum('iabc,i,a,b,c->iabc', Iabab, sfoa, sfvb, dsva, sfvb)
     Iovvv += einsum('iabc,i,a,b,c->iabc', Iabab, sfoa, sfvb, sfva, dsvb)
 
-    Ivvoo =  einsum('abij,a,b,i,j->abij', Iabab, dsva, sfvb, sfoa, sfob)
+    Ivvoo = +einsum('abij,a,b,i,j->abij', Iabab, dsva, sfvb, sfoa, sfob)
     Ivvoo += einsum('abij,a,b,i,j->abij', Iabab, sfva, dsvb, sfoa, sfob)
     Ivvoo += einsum('abij,a,b,i,j->abij', Iabab, sfva, sfvb, dsoa, sfob)
     Ivvoo += einsum('abij,a,b,i,j->abij', Iabab, sfva, sfvb, sfoa, dsob)
 
-    Ivovo =  einsum('ajbi,a,j,b,i->ajbi', Iabab, dsva, sfob, sfva, sfob)
+    Ivovo = +einsum('ajbi,a,j,b,i->ajbi', Iabab, dsva, sfob, sfva, sfob)
     Ivovo += einsum('ajbi,a,j,b,i->ajbi', Iabab, sfva, dsob, sfva, sfob)
     Ivovo += einsum('ajbi,a,j,b,i->ajbi', Iabab, sfva, sfob, dsva, sfob)
     Ivovo += einsum('ajbi,a,j,b,i->ajbi', Iabab, sfva, sfob, sfva, dsob)
 
-    Iovvo =  einsum('jabi,j,a,b,i->jabi', Iabab, dsoa, sfvb, sfva, sfob)
+    Iovvo = +einsum('jabi,j,a,b,i->jabi', Iabab, dsoa, sfvb, sfva, sfob)
     Iovvo += einsum('jabi,j,a,b,i->jabi', Iabab, sfoa, dsvb, sfva, sfob)
     Iovvo += einsum('jabi,j,a,b,i->jabi', Iabab, sfoa, sfvb, dsva, sfob)
     Iovvo += einsum('jabi,j,a,b,i->jabi', Iabab, sfoa, sfvb, sfva, dsob)
 
-    Ivoov =  einsum('ajib,a,j,i,b->ajib', Iabab, dsva, sfob, sfoa, sfvb)
+    Ivoov = +einsum('ajib,a,j,i,b->ajib', Iabab, dsva, sfob, sfoa, sfvb)
     Ivoov += einsum('ajib,a,j,i,b->ajib', Iabab, sfva, dsob, sfoa, sfvb)
     Ivoov += einsum('ajib,a,j,i,b->ajib', Iabab, sfva, sfob, dsoa, sfvb)
     Ivoov += einsum('ajib,a,j,i,b->ajib', Iabab, sfva, sfob, sfoa, dsvb)
 
-    Iovov =  einsum('jaib,j,a,i,b->jaib', Iabab, dsoa, sfvb, sfoa, sfvb)
+    Iovov = +einsum('jaib,j,a,i,b->jaib', Iabab, dsoa, sfvb, sfoa, sfvb)
     Iovov += einsum('jaib,j,a,i,b->jaib', Iabab, sfoa, dsvb, sfoa, sfvb)
     Iovov += einsum('jaib,j,a,i,b->jaib', Iabab, sfoa, sfvb, dsoa, sfvb)
     Iovov += einsum('jaib,j,a,i,b->jaib', Iabab, sfoa, sfvb, sfoa, dsvb)
 
-    Ioovv =  einsum('ijab,i,j,a,b->ijab', Iabab, dsoa, sfob, sfva, sfvb)
+    Ioovv = +einsum('ijab,i,j,a,b->ijab', Iabab, dsoa, sfob, sfva, sfvb)
     Ioovv += einsum('ijab,i,j,a,b->ijab', Iabab, sfoa, dsob, sfva, sfvb)
     Ioovv += einsum('ijab,i,j,a,b->ijab', Iabab, sfoa, sfob, dsva, sfvb)
     Ioovv += einsum('ijab,i,j,a,b->ijab', Iabab, sfoa, sfob, sfva, dsvb)
 
-    Ivooo =  einsum('akij,a,k,i,j->akij', Iabab, dsva, sfob, sfoa, sfob)
+    Ivooo = +einsum('akij,a,k,i,j->akij', Iabab, dsva, sfob, sfoa, sfob)
     Ivooo += einsum('akij,a,k,i,j->akij', Iabab, sfva, dsob, sfoa, sfob)
     Ivooo += einsum('akij,a,k,i,j->akij', Iabab, sfva, sfob, dsoa, sfob)
     Ivooo += einsum('akij,a,k,i,j->akij', Iabab, sfva, sfob, sfoa, dsob)
 
-    Iovoo =  einsum('kaij,k,a,i,j->kaij', Iabab, dsoa, sfvb, sfoa, sfob)
+    Iovoo = +einsum('kaij,k,a,i,j->kaij', Iabab, dsoa, sfvb, sfoa, sfob)
     Iovoo += einsum('kaij,k,a,i,j->kaij', Iabab, sfoa, dsvb, sfoa, sfob)
     Iovoo += einsum('kaij,k,a,i,j->kaij', Iabab, sfoa, sfvb, dsoa, sfob)
     Iovoo += einsum('kaij,k,a,i,j->kaij', Iabab, sfoa, sfvb, sfoa, dsob)
 
-    Ioovo =  einsum('jkai,j,k,a,i->jkai', Iabab, dsoa, sfob, sfva, sfob)
+    Ioovo = +einsum('jkai,j,k,a,i->jkai', Iabab, dsoa, sfob, sfva, sfob)
     Ioovo += einsum('jkai,j,k,a,i->jkai', Iabab, sfoa, dsob, sfva, sfob)
     Ioovo += einsum('jkai,j,k,a,i->jkai', Iabab, sfoa, sfob, dsva, sfob)
     Ioovo += einsum('jkai,j,k,a,i->jkai', Iabab, sfoa, sfob, sfva, dsob)
 
-    Iooov =  einsum('jkia,j,k,i,a->jkia', Iabab, dsoa, sfob, sfoa, sfvb)
+    Iooov = +einsum('jkia,j,k,i,a->jkia', Iabab, dsoa, sfob, sfoa, sfvb)
     Iooov += einsum('jkia,j,k,i,a->jkia', Iabab, sfoa, dsob, sfoa, sfvb)
     Iooov += einsum('jkia,j,k,i,a->jkia', Iabab, sfoa, sfob, dsoa, sfvb)
     Iooov += einsum('jkia,j,k,i,a->jkia', Iabab, sfoa, sfob, sfoa, dsvb)
 
-    Ioooo =  einsum('klij,k,l,i,j->klij', Iabab, dsoa, sfob, sfoa, sfob)
+    Ioooo = +einsum('klij,k,l,i,j->klij', Iabab, dsoa, sfob, sfoa, sfob)
     Ioooo += einsum('klij,k,l,i,j->klij', Iabab, sfoa, dsob, sfoa, sfob)
     Ioooo += einsum('klij,k,l,i,j->klij', Iabab, sfoa, sfob, dsoa, sfob)
     Ioooo += einsum('klij,k,l,i,j->klij', Iabab, sfoa, sfob, sfoa, dsob)
@@ -1457,7 +1458,7 @@ def uft_d_active_integrals(sys, ea, eb, foa, fva, fob, fvb,
 
 
 def g_n2rdm_full(beta, sfo, sfv, P2):
-    n2rdm =  (1.0/beta)*einsum('cdab,c,d,a,b->cdab', P2[0], sfv, sfv, sfv, sfv)
+    n2rdm = +(1.0/beta)*einsum('cdab,c,d,a,b->cdab', P2[0], sfv, sfv, sfv, sfv)
     n2rdm += (1.0/beta)*einsum('ciab,c,i,a,b->ciab', P2[1], sfv, sfo, sfv, sfv)
     n2rdm -= (1.0/beta)*einsum('ciab,c,i,a,b->icab', P2[1], sfv, sfo, sfv, sfv)
     n2rdm += (1.0/beta)*einsum('bcai,b,c,a,i->bcai', P2[2], sfv, sfv, sfv, sfo)

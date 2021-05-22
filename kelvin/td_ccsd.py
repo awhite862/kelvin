@@ -166,11 +166,11 @@ class TDCCSD(object):
             self.N0 = N
             self.N1 = 0
             self.Ncc = 0
-            self.N = Ncc + N0 + N1
+            self.N = N
             self.E0 = self.G0
             self.E1 = self.G1
             self.Ecc = self.Gcc
-            self.E = E0 + E1 + Ecc
+            self.E = self.E0 + self.E1 + self.Ecc
             self.S = 0
             self.S0 = 0
             self.S1 = 0
@@ -1471,13 +1471,13 @@ class TDCCSD(object):
         self.dba = (pba,pBA)
         self.dai = (pai,pAI)
         self.ndia = (numpy.einsum('ia,i,a->ia', self.dia[0], sfoa, sfva),
-                numpy.einsum('ia,i,a->ia', self.dia[1], sfob, sfvb))
+                     numpy.einsum('ia,i,a->ia', self.dia[1], sfob, sfvb))
         self.ndba = (numpy.einsum('ba,b,a->ba', self.dba[0], sfva, sfva),
-                numpy.einsum('ba,b,a->ba', self.dba[1], sfvb, sfvb))
+                     numpy.einsum('ba,b,a->ba', self.dba[1], sfvb, sfvb))
         self.ndji = (numpy.einsum('ji,j,i->ji', self.dji[0], sfoa, sfoa),
-                numpy.einsum('ji,j,i->ji', self.dji[1], sfob, sfob))
+                     numpy.einsum('ji,j,i->ji', self.dji[1], sfob, sfob))
         self.ndai = (numpy.einsum('ai,a,i->ai', self.dai[0], sfva, sfoa),
-                numpy.einsum('ai,a,i->ai', self.dai[1], sfvb, sfob))
+                     numpy.einsum('ai,a,i->ai', self.dai[1], sfvb, sfob))
 
         self.n1rdm = [numpy.zeros((na,na), dtype=self.ndia[0].dtype),
                 numpy.zeros((nb,nb), dtype=self.ndia[1].dtype)]
@@ -1490,15 +1490,15 @@ class TDCCSD(object):
         self.n1rdm[1][numpy.ix_(self.iocc[1],self.iocc[1])] += self.ndji[1]/beta
         self.n1rdm[1][numpy.ix_(self.ivir[1],self.iocc[1])] += self.ndai[1]/beta
         if rdm2:
-            self.P2 = ((Pcdab,PCDAB,PcDaB),
-                    (Pciab,PCIAB,PcIaB,PCiAb),
-                    (Pbcai,PBCAI,PbCaI,PBcAi),
-                    (Pijab,PIJAB,PiJaB),
-                    (Pbjai,PBJAI,PbJaI,PbJAi,PBjaI,PBjAi),
-                    (Pabij,PABIJ,PaBiJ),
-                    (Pjkai,PJKAI,PjKaI,PJkAi),
-                    (Pkaij,PKAIJ,PkAiJ,PKaIj),
-                    (Pklij,PKLIJ,PkLiJ))
+            self.P2 = ((Pcdab, PCDAB, PcDaB),
+                       (Pciab, PCIAB, PcIaB, PCiAb),
+                       (Pbcai, PBCAI, PbCaI, PBcAi),
+                       (Pijab, PIJAB, PiJaB),
+                       (Pbjai, PBJAI, PbJaI, PbJAi, PBjaI, PBjAi),
+                       (Pabij, PABIJ, PaBiJ),
+                       (Pjkai, PJKAI, PjKaI, PJkAi),
+                       (Pkaij, PKAIJ, PkAiJ, PKaIj),
+                       (Pklij, PKLIJ, PkLiJ))
         if erel:
             self.rorbo = [rorbo_a, rorbo_b]
             self.rorbv = [rorbv_a, rorbv_b]

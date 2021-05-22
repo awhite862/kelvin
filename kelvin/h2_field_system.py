@@ -82,7 +82,7 @@ class h2_field_system(System):
             temp = field*numpy.sin(self.omega*self.ti[i])
             Fock[i] += temp
         if self.O is not None:
-            delta = ti[ot] - ti[ot - 1] #if ot > 0 else ti[ot + 1] - ti[ot]
+            delta = ti[ot] - ti[ot - 1]
         if direc == 'f' and self.O is not None:
             Fock[self.ot] += -1.j*self.beta*self.O/delta
         elif direc == 'b' and self.O is not None:

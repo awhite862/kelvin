@@ -133,11 +133,11 @@ class ccsd(object):
             self.N0 = N
             self.N1 = 0
             self.Ncc = 0
-            self.N = Ncc + N0 + N1
+            self.N = N
             self.E0 = self.G0
             self.E1 = self.G1
             self.Ecc = self.Gcc
-            self.E = E0 + E1 + Ecc
+            self.E = self.E0 + self.E1 + self.Ecc
             self.S = 0
             self.S0 = 0
             self.S1 = 0

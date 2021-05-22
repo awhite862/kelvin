@@ -95,9 +95,7 @@ class UEGBasis(object):
                         ks = self.ks[s]
                         peqr = (p == r)
                         qeqs = (q == s)
-                        s1 = True#(p == r)
-                        s2 = True#(q == s)
-                        if (not peqr) and (not qeqs) and s1 and s2:
+                        if (not peqr) and (not qeqs):
                             if numpy.linalg.norm(kp + kq - kr - ks) < 1e-12:
                                 V[p,q,r,s] = aaa / (scaled_energy(kp - kr))
         return V
