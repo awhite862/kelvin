@@ -60,8 +60,8 @@ def test_L1(cc, thresh):
                 d = 1.e-4
                 TP = cc.T1i.copy()
                 TM = cc.T1i.copy()
-                TP[y,a,i] += d
-                TM[y,a,i] -= d
+                TP[y, a, i] += d
+                TM[y, a, i] -= d
                 LP = evalL(cc.T1f, cc.T1b, TP, cc.T2f, cc.T2b, cc.T2i,
                            cc.L1f, cc.L1b, cc.L1i, cc.L2f, cc.L2b, cc.L2i,
                            Ff, Fb, F, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
@@ -77,8 +77,8 @@ def test_L1(cc, thresh):
                 d = 1.e-4
                 TP = cc.T1b.copy()
                 TM = cc.T1b.copy()
-                TP[y,a,i] += d
-                TM[y,a,i] -= d
+                TP[y, a, i] += d
+                TM[y, a, i] -= d
                 LP = evalL(cc.T1f, TP, cc.T1i, cc.T2f, cc.T2b, cc.T2i,
                            cc.L1f, cc.L1b, cc.L1i, cc.L2f, cc.L2b, cc.L2i,
                            Ff, Fb, F, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
@@ -94,8 +94,8 @@ def test_L1(cc, thresh):
                 d = 1.e-4
                 TP = cc.T1f.copy()
                 TM = cc.T1f.copy()
-                TP[y,a,i] += d
-                TM[y,a,i] -= d
+                TP[y, a, i] += d
+                TM[y, a, i] -= d
                 LP = evalL(TP, cc.T1b, cc.T1i, cc.T2f, cc.T2b, cc.T2i,
                            cc.L1f, cc.L1b, cc.L1i, cc.L2f, cc.L2b, cc.L2i,
                            Ff, Fb, F, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)

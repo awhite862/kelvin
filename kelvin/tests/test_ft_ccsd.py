@@ -36,7 +36,7 @@ class FTCCSDTest(unittest.TestCase):
         T = 1.0
         mu = 0.0
         sys = SCFSystem(m, T, mu)
-        ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=24, econv=1e-11, ngrid=320)
+        ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=24, econv=1e-11, ngrid=220)
         Ecc = ccsdT.run()
 
         fciT = FCI(sys, T=T, mu=mu)
@@ -125,7 +125,7 @@ class FTCCSDTest(unittest.TestCase):
         mi = 50
         ueg = UEGSystem(T, L, cut, mu=mu, norb=norb, orbtype='g')
         ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=10)
-        Ecctot,Ecc = ccsdT.run()
+        Ecctot, Ecc = ccsdT.run()
         diff = abs(self.ueg_ref - Ecc)
         error = "Expected: {}  Actual: {}".format(self.ueg_ref, Ecc)
         self.assertTrue(diff < self.thresh, error)
@@ -140,7 +140,7 @@ class FTCCSDTest(unittest.TestCase):
         mi = 50
         ueg = UEGSystem(T, L, cut, mu=mu, norb=norb)
         ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=10)
-        Ecctot,Ecc = ccsdT.run()
+        Ecctot, Ecc = ccsdT.run()
         diff = abs(self.ueg_ref - Ecc)
         error = "Expected: {}  Actual: {}".format(self.ueg_ref, Ecc)
         self.assertTrue(diff < self.thresh, error)
@@ -155,7 +155,7 @@ class FTCCSDTest(unittest.TestCase):
         mi = 50
         ueg = PUEGSystem(T, L, cut, mu=mu, norb=norb)
         ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=10)
-        Ecctot,Ecc = ccsdT.run()
+        Ecctot, Ecc = ccsdT.run()
         diff = abs(self.pueg_ref - Ecc)
         error = "Expected: {}  Actual: {}".format(self.pueg_ref, Ecc)
         self.assertTrue(diff < 1e-8, error)

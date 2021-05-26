@@ -41,10 +41,10 @@ class CCUtilsTest(unittest.TestCase):
         fvira = [x for x in fva if x > athresh]
         foccb = [x for x in fob if x > athresh]
         fvirb = [x for x in fvb if x > athresh]
-        iocca = [i for i,x in enumerate(foa) if x > athresh]
-        ivira = [i for i,x in enumerate(fva) if x > athresh]
-        ioccb = [i for i,x in enumerate(fob) if x > athresh]
-        ivirb = [i for i,x in enumerate(fvb) if x > athresh]
+        iocca = [i for i, x in enumerate(foa) if x > athresh]
+        ivira = [i for i, x in enumerate(fva) if x > athresh]
+        ioccb = [i for i, x in enumerate(fob) if x > athresh]
+        ivirb = [i for i, x in enumerate(fvb) if x > athresh]
         Fa, Fb, Ia, Ib, Iabab = cc_utils.uft_active_integrals(
                 sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
         Fga, Fgb, Iga, Igb, Igabab = cc_utils.uft_integrals(sys, ea, eb, beta, mu)

@@ -35,21 +35,21 @@ class FTCCSD_RDMTest(unittest.TestCase):
         T1old, T2old = test_utils.make_random_ft_T(ng, n)
         L1old, L2old = test_utils.make_random_ft_T(ng, n)
         F, I = test_utils.make_random_integrals(n, n)
-        F.ov = numpy.zeros((n,n))
-        F.vv = numpy.zeros((n,n))
-        F.oo = numpy.zeros((n,n))
-        I.vvvv = numpy.zeros((n,n,n,n))
-        I.vvvo = numpy.zeros((n,n,n,n))
-        I.vovv = numpy.zeros((n,n,n,n))
-        I.vvoo = numpy.zeros((n,n,n,n))
-        I.vovo = numpy.zeros((n,n,n,n))
-        I.oovv = numpy.zeros((n,n,n,n))
-        I.vooo = numpy.zeros((n,n,n,n))
-        I.ooov = numpy.zeros((n,n,n,n))
-        I.oooo = numpy.zeros((n,n,n,n))
+        F.ov = numpy.zeros((n, n))
+        F.vv = numpy.zeros((n, n))
+        F.oo = numpy.zeros((n, n))
+        I.vvvv = numpy.zeros((n, n, n, n))
+        I.vvvo = numpy.zeros((n, n, n, n))
+        I.vovv = numpy.zeros((n, n, n, n))
+        I.vvoo = numpy.zeros((n, n, n, n))
+        I.vovo = numpy.zeros((n, n, n, n))
+        I.oovv = numpy.zeros((n, n, n, n))
+        I.vooo = numpy.zeros((n, n, n, n))
+        I.ooov = numpy.zeros((n, n, n, n))
+        I.oooo = numpy.zeros((n, n, n, n))
 
         D1, D2 = test_utils.make_random_ft_D(n)
-        ti,g,G = quadrature.simpsons(ng, beta)
+        ti, g, G = quadrature.simpsons(ng, beta)
 
         # compute the trace from the CC equations
         ref = compute_ref(T1old, T2old, L1old, L2old, F, I, D1, D2, ti, ng, g, G, beta)
@@ -68,21 +68,21 @@ class FTCCSD_RDMTest(unittest.TestCase):
         T1old, T2old = test_utils.make_random_ft_T(ng, n)
         L1old, L2old = test_utils.make_random_ft_T(ng, n)
         F, I = test_utils.make_random_integrals(n, n)
-        F.oo = numpy.zeros((n,n))
-        F.ov = numpy.zeros((n,n))
-        F.vo = numpy.zeros((n,n))
-        I.vvvv = numpy.zeros((n,n,n,n))
-        I.vvvo = numpy.zeros((n,n,n,n))
-        I.vovv = numpy.zeros((n,n,n,n))
-        I.vvoo = numpy.zeros((n,n,n,n))
-        I.vovo = numpy.zeros((n,n,n,n))
-        I.oovv = numpy.zeros((n,n,n,n))
-        I.vooo = numpy.zeros((n,n,n,n))
-        I.ooov = numpy.zeros((n,n,n,n))
-        I.oooo = numpy.zeros((n,n,n,n))
+        F.oo = numpy.zeros((n, n))
+        F.ov = numpy.zeros((n, n))
+        F.vo = numpy.zeros((n, n))
+        I.vvvv = numpy.zeros((n, n, n, n))
+        I.vvvo = numpy.zeros((n, n, n, n))
+        I.vovv = numpy.zeros((n, n, n, n))
+        I.vvoo = numpy.zeros((n, n, n, n))
+        I.vovo = numpy.zeros((n, n, n, n))
+        I.oovv = numpy.zeros((n, n, n, n))
+        I.vooo = numpy.zeros((n, n, n, n))
+        I.ooov = numpy.zeros((n, n, n, n))
+        I.oooo = numpy.zeros((n, n, n, n))
 
         D1, D2 = test_utils.make_random_ft_D(n)
-        ti,g,G = quadrature.simpsons(ng, beta)
+        ti, g, G = quadrature.simpsons(ng, beta)
 
         # compute the trace from the CC equations
         ref = compute_ref(T1old, T2old, L1old, L2old, F, I, D1, D2, ti, ng, g, G, beta)
@@ -101,18 +101,18 @@ class FTCCSD_RDMTest(unittest.TestCase):
         T1old, T2old = test_utils.make_random_ft_T(ng, n)
         L1old, L2old = test_utils.make_random_ft_T(ng, n)
         F, I = test_utils.make_random_integrals(n, n)
-        F.ov = numpy.zeros((n,n))
-        F.vo = numpy.zeros((n,n))
-        F.vv = numpy.zeros((n,n))
-        I.vvvv = numpy.zeros((n,n,n,n))
-        I.vvvo = numpy.zeros((n,n,n,n))
-        I.vovv = numpy.zeros((n,n,n,n))
-        I.vvoo = numpy.zeros((n,n,n,n))
-        I.vovo = numpy.zeros((n,n,n,n))
-        I.oovv = numpy.zeros((n,n,n,n))
-        I.vooo = numpy.zeros((n,n,n,n))
-        I.ooov = numpy.zeros((n,n,n,n))
-        I.oooo = numpy.zeros((n,n,n,n))
+        F.ov = numpy.zeros((n, n))
+        F.vo = numpy.zeros((n, n))
+        F.vv = numpy.zeros((n, n))
+        I.vvvv = numpy.zeros((n, n, n, n))
+        I.vvvo = numpy.zeros((n, n, n, n))
+        I.vovv = numpy.zeros((n, n, n, n))
+        I.vvoo = numpy.zeros((n, n, n, n))
+        I.vovo = numpy.zeros((n, n, n, n))
+        I.oovv = numpy.zeros((n, n, n, n))
+        I.vooo = numpy.zeros((n, n, n, n))
+        I.ooov = numpy.zeros((n, n, n, n))
+        I.oooo = numpy.zeros((n, n, n, n))
 
         D1, D2 = test_utils.make_random_ft_D(n)
         ti, g, G = quadrature.simpsons(ng, beta)
@@ -134,18 +134,18 @@ class FTCCSD_RDMTest(unittest.TestCase):
         T1old, T2old = test_utils.make_random_ft_T(ng, n)
         L1old, L2old = test_utils.make_random_ft_T(ng, n)
         F, I = test_utils.make_random_integrals(n, n)
-        F.oo = numpy.zeros((n,n))
-        F.vo = numpy.zeros((n,n))
-        F.vv = numpy.zeros((n,n))
-        I.vvvv = numpy.zeros((n,n,n,n))
-        I.vvvo = numpy.zeros((n,n,n,n))
-        I.vovv = numpy.zeros((n,n,n,n))
-        I.vvoo = numpy.zeros((n,n,n,n))
-        I.vovo = numpy.zeros((n,n,n,n))
-        I.oovv = numpy.zeros((n,n,n,n))
-        I.vooo = numpy.zeros((n,n,n,n))
-        I.ooov = numpy.zeros((n,n,n,n))
-        I.oooo = numpy.zeros((n,n,n,n))
+        F.oo = numpy.zeros((n, n))
+        F.vo = numpy.zeros((n, n))
+        F.vv = numpy.zeros((n, n))
+        I.vvvv = numpy.zeros((n, n, n, n))
+        I.vvvo = numpy.zeros((n, n, n, n))
+        I.vovv = numpy.zeros((n, n, n, n))
+        I.vvoo = numpy.zeros((n, n, n, n))
+        I.vovo = numpy.zeros((n, n, n, n))
+        I.oovv = numpy.zeros((n, n, n, n))
+        I.vooo = numpy.zeros((n, n, n, n))
+        I.ooov = numpy.zeros((n, n, n, n))
+        I.oooo = numpy.zeros((n, n, n, n))
 
         D1, D2 = test_utils.make_random_ft_D(n)
         ti, g, G = quadrature.simpsons(ng, beta)
@@ -167,19 +167,19 @@ class FTCCSD_RDMTest(unittest.TestCase):
         T1old, T2old = test_utils.make_random_ft_T(ng, n)
         L1old, L2old = test_utils.make_random_ft_T(ng, n)
         F, I = test_utils.make_random_integrals(n, n)
-        F.oo = numpy.zeros((n,n))
-        F.vo = numpy.zeros((n,n))
-        F.ov = numpy.zeros((n,n))
-        F.vv = numpy.zeros((n,n))
+        F.oo = numpy.zeros((n, n))
+        F.vo = numpy.zeros((n, n))
+        F.ov = numpy.zeros((n, n))
+        F.vv = numpy.zeros((n, n))
         # I.vvvv = numpy.zeros((n,n,n,n))
-        I.vvvo = numpy.zeros((n,n,n,n))
-        I.vovv = numpy.zeros((n,n,n,n))
-        I.vvoo = numpy.zeros((n,n,n,n))
-        I.vovo = numpy.zeros((n,n,n,n))
-        I.oovv = numpy.zeros((n,n,n,n))
-        I.vooo = numpy.zeros((n,n,n,n))
-        I.ooov = numpy.zeros((n,n,n,n))
-        I.oooo = numpy.zeros((n,n,n,n))
+        I.vvvo = numpy.zeros((n, n, n, n))
+        I.vovv = numpy.zeros((n, n, n, n))
+        I.vvoo = numpy.zeros((n, n, n, n))
+        I.vovo = numpy.zeros((n, n, n, n))
+        I.oovv = numpy.zeros((n, n, n, n))
+        I.vooo = numpy.zeros((n, n, n, n))
+        I.ooov = numpy.zeros((n, n, n, n))
+        I.oooo = numpy.zeros((n, n, n, n))
 
         D1, D2 = test_utils.make_random_ft_D(n)
         ti, g, G = quadrature.simpsons(ng, beta)
@@ -201,19 +201,19 @@ class FTCCSD_RDMTest(unittest.TestCase):
         T1old, T2old = test_utils.make_random_ft_T(ng, n)
         L1old, L2old = test_utils.make_random_ft_T(ng, n)
         F, I = test_utils.make_random_integrals(n, n)
-        F.oo = numpy.zeros((n,n))
-        F.vo = numpy.zeros((n,n))
-        F.ov = numpy.zeros((n,n))
-        F.vv = numpy.zeros((n,n))
-        I.vvvv = numpy.zeros((n,n,n,n))
+        F.oo = numpy.zeros((n, n))
+        F.vo = numpy.zeros((n, n))
+        F.ov = numpy.zeros((n, n))
+        F.vv = numpy.zeros((n, n))
+        I.vvvv = numpy.zeros((n, n, n, n))
         # I.vvvo = numpy.zeros((n,n,n,n))
-        I.vovv = numpy.zeros((n,n,n,n))
-        I.vvoo = numpy.zeros((n,n,n,n))
-        I.vovo = numpy.zeros((n,n,n,n))
-        I.oovv = numpy.zeros((n,n,n,n))
-        I.vooo = numpy.zeros((n,n,n,n))
-        I.ooov = numpy.zeros((n,n,n,n))
-        I.oooo = numpy.zeros((n,n,n,n))
+        I.vovv = numpy.zeros((n, n, n, n))
+        I.vvoo = numpy.zeros((n, n, n, n))
+        I.vovo = numpy.zeros((n, n, n, n))
+        I.oovv = numpy.zeros((n, n, n, n))
+        I.vooo = numpy.zeros((n, n, n, n))
+        I.ooov = numpy.zeros((n, n, n, n))
+        I.oooo = numpy.zeros((n, n, n, n))
 
         D1, D2 = test_utils.make_random_ft_D(n)
         ti, g, G = quadrature.simpsons(ng, beta)
@@ -235,19 +235,19 @@ class FTCCSD_RDMTest(unittest.TestCase):
         T1old, T2old = test_utils.make_random_ft_T(ng, n)
         L1old, L2old = test_utils.make_random_ft_T(ng, n)
         F, I = test_utils.make_random_integrals(n, n)
-        F.oo = numpy.zeros((n,n))
-        F.vo = numpy.zeros((n,n))
-        F.ov = numpy.zeros((n,n))
-        F.vv = numpy.zeros((n,n))
-        I.vvvv = numpy.zeros((n,n,n,n))
-        I.vvvo = numpy.zeros((n,n,n,n))
+        F.oo = numpy.zeros((n, n))
+        F.vo = numpy.zeros((n, n))
+        F.ov = numpy.zeros((n, n))
+        F.vv = numpy.zeros((n, n))
+        I.vvvv = numpy.zeros((n, n, n, n))
+        I.vvvo = numpy.zeros((n, n, n, n))
         # I.vovv = numpy.zeros((n,n,n,n))
-        I.vvoo = numpy.zeros((n,n,n,n))
-        I.vovo = numpy.zeros((n,n,n,n))
-        I.oovv = numpy.zeros((n,n,n,n))
-        I.vooo = numpy.zeros((n,n,n,n))
-        I.ooov = numpy.zeros((n,n,n,n))
-        I.oooo = numpy.zeros((n,n,n,n))
+        I.vvoo = numpy.zeros((n, n, n, n))
+        I.vovo = numpy.zeros((n, n, n, n))
+        I.oovv = numpy.zeros((n, n, n, n))
+        I.vooo = numpy.zeros((n, n, n, n))
+        I.ooov = numpy.zeros((n, n, n, n))
+        I.oooo = numpy.zeros((n, n, n, n))
 
         D1, D2 = test_utils.make_random_ft_D(n)
         ti, g, G = quadrature.simpsons(ng, beta)
@@ -269,19 +269,19 @@ class FTCCSD_RDMTest(unittest.TestCase):
         T1old, T2old = test_utils.make_random_ft_T(ng, n)
         L1old, L2old = test_utils.make_random_ft_T(ng, n)
         F, I = test_utils.make_random_integrals(n, n)
-        F.oo = numpy.zeros((n,n))
-        F.vo = numpy.zeros((n,n))
-        F.ov = numpy.zeros((n,n))
-        F.vv = numpy.zeros((n,n))
-        I.vvvv = numpy.zeros((n,n,n,n))
-        I.vvvo = numpy.zeros((n,n,n,n))
-        I.vovv = numpy.zeros((n,n,n,n))
+        F.oo = numpy.zeros((n, n))
+        F.vo = numpy.zeros((n, n))
+        F.ov = numpy.zeros((n, n))
+        F.vv = numpy.zeros((n, n))
+        I.vvvv = numpy.zeros((n, n, n, n))
+        I.vvvo = numpy.zeros((n, n, n, n))
+        I.vovv = numpy.zeros((n, n, n, n))
         # I.vvoo = numpy.zeros((n,n,n,n))
-        I.vovo = numpy.zeros((n,n,n,n))
-        I.oovv = numpy.zeros((n,n,n,n))
-        I.vooo = numpy.zeros((n,n,n,n))
-        I.ooov = numpy.zeros((n,n,n,n))
-        I.oooo = numpy.zeros((n,n,n,n))
+        I.vovo = numpy.zeros((n, n, n, n))
+        I.oovv = numpy.zeros((n, n, n, n))
+        I.vooo = numpy.zeros((n, n, n, n))
+        I.ooov = numpy.zeros((n, n, n, n))
+        I.oooo = numpy.zeros((n, n, n, n))
 
         D1, D2 = test_utils.make_random_ft_D(n)
         ti, g, G = quadrature.simpsons(ng, beta)
@@ -303,19 +303,19 @@ class FTCCSD_RDMTest(unittest.TestCase):
         T1old, T2old = test_utils.make_random_ft_T(ng, n)
         L1old, L2old = test_utils.make_random_ft_T(ng, n)
         F, I = test_utils.make_random_integrals(n, n)
-        F.oo = numpy.zeros((n,n))
-        F.vo = numpy.zeros((n,n))
-        F.ov = numpy.zeros((n,n))
-        F.vv = numpy.zeros((n,n))
-        I.vvvv = numpy.zeros((n,n,n,n))
-        I.vvvo = numpy.zeros((n,n,n,n))
-        I.vovv = numpy.zeros((n,n,n,n))
-        I.vvoo = numpy.zeros((n,n,n,n))
+        F.oo = numpy.zeros((n, n))
+        F.vo = numpy.zeros((n, n))
+        F.ov = numpy.zeros((n, n))
+        F.vv = numpy.zeros((n, n))
+        I.vvvv = numpy.zeros((n, n, n, n))
+        I.vvvo = numpy.zeros((n, n, n, n))
+        I.vovv = numpy.zeros((n, n, n, n))
+        I.vvoo = numpy.zeros((n, n, n, n))
         # I.vovo = numpy.zeros((n,n,n,n))
-        I.oovv = numpy.zeros((n,n,n,n))
-        I.vooo = numpy.zeros((n,n,n,n))
-        I.ooov = numpy.zeros((n,n,n,n))
-        I.oooo = numpy.zeros((n,n,n,n))
+        I.oovv = numpy.zeros((n, n, n, n))
+        I.vooo = numpy.zeros((n, n, n, n))
+        I.ooov = numpy.zeros((n, n, n, n))
+        I.oooo = numpy.zeros((n, n, n, n))
 
         D1, D2 = test_utils.make_random_ft_D(n)
         ti, g, G = quadrature.simpsons(ng, beta)
@@ -337,19 +337,19 @@ class FTCCSD_RDMTest(unittest.TestCase):
         T1old, T2old = test_utils.make_random_ft_T(ng, n)
         L1old, L2old = test_utils.make_random_ft_T(ng, n)
         F, I = test_utils.make_random_integrals(n, n)
-        F.oo = numpy.zeros((n,n))
-        F.vo = numpy.zeros((n,n))
-        F.ov = numpy.zeros((n,n))
-        F.vv = numpy.zeros((n,n))
-        I.vvvv = numpy.zeros((n,n,n,n))
-        I.vvvo = numpy.zeros((n,n,n,n))
-        I.vovv = numpy.zeros((n,n,n,n))
-        I.vvoo = numpy.zeros((n,n,n,n))
-        I.vovo = numpy.zeros((n,n,n,n))
+        F.oo = numpy.zeros((n, n))
+        F.vo = numpy.zeros((n, n))
+        F.ov = numpy.zeros((n, n))
+        F.vv = numpy.zeros((n, n))
+        I.vvvv = numpy.zeros((n, n, n, n))
+        I.vvvo = numpy.zeros((n, n, n, n))
+        I.vovv = numpy.zeros((n, n, n, n))
+        I.vvoo = numpy.zeros((n, n, n, n))
+        I.vovo = numpy.zeros((n, n, n, n))
         # I.oovv = numpy.zeros((n,n,n,n))
-        I.vooo = numpy.zeros((n,n,n,n))
-        I.ooov = numpy.zeros((n,n,n,n))
-        I.oooo = numpy.zeros((n,n,n,n))
+        I.vooo = numpy.zeros((n, n, n, n))
+        I.ooov = numpy.zeros((n, n, n, n))
+        I.oooo = numpy.zeros((n, n, n, n))
 
         D1, D2 = test_utils.make_random_ft_D(n)
         ti, g, G = quadrature.simpsons(ng, beta)
@@ -371,19 +371,19 @@ class FTCCSD_RDMTest(unittest.TestCase):
         T1old, T2old = test_utils.make_random_ft_T(ng, n)
         L1old, L2old = test_utils.make_random_ft_T(ng, n)
         F, I = test_utils.make_random_integrals(n, n)
-        F.oo = numpy.zeros((n,n))
-        F.vo = numpy.zeros((n,n))
-        F.ov = numpy.zeros((n,n))
-        F.vv = numpy.zeros((n,n))
-        I.vvvv = numpy.zeros((n,n,n,n))
-        I.vvvo = numpy.zeros((n,n,n,n))
-        I.vovv = numpy.zeros((n,n,n,n))
-        I.vvoo = numpy.zeros((n,n,n,n))
-        I.vovo = numpy.zeros((n,n,n,n))
-        I.oovv = numpy.zeros((n,n,n,n))
+        F.oo = numpy.zeros((n, n))
+        F.vo = numpy.zeros((n, n))
+        F.ov = numpy.zeros((n, n))
+        F.vv = numpy.zeros((n, n))
+        I.vvvv = numpy.zeros((n, n, n, n))
+        I.vvvo = numpy.zeros((n, n, n, n))
+        I.vovv = numpy.zeros((n, n, n, n))
+        I.vvoo = numpy.zeros((n, n, n, n))
+        I.vovo = numpy.zeros((n, n, n, n))
+        I.oovv = numpy.zeros((n, n, n, n))
         # I.vooo = numpy.zeros((n,n,n,n))
-        I.ooov = numpy.zeros((n,n,n,n))
-        I.oooo = numpy.zeros((n,n,n,n))
+        I.ooov = numpy.zeros((n, n, n, n))
+        I.oooo = numpy.zeros((n, n, n, n))
 
         D1, D2 = test_utils.make_random_ft_D(n)
         ti, g, G = quadrature.simpsons(ng, beta)
@@ -405,19 +405,19 @@ class FTCCSD_RDMTest(unittest.TestCase):
         T1old, T2old = test_utils.make_random_ft_T(ng, n)
         L1old, L2old = test_utils.make_random_ft_T(ng, n)
         F, I = test_utils.make_random_integrals(n, n)
-        F.oo = numpy.zeros((n,n))
-        F.vo = numpy.zeros((n,n))
-        F.ov = numpy.zeros((n,n))
-        F.vv = numpy.zeros((n,n))
-        I.vvvv = numpy.zeros((n,n,n,n))
-        I.vvvo = numpy.zeros((n,n,n,n))
-        I.vovv = numpy.zeros((n,n,n,n))
-        I.vvoo = numpy.zeros((n,n,n,n))
-        I.vovo = numpy.zeros((n,n,n,n))
-        I.oovv = numpy.zeros((n,n,n,n))
-        I.vooo = numpy.zeros((n,n,n,n))
+        F.oo = numpy.zeros((n, n))
+        F.vo = numpy.zeros((n, n))
+        F.ov = numpy.zeros((n, n))
+        F.vv = numpy.zeros((n, n))
+        I.vvvv = numpy.zeros((n, n, n, n))
+        I.vvvo = numpy.zeros((n, n, n, n))
+        I.vovv = numpy.zeros((n, n, n, n))
+        I.vvoo = numpy.zeros((n, n, n, n))
+        I.vovo = numpy.zeros((n, n, n, n))
+        I.oovv = numpy.zeros((n, n, n, n))
+        I.vooo = numpy.zeros((n, n, n, n))
         # I.ooov = numpy.zeros((n,n,n,n))
-        I.oooo = numpy.zeros((n,n,n,n))
+        I.oooo = numpy.zeros((n, n, n, n))
 
         D1, D2 = test_utils.make_random_ft_D(n)
         ti, g, G = quadrature.simpsons(ng, beta)
@@ -439,18 +439,18 @@ class FTCCSD_RDMTest(unittest.TestCase):
         T1old, T2old = test_utils.make_random_ft_T(ng, n)
         L1old, L2old = test_utils.make_random_ft_T(ng, n)
         F, I = test_utils.make_random_integrals(n, n)
-        F.oo = numpy.zeros((n,n))
-        F.vo = numpy.zeros((n,n))
-        F.ov = numpy.zeros((n,n))
-        F.vv = numpy.zeros((n,n))
-        I.vvvv = numpy.zeros((n,n,n,n))
-        I.vvvo = numpy.zeros((n,n,n,n))
-        I.vovv = numpy.zeros((n,n,n,n))
-        I.vvoo = numpy.zeros((n,n,n,n))
-        I.vovo = numpy.zeros((n,n,n,n))
-        I.oovv = numpy.zeros((n,n,n,n))
-        I.vooo = numpy.zeros((n,n,n,n))
-        I.ooov = numpy.zeros((n,n,n,n))
+        F.oo = numpy.zeros((n, n))
+        F.vo = numpy.zeros((n, n))
+        F.ov = numpy.zeros((n, n))
+        F.vv = numpy.zeros((n, n))
+        I.vvvv = numpy.zeros((n, n, n, n))
+        I.vvvo = numpy.zeros((n, n, n, n))
+        I.vovv = numpy.zeros((n, n, n, n))
+        I.vvoo = numpy.zeros((n, n, n, n))
+        I.vovo = numpy.zeros((n, n, n, n))
+        I.oovv = numpy.zeros((n, n, n, n))
+        I.vooo = numpy.zeros((n, n, n, n))
+        I.ooov = numpy.zeros((n, n, n, n))
         # I.oooo = numpy.zeros((n,n,n,n))
 
         D1, D2 = test_utils.make_random_ft_D(n)
@@ -472,7 +472,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
         nb = 8
         thresh = 1e-14
         beta = 2.0
-        ti,g,G = quadrature.simpsons(ng, beta)
+        ti, g, G = quadrature.simpsons(ng, beta)
         n = na + nb
         T1a, T1b = test_utils.make_random_ft_T1_spatial(ng, na, nb)
         L1a, L1b = test_utils.make_random_ft_T1_spatial(ng, na, nb)
@@ -483,10 +483,10 @@ class FTCCSD_RDMTest(unittest.TestCase):
         D2aa = test_utils.make_random_ft_D2(na, na)
         D2ab = test_utils.make_random_ft_D2(na, nb)
         D2bb = test_utils.make_random_ft_D2(nb, nb)
-        T1 = numpy.zeros((ng,n,n))
-        L1 = numpy.zeros((ng,n,n))
-        T2 = numpy.zeros((ng,n,n,n,n))
-        L2 = numpy.zeros((ng,n,n,n,n))
+        T1 = numpy.zeros((ng, n, n))
+        L1 = numpy.zeros((ng, n, n))
+        T2 = numpy.zeros((ng, n, n, n, n))
+        L2 = numpy.zeros((ng, n, n, n, n))
         D1 = spin_utils.T1_to_spin(D1a, D1b, na, na, nb, nb)
         D2 = spin_utils.D2_to_spin(D2aa, D2ab, D2bb, na, na, nb, nb)
         for i in range(ng):
@@ -501,29 +501,29 @@ class FTCCSD_RDMTest(unittest.TestCase):
         grdm1 = ft_cc_equations.ccsd_1rdm(T1, T2, L1, L2, D1, D2, ti, ng, g, G)
 
         # test ia
-        refa = grdm1[0][:na,:na]
-        refb = grdm1[0][na:,na:]
+        refa = grdm1[0][:na, :na]
+        refb = grdm1[0][na:, na:]
         diffa = numpy.linalg.norm(refa - urdm1[0][0])/numpy.linalg.norm(refa)
         diffb = numpy.linalg.norm(refb - urdm1[0][1])/numpy.linalg.norm(refa)
         self.assertTrue(diffa < thresh)
         self.assertTrue(diffb < thresh)
         # test ba
-        refa = grdm1[1][:na,:na]
-        refb = grdm1[1][na:,na:]
+        refa = grdm1[1][:na, :na]
+        refb = grdm1[1][na:, na:]
         diffa = numpy.linalg.norm(refa - urdm1[1][0])/numpy.linalg.norm(refa)
         diffb = numpy.linalg.norm(refb - urdm1[1][1])/numpy.linalg.norm(refa)
         self.assertTrue(diffa < thresh)
         self.assertTrue(diffb < thresh)
         # test ji
-        refa = grdm1[2][:na,:na]
-        refb = grdm1[2][na:,na:]
+        refa = grdm1[2][:na, :na]
+        refb = grdm1[2][na:, na:]
         diffa = numpy.linalg.norm(refa - urdm1[2][0])/numpy.linalg.norm(refa)
         diffb = numpy.linalg.norm(refb - urdm1[2][1])/numpy.linalg.norm(refa)
         self.assertTrue(diffa < thresh)
         self.assertTrue(diffb < thresh)
         # test ai
-        refa = grdm1[3][:na,:na]
-        refb = grdm1[3][na:,na:]
+        refa = grdm1[3][:na, :na]
+        refb = grdm1[3][na:, na:]
         diffa = numpy.linalg.norm(refa - urdm1[3][0])/numpy.linalg.norm(refa)
         diffb = numpy.linalg.norm(refb - urdm1[3][1])/numpy.linalg.norm(refa)
         self.assertTrue(diffa < thresh)
@@ -535,7 +535,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
         nb = 8
         thresh = 1e-14
         beta = 2.0
-        ti,g,G = quadrature.simpsons(ng, beta)
+        ti, g, G = quadrature.simpsons(ng, beta)
         n = na + nb
         T1a, T1b = test_utils.make_random_ft_T1_spatial(ng, na, nb)
         L1a, L1b = test_utils.make_random_ft_T1_spatial(ng, na, nb)
@@ -546,10 +546,10 @@ class FTCCSD_RDMTest(unittest.TestCase):
         D2aa = test_utils.make_random_ft_D2(na, na)
         D2ab = test_utils.make_random_ft_D2(na, nb)
         D2bb = test_utils.make_random_ft_D2(nb, nb)
-        T1 = numpy.zeros((ng,n,n))
-        L1 = numpy.zeros((ng,n,n))
-        T2 = numpy.zeros((ng,n,n,n,n))
-        L2 = numpy.zeros((ng,n,n,n,n))
+        T1 = numpy.zeros((ng, n, n))
+        L1 = numpy.zeros((ng, n, n))
+        T2 = numpy.zeros((ng, n, n, n, n))
+        L2 = numpy.zeros((ng, n, n, n, n))
         D1 = spin_utils.T1_to_spin(D1a, D1b, na, na, nb, nb)
         D2 = spin_utils.D2_to_spin(D2aa, D2ab, D2bb, na, na, nb, nb)
         for i in range(ng):
@@ -564,9 +564,9 @@ class FTCCSD_RDMTest(unittest.TestCase):
         grdm2 = ft_cc_equations.ccsd_2rdm(T1, T2, L1, L2, D1, D2, ti, ng, g, G)
 
         # test cdab
-        ref1 = grdm2[0][:na,:na,:na,:na]
-        ref2 = grdm2[0][na:,na:,na:,na:]
-        ref3 = grdm2[0][:na,na:,:na,na:]
+        ref1 = grdm2[0][:na, :na, :na, :na]
+        ref2 = grdm2[0][na:, na:, na:, na:]
+        ref3 = grdm2[0][:na, na:, :na, na:]
         out1 = urdm2[0][0]
         out2 = urdm2[0][1]
         out3 = urdm2[0][2]
@@ -578,10 +578,10 @@ class FTCCSD_RDMTest(unittest.TestCase):
         self.assertTrue(diff3 < thresh, "error in PcDaB: {}".format(diff3))
 
         # test ciab
-        ref1 = grdm2[1][:na,:na,:na,:na]
-        ref2 = grdm2[1][na:,na:,na:,na:]
-        ref3 = grdm2[1][:na,na:,:na,na:]
-        ref4 = grdm2[1][na:,:na,na:,:na]
+        ref1 = grdm2[1][:na, :na, :na, :na]
+        ref2 = grdm2[1][na:, na:, na:, na:]
+        ref3 = grdm2[1][:na, na:, :na, na:]
+        ref4 = grdm2[1][na:, :na, na:, :na]
         out1 = urdm2[1][0]
         out2 = urdm2[1][1]
         out3 = urdm2[1][2]
@@ -596,10 +596,10 @@ class FTCCSD_RDMTest(unittest.TestCase):
         self.assertTrue(diff4 < thresh, "error in PCiAb: {}".format(diff4))
 
         # test bcai
-        ref1 = grdm2[2][:na,:na,:na,:na]
-        ref2 = grdm2[2][na:,na:,na:,na:]
-        ref3 = grdm2[2][:na,na:,:na,na:]
-        ref4 = grdm2[2][na:,:na,na:,:na]
+        ref1 = grdm2[2][:na, :na, :na, :na]
+        ref2 = grdm2[2][na:, na:, na:, na:]
+        ref3 = grdm2[2][:na, na:, :na, na:]
+        ref4 = grdm2[2][na:, :na, na:, :na]
         out1 = urdm2[2][0]
         out2 = urdm2[2][1]
         out3 = urdm2[2][2]
@@ -614,9 +614,9 @@ class FTCCSD_RDMTest(unittest.TestCase):
         self.assertTrue(diff4 < thresh, "error in PBcAi: {}".format(diff4))
 
         # test ijab
-        ref1 = grdm2[3][:na,:na,:na,:na]
-        ref2 = grdm2[3][na:,na:,na:,na:]
-        ref3 = grdm2[3][:na,na:,:na,na:]
+        ref1 = grdm2[3][:na, :na, :na, :na]
+        ref2 = grdm2[3][na:, na:, na:, na:]
+        ref3 = grdm2[3][:na, na:, :na, na:]
         out1 = urdm2[3][0]
         out2 = urdm2[3][1]
         out3 = urdm2[3][2]
@@ -628,12 +628,12 @@ class FTCCSD_RDMTest(unittest.TestCase):
         self.assertTrue(diff3 < thresh, "error in PiJaB: {}".format(diff3))
 
         # test bjai
-        ref1 = grdm2[4][:na,:na,:na,:na]
-        ref2 = grdm2[4][na:,na:,na:,na:]
-        ref3 = grdm2[4][:na,na:,:na,na:]
-        ref4 = grdm2[4][:na,na:,na:,:na]
-        ref5 = grdm2[4][na:,:na,:na,na:]
-        ref6 = grdm2[4][na:,:na,na:,:na]
+        ref1 = grdm2[4][:na, :na, :na, :na]
+        ref2 = grdm2[4][na:, na:, na:, na:]
+        ref3 = grdm2[4][:na, na:, :na, na:]
+        ref4 = grdm2[4][:na, na:, na:, :na]
+        ref5 = grdm2[4][na:, :na, :na, na:]
+        ref6 = grdm2[4][na:, :na, na:, :na]
         out1 = urdm2[4][0]
         out2 = urdm2[4][1]
         out3 = urdm2[4][2]
@@ -654,9 +654,9 @@ class FTCCSD_RDMTest(unittest.TestCase):
         self.assertTrue(diff6 < thresh, "error in PBjAi: {}".format(diff6))
 
         # test abij
-        ref1 = grdm2[5][:na,:na,:na,:na]
-        ref2 = grdm2[5][na:,na:,na:,na:]
-        ref3 = grdm2[5][:na,na:,:na,na:]
+        ref1 = grdm2[5][:na, :na, :na, :na]
+        ref2 = grdm2[5][na:, na:, na:, na:]
+        ref3 = grdm2[5][:na, na:, :na, na:]
         out1 = urdm2[5][0]
         out2 = urdm2[5][1]
         out3 = urdm2[5][2]
@@ -668,10 +668,10 @@ class FTCCSD_RDMTest(unittest.TestCase):
         self.assertTrue(diff3 < thresh, "error in PaBiJ: {}".format(diff3))
 
         # test jkai
-        ref1 = grdm2[6][:na,:na,:na,:na]
-        ref2 = grdm2[6][na:,na:,na:,na:]
-        ref3 = grdm2[6][:na,na:,:na,na:]
-        ref4 = grdm2[6][na:,:na,na:,:na]
+        ref1 = grdm2[6][:na, :na, :na, :na]
+        ref2 = grdm2[6][na:, na:, na:, na:]
+        ref3 = grdm2[6][:na, na:, :na, na:]
+        ref4 = grdm2[6][na:, :na, na:, :na]
         out1 = urdm2[6][0]
         out2 = urdm2[6][1]
         out3 = urdm2[6][2]
@@ -686,10 +686,10 @@ class FTCCSD_RDMTest(unittest.TestCase):
         self.assertTrue(diff4 < thresh, "error in PJkAi: {}".format(diff4))
 
         # test kaij
-        ref1 = grdm2[7][:na,:na,:na,:na]
-        ref2 = grdm2[7][na:,na:,na:,na:]
-        ref3 = grdm2[7][:na,na:,:na,na:]
-        ref4 = grdm2[7][na:,:na,na:,:na]
+        ref1 = grdm2[7][:na, :na, :na, :na]
+        ref2 = grdm2[7][na:, na:, na:, na:]
+        ref3 = grdm2[7][:na, na:, :na, na:]
+        ref4 = grdm2[7][na:, :na, na:, :na]
         out1 = urdm2[7][0]
         out2 = urdm2[7][1]
         out3 = urdm2[7][2]
@@ -704,9 +704,9 @@ class FTCCSD_RDMTest(unittest.TestCase):
         self.assertTrue(diff4 < thresh, "error in PKaIj: {}".format(diff4))
 
         # test klij
-        ref1 = grdm2[8][:na,:na,:na,:na]
-        ref2 = grdm2[8][na:,na:,na:,na:]
-        ref3 = grdm2[8][:na,na:,:na,na:]
+        ref1 = grdm2[8][:na, :na, :na, :na]
+        ref2 = grdm2[8][na:, na:, na:, na:]
+        ref3 = grdm2[8][:na, na:, :na, na:]
         out1 = urdm2[8][0]
         out2 = urdm2[8][1]
         out3 = urdm2[8][2]

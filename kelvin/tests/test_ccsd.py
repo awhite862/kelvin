@@ -11,7 +11,7 @@ def test_ccsd_gen(m):
     mycc.run()
     sys = SCFSystem(m, 0.0, 0.0, orbtype='g')
     ccsd0 = ccsd(sys, iprint=0, max_iter=44, econv=1e-12)
-    Etot,Ecc = ccsd0.run()
+    Etot, Ecc = ccsd0.run()
 
     return (mycc.e_corr, Ecc)
 
@@ -22,7 +22,7 @@ def test_ccsd(m):
     mycc.run()
     sys = SCFSystem(m, 0.0, 0.0)
     ccsd0 = ccsd(sys, iprint=0, max_iter=44, econv=1e-12)
-    Etot,Ecc = ccsd0.run()
+    Etot, Ecc = ccsd0.run()
 
     return (mycc.e_corr, Ecc)
 

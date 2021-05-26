@@ -56,17 +56,17 @@ class FTamplEquationsTest(unittest.TestCase):
         I = spin_utils.int_to_spin2(Ia, Ib, Iabab, na, na, nb, nb)
         F = spin_utils.F_to_spin(Fa, Fb, na, na, nb, nb)
 
-        T1a = numpy.zeros((ng,na,na))
-        T1b = numpy.zeros((ng,nb,nb))
+        T1a = numpy.zeros((ng, na, na))
+        T1b = numpy.zeros((ng, nb, nb))
         for i in range(ng):
             T1at, T1bt = test_utils.make_random_T1_spatial(na, na, nb, nb)
             T1a[i] = T1at
             T1b[i] = T1bt
-        T2aa = numpy.zeros((ng,na,na,na,na))
-        T2ab = numpy.zeros((ng,na,nb,na,nb))
-        T2bb = numpy.zeros((ng,nb,nb,nb,nb))
-        T1old = numpy.zeros((ng,n,n))
-        T2old = numpy.zeros((ng,n,n,n,n))
+        T2aa = numpy.zeros((ng, na, na, na, na))
+        T2ab = numpy.zeros((ng, na, nb, na, nb))
+        T2bb = numpy.zeros((ng, nb, nb, nb, nb))
+        T1old = numpy.zeros((ng, n, n))
+        T2old = numpy.zeros((ng, n, n, n, n))
         for i in range(ng):
             T2aat, T2abt, T2bbt = test_utils.make_random_T2_spatial(na, na, nb, nb)
             T2aa[i] = T2aat
@@ -92,8 +92,8 @@ class FTamplEquationsTest(unittest.TestCase):
             Fa, Fb, Ia, Ib, Iabab, T1a, T1b, T2aa, T2ab, T2bb,
             D1a, D1b, D2aa, D2ab, D2bb, ti, ng, G)
 
-        T1 = numpy.zeros((ng,n,n))
-        T2 = numpy.zeros((ng,n,n,n,n))
+        T1 = numpy.zeros((ng, n, n))
+        T2 = numpy.zeros((ng, n, n, n, n))
         for i in range(ng):
             T1[i] = spin_utils.T1_to_spin(
                 T1out[0][i], T1out[1][i], na, na, nb, nb)

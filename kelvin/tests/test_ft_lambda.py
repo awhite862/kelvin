@@ -262,7 +262,7 @@ class FTLambdaTest(unittest.TestCase):
         dT1L, L2n = ft_cc_equations.ccsd_lambda_simple(
             F, I, cc.T1, cc.T2, L1, L2, D1, D2, ti, ng, g, G, beta)
         dT1L = -(dT1L - L1)
-        dT1L = dT1L.transpose((0,2,1))
+        dT1L = dT1L.transpose((0, 2, 1))
         for y in range(ng):
             dT1L[y] *= g[y]/beta
 

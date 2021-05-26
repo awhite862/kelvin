@@ -72,10 +72,10 @@ class FTCC2RDMTest(unittest.TestCase):
         T = 1.0
         L = 2
         mu = 0.5
-        Mg = numpy.zeros((2*L,2*L,2*L,2*L))
+        Mg = numpy.zeros((2*L, 2*L, 2*L, 2*L))
         for i in range(L):
-            Mg[i,L+i,i,L+i] = -2.0
-            Mg[L+i,i,L+i,i] = -2.0
+            Mg[i, L+i, i, L+i] = -2.0
+            Mg[L+i, i, L+i, i] = -2.0
         Mg = Mg - Mg.transpose((0,1,3,2))
         hub = Hubbard1D(2, 1.0, U)
         Pa = numpy.zeros((2,2))
@@ -165,8 +165,8 @@ class FTCC2RDMTest(unittest.TestCase):
         fv = ft_utils.ffv(beta, en, mu)
         focc = [x for x in fo if x > athresh]
         fvir = [x for x in fv if x > athresh]
-        iocc = [i for i,x in enumerate(fo) if x > athresh]
-        ivir = [i for i,x in enumerate(fv) if x > athresh]
+        iocc = [i for i, x in enumerate(fo) if x > athresh]
+        ivir = [i for i, x in enumerate(fv) if x > athresh]
         F, I = cc_utils.ft_active_integrals(sys, en, focc, fvir, iocc, ivir)
         ref = (0.25/beta)*einsum('cdab,abcd->', ccsdT.P2[0], I.vvvv)
         ref += (0.5/beta)*einsum('ciab,abci->', ccsdT.P2[1], I.vvvo)
@@ -213,15 +213,15 @@ class FTCC2RDMTest(unittest.TestCase):
         P2u = ccsdT.n2rdm
 
         # aaaa block
-        diff = numpy.linalg.norm(P2u[0] - P2g[:na,:na,:na,:na])/numpy.linalg.norm(P2u[0])
+        diff = numpy.linalg.norm(P2u[0] - P2g[:na, :na, :na, :na])/numpy.linalg.norm(P2u[0])
         self.assertTrue(diff < self.thresh, "Error in 2rdm(aaaa): {}".format(diff))
 
         # bbbb block
-        diff = numpy.linalg.norm(P2u[1] - P2g[na:,na:,na:,na:])/numpy.linalg.norm(P2u[1])
+        diff = numpy.linalg.norm(P2u[1] - P2g[na:, na:, na:, na:])/numpy.linalg.norm(P2u[1])
         self.assertTrue(diff < self.thresh, "Error in 2rdm(bbbb): {}".format(diff))
 
         # abab block
-        P2gab = P2g[:na,na:,:na,na:]
+        P2gab = P2g[:na, na:, :na, na:]
         diff = numpy.linalg.norm(P2u[2] - P2gab)/numpy.linalg.norm(P2u[2])
         self.assertTrue(diff < self.thresh, "Error in 2rdm(abab): {}".format(diff))
 
@@ -254,15 +254,15 @@ class FTCC2RDMTest(unittest.TestCase):
         P2u = ccsdT.n2rdm
 
         # aaaa block
-        diff = numpy.linalg.norm(P2u[0] - P2g[:na,:na,:na,:na])/numpy.linalg.norm(P2u[0])
+        diff = numpy.linalg.norm(P2u[0] - P2g[:na, :na, :na, :na])/numpy.linalg.norm(P2u[0])
         self.assertTrue(diff < 1e-12, "Error in 2rdm(aaaa): {}".format(diff))
 
         # bbbb block
-        diff = numpy.linalg.norm(P2u[1] - P2g[na:,na:,na:,na:])/numpy.linalg.norm(P2u[1])
+        diff = numpy.linalg.norm(P2u[1] - P2g[na:, na:, na:, na:])/numpy.linalg.norm(P2u[1])
         self.assertTrue(diff < 1e-12, "Error in 2rdm(bbbb): {}".format(diff))
 
         # abab block
-        P2gab = P2g[:na,na:,:na,na:]
+        P2gab = P2g[:na, na:, :na, na:]
         diff = numpy.linalg.norm(P2u[2] - P2gab)/numpy.linalg.norm(P2u[2])
         self.assertTrue(diff < 1e-12, "Error in 2rdm(abab): {}".format(diff))
 
@@ -291,15 +291,15 @@ class FTCC2RDMTest(unittest.TestCase):
         P2u = ccsdT.full_2rdm()
 
         # aaaa block
-        diff = numpy.linalg.norm(P2u[0] - P2g[:na,:na,:na,:na])/numpy.linalg.norm(P2u[0])
+        diff = numpy.linalg.norm(P2u[0] - P2g[:na, :na, :na, :na])/numpy.linalg.norm(P2u[0])
         self.assertTrue(diff < 1e-12, "Error in 2rdm(aaaa): {}".format(diff))
 
         # bbbb block
-        diff = numpy.linalg.norm(P2u[1] - P2g[na:,na:,na:,na:])/numpy.linalg.norm(P2u[1])
+        diff = numpy.linalg.norm(P2u[1] - P2g[na:, na:, na:, na:])/numpy.linalg.norm(P2u[1])
         self.assertTrue(diff < 1e-12, "Error in 2rdm(bbbb): {}".format(diff))
 
         # abab block
-        P2gab = P2g[:na,na:,:na,na:]
+        P2gab = P2g[:na, na:, :na, na:]
         diff = numpy.linalg.norm(P2u[2] - P2gab)/numpy.linalg.norm(P2u[2])
         self.assertTrue(diff < 1e-12, "Error in 2rdm(abab): {}".format(diff))
 
