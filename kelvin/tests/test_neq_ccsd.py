@@ -36,13 +36,13 @@ class NEQ_CCSDTest(unittest.TestCase):
         E[2] = 1.0
         field = numpy.einsum('x,xij->ij', E, mol.intor('cint1e_r_sph', comp=3))
         field = numpy.einsum('mp,mn,nq->pq', mos, field, mos)
-        H = numpy.zeros((4,4))
+        H = numpy.zeros((4, 4))
         H[1,1] += hcore[0,0]
         H[2,2] += hcore[1,1]
         H[1,2] += hcore[0,1]
         H[2,1] += hcore[1,0]
         H[3,3] = hcore[0,0] + hcore[1,1] + eri[0,1,0,1] - eri[0,1,1,0]
-        Hint = numpy.zeros((4,4))
+        Hint = numpy.zeros((4, 4))
         Hint[1,1] = field[0,0]
         Hint[2,2] = field[1,1]
         Hint[1,2] = field[0,1]
@@ -119,20 +119,20 @@ class NEQ_CCSDTest(unittest.TestCase):
         E[2] = 1.0
         field = numpy.einsum('x,xij->ij', E, mol.intor('cint1e_r_sph', comp=3))
         field = numpy.einsum('mp,mn,nq->pq', mos, field, mos)
-        H = numpy.zeros((4,4))
+        H = numpy.zeros((4, 4))
         H[1,1] += hcore[0,0]
         H[2,2] += hcore[1,1]
         H[1,2] += hcore[0,1]
         H[2,1] += hcore[1,0]
         H[3,3] = hcore[0,0] + hcore[1,1] + eri[0,1,0,1] - eri[0,1,1,0]
-        Hint = numpy.zeros((4,4))
+        Hint = numpy.zeros((4, 4))
         Hint[1,1] = field[0,0]
         Hint[2,2] = field[1,1]
         Hint[1,2] = field[0,1]
         Hint[2,1] = field[1,0]
         Hint[3,3] = field[0,0] + field[1,1]
 
-        Htest = numpy.zeros((4,4))
+        Htest = numpy.zeros((4, 4))
         Htest[3,3] = eri[0,1,0,1] - eri[0,1,1,0]
 
         e0,v0 = numpy.linalg.eigh(H)

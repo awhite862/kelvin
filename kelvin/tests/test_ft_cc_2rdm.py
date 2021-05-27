@@ -76,10 +76,10 @@ class FTCC2RDMTest(unittest.TestCase):
         for i in range(L):
             Mg[i, L+i, i, L+i] = -2.0
             Mg[L+i, i, L+i, i] = -2.0
-        Mg = Mg - Mg.transpose((0,1,3,2))
+        Mg = Mg - Mg.transpose((0, 1, 3, 2))
         hub = Hubbard1D(2, 1.0, U)
-        Pa = numpy.zeros((2,2))
-        Pb = numpy.zeros((2,2))
+        Pa = numpy.zeros((2, 2))
+        Pb = numpy.zeros((2, 2))
         Pa[0,0] = 1.0
         Pb[1,1] = 1.0
         sys = HubbardSystem(T, hub, Pa, Pb, mu=mu, orbtype='g')

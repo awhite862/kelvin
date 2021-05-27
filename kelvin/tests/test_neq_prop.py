@@ -138,16 +138,16 @@ class NEQPropTest(unittest.TestCase):
         Esfd = (Ef - Eb)/(2*d)
 
         # integrals
-        Fock = numpy.zeros((ng,n,n), dtype=complex)
+        Fock = numpy.zeros((ng, n, n), dtype=complex)
         Fock[ng - 1] -= 1.j*beta*field/deltat
         Foo = numpy.einsum('yij,j->yij', Fock, fo)
         Fvo = numpy.einsum('yai,a,i->yai', Fock, fv, fo)
         Fvv = numpy.einsum('yab,a->yab', Fock, fv)
-        temp = numpy.zeros((ng,n,n), dtype=complex)
+        temp = numpy.zeros((ng, n, n), dtype=complex)
         Ffn = one_e_blocks(Foo, Fock, Fvo, Fvv)
         Fbn = one_e_blocks(temp, temp, temp, temp)
         Fn = one_e_blocks(Fock[0], Fock[0], Fock[0], Fock[0])
-        Inull = numpy.zeros((n,n,n,n), dtype=complex)
+        Inull = numpy.zeros((n, n, n, n), dtype=complex)
         In = two_e_blocks(
             vvvv=Inull, vvvo=Inull, vovv=Inull,
             vvoo=Inull, vovo=Inull, oovv=Inull,
@@ -162,9 +162,9 @@ class NEQPropTest(unittest.TestCase):
         F, Ff, Fb, I = cc_utils.get_ft_integrals_neq(sys, en, beta, mu)
 
         # compute the singles
-        dT1i = numpy.zeros((ngi,n,n), dtype=complex)
-        dT1b = numpy.zeros((ngr,n,n), dtype=complex)
-        dT1f = numpy.zeros((ngr,n,n), dtype=complex)
+        dT1i = numpy.zeros((ngi, n, n), dtype=complex)
+        dT1b = numpy.zeros((ngr, n, n), dtype=complex)
+        dT1f = numpy.zeros((ngr, n, n), dtype=complex)
         for y in range(ngi):
             for i in range(n):
                 for a in range(n):
@@ -211,9 +211,9 @@ class NEQPropTest(unittest.TestCase):
                         Ff.ov, Fb.ov, F.ov, I.oovv, gr, gi, beta)
                     dT1f[y,i,a] = (EP - EM)/(2*d)
 
-        dT2i = numpy.zeros((ngi,n,n,n,n), dtype=complex)
-        dT2b = numpy.zeros((ngr,n,n,n,n), dtype=complex)
-        dT2f = numpy.zeros((ngr,n,n,n,n), dtype=complex)
+        dT2i = numpy.zeros((ngi, n, n, n, n), dtype=complex)
+        dT2b = numpy.zeros((ngr, n, n, n, n), dtype=complex)
+        dT2f = numpy.zeros((ngr, n, n, n, n), dtype=complex)
         for y in range(ngi):
             for i in range(n):
                 for j in range(n):
@@ -397,13 +397,13 @@ class NEQPropTest(unittest.TestCase):
         E[2] = 1.0
         field = numpy.einsum('x,xij->ij', E, mol.intor('cint1e_r_sph', comp=3))
         field = numpy.einsum('mp,mn,nq->pq', mos, field, mos)
-        H = numpy.zeros((4,4))
+        H = numpy.zeros((4, 4))
         H[1,1] += hcore[0,0]
         H[2,2] += hcore[1,1]
         H[1,2] += hcore[0,1]
         H[2,1] += hcore[1,0]
         H[3,3] = hcore[0,0] + hcore[1,1] + eri[0,1,0,1] - eri[0,1,1,0]
-        Hint = numpy.zeros((4,4))
+        Hint = numpy.zeros((4, 4))
         Hint[1,1] = field[0,0]
         Hint[2,2] = field[1,1]
         Hint[1,2] = field[0,1]

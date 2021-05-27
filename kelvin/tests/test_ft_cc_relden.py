@@ -59,7 +59,7 @@ class FTCCReldenTest(unittest.TestCase):
         m.scf()
         h = m.get_hcore()
         field = numpy.random.random(h.shape)
-        field = 0.1*(field + field.transpose((1,0)))
+        field = 0.1*(field + field.transpose((1, 0)))
         fmo = scf_utils.mo_tran_1e(m, field)
         fdiag = fmo.diagonal()
         na = fmo.shape[0]//2
@@ -129,7 +129,7 @@ class FTCCReldenTest(unittest.TestCase):
         m.scf()
         h = m.get_hcore()
         field = numpy.random.random(h.shape)
-        field = 0.1*(field + field.transpose((1,0)))
+        field = 0.1*(field + field.transpose((1, 0)))
         fmo = scf_utils.mo_tran_1e(m, field)
         fdiag = fmo.diagonal()
         na = fmo.shape[0]//2

@@ -104,11 +104,11 @@ class HubbardTest(unittest.TestCase):
         Pb = numpy.einsum('i,j->ij', Ob, Ob)
         sys = hubbard_site_system(0.0, hub, Pa, Pb, na=1, nb=1)
         cc = ccsd(sys, iprint=0, damp=0.6, max_iter=80, econv=1e-11)
-        T2aa = numpy.zeros((1,1,1,1))
-        T2ab = numpy.zeros((1,1,1,1))
-        T2bb = numpy.zeros((1,1,1,1))
-        T1a = numpy.zeros((1,1))
-        T1b = numpy.zeros((1,1))
+        T2aa = numpy.zeros((1, 1, 1, 1))
+        T2ab = numpy.zeros((1, 1, 1, 1))
+        T2bb = numpy.zeros((1, 1, 1, 1))
+        T1a = numpy.zeros((1, 1))
+        T1b = numpy.zeros((1, 1))
         T1a[0,0] = 1.0
         T1b[0,0] = 1.0
         T1 = (T1a,T1b)

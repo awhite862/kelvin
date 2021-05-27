@@ -179,10 +179,10 @@ class FTLambdaTest(unittest.TestCase):
         n = na + nb
 
         # convert to spin orbitals
-        L1 = numpy.zeros((ng,n,n))
-        L2 = numpy.zeros((ng,n,n,n,n))
-        T1 = numpy.zeros((ng,n,n))
-        T2 = numpy.zeros((ng,n,n,n,n))
+        L1 = numpy.zeros((ng, n, n))
+        L2 = numpy.zeros((ng, n, n, n, n))
+        T1 = numpy.zeros((ng, n, n))
+        T2 = numpy.zeros((ng, n, n, n, n))
         for y in range(ng):
             L1[y] = spin_utils.T1_to_spin(
                 ccsdT.L1[0][y], ccsdT.L1[1][y], na, na, nb, nb)
@@ -230,7 +230,7 @@ class FTLambdaTest(unittest.TestCase):
         D2 = en[:,None,None,None] + en[None,:,None,None] \
             - en[None,None,:,None] - en[None,None,None,:]
         F,I = cc_utils.ft_integrals(sys, en, beta, mu)
-        dT1 = numpy.zeros((ng,n,n))
+        dT1 = numpy.zeros((ng, n, n))
         for y in range(ng):
             for i in range(n):
                 for a in range(n):
@@ -258,7 +258,7 @@ class FTLambdaTest(unittest.TestCase):
                     dT1[y,a,i] = (fw - bw)/(2*d)
 
         # compute derivative from Lambda equations
-        dT1L = numpy.zeros((ng,n,n))
+        dT1L = numpy.zeros((ng, n, n))
         dT1L, L2n = ft_cc_equations.ccsd_lambda_simple(
             F, I, cc.T1, cc.T2, L1, L2, D1, D2, ti, ng, g, G, beta)
         dT1L = -(dT1L - L1)
