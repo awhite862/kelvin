@@ -22,7 +22,7 @@ class TDCCSDReldenTest(unittest.TestCase):
 
         # compute normal-ordered 1-rdm
         ccsdT = ccsd(sys, T=T, mu=mu, ngrid=80, iprint=0)
-        Eref,Eccref = ccsdT.run()
+        Eref, Eccref = ccsdT.run()
         ccsdT._g_ft_1rdm()
         ccsdT._g_ft_2rdm()
         ccsdT._g_ft_ron()
@@ -31,8 +31,8 @@ class TDCCSDReldenTest(unittest.TestCase):
         # compute normal-order 1-rdm from propagation
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
-        Eout,Eccout = tdccsdT.run()
-        Etmp,Ecctmp = tdccsdT._ccsd_lambda(rdm2=True, erel=True)
+        Eout, Eccout = tdccsdT.run()
+        Etmp, Ecctmp = tdccsdT._ccsd_lambda(rdm2=True, erel=True)
         tdccsdT._g_ft_ron()
 
         diff = numpy.linalg.norm(ccsdT.ron1 - tdccsdT.ron1)/numpy.linalg.norm(ccsdT.ron1)
@@ -61,7 +61,7 @@ class TDCCSDReldenTest(unittest.TestCase):
 
         # compute normal-ordered 1-rdm
         ccsdT = ccsd(sys, T=T, mu=mu, ngrid=120, iprint=0, athresh=1e-20)
-        Eref,Eccref = ccsdT.run()
+        Eref, Eccref = ccsdT.run()
         ccsdT._g_ft_1rdm()
         ccsdT._g_ft_2rdm()
         ccsdT._g_ft_ron()
@@ -70,8 +70,8 @@ class TDCCSDReldenTest(unittest.TestCase):
         # compute normal-order 1-rdm from propagation
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=440, athresh=1e-20, saveT=True)
-        Eout,Eccout = tdccsdT.run()
-        Etmp,Ecctmp = tdccsdT._ccsd_lambda(rdm2=True, erel=True)
+        Eout, Eccout = tdccsdT.run()
+        Etmp, Ecctmp = tdccsdT._ccsd_lambda(rdm2=True, erel=True)
         tdccsdT._g_ft_ron()
 
         diff = numpy.linalg.norm(ccsdT.ron1 - tdccsdT.ron1)/numpy.linalg.norm(ccsdT.ron1)
@@ -101,8 +101,8 @@ class TDCCSDReldenTest(unittest.TestCase):
         # compute normal-order 1-rdm from propagation
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
-        Eout,Eccout = tdccsdT.run()
-        Etmp,Ecctmp = tdccsdT._ccsd_lambda(rdm2=True, erel=True)
+        Eout, Eccout = tdccsdT.run()
+        Etmp, Ecctmp = tdccsdT._ccsd_lambda(rdm2=True, erel=True)
         tdccsdT._g_ft_ron()
         ron1 = tdccsdT.ron1
         rono = tdccsdT.rono
@@ -114,8 +114,8 @@ class TDCCSDReldenTest(unittest.TestCase):
         # compute normal-order 1-rdm from propagation
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
-        Eout,Eccout = tdccsdT.run()
-        Etmp,Ecctmp = tdccsdT._uccsd_lambda(rdm2=True, erel=True)
+        Eout, Eccout = tdccsdT.run()
+        Etmp, Ecctmp = tdccsdT._uccsd_lambda(rdm2=True, erel=True)
         tdccsdT._u_ft_ron()
         uron1 = numpy.concatenate((tdccsdT.ron1[0], tdccsdT.ron1[1]))
         urono = numpy.concatenate((tdccsdT.rono[0], tdccsdT.rono[1]))
@@ -150,8 +150,8 @@ class TDCCSDReldenTest(unittest.TestCase):
         # compute normal-order 1-rdm from propagation
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80)
-        Eout,Eccout = tdccsdT.run()
-        Etmp,Ecctmp = tdccsdT._rccsd_lambda(rdm2=True, erel=True)
+        Eout, Eccout = tdccsdT.run()
+        Etmp, Ecctmp = tdccsdT._rccsd_lambda(rdm2=True, erel=True)
         tdccsdT._r_ft_ron()
         ron1 = tdccsdT.ron1
         rono = tdccsdT.rono
@@ -163,8 +163,8 @@ class TDCCSDReldenTest(unittest.TestCase):
         # compute normal-order 1-rdm from propagation
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80)
-        Eout,Eccout = tdccsdT.run()
-        Etmp,Ecctmp = tdccsdT._uccsd_lambda(rdm2=True, erel=True)
+        Eout, Eccout = tdccsdT.run()
+        Etmp, Ecctmp = tdccsdT._uccsd_lambda(rdm2=True, erel=True)
         tdccsdT._u_ft_ron()
         uron1 = tdccsdT.ron1[0]
         urono = tdccsdT.rono[0]
@@ -200,8 +200,8 @@ class TDCCSDReldenTest(unittest.TestCase):
         # compute normal-order 1-rdm from propagation
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160, athresh=athresh, saveT=True)
-        Eout,Eccout = tdccsdT.run()
-        Etmp,Ecctmp = tdccsdT._rccsd_lambda(rdm2=True, erel=True)
+        Eout, Eccout = tdccsdT.run()
+        Etmp, Ecctmp = tdccsdT._rccsd_lambda(rdm2=True, erel=True)
         tdccsdT._r_ft_ron()
         ron1 = tdccsdT.ron1
         rono = tdccsdT.rono
@@ -213,8 +213,8 @@ class TDCCSDReldenTest(unittest.TestCase):
         # compute normal-order 1-rdm from propagation
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160, athresh=athresh, saveT=True)
-        Eout,Eccout = tdccsdT.run()
-        Etmp,Ecctmp = tdccsdT._uccsd_lambda(rdm2=True, erel=True)
+        Eout, Eccout = tdccsdT.run()
+        Etmp, Ecctmp = tdccsdT._uccsd_lambda(rdm2=True, erel=True)
         tdccsdT._u_ft_ron()
         uron1 = tdccsdT.ron1[0]
         urono = tdccsdT.rono[0]
@@ -248,7 +248,7 @@ class TDCCSDReldenTest(unittest.TestCase):
 
         # compute normal-ordered 1-rdm
         ccsdT = ccsd(sys, T=T, mu=mu, ngrid=80, iprint=0)
-        Eref,Eccref = ccsdT.run()
+        Eref, Eccref = ccsdT.run()
         ccsdT._u_ft_1rdm()
         ccsdT._u_ft_2rdm()
         ccsdT._u_ft_ron()
@@ -258,8 +258,8 @@ class TDCCSDReldenTest(unittest.TestCase):
         # compute normal-order 1-rdm from propagation
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
-        Eout,Eccout = tdccsdT.run()
-        Etmp,Ecctmp = tdccsdT._uccsd_lambda(rdm2=True, erel=True)
+        Eout, Eccout = tdccsdT.run()
+        Etmp, Ecctmp = tdccsdT._uccsd_lambda(rdm2=True, erel=True)
         rdm1_out = tdccsdT.full_1rdm(relax=True)
         d1 = numpy.linalg.norm(rdm1_ref[0] - rdm1_out[0])
         d2 = numpy.linalg.norm(rdm1_ref[1] - rdm1_out[1])
@@ -283,16 +283,16 @@ class TDCCSDReldenTest(unittest.TestCase):
         sys = SCFSystem(m, T, mu, orbtype='u')
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
-        Eout,Eccout = tdccsdT.run()
-        Etmp,Ecctmp = tdccsdT._uccsd_lambda(rdm2=True, erel=True)
+        Eout, Eccout = tdccsdT.run()
+        Etmp, Ecctmp = tdccsdT._uccsd_lambda(rdm2=True, erel=True)
         rdm1_ref = tdccsdT.full_1rdm(relax=True)
 
         # compute normal-order 1-rdm (R)
         sys = SCFSystem(m, T, mu, orbtype='r')
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
-        Eout,Eccout = tdccsdT.run()
-        Etmp,Ecctmp = tdccsdT._rccsd_lambda(rdm2=True, erel=True)
+        Eout, Eccout = tdccsdT.run()
+        Etmp, Ecctmp = tdccsdT._rccsd_lambda(rdm2=True, erel=True)
         rdm1_out = tdccsdT.full_1rdm(relax=True)
         diff = numpy.linalg.norm(rdm1_ref[0] - rdm1_out)
 

@@ -187,9 +187,9 @@ class FTCCSDTest(unittest.TestCase):
         mi = 50
         ueg = UEGSystem(T, L, cut, mu=mu, norb=norb, orbtype='u')
         ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, tconv=1e-8, ngrid=10)
-        Ecctot1,Ecc1 = ccsdT.run()
+        Ecctot1, Ecc1 = ccsdT.run()
         ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, tconv=1e-8, rt_iter="point")
-        Ecctot2,Ecc2 = ccsdT.run()
+        Ecctot2, Ecc2 = ccsdT.run()
         diff = abs(Ecc1 - Ecc2)
         error = "Expected: {}  Actual: {}".format(Ecc1, Ecc2)
         self.assertTrue(diff < 1e-8, error)

@@ -27,7 +27,7 @@ def buildH(hub, phase=None):
     H31 = myfci.getH(phase=phase)
     myfci = FCISimple(hub, 4, m_s=0)
     H4 = myfci.getH(phase=phase)
-    H = numpy.zeros((dim,dim), dtype=complex)
+    H = numpy.zeros((dim, dim), dtype=complex)
     x = 1
     y = 3
     z = 5
@@ -36,23 +36,23 @@ def buildH(hub, phase=None):
     c = 11
     d = 13
     e = 15
-    H[x:y,x:y] = H1
-    H[y:z,y:z] = H1
-    H[z:a,z:a] = H20
-    H[a:b,a:b] = H22
-    H[b:c,b:c] = H22
-    H[c:d,c:d] = H31
-    H[d:e,d:e] = H31
-    H[e:,e:] = H4
+    H[x:y, x:y] = H1
+    H[y:z, y:z] = H1
+    H[z:a, z:a] = H20
+    H[a:b, a:b] = H22
+    H[b:c, b:c] = H22
+    H[c:d, c:d] = H31
+    H[d:e, d:e] = H31
+    H[e:, e:] = H4
     return H
 
 
 def matrix_exp(M):
-    n,m = M.shape
+    n, m = M.shape
     assert(n == m)
-    U = numpy.identity(m,dtype=complex)
+    U = numpy.identity(m, dtype=complex)
     Mn = M.copy()
-    for i in range(1,13):
+    for i in range(1, 13):
         U = U + Mn
         Mn = numpy.einsum('pq,qr->pr', Mn, M)/float(i+1)
 
@@ -81,17 +81,17 @@ class HubbardFieldTest(unittest.TestCase):
         hub = Hubbard1D(L, 1.0, U, boundary='o')
         ti = numpy.asarray([deltat/2 + float(j)*deltat for j in range(ng)])
 
-        Pa = numpy.zeros((2,2))
-        Pb = numpy.zeros((2,2))
-        Pa[0,0] = 1.0
-        Pb[1,1] = 1.0
+        Pa = numpy.zeros((2, 2))
+        Pb = numpy.zeros((2, 2))
+        Pa[0, 0] = 1.0
+        Pb[1, 1] = 1.0
         sys = hubbard_field_system(T, hub, ti, A0, t0, sigma, omega, mu=mu, Pa=Pa, Pb=Pb)
         cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-9, max_iter=40, damp=0.1, ngr=ng, ngi=ngi, iprint=0)
-        E,Ecc = cc.run()
+        E, Ecc = cc.run()
 
         sys = HubbardSystem(T, hub, Pa, Pb, mu=mu, orbtype='u')
         cc = ccsd(sys, iprint=0, max_iter=80, econv=1e-11, T=T, mu=mu, ngrid=ngi)
-        Eoutr,Eccr = cc.run()
+        Eoutr, Eccr = cc.run()
         diff = abs(Eoutr - E)
         msg = "Difference: {}".format(diff)
         self.assertTrue(diff < 5e-4, msg)
@@ -121,39 +121,39 @@ class HubbardFieldTest(unittest.TestCase):
 
         # Construct H, U, E and mz^2
         H = buildH(hub)
-        E,U = numpy.linalg.eigh(H)
-        N = numpy.zeros((dim,dim))
-        N[1,1] = 1.0
-        N[2,2] = 1.0
-        N[3,3] = 1.0
-        N[4,4] = 1.0
-        N[5,5] = 2.0
-        N[6,6] = 2.0
-        N[7,7] = 2.0
-        N[8,8] = 2.0
-        N[9,9] = 2.0
-        N[10,10] = 2.0
-        N[11,11] = 3.0
-        N[12,12] = 3.0
-        N[13,13] = 3.0
-        N[14,14] = 3.0
-        N[15,15] = 4.0
-        M = numpy.zeros((dim,dim))
-        M[1,1] = 1.0
-        M[2,2] = 0.0
-        M[3,3] = 1.0
-        M[4,4] = 0.0
-        M[5,5] = 2.0
-        M[6,6] = 1.0
-        M[7,7] = 1.0
-        M[8,8] = 0.0
-        M[9,9] = 1.0
-        M[10,10] = 1.0
-        M[11,11] = 2.0
-        M[12,12] = 1.0
-        M[13,13] = 2.0
-        M[14,14] = 1.0
-        M[15,15] = 2.0
+        E, U = numpy.linalg.eigh(H)
+        N = numpy.zeros((dim, dim))
+        N[1, 1] = 1.0
+        N[2, 2] = 1.0
+        N[3, 3] = 1.0
+        N[4, 4] = 1.0
+        N[5, 5] = 2.0
+        N[6, 6] = 2.0
+        N[7, 7] = 2.0
+        N[8, 8] = 2.0
+        N[9, 9] = 2.0
+        N[10, 10] = 2.0
+        N[11, 11] = 3.0
+        N[12, 12] = 3.0
+        N[13, 13] = 3.0
+        N[14, 14] = 3.0
+        N[15, 15] = 4.0
+        M = numpy.zeros((dim, dim))
+        M[1, 1] = 1.0
+        M[2, 2] = 0.0
+        M[3, 3] = 1.0
+        M[4, 4] = 0.0
+        M[5, 5] = 2.0
+        M[6, 6] = 1.0
+        M[7, 7] = 1.0
+        M[8, 8] = 0.0
+        M[9, 9] = 1.0
+        M[10, 10] = 1.0
+        M[11, 11] = 2.0
+        M[12, 12] = 1.0
+        M[13, 13] = 2.0
+        M[14, 14] = 1.0
+        M[15, 15] = 2.0
         Ns = numpy.einsum('ij,ip,jq->pq', N, U, U).diagonal()
 
         # construct density matrix at t = 0
@@ -163,13 +163,13 @@ class HubbardFieldTest(unittest.TestCase):
 
         Ms = []
         # propagate density and measure M
-        for i,t in enumerate(ti):
+        for i, t in enumerate(ti):
             # propagate the density
             dt = t - t0
             ex = dt*dt/(2*sigma*sigma)
             phase = A0*numpy.exp(-ex)*numpy.cos(omega*dt + phi)
             Ht = buildH(hub, phase=phase)
-            e,v = numpy.linalg.eigh(Ht)
+            e, v = numpy.linalg.eigh(Ht)
             ee = numpy.exp(-deltat*1.j*e)
             ee2 = numpy.exp(deltat*1.j*e)
             U = numpy.einsum('ai,i,bi->ab', v, ee, numpy.conj(v))
@@ -179,26 +179,26 @@ class HubbardFieldTest(unittest.TestCase):
             # measure M
             Ms.append(numpy.einsum('ij,ji->', P, M))
 
-        Pa = numpy.zeros((2,2))
-        Pb = numpy.zeros((2,2))
-        Pa[0,0] = 1.0
-        Pb[1,1] = 1.0
+        Pa = numpy.zeros((2, 2))
+        Pb = numpy.zeros((2, 2))
+        Pa[0, 0] = 1.0
+        Pb[1, 1] = 1.0
         sys = hubbard_field_system(T, hub, ti, A0, t0, sigma, omega, mu=mu, Pa=Pa, Pb=Pb)
-        m = numpy.zeros((2,2))
-        m[0,0] = 1.0
+        m = numpy.zeros((2, 2))
+        m[0, 0] = 1.0
         ma = numpy.einsum('ij,ip,jq->pq', m, sys.ua, sys.ua)
         mb = numpy.einsum('ij,ip,jq->pq', m, sys.ub, sys.ub)
         mg = block_diag(ma, mb)
         cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-9, max_iter=40, damp=0.1, ngr=ng, ngi=ngi, iprint=0)
-        E,Ecc = cc.run()
+        E, Ecc = cc.run()
         cc._neq_ccsd_lambda()
         cc._neq_1rdm()
         Mscc = []
-        for i,t in enumerate(ti):
-            out = cc.compute_prop(mg,i)
+        for i, t in enumerate(ti):
+            out = cc.compute_prop(mg, i)
             Mscc.append(out)
 
-        for i,m in enumerate(Ms):
+        for i, m in enumerate(Ms):
             diff = abs(m - Mscc[i])
             msg = "{}: {} {}".format(i, m, Mscc[i])
             self.assertTrue(diff < 2e-4, msg)
@@ -228,55 +228,55 @@ class HubbardFieldTest(unittest.TestCase):
 
         # Construct H, U, E and mz^2
         H = buildH(hub)
-        E,U = numpy.linalg.eigh(H)
-        N = numpy.zeros((dim,dim))
-        N[1,1] = 1.0
-        N[2,2] = 1.0
-        N[3,3] = 1.0
-        N[4,4] = 1.0
-        N[5,5] = 2.0
-        N[6,6] = 2.0
-        N[7,7] = 2.0
-        N[8,8] = 2.0
-        N[9,9] = 2.0
-        N[10,10] = 2.0
-        N[11,11] = 3.0
-        N[12,12] = 3.0
-        N[13,13] = 3.0
-        N[14,14] = 3.0
-        N[15,15] = 4.0
-        M = numpy.zeros((dim,dim))
-        M[1,1] = 1.0
-        M[2,2] = 0.0
-        M[3,3] = 1.0
-        M[4,4] = 0.0
-        M[5,5] = 2.0
-        M[6,6] = 1.0
-        M[7,7] = 1.0
-        M[8,8] = 0.0
-        M[9,9] = 1.0
-        M[10,10] = 1.0
-        M[11,11] = 2.0
-        M[12,12] = 1.0
-        M[13,13] = 2.0
-        M[14,14] = 1.0
-        M[15,15] = 2.0
+        E, U = numpy.linalg.eigh(H)
+        N = numpy.zeros((dim, dim))
+        N[1, 1] = 1.0
+        N[2, 2] = 1.0
+        N[3, 3] = 1.0
+        N[4, 4] = 1.0
+        N[5, 5] = 2.0
+        N[6, 6] = 2.0
+        N[7, 7] = 2.0
+        N[8, 8] = 2.0
+        N[9, 9] = 2.0
+        N[10, 10] = 2.0
+        N[11, 11] = 3.0
+        N[12, 12] = 3.0
+        N[13, 13] = 3.0
+        N[14, 14] = 3.0
+        N[15, 15] = 4.0
+        M = numpy.zeros((dim, dim))
+        M[1, 1] = 1.0
+        M[2, 2] = 0.0
+        M[3, 3] = 1.0
+        M[4, 4] = 0.0
+        M[5, 5] = 2.0
+        M[6, 6] = 1.0
+        M[7, 7] = 1.0
+        M[8, 8] = 0.0
+        M[9, 9] = 1.0
+        M[10, 10] = 1.0
+        M[11, 11] = 2.0
+        M[12, 12] = 1.0
+        M[13, 13] = 2.0
+        M[14, 14] = 1.0
+        M[15, 15] = 2.0
         Ns = numpy.einsum('ij,ip,jq->pq', N, U, U).diagonal()
 
         # construct density matrix at t = 0
         exp = numpy.exp(-beta*(E - mu*Ns))
         Z = exp.sum()
-        P = numpy.einsum('mi,i,ni->mn', U, exp, U) / Z
+        P = numpy.einsum('mi,i,ni->mn', U, exp, U)/Z
 
         Ms = [numpy.einsum('ij,ji->', P, M)]
         # propagate density and measure M
-        for i,t in enumerate(ti):
+        for i, t in enumerate(ti):
             # propagate the density
             dt = (i)*deltat - t0
             ex = dt*dt/(2*sigma*sigma)
             phase = A0*numpy.exp(-ex)*numpy.cos(omega*dt + phi)
             Ht = buildH(hub, phase=phase)
-            e,v = numpy.linalg.eigh(Ht)
+            e, v = numpy.linalg.eigh(Ht)
             ee = numpy.exp(-deltat*1.j*e)
             ee2 = numpy.exp(deltat*1.j*e)
             U = numpy.einsum('ai,i,bi->ab', v, ee, numpy.conj(v))
@@ -286,13 +286,13 @@ class HubbardFieldTest(unittest.TestCase):
             # measure M
             Ms.append(numpy.einsum('ij,ji->', P, M))
 
-        Pa = numpy.zeros((2,2))
-        Pb = numpy.zeros((2,2))
-        Pa[0,0] = 1.0
-        Pb[1,1] = 1.0
+        Pa = numpy.zeros((2, 2))
+        Pb = numpy.zeros((2, 2))
+        Pa[0, 0] = 1.0
+        Pb[1, 1] = 1.0
         sys = hubbard_field_system(T, hub, ti, A0, t0, sigma, omega, mu=mu, Pa=Pa, Pb=Pb)
-        m = numpy.zeros((2,2))
-        m[0,0] = 1.0
+        m = numpy.zeros((2, 2))
+        m[0, 0] = 1.0
         ma = numpy.einsum('ij,ip,jq->pq', m, sys.ua, sys.ua)
         mb = numpy.einsum('ij,ip,jq->pq', m, sys.ub, sys.ub)
         mg = block_diag(ma, mb)
@@ -308,11 +308,11 @@ class HubbardFieldTest(unittest.TestCase):
         kccsd = KelCCSD(sys, prop, T=T, mu=mu, iprint=0)
         kccsd.init_from_ftccsd(mycc, contour="keldysh")
         kccsd._ccsd(nstep=400, step=0.00125)
-        for i,p in enumerate(kccsd.P):
+        for i, p in enumerate(kccsd.P):
             Mscc2.append(numpy.einsum('ij,ji->', mg, p))
 
-        for i,ms in enumerate(zip(Ms,Mscc2)):
-            m,m2 = ms
+        for i, ms in enumerate(zip(Ms, Mscc2)):
+            m, m2 = ms
             diff = abs(m - m2)
             msg = "{}: {} {}".format(i, m, m2)
             self.assertTrue(diff < 2e-4, msg)

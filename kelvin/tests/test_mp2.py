@@ -7,7 +7,7 @@ from kelvin.scf_system import SCFSystem
 def test_mp2(m):
     sys = SCFSystem(m, 0.0, 0.0)
     mp20 = MP2(sys, iprint=0)
-    E00,E10,E20 = mp20.run()
+    E00, E10, E20 = mp20.run()
 
     pt = mp.MP2(m)
     Emp, temp = pt.kernel()
@@ -74,7 +74,7 @@ class MP2Test(unittest.TestCase):
         Emp, temp = pt.kernel()
         sys = SCFSystem(mf, 0.0, 0.0)
         mp20 = MP2(sys, iprint=0)
-        E00,E10,E20 = mp20.run()
+        E00, E10, E20 = mp20.run()
         diff = abs(E20 - Emp)
         self.assertTrue(diff < self.thresh)
 

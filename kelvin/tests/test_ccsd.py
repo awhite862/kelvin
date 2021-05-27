@@ -120,7 +120,7 @@ class CCSDTest(unittest.TestCase):
         Ecc = mycc.kernel()
         sys = SCFSystem(mf, 0.0, 0.0, orbtype='g')
         ccsd0 = ccsd(sys, iprint=0, max_iter=100, econv=1e-11, damp=0.0)
-        Etot,Ecc2 = ccsd0.run()
+        Etot, Ecc2 = ccsd0.run()
         diff = abs(Ecc[0] - Ecc2)
         self.assertTrue(diff < self.thresh)
 
@@ -155,7 +155,7 @@ class CCSDTest(unittest.TestCase):
         Ecc = mycc.kernel()
         sys = SCFSystem(mf, 0.0, 0.0)
         ccsd0 = ccsd(sys, iprint=0, max_iter=100, econv=1e-11, damp=0.0)
-        Etot,Ecc2 = ccsd0.run()
+        Etot, Ecc2 = ccsd0.run()
         diff = abs(Ecc[0] - Ecc2)
         self.assertTrue(diff < self.thresh)
 
@@ -191,7 +191,7 @@ class CCSDTest(unittest.TestCase):
         Ecc = mycc.kernel()
         sys = SCFSystem(mf, 0.0, 0.0)
         ccsd0 = ccsd(sys, iprint=1, max_iter=100, econv=1e-11, damp=0.0)
-        Etot,Ecc2 = ccsd0.run()
+        Etot, Ecc2 = ccsd0.run()
         diff = abs(Ecc[0] - Ecc2)
         self.assertTrue(diff < self.thresh)
 

@@ -421,7 +421,7 @@ class FTDerivTest(unittest.TestCase):
         sys = HubbardSystem(T, model, Pa=Pa, Pb=Pb, mu=mu)
 
         cc = ccsd(sys, T=T, mu=mu, iprint=0)
-        Ecctot,Ecc = cc.run()
+        Ecctot, Ecc = cc.run()
         cc.compute_ESN()
         E = cc.E
         S = cc.S

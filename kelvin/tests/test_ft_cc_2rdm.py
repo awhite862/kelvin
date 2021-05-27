@@ -86,7 +86,7 @@ class FTCC2RDMTest(unittest.TestCase):
         cmat = utils.block_diag(sys.ua, sys.ub)
         Mg = sys._transform1(Mg, cmat)
         cc = ccsd(sys, T=T, mu=mu, iprint=0, max_iter=80, econv=1e-11)
-        E,Ecc = cc.run()
+        E, Ecc = cc.run()
         cc._ft_ccsd_lambda()
         cc._g_ft_1rdm()
         cc._g_ft_2rdm()
@@ -97,11 +97,11 @@ class FTCC2RDMTest(unittest.TestCase):
         d = 5e-4
         sysf = FakeHubbardSystem(sys, M=d*Mg)
         ccf = ccsd(sysf, T=T, mu=mu, iprint=0, max_iter=80, econv=1e-11)
-        Ef,Eccf = ccf.run()
+        Ef, Eccf = ccf.run()
 
         sysb = FakeHubbardSystem(sys, M=-d*Mg)
         ccb = ccsd(sysb, T=T, mu=mu, iprint=0, max_iter=80, econv=1e-11)
-        Eb,Eccb = ccb.run()
+        Eb, Eccb = ccb.run()
         ref = (Ef - Eb)/(2*d)
         error = abs(ref - out) / abs(ref)
         self.assertTrue(error < 1e-6, "Error: {}".format(error))

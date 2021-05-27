@@ -138,7 +138,7 @@ class FTLambdaTest(unittest.TestCase):
         m.scf()
         sys = SCFSystem(m, self.T, self.mu, orbtype='g')
         ccsdT = ccsd(sys, T=self.T, mu=self.mu, iprint=0, max_iter=44, econv=1e-12)
-        Etot,Ecc = ccsdT.run()
+        Etot, Ecc = ccsdT.run()
         ccsdT._ft_ccsd_lambda()
         out = test_L1(ccsdT, self.thresh)
         self.assertTrue(out[1], out[0])
@@ -155,7 +155,7 @@ class FTLambdaTest(unittest.TestCase):
         mu = 0.0
         sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, damp=0.45, max_iter=240, ngrid=25, econv=1e-10, tconv=1e-9, athresh=1e-20)
-        Etot,Ecc = ccsdT.run()
+        Etot, Ecc = ccsdT.run()
         ccsdT._ft_ccsd_lambda()
         out = test_L1(ccsdT, 1e-7)
         self.assertTrue(out[1], out[0])
@@ -171,7 +171,7 @@ class FTLambdaTest(unittest.TestCase):
         ng = 10
         sys = SCFSystem(m, self.T, self.mu, orbtype='u')
         ccsdT = ccsd(sys, T=self.T, mu=self.mu, ngrid=ng, iprint=0, max_iter=44, econv=1e-12)
-        Etot,Ecc = ccsdT.run()
+        Etot, Ecc = ccsdT.run()
         ccsdT._ft_uccsd_lambda()
         ea,eb = ccsdT.sys.u_energies_tot()
         na = ea.shape[0]
@@ -213,7 +213,7 @@ class FTLambdaTest(unittest.TestCase):
         mu = self.mu
         sys = SCFSystem(m, T, mu, orbtype='g')
         cc = ccsd(sys, T=T, mu=mu, iprint=0, max_iter=44, ngrid=ng, econv=1e-12)
-        Etot,Ecc = cc.run()
+        Etot, Ecc = cc.run()
         n = sys.g_energies_tot().shape[0]
         G = cc.G
         g = cc.g
