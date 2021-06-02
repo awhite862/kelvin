@@ -27,9 +27,9 @@ class lccsd(object):
         realtime (bool): Force time-dependent formulation for zero T
         athresh (float): Threshold for ignoring small occupations
     """
-    def __init__(self, sys, T=0, mu=0, iprint=0,
-            singles=True, econv=1e-8, tconv=None, max_iter=40,
-            damp=0.0, ngrid=10, realtime=False, athresh=0.0, quad='lin'):
+    def __init__(self, sys, T=0, mu=0, iprint=0, singles=True,
+                 econv=1e-8, tconv=None, max_iter=40, damp=0.0,
+                 ngrid=10, realtime=False, athresh=0.0, quad='lin'):
         self.T = T
         self.mu = mu
         self.finite_T = False if T == 0 else True
@@ -182,8 +182,9 @@ class lccsd(object):
         # run CC iterations
         conv_options = {"econv":self.econv, "max_iter":self.max_iter, "damp":self.damp}
         method = "LCCSD" if self.singles else "LCCD"
-        Eccn,T1,T2 = cc_utils.ft_cc_iter(method, T1old, T2old, F, I,
-                Dvo, Dvvoo, g, G, self.beta_max, ng, ti, self.iprint, conv_options)
+        Eccn,T1,T2 = cc_utils.ft_cc_iter(
+            method, T1old, T2old, F, I, Dvo, Dvvoo, g, G,
+            self.beta_max, ng, ti, self.iprint, conv_options)
         self.T1 = T1
         self.T2 = T2
 
@@ -236,8 +237,8 @@ class lccsd(object):
             Id = numpy.ones((ng))
             T1old = -numpy.einsum('v,ai->vai', Id, F.vo)
             T2old = -numpy.einsum('v,abij->vabij', Id, I.vvoo)
-            T1old = quadrature.int_tbar1(ng,T1old,ti,D1,G)
-            T2old = quadrature.int_tbar2(ng,T2old,ti,D2,G)
+            T1old = quadrature.int_tbar1(ng, T1old, ti, D1, G)
+            T2old = quadrature.int_tbar2(ng, T2old, ti, D2, G)
         if not self.singles:
             T1old = numpy.zeros(T1old.shape)
         #E2 = ft_cc_energy.ft_cc_energy(T1old,T2old,
@@ -250,8 +251,9 @@ class lccsd(object):
             "max_iter":self.max_iter,
             "damp":self.damp}
         method = "LCCSD" if self.singles else "LCCD"
-        Eccn,T1,T2 = cc_utils.ft_cc_iter(method, T1old, T2old, F, I, D1, D2,
-                g, G, beta, ng, ti, self.iprint, conv_options)
+        Eccn,T1,T2 = cc_utils.ft_cc_iter(
+            method, T1old, T2old, F, I, D1, D2,
+            g, G, beta, ng, ti, self.iprint, conv_options)
         self.T1 = T1
         self.T2 = T2
 
@@ -383,8 +385,9 @@ class lccsd(object):
             "tconv":self.tconv,
             "max_iter":self.max_iter,
             "damp":self.damp}
-        L1,L2 = cc_utils.ft_lambda_iter(method, L1old, L2old, self.T1, self.T2, F, I,
-                D1, D2, g, G, beta, ng, ti, self.iprint, conv_options)
+        L1,L2 = cc_utils.ft_lambda_iter(
+            method, L1old, L2old, self.T1, self.T2, F, I,
+            D1, D2, g, G, beta, ng, ti, self.iprint, conv_options)
 
         # save lambda amplitudes
         self.L1 = L1

@@ -128,8 +128,7 @@ class UEGSystem(System):
                 beta = 1.0 / self.T
                 en = self.g_energies_tot()
                 fo = ft_utils.ff(beta, en, self.mu)
-                return 0.5*einsum('ijij,i,j->',
-                    V, fo, fo)
+                return 0.5*einsum('ijij,i,j->', V, fo, fo)
             else:
                 V = self.g_aint()
                 return 0.5*einsum('ijij->', V.oooo)
@@ -552,10 +551,10 @@ class UEGSystem(System):
         Vooov = Va[numpy.ix_(oaidx,oaidx,oaidx,vaidx)]
         Voooo = Va[numpy.ix_(oaidx,oaidx,oaidx,oaidx)]
         Va = two_e_blocks(
-            vvvv=Vvvvv,vvvo=Vvvvo,
-            vovv=Vvovv,vvoo=Vvvoo,
-            vovo=Vvovo,oovv=Voovv,
-            vooo=Vvooo,ooov=Vooov,
+            vvvv=Vvvvv, vvvo=Vvvvo,
+            vovv=Vvovv, vvoo=Vvvoo,
+            vovo=Vvovo, oovv=Voovv,
+            vooo=Vvooo, ooov=Vooov,
             oooo=Voooo)
         Vvvvv = Vb[numpy.ix_(vbidx,vbidx,vbidx,vbidx)]
         Vvvvo = Vb[numpy.ix_(vbidx,vbidx,vbidx,obidx)]
@@ -567,10 +566,10 @@ class UEGSystem(System):
         Vooov = Vb[numpy.ix_(obidx,obidx,obidx,vbidx)]
         Voooo = Vb[numpy.ix_(obidx,obidx,obidx,obidx)]
         Vb = two_e_blocks(
-            vvvv=Vvvvv,vvvo=Vvvvo,
-            vovv=Vvovv,vvoo=Vvvoo,
-            vovo=Vvovo,oovv=Voovv,
-            vooo=Vvooo,ooov=Vooov,
+            vvvv=Vvvvv, vvvo=Vvvvo,
+            vovv=Vvovv, vvoo=Vvvoo,
+            vovo=Vvovo, oovv=Voovv,
+            vooo=Vvooo, ooov=Vooov,
             oooo=Voooo)
 
         Vvvvv = Vabab[numpy.ix_(vaidx,vbidx,vaidx,vbidx)]
@@ -589,15 +588,11 @@ class UEGSystem(System):
         Voovo = Vabab[numpy.ix_(oaidx,obidx,vaidx,obidx)]
         Vooov = Vabab[numpy.ix_(oaidx,obidx,oaidx,vbidx)]
         Voooo = Vabab[numpy.ix_(oaidx,obidx,oaidx,obidx)]
-        Vabab = two_e_blocks_full(vvvv=Vvvvv,
-                vvvo=Vvvvo,vvov=Vvvov,
-                vovv=Vvovv,ovvv=Vovvv,
-                vvoo=Vvvoo,vovo=Vvovo,
-                ovvo=Vovvo,voov=Vvoov,
-                ovov=Vovov,oovv=Voovv,
-                vooo=Vvooo,ovoo=Vovoo,
-                oovo=Voovo,ooov=Vooov,
-                oooo=Voooo)
+        Vabab = two_e_blocks_full(
+            vvvv=Vvvvv, vvvo=Vvvvo, vvov=Vvvov, vovv=Vvovv,
+            ovvv=Vovvv, vvoo=Vvvoo, vovo=Vvovo, ovvo=Vovvo,
+            voov=Vvoov, ovov=Vovov, oovv=Voovv, vooo=Vvooo,
+            ovoo=Vovoo, oovo=Voovo, ooov=Vooov, oooo=Voooo)
         return Va,Vb,Vabab
 
     def g_aint(self, code=0):
@@ -643,10 +638,10 @@ class UEGSystem(System):
         if code == 0 or code == 9:
             Voooo = V[numpy.ix_(oidx,oidx,oidx,oidx)]
         return two_e_blocks(
-            vvvv=Vvvvv,vvvo=Vvvvo,
-            vovv=Vvovv,vvoo=Vvvoo,
-            vovo=Vvovo,oovv=Voovv,
-            vooo=Vvooo,ooov=Vooov,
+            vvvv=Vvvvv, vvvo=Vvvvo,
+            vovv=Vvovv, vvoo=Vvvoo,
+            vovo=Vvovo, oovv=Voovv,
+            vooo=Vvooo, ooov=Vooov,
             oooo=Voooo)
 
     def u_aint_tot(self):
@@ -667,4 +662,4 @@ class ueg_system(UEGSystem):
                  norb=None, orbtype='u', madelung=None):
         logging.warning("This class is deprecated, use UEGSystem instead")
         UEGSystem.__init__(self, T, L, Emax, mu=mu, na=na, nb=nb,
-            norb=norb, orbtype=orbtype, madelung=madelung)
+                           norb=norb, orbtype=orbtype, madelung=madelung)

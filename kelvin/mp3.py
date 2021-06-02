@@ -29,8 +29,8 @@ class MP3(object):
 
     def run(self):
         if self.finite_T:
-            logging.info('Running MP3 at an electronic temperature of %f K'
-                % ft_utils.HtoK(self.T))
+            logging.info(
+                'Running MP3 at an electronic temperature of %f K' % ft_utils.HtoK(self.T))
             return self._ft_mp3()
         else:
             logging.info('Running MP3 at zero Temperature')

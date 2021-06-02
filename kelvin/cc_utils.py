@@ -595,8 +595,9 @@ def ft_integrals(sys, en, beta, mu):
     Ivooo = einsum('akij,a,k,i,j->akij', eri, sfv, sfo, sfo, sfo)
     Iooov = einsum('jkia,j,k,i,a->jkia', eri, sfo, sfo, sfo, sfv)
     Ioooo = einsum('klij,k,l,i,j->klij', eri, sfo, sfo, sfo, sfo)
-    I = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-            vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+    I = two_e_blocks(
+        vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
+        vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
     return F,I
 
 
@@ -619,8 +620,9 @@ def ft_integrals_2e(sys, en, beta, mu):
     Ivooo = einsum('akij,a,k,i,j->akij', eri, sfv, sfo, sfo, sfo)
     Iooov = einsum('jkia,j,k,i,a->jkia', eri, sfo, sfo, sfo, sfv)
     Ioooo = einsum('klij,k,l,i,j->klij', eri, sfo, sfo, sfo, sfo)
-    I = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-            vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+    I = two_e_blocks(
+        vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
+        vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
     return I
 
 
@@ -684,8 +686,9 @@ def get_ft_integrals_neq(sys, en, beta, mu):
     Ivooo = einsum('akij,a,i,j->akij', eri, fv, fo, fo)
     Iooov = einsum('jkia,i->jkia', eri, fo)
     Ioooo = einsum('klij,i,j->klij', eri, fo, fo)
-    I = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-            vovo=Ivovo,oovv=eri,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+    I = two_e_blocks(
+        vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
+        vovo=Ivovo,oovv=eri,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
     return F,Ff,Fb,I
 
 
@@ -729,8 +732,9 @@ def uft_integrals(sys, ea, eb, beta, mu):
     Ivooo = einsum('akij,a,k,i,j->akij', eriA, sfva, sfoa, sfoa, sfoa)
     Iooov = einsum('jkia,j,k,i,a->jkia', eriA, sfoa, sfoa, sfoa, sfva)
     Ioooo = einsum('klij,k,l,i,j->klij', eriA, sfoa, sfoa, sfoa, sfoa)
-    Ia = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-            vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+    Ia = two_e_blocks(
+        vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
+        vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
 
     Ivvvv = einsum('abcd,a,b,c,d->abcd', eriB, sfvb, sfvb, sfvb, sfvb)
     Ivvvo = einsum('abci,a,b,c,i->abci', eriB, sfvb, sfvb, sfvb, sfob)
@@ -741,8 +745,9 @@ def uft_integrals(sys, ea, eb, beta, mu):
     Ivooo = einsum('akij,a,k,i,j->akij', eriB, sfvb, sfob, sfob, sfob)
     Iooov = einsum('jkia,j,k,i,a->jkia', eriB, sfob, sfob, sfob, sfvb)
     Ioooo = einsum('klij,k,l,i,j->klij', eriB, sfob, sfob, sfob, sfob)
-    Ib = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-            vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+    Ib = two_e_blocks(
+        vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
+        vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
 
     Ivvvv = einsum('abcd,a,b,c,d->abcd', eriAB, sfva, sfvb, sfva, sfvb)
     Ivvvo = einsum('abci,a,b,c,i->abci', eriAB, sfva, sfvb, sfva, sfob)
@@ -810,15 +815,11 @@ def rft_integrals(sys, en, beta, mu):
     Ioovo = einsum('jkai,j,k,a,i->jkai', eri, sfo, sfo, sfv, sfo)
     Iooov = einsum('jkia,j,k,i,a->jkia', eri, sfo, sfo, sfo, sfv)
     Ioooo = einsum('klij,k,l,i,j->klij', eri, sfo, sfo, sfo, sfo)
-    I = two_e_blocks_full(vvvv=Ivvvv,
-            vvvo=Ivvvo,vvov=Ivvov,
-            vovv=Ivovv,ovvv=Iovvv,
-            vvoo=Ivvoo,vovo=Ivovo,
-            ovvo=Iovvo,voov=Ivoov,
-            ovov=Iovov,oovv=Ioovv,
-            vooo=Ivooo,ovoo=Iovoo,
-            oovo=Ioovo,ooov=Iooov,
-            oooo=Ioooo)
+    I = two_e_blocks_full(
+        vvvv=Ivvvv, vvvo=Ivvvo, vvov=Ivvov, vovv=Ivovv,
+        ovvv=Iovvv, vvoo=Ivvoo, vovo=Ivovo, ovvo=Iovvo,
+        voov=Ivoov, ovov=Iovov, oovv=Ioovv, vooo=Ivooo,
+        ovoo=Iovoo, oovo=Ioovo, ooov=Iooov, oooo=Ioooo)
     return F,I
 
 
@@ -851,8 +852,9 @@ def ft_active_integrals(sys, en, focc, fvir, iocc, ivir):
     Ivooo = einsum('akij,a,k,i,j->akij', eri[numpy.ix_(ivir, iocc, iocc, iocc)], sfv, sfo, sfo, sfo)
     Iooov = einsum('jkia,j,k,i,a->jkia', eri[numpy.ix_(iocc, iocc, iocc, ivir)], sfo, sfo, sfo, sfv)
     Ioooo = einsum('klij,k,l,i,j->klij', eri[numpy.ix_(iocc, iocc, iocc, iocc)], sfo, sfo, sfo, sfo)
-    I = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-            vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+    I = two_e_blocks(
+        vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
+        vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
 
     return F,I
 
@@ -895,8 +897,9 @@ def uft_active_integrals(sys, ea, eb, foa, fva, fob, fvb, iocca, ivira, ioccb, i
     Ivooo = einsum('akij,a,k,i,j->akij', eriA[numpy.ix_(ivira, iocca, iocca, iocca)], sfva, sfoa, sfoa, sfoa)
     Iooov = einsum('jkia,j,k,i,a->jkia', eriA[numpy.ix_(iocca, iocca, iocca, ivira)], sfoa, sfoa, sfoa, sfva)
     Ioooo = einsum('klij,k,l,i,j->klij', eriA[numpy.ix_(iocca, iocca, iocca, iocca)], sfoa, sfoa, sfoa, sfoa)
-    Ia = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-            vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+    Ia = two_e_blocks(
+        vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
+        vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
 
     Ivvvv = einsum('abcd,a,b,c,d->abcd', eriB[numpy.ix_(ivirb, ivirb, ivirb, ivirb)], sfvb, sfvb, sfvb, sfvb)
     Ivvvo = einsum('abci,a,b,c,i->abci', eriB[numpy.ix_(ivirb, ivirb, ivirb, ioccb)], sfvb, sfvb, sfvb, sfob)
@@ -907,8 +910,9 @@ def uft_active_integrals(sys, ea, eb, foa, fva, fob, fvb, iocca, ivira, ioccb, i
     Ivooo = einsum('akij,a,k,i,j->akij', eriB[numpy.ix_(ivirb, ioccb, ioccb, ioccb)], sfvb, sfob, sfob, sfob)
     Iooov = einsum('jkia,j,k,i,a->jkia', eriB[numpy.ix_(ioccb, ioccb, ioccb, ivirb)], sfob, sfob, sfob, sfvb)
     Ioooo = einsum('klij,k,l,i,j->klij', eriB[numpy.ix_(ioccb, ioccb, ioccb, ioccb)], sfob, sfob, sfob, sfob)
-    Ib = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-            vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+    Ib = two_e_blocks(
+        vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
+        vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
 
     Ivvvv = einsum('abcd,a,b,c,d->abcd', eriAB[numpy.ix_(ivira, ivirb, ivira, ivirb)], sfva, sfvb, sfva, sfvb)
     Ivvvo = einsum('abci,a,b,c,i->abci', eriAB[numpy.ix_(ivira, ivirb, ivira, ioccb)], sfva, sfvb, sfva, sfob)
@@ -926,15 +930,11 @@ def uft_active_integrals(sys, ea, eb, foa, fva, fob, fvb, iocca, ivira, ioccb, i
     Ioovo = einsum('jkai,j,k,a,i->jkai', eriAB[numpy.ix_(iocca, ioccb, ivira, ioccb)], sfoa, sfob, sfva, sfob)
     Iooov = einsum('jkia,j,k,i,a->jkia', eriAB[numpy.ix_(iocca, ioccb, iocca, ivirb)], sfoa, sfob, sfoa, sfvb)
     Ioooo = einsum('klij,k,l,i,j->klij', eriAB[numpy.ix_(iocca, ioccb, iocca, ioccb)], sfoa, sfob, sfoa, sfob)
-    Iabab = two_e_blocks_full(vvvv=Ivvvv,
-            vvvo=Ivvvo,vvov=Ivvov,
-            vovv=Ivovv,ovvv=Iovvv,
-            vvoo=Ivvoo,vovo=Ivovo,
-            ovvo=Iovvo,voov=Ivoov,
-            ovov=Iovov,oovv=Ioovv,
-            vooo=Ivooo,ovoo=Iovoo,
-            oovo=Ioovo,ooov=Iooov,
-            oooo=Ioooo)
+    Iabab = two_e_blocks_full(
+        vvvv=Ivvvv, vvvo=Ivvvo, vvov=Ivvov, vovv=Ivovv,
+        ovvv=Iovvv, vvoo=Ivvoo, vovo=Ivovo, ovvo=Iovvo,
+        voov=Ivoov, ovov=Iovov, oovv=Ioovv, vooo=Ivooo,
+        ovoo=Iovoo, oovo=Ioovo, ooov=Iooov, oooo=Ioooo)
 
     return Fa,Fb,Ia,Ib,Iabab
 
@@ -975,15 +975,11 @@ def rft_active_integrals(sys, en, focc, fvir, iocc, ivir):
     Ioovo = einsum('jkai,j,k,a,i->jkai', eri[numpy.ix_(iocc, iocc, ivir, iocc)], sfo, sfo, sfv, sfo)
     Iooov = einsum('jkia,j,k,i,a->jkia', eri[numpy.ix_(iocc, iocc, iocc, ivir)], sfo, sfo, sfo, sfv)
     Ioooo = einsum('klij,k,l,i,j->klij', eri[numpy.ix_(iocc, iocc, iocc, iocc)], sfo, sfo, sfo, sfo)
-    I = two_e_blocks_full(vvvv=Ivvvv,
-            vvvo=Ivvvo,vvov=Ivvov,
-            vovv=Ivovv,ovvv=Iovvv,
-            vvoo=Ivvoo,vovo=Ivovo,
-            ovvo=Iovvo,voov=Ivoov,
-            ovov=Iovov,oovv=Ioovv,
-            vooo=Ivooo,ovoo=Iovoo,
-            oovo=Ioovo,ooov=Iooov,
-            oooo=Ioooo)
+    I = two_e_blocks_full(
+        vvvv=Ivvvv, vvvo=Ivvvo, vvov=Ivvov, vovv=Ivovv,
+        ovvv=Iovvv, vvoo=Ivvoo, vovo=Ivovo, ovvo=Iovvo,
+        voov=Ivoov, ovov=Iovov, oovv=Ioovv, vooo=Ivooo,
+        ovoo=Iovoo, oovo=Ioovo, ooov=Iooov, oooo=Ioooo)
     return F,I
 
 
@@ -1033,8 +1029,9 @@ def _form_ft_d_eris(eri, sfo, sfv, dso, dsv):
           + einsum('klij,k,l,i,j->klij', eri, sfo, sfo, dso, sfo)\
           + einsum('klij,k,l,i,j->klij', eri, sfo, sfo, sfo, dso)
 
-    I = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-            vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+    I = two_e_blocks(
+        vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
+        vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
     return I
 
 
@@ -1084,8 +1081,9 @@ def _form_ft_d_active_eris(eri, sfo, sfv, dso, dsv, iocc, ivir):
           + einsum('klij,k,l,i,j->klij', eri[numpy.ix_(iocc, iocc, iocc, iocc)], sfo, sfo, dso, sfo)\
           + einsum('klij,k,l,i,j->klij', eri[numpy.ix_(iocc, iocc, iocc, iocc)], sfo, sfo, sfo, dso)
 
-    I = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-            vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+    I = two_e_blocks(
+        vvvv=Ivvvv, vvvo=Ivvvo, vovv=Ivovv, vvoo=Ivvoo,
+        vovo=Ivovo, oovv=Ioovv, vooo=Ivooo, ooov=Iooov, oooo=Ioooo)
     return I
 
 
@@ -1257,15 +1255,11 @@ def u_ft_d_integrals(sys, ea, eb, foa, fva, fob, fvb, dveca, dvecb):
     Ioooo += einsum('klij,k,l,i,j->klij', Iabab, sfoa, sfob, dsoa, sfob)
     Ioooo += einsum('klij,k,l,i,j->klij', Iabab, sfoa, sfob, sfoa, dsob)
 
-    Iabab = two_e_blocks_full(vvvv=Ivvvv,
-            vvvo=Ivvvo,vvov=Ivvov,
-            vovv=Ivovv,ovvv=Iovvv,
-            vvoo=Ivvoo,vovo=Ivovo,
-            ovvo=Iovvo,voov=Ivoov,
-            ovov=Iovov,oovv=Ioovv,
-            vooo=Ivooo,ovoo=Iovoo,
-            oovo=Ioovo,ooov=Iooov,
-            oooo=Ioooo)
+    Iabab = two_e_blocks_full(
+        vvvv=Ivvvv, vvvo=Ivvvo, vvov=Ivvov, vovv=Ivovv,
+        ovvv=Iovvv, vvoo=Ivvoo, vovo=Ivovo, ovvo=Iovvo,
+        voov=Ivoov, ovov=Iovov, oovv=Ioovv, vooo=Ivooo,
+        ovoo=Iovoo, oovo=Ioovo, ooov=Iooov, oooo=Ioooo)
 
     return Fa,Fb,Ia,Ib,Iabab
 
@@ -1444,15 +1438,11 @@ def uft_d_active_integrals(sys, ea, eb, foa, fva, fob, fvb,
           + einsum('klij,k,l,i,j->klij', eriAB[numpy.ix_(iocca, ioccb, iocca, ioccb)], sfoa, sfob, dsoa, sfob)\
           + einsum('klij,k,l,i,j->klij', eriAB[numpy.ix_(iocca, ioccb, iocca, ioccb)], sfoa, sfob, sfoa, dsob)
 
-    Iabab = two_e_blocks_full(vvvv=Ivvvv,
-            vvvo=Ivvvo,vvov=Ivvov,
-            vovv=Ivovv,ovvv=Iovvv,
-            vvoo=Ivvoo,vovo=Ivovo,
-            ovvo=Iovvo,voov=Ivoov,
-            ovov=Iovov,oovv=Ioovv,
-            vooo=Ivooo,ovoo=Iovoo,
-            oovo=Ioovo,ooov=Iooov,
-            oooo=Ioooo)
+    Iabab = two_e_blocks_full(
+        vvvv=Ivvvv, vvvo=Ivvvo, vvov=Ivvov, vovv=Ivovv,
+        ovvv=Iovvv, vvoo=Ivvoo, vovo=Ivovo, ovvo=Iovvo,
+        voov=Ivoov, ovov=Iovov, oovv=Ioovv, vooo=Ivooo,
+        ovoo=Iovoo, oovo=Ioovo, ooov=Iooov, oooo=Ioooo)
 
     return Fa,Fb,Ia,Ib,Iabab
 

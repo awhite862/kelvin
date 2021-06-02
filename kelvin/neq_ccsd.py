@@ -119,8 +119,9 @@ class neq_ccsd(object):
         while i < max_iter and not converged:
             # form new T1 and T2
             T1f,T1b,T1i,T2f,T2b,T2i = \
-                ft_cc_equations.neq_ccsd_stanton(Ff,Fb,F,I,T1oldf,T1oldb,T1oldi,
-                        T2oldf,T2oldb,T2oldi,D1,D2,tir,tii,ngr,ngi,Gr,Gi)
+                ft_cc_equations.neq_ccsd_stanton(
+                    Ff,Fb,F,I,T1oldf,T1oldb,T1oldi,T2oldf,T2oldb,
+                    T2oldi,D1,D2,tir,tii,ngr,ngi,Gr,Gi)
 
             res1 = numpy.linalg.norm(T1f - T1oldf) / nl1
             res1 += numpy.linalg.norm(T1b - T1oldb) / nl1
@@ -200,12 +201,12 @@ class neq_ccsd(object):
 
         if L2 is None:
             # Use T^{\dagger} as a guess for Lambda
-            L1oldf = numpy.transpose(self.T1f,(0,2,1))
-            L1oldb = numpy.transpose(self.T1b,(0,2,1))
-            L1oldi = numpy.transpose(self.T1i,(0,2,1))
-            L2oldf = numpy.transpose(self.T2f,(0,3,4,1,2))
-            L2oldb = numpy.transpose(self.T2b,(0,3,4,1,2))
-            L2oldi = numpy.transpose(self.T2i,(0,3,4,1,2))
+            L1oldf = numpy.transpose(self.T1f, (0,2,1))
+            L1oldb = numpy.transpose(self.T1b, (0,2,1))
+            L1oldi = numpy.transpose(self.T1i, (0,2,1))
+            L2oldf = numpy.transpose(self.T2f, (0,3,4,1,2))
+            L2oldb = numpy.transpose(self.T2b, (0,3,4,1,2))
+            L2oldi = numpy.transpose(self.T2i, (0,3,4,1,2))
         else:
             L2oldf = L2[0]
             L2oldb = L2[1]
@@ -234,9 +235,10 @@ class neq_ccsd(object):
         while i < max_iter and not converged:
             # form new T1 and T2
             L1f,L1b,L1i,L2f,L2b,L2i = \
-                ft_cc_equations.neq_lambda_opt(Ff,Fb,F,I,L1oldf,L1oldb,L1oldi,
-                        L2oldf,L2oldb,L2oldi,self.T1f,self.T1b,self.T1i,
-                        self.T2f,self.T2b,self.T2i,D1,D2,tir,tii,ngr,ngi,gr,gi,Gr,Gi)
+                ft_cc_equations.neq_lambda_opt(
+                    Ff,Fb,F,I,L1oldf,L1oldb,L1oldi,L2oldf,L2oldb,
+                    L2oldi,self.T1f,self.T1b,self.T1i,self.T2f,self.T2b,
+                    self.T2i,D1,D2,tir,tii,ngr,ngi,gr,gi,Gr,Gi)
 
             res1 = numpy.linalg.norm(L1f - L1oldf) / nl1
             res1 += numpy.linalg.norm(L1b - L1oldb) / nl1

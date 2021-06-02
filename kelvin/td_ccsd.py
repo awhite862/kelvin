@@ -773,8 +773,9 @@ class TDCCSD(object):
             k1daa = -D2aa*t2aa - Ia.vvoo.copy()
             k1dab = -D2ab*t2ab - Iabab.vvoo.copy()
             k1dbb = -D2bb*t2bb - Ib.vvoo.copy()
-            cc_equations._u_Stanton(k1sa, k1sb, k1daa, k1dab, k1dbb,
-                    Fa, Fb, Ia, Ib, Iabab, (t1a,t1b), (t2aa,t2ab,t2bb), fac=-1.0)
+            cc_equations._u_Stanton(
+                k1sa, k1sb, k1daa, k1dab, k1dbb, Fa, Fb, Ia, Ib, Iabab,
+                (t1a,t1b), (t2aa,t2ab,t2bb), fac=-1.0)
             return [k1sa,k1sb,k1daa,k1dab,k1dbb]
 
         if self.saveT:
@@ -792,8 +793,9 @@ class TDCCSD(object):
             t2bb += d2bb
 
             # compute free energy contribution
-            Eccn += g[i]*ucc_energy((t1a,t1b), (t2aa,t2ab,t2bb),
-                    Fa.ov, Fb.ov, Ia.oovv, Ib.oovv, Iabab.oovv)/beta
+            Eccn += g[i]*ucc_energy(
+                (t1a,t1b), (t2aa,t2ab,t2bb), Fa.ov, Fb.ov,
+                Ia.oovv, Ib.oovv, Iabab.oovv)/beta
             if self.saveT:
                 self._save_T1(i, (t1a.copy(),t1b.copy()))
                 self._save_T2(i, (t2aa.copy(),t2ab.copy(),t2bb.copy()))
@@ -978,8 +980,7 @@ class TDCCSD(object):
             t1,t2 = ttot
             l1s = -D1.transpose((1,0))*l1 - F.ov.copy()
             l1d = -D2.transpose((2,3,0,1))*l2 - I.oovv.copy()
-            cc_equations._Lambda_opt(l1s, l1d, F, I,
-                    l1, l2, t1, t2, fac=-1.0)
+            cc_equations._Lambda_opt(l1s, l1d, F, I, l1, l2, t1, t2, fac=-1.0)
             cc_equations._LS_TS(l1s,I,t1,fac=-1.0)
             if not singles:
                 l1s = numpy.zeros(l1s.shape, l1s.dtype)
@@ -1041,7 +1042,7 @@ class TDCCSD(object):
                 x2 += dx2
                 d1test = -F.vo.copy()
                 d2test = -I.vvoo.copy()
-                cc_equations._Stanton(d1test,d2test,F,I,t1e,t2e,fac=-1.0)
+                cc_equations._Stanton(d1test, d2test, F, I, t1e, t2e, fac=-1.0)
             if singles:
                 l1 += ld1
             l2 += ld2
@@ -1182,8 +1183,8 @@ class TDCCSD(object):
 
             # get scaled integrals
             Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
-                    self.sys, ea, eb, self.focc[0], self.fvir[0], self.focc[1], self.fvir[1],
-                    self.iocc[0], self.ivir[0], self.iocc[1], self.ivir[1])
+                self.sys, ea, eb, self.focc[0], self.fvir[0], self.focc[1], self.fvir[1],
+                self.iocc[0], self.ivir[0], self.iocc[1], self.ivir[1])
             sfoa = numpy.sqrt(self.focc[0])
             sfob = numpy.sqrt(self.focc[1])
             sfva = numpy.sqrt(self.fvir[0])
@@ -1196,8 +1197,9 @@ class TDCCSD(object):
             k1daa = -D2aa*t2aa - Ia.vvoo.copy()
             k1dab = -D2ab*t2ab - Iabab.vvoo.copy()
             k1dbb = -D2bb*t2bb - Ib.vvoo.copy()
-            cc_equations._u_Stanton(k1sa, k1sb, k1daa, k1dab, k1dbb,
-                    Fa, Fb, Ia, Ib, Iabab, (t1a,t1b), (t2aa,t2ab,t2bb), fac=-1.0)
+            cc_equations._u_Stanton(
+                k1sa, k1sb, k1daa, k1dab, k1dbb, Fa, Fb,
+                Ia, Ib, Iabab, (t1a,t1b), (t2aa,t2ab,t2bb), fac=-1.0)
             return [(-1)*k1sa,(-1)*k1sb,(-1)*k1daa,(-1)*k1dab,(-1)*k1dbb]
 
         def fLRHS(ttot, var):
@@ -1208,9 +1210,9 @@ class TDCCSD(object):
             l1daa = -D2aa.transpose((2,3,0,1))*l2aa - Ia.oovv.copy()
             l1dab = -D2ab.transpose((2,3,0,1))*l2ab - Iabab.oovv.copy()
             l1dbb = -D2bb.transpose((2,3,0,1))*l2bb - Ib.oovv.copy()
-            cc_equations._uccsd_Lambda_opt(l1sa, l1sb, l1daa, l1dab, l1dbb,
-                    Fa, Fb, Ia, Ib, Iabab, (l1a,l1b), (l2aa,l2ab,l2bb),
-                    (t1a,t1b), (t2aa,t2ab,t2bb), fac=-1.0)
+            cc_equations._uccsd_Lambda_opt(
+                l1sa, l1sb, l1daa, l1dab, l1dbb, Fa, Fb, Ia, Ib, Iabab,
+                (l1a,l1b), (l2aa,l2ab,l2bb), (t1a,t1b), (t2aa,t2ab,t2bb), fac=-1.0)
             cc_equations._u_LS_TS(l1sa, l1sb, Ia, Ib, Iabab, t1a, t1b, fac=-1.0)
             return [l1sa,l1sb,l1daa,l1dab,l1dbb]
 
@@ -1244,28 +1246,28 @@ class TDCCSD(object):
             PiJaB = numpy.zeros((noa,nob,nva,nvb), dtype=l2ab.dtype)
             PIJAB = numpy.zeros((nob,nob,nvb,nvb), dtype=l2bb.dtype)
 
-            Pcdab_tot = cc_equations.uccsd_2rdm_cdab(t1da, t1db, t2daa, t2dab, t2dbb,
-                    l1a, l1b, l2aa, l2ab, l2bb)
+            Pcdab_tot = cc_equations.uccsd_2rdm_cdab(
+                t1da, t1db, t2daa, t2dab, t2dbb, l1a, l1b, l2aa, l2ab, l2bb)
             Pcdab = g[ng - 1]*Pcdab_tot[0]
             PCDAB = g[ng - 1]*Pcdab_tot[1]
             PcDaB = g[ng - 1]*Pcdab_tot[2]
 
-            Pciab_tot = cc_equations.uccsd_2rdm_ciab(t1da, t1db, t2daa, t2dab, t2dbb,
-                    l1a, l1b, l2aa, l2ab, l2bb)
+            Pciab_tot = cc_equations.uccsd_2rdm_ciab(
+                t1da, t1db, t2daa, t2dab, t2dbb, l1a, l1b, l2aa, l2ab, l2bb)
             Pciab = g[ng - 1]*Pciab_tot[0]
             PCIAB = g[ng - 1]*Pciab_tot[1]
             PcIaB = g[ng - 1]*Pciab_tot[2]
             PCiAb = g[ng - 1]*Pciab_tot[3]
 
-            Pbcai_tot = cc_equations.uccsd_2rdm_bcai(t1da, t1db, t2daa, t2dab, t2dbb,
-                    l1a, l1b, l2aa, l2ab, l2bb)
+            Pbcai_tot = cc_equations.uccsd_2rdm_bcai(
+                t1da, t1db, t2daa, t2dab, t2dbb, l1a, l1b, l2aa, l2ab, l2bb)
             Pbcai = g[ng - 1]*Pbcai_tot[0]
             PBCAI = g[ng - 1]*Pbcai_tot[1]
             PbCaI = g[ng - 1]*Pbcai_tot[2]
             PBcAi = g[ng - 1]*Pbcai_tot[3]
 
-            Pbjai_tot = cc_equations.uccsd_2rdm_bjai(t1da, t1db, t2daa, t2dab, t2dbb,
-                    l1a, l1b, l2aa, l2ab, l2bb)
+            Pbjai_tot = cc_equations.uccsd_2rdm_bjai(
+                t1da, t1db, t2daa, t2dab, t2dbb, l1a, l1b, l2aa, l2ab, l2bb)
             Pbjai = g[ng - 1]*Pbjai_tot[0]
             PBJAI = g[ng - 1]*Pbjai_tot[1]
             PbJaI = g[ng - 1]*Pbjai_tot[2]
@@ -1273,28 +1275,28 @@ class TDCCSD(object):
             PBjaI = g[ng - 1]*Pbjai_tot[4]
             PBjAi = g[ng - 1]*Pbjai_tot[5]
 
-            Pabij_tot = cc_equations.uccsd_2rdm_abij(t1da, t1db, t2daa, t2dab, t2dbb,
-                    l1a, l1b, l2aa, l2ab, l2bb)
+            Pabij_tot = cc_equations.uccsd_2rdm_abij(
+                t1da, t1db, t2daa, t2dab, t2dbb, l1a, l1b, l2aa, l2ab, l2bb)
             Pabij = g[ng - 1]*Pabij_tot[0]
             PABIJ = g[ng - 1]*Pabij_tot[1]
             PaBiJ = g[ng - 1]*Pabij_tot[2]
 
-            Pjkai_tot = cc_equations.uccsd_2rdm_jkai(t1da, t1db, t2daa, t2dab, t2dbb,
-                    l1a, l1b, l2aa, l2ab, l2bb)
+            Pjkai_tot = cc_equations.uccsd_2rdm_jkai(
+                t1da, t1db, t2daa, t2dab, t2dbb, l1a, l1b, l2aa, l2ab, l2bb)
             Pjkai = g[ng - 1]*Pjkai_tot[0]
             PJKAI = g[ng - 1]*Pjkai_tot[1]
             PjKaI = g[ng - 1]*Pjkai_tot[2]
             PJkAi = g[ng - 1]*Pjkai_tot[3]
 
-            Pkaij_tot = cc_equations.uccsd_2rdm_kaij(t1da, t1db, t2daa, t2dab, t2dbb,
-                    l1a, l1b, l2aa, l2ab, l2bb)
+            Pkaij_tot = cc_equations.uccsd_2rdm_kaij(
+                t1da, t1db, t2daa, t2dab, t2dbb, l1a, l1b, l2aa, l2ab, l2bb)
             Pkaij = g[ng - 1]*Pkaij_tot[0]
             PKAIJ = g[ng - 1]*Pkaij_tot[1]
             PkAiJ = g[ng - 1]*Pkaij_tot[2]
             PKaIj = g[ng - 1]*Pkaij_tot[3]
 
-            Pklij_tot = cc_equations.uccsd_2rdm_klij(t1da, t1db, t2daa, t2dab, t2dbb,
-                    l1a, l1b, l2aa, l2ab, l2bb)
+            Pklij_tot = cc_equations.uccsd_2rdm_klij(
+                t1da, t1db, t2daa, t2dab, t2dbb, l1a, l1b, l2aa, l2ab, l2bb)
             Pklij = g[ng - 1]*Pklij_tot[0]
             PKLIJ = g[ng - 1]*Pklij_tot[1]
             PkLiJ = g[ng - 1]*Pklij_tot[2]
@@ -1335,10 +1337,11 @@ class TDCCSD(object):
                 t1ea,t1eb = self._read_T1(ng - i - 1)
                 t2eaa,t2eab,t2ebb = self._read_T2(ng - i - 1)
             ld1a, ld1b, ld2aa, ld2ab, ld2bb = self._get_l_step(
-                    h, (l1a,l1b,l2aa,l2ab,l2bb), (t1da,t1db,t2daa,t2dab,t2dbb), (t1ea,t1eb,t2eaa,t2eab,t2ebb), fLRHS)
+                h, (l1a,l1b,l2aa,l2ab,l2bb), (t1da,t1db,t2daa,t2dab,t2dbb), (t1ea,t1eb,t2eaa,t2eab,t2ebb), fLRHS)
             if erel:
-                dx1a, dx1b, dx2aa, dx2ab, dx2bb = self._get_l_step(h, (x1a,x1b,x2aa,x2ab,x2bb),
-                        (l1a,l1b,l2aa,l2ab,l2bb), (l1a + ld1a, l1b + ld1b, l2aa + ld2aa, l2ab + ld2ab, l2bb + ld2bb), fXRHS)
+                dx1a, dx1b, dx2aa, dx2ab, dx2bb = self._get_l_step(
+                    h, (x1a,x1b,x2aa,x2ab,x2bb), (l1a,l1b,l2aa,l2ab,l2bb),
+                    (l1a + ld1a, l1b + ld1b, l2aa + ld2aa, l2ab + ld2ab, l2bb + ld2bb), fXRHS)
                 x1a += dx1a
                 x1b += dx1b
                 x2aa += dx2aa
@@ -1349,8 +1352,9 @@ class TDCCSD(object):
                 d2aatest = -Ia.vvoo.copy()
                 d2abtest = -Iabab.vvoo.copy()
                 d2bbtest = -Ib.vvoo.copy()
-                cc_equations._u_Stanton(d1atest,d1btest,d2aatest,d2abtest,d2bbtest,
-                        Fa,Fb,Ia,Ib,Iabab,(t1ea,t1eb),(t2eaa,t2eab,t2ebb),fac=-1.0)
+                cc_equations._u_Stanton(
+                    d1atest,d1btest,d2aatest,d2abtest,d2bbtest,
+                    Fa,Fb,Ia,Ib,Iabab,(t1ea,t1eb),(t2eaa,t2eab,t2ebb),fac=-1.0)
             l1a += ld1a
             l1b += ld1b
             l2aa += ld2aa
@@ -1576,8 +1580,8 @@ class TDCCSD(object):
             t1,t2 = ttot
             l1s = -D1.transpose((1,0))*l1 - F.ov.copy()
             l1d = -D2.transpose((2,3,0,1))*l2 - I.oovv.copy()
-            cc_equations._rccsd_Lambda_opt(l1s, l1d, F, I,
-                    l1, l2, t1, t2, fac=-1.0)
+            cc_equations._rccsd_Lambda_opt(
+                l1s, l1d, F, I, l1, l2, t1, t2, fac=-1.0)
             cc_equations._r_LS_TS(l1s,I,t1,fac=-1.0)
             return [l1s,l1d]
 

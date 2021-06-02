@@ -205,8 +205,8 @@ def mp2_sep(en, no, f, eri, T, returnT=False):
     """
     D1 = get_D1c(en)
     D2 = get_D2c(en)
-    D1a = get_D1a(en,T)
-    D2a = get_D2a(en,T)
+    D1a = get_D1a(en, T)
+    D2a = get_D2a(en, T)
 
     nv = (1.0 - no)
     T1n = numpy.einsum(
@@ -538,10 +538,8 @@ def mp23_int(e, no, nv, f, eri, T, ngrid=10):
     T1old = quadrature.int_tbar1(ng,T1old,ti,D1,G)
     T2old = quadrature.int_tbar2(ng,T2old,ti,D2,G)
 
-    E23_1 = ft_cc_energy.ft_cc_energy(T1old,T2old,f,eri,
-            g,beta)
-    E23_1F = ft_cc_energy.ft_cc_energy(T1old,T2old,f,eri,
-            g,beta,Qterm=False)
+    E23_1 = ft_cc_energy.ft_cc_energy(T1old,T2old,f,eri,g,beta)
+    E23_1F = ft_cc_energy.ft_cc_energy(T1old, T2old, f, eri, g, beta, Qterm=False)
     E23_Q = E23_1 - E23_1F
 
     # pre-contract with fermi factors
@@ -558,15 +556,12 @@ def mp23_int(e, no, nv, f, eri, T, ngrid=10):
     Ivooo = numpy.einsum('akij,a,i,j->akij', eri, nv, no, no)
     Iooov = numpy.einsum('jkia,i->jkia', eri, no)
     Ioooo = numpy.einsum('klij,i,j->klij', eri, no, no)
-    I = two_e_blocks(vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-            vovo=Ivovo,oovv=eri,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+    I = two_e_blocks(
+        vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
+        vovo=Ivovo,oovv=eri,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
 
     # do one iteration of LCCSD
-    T1,T2 = ft_cc_equations.lccsd_simple(F,I,T1old,T2old,
-            D1,D2,ti,ng,G)
+    T1,T2 = ft_cc_equations.lccsd_simple(F,I,T1old,T2old,D1,D2,ti,ng,G)
+    E23_2 = ft_cc_energy.ft_cc_energy(T1,T2,f,eri,g,beta,Qterm=False)
 
-    E23_2 = ft_cc_energy.ft_cc_energy(T1,T2,f,eri,
-            g,beta,Qterm=False)
-
-    #print(E23_Q, E23_2)
     return E23_Q + E23_2

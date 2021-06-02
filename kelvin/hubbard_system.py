@@ -485,10 +485,10 @@ class HubbardSystem(System):
         Vooov = Va[numpy.ix_(oidxa,oidxa,oidxa,vidxa)]
         Voooo = Va[numpy.ix_(oidxa,oidxa,oidxa,oidxa)]
         Va = two_e_blocks(
-            vvvv=Vvvvv,vvvo=Vvvvo,
-            vovv=Vvovv,vvoo=Vvvoo,
-            vovo=Vvovo,oovv=Voovv,
-            vooo=Vvooo,ooov=Vooov,
+            vvvv=Vvvvv, vvvo=Vvvvo,
+            vovv=Vvovv, vvoo=Vvvoo,
+            vovo=Vvovo, oovv=Voovv,
+            vooo=Vvooo, ooov=Vooov,
             oooo=Voooo)
         Vvvvv = Vb[numpy.ix_(vidxb,vidxb,vidxb,vidxb)]
         Vvvvo = Vb[numpy.ix_(vidxb,vidxb,vidxb,oidxb)]
@@ -500,10 +500,10 @@ class HubbardSystem(System):
         Vooov = Vb[numpy.ix_(oidxb,oidxb,oidxb,vidxb)]
         Voooo = Vb[numpy.ix_(oidxb,oidxb,oidxb,oidxb)]
         Vb = two_e_blocks(
-            vvvv=Vvvvv,vvvo=Vvvvo,
-            vovv=Vvovv,vvoo=Vvvoo,
-            vovo=Vvovo,oovv=Voovv,
-            vooo=Vvooo,ooov=Vooov,
+            vvvv=Vvvvv, vvvo=Vvvvo,
+            vovv=Vvovv, vvoo=Vvvoo,
+            vovo=Vvovo, oovv=Voovv,
+            vooo=Vvooo, ooov=Vooov,
             oooo=Voooo)
 
         Vvvvv = Vabab[numpy.ix_(vidxa,vidxb,vidxa,vidxb)]
@@ -522,15 +522,11 @@ class HubbardSystem(System):
         Voovo = Vabab[numpy.ix_(oidxa,oidxb,vidxa,oidxb)]
         Vooov = Vabab[numpy.ix_(oidxa,oidxb,oidxa,vidxb)]
         Voooo = Vabab[numpy.ix_(oidxa,oidxb,oidxa,oidxb)]
-        Vabab = two_e_blocks_full(vvvv=Vvvvv,
-                vvvo=Vvvvo,vvov=Vvvov,
-                vovv=Vvovv,ovvv=Vovvv,
-                vvoo=Vvvoo,vovo=Vvovo,
-                ovvo=Vovvo,voov=Vvoov,
-                ovov=Vovov,oovv=Voovv,
-                vooo=Vvooo,ovoo=Vovoo,
-                oovo=Voovo,ooov=Vooov,
-                oooo=Voooo)
+        Vabab = two_e_blocks_full(
+            vvvv=Vvvvv,vvvo=Vvvvo,vvov=Vvvov,vovv=Vvovv,
+            ovvv=Vovvv,vvoo=Vvvoo,vovo=Vvovo,ovvo=Vovvo,
+            voov=Vvoov,ovov=Vovov,oovv=Voovv,vooo=Vvooo,
+            ovoo=Vovoo,oovo=Voovo,ooov=Vooov,oooo=Voooo)
         return Va,Vb,Vabab
 
     def g_aint(self, code=0):

@@ -403,8 +403,8 @@ class ccsd(object):
         T2bbold = einsum('abij,ijab->abij', Ib.vvoo, Doovvbb)
         T1olds = (T1aold,T1bold)
         T2olds = (T2aaold,T2abold,T2bbold)
-        Emp2 = cc_energy.ump2_energy(T1olds,T2olds,
-                Fa.ov,Fb.ov,Ia.oovv,Ib.oovv,Iabab.oovv)
+        Emp2 = cc_energy.ump2_energy(
+            T1olds,T2olds,Fa.ov,Fb.ov,Ia.oovv,Ib.oovv,Iabab.oovv)
 
         # start with custom guess if provided
         if T1in is not None:
@@ -710,8 +710,9 @@ class ccsd(object):
             logging.info('MP2 Energy: {:.10f}'.format(E2))
 
             # run CC iterations
-            Eccn,T1,T2 = cc_utils.ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G,
-                    self.beta_max, ng, ti, self.iprint, conv_options)
+            Eccn,T1,T2 = cc_utils.ft_cc_iter(
+                method, T1old, T2old, F, I, D1, D2, g, G,
+                self.beta_max, ng, ti, self.iprint, conv_options)
         else:
             T1,T2 = cc_utils.ft_cc_iter_extrap(method, F, I, D1, D2, g, G, self.beta_max, ng, ti,
                     self.iprint, conv_options)
@@ -882,19 +883,23 @@ class ccsd(object):
                 T2bbold = quadrature.int_tbar2(ng,T2bbold,ti,D2bb,G)
 
             # MP2 energy
-            E2 = ft_cc_energy.ft_ucc_energy(T1aold,T1bold,T2aaold,T2abold,T2bbold,
-                Fa.ov,Fb.ov,Ia.oovv,Ib.oovv,Iabab.oovv,g,self.beta_max,Qterm=False)
+            E2 = ft_cc_energy.ft_ucc_energy(
+                T1aold,T1bold,T2aaold,T2abold,T2bbold,Fa.ov,Fb.ov,
+                Ia.oovv,Ib.oovv,Iabab.oovv,g,self.beta_max,Qterm=False)
             logging.info('MP2 Energy: {:.10f}'.format(E2))
 
             # run CC iterations
-            Eccn,T1,T2 = cc_utils.ft_ucc_iter(method, T1aold, T1bold, T2aaold, T2abold, T2bbold,
-                    Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb,
-                    g, G, self.beta_max, ng, ti, self.iprint, conv_options)
+            Eccn,T1,T2 = cc_utils.ft_ucc_iter(
+                method, T1aold, T1bold, T2aaold, T2abold, T2bbold,
+                Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb,
+                g, G, self.beta_max, ng, ti, self.iprint, conv_options)
         else:
-            T1,T2 = cc_utils.ft_ucc_iter_extrap(method, Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb,
-                    g, G, self.beta_max, ng, ti, self.iprint, conv_options)
-            Eccn = ft_cc_energy.ft_ucc_energy(T1[0], T1[1], T2[0], T2[1], T2[2],
-                Fa.ov,Fb.ov,Ia.oovv,Ib.oovv,Iabab.oovv,g,self.beta_max)
+            T1,T2 = cc_utils.ft_ucc_iter_extrap(
+                method, Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb,
+                g, G, self.beta_max, ng, ti, self.iprint, conv_options)
+            Eccn = ft_cc_energy.ft_ucc_energy(
+                T1[0], T1[1], T2[0], T2[1], T2[2],Fa.ov,Fb.ov,
+                Ia.oovv,Ib.oovv,Iabab.oovv,g,self.beta_max)
 
         # save T amplitudes
         self.T1 = T1
@@ -987,13 +992,14 @@ class ccsd(object):
 
         # run lambda iterations
         conv_options = {
-                "econv":self.econv,
-                "tconv":self.tconv,
-                "max_iter":self.max_iter,
-                "damp":self.damp}
+                "econv": self.econv,
+                "tconv": self.tconv,
+                "max_iter": self.max_iter,
+                "damp": self.damp}
         method = "CCSD" if self.singles else "CCD"
-        L1,L2 = cc_utils.ft_lambda_iter(method, L1old, L2old, self.T1, self.T2, F, I,
-                D1, D2, g, G, self.beta_max, ng, ti, self.iprint, conv_options)
+        L1,L2 = cc_utils.ft_lambda_iter(
+            method, L1old, L2old, self.T1, self.T2, F, I, D1, D2, g, G,
+            self.beta_max, ng, ti, self.iprint, conv_options)
 
         # save lambda amplitudes
         self.L1 = L1
@@ -1166,20 +1172,19 @@ class ccsd(object):
             D1 = D1[numpy.ix_(ivir,iocc)]
             D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
             F,I = cc_utils.ft_active_integrals(
-                    self.sys, en, focc, fvir, iocc, ivir)
+                self.sys, en, focc, fvir, iocc, ivir)
         else:
             F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
 
         A1 = (1.0/beta)*einsum('ia,ai->', self.dia, F.vo)
         # get derivative with respect to g
-        Eterm = ft_cc_energy.ft_cc_energy(self.T1,self.T2,
-            F.ov,I.oovv,gd,beta)
+        Eterm = ft_cc_energy.ft_cc_energy(self.T1,self.T2,F.ov,I.oovv,gd,beta)
 
         dg = Eterm
 
         # get derivative with respect to G
-        T1temp,T2temp = ft_cc_equations.ccsd_stanton(F,I,self.T1,self.T2,
-                D1,D2,ti,ng,Gd)
+        T1temp,T2temp = ft_cc_equations.ccsd_stanton(
+            F,I,self.T1,self.T2,D1,D2,ti,ng,Gd)
 
         A1 = (1.0/beta)*einsum('via,vai->v', self.L1, T1temp)
         A2 = (1.0/beta)*0.25*einsum('vijab,vabij->v', self.L2, T2temp)
@@ -1196,8 +1201,8 @@ class ccsd(object):
             for j in range(n):
                 Gnew[i,j] *= (self.ti[j] - self.ti[i])/beta
 
-        T1temp,T2temp = ft_cc_equations.ccsd_stanton(F,I,self.T1,self.T2,
-                D1,D2,ti,ng,Gnew)
+        T1temp,T2temp = ft_cc_equations.ccsd_stanton(
+            F,I,self.T1,self.T2,D1,D2,ti,ng,Gnew)
         T1temp *= D1
         T2temp *= D2
 
@@ -1258,7 +1263,7 @@ class ccsd(object):
             D2ab = D2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)]
             D2bb = D2bb[numpy.ix_(ivira,ivira,iocca,iocca)]
             Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_active_integrals(
-                    self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
+                self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
         else:
             Fa,Fb,Ia,Ib,Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
         T1aold,T1bold = self.T1
@@ -1267,14 +1272,16 @@ class ccsd(object):
         L2aaold,L2abold,L2bbold = self.L2
 
         # get derivative with respect to g
-        Eterm = ft_cc_energy.ft_ucc_energy(T1aold,T1bold,T2aaold,T2abold,T2bbold,
+        Eterm = ft_cc_energy.ft_ucc_energy(
+            T1aold,T1bold,T2aaold,T2abold,T2bbold,
             Fa.ov,Fb.ov,Ia.oovv,Ib.oovv,Iabab.oovv,gd,beta)
 
         dg = Eterm
 
         # get derivative with respect to G
-        T1t,T2t = ft_cc_equations.uccsd_stanton(Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,
-                T2aaold,T2abold,T2bbold,D1a,D1b,D2aa,D2ab,D2bb,ti,ng,Gd)
+        T1t,T2t = ft_cc_equations.uccsd_stanton(
+            Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,T2aaold,T2abold,T2bbold,
+            D1a,D1b,D2aa,D2ab,D2bb,ti,ng,Gd)
 
         A1a = -(1.0/beta)*einsum('via,vai->v', L1aold, T1t[0])
         A1b = -(1.0/beta)*einsum('via,vai->v', L1bold, T1t[1])
@@ -1297,8 +1304,9 @@ class ccsd(object):
             for j in range(n):
                 Gnew[i,j] *= (self.ti[j] - self.ti[i])/beta
 
-        T1t,T2t = ft_cc_equations.uccsd_stanton(Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,
-                T2aaold,T2abold,T2bbold,D1a,D1b,D2aa,D2ab,D2bb,ti,ng,Gnew)
+        T1t,T2t = ft_cc_equations.uccsd_stanton(
+            Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,T2aaold,T2abold,T2bbold,
+            D1a,D1b,D2aa,D2ab,D2bb,ti,ng,Gnew)
         T1a,T1b = T1t
         T2aa,T2ab,T2bb = T2t
         T1a *= D1a
@@ -1607,8 +1615,8 @@ class ccsd(object):
         if self.athresh > 0.0:
             D1 = D1[numpy.ix_(ivir,iocc)]
             D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
-        T1temp,T2temp = ft_cc_equations.ccsd_stanton(F,I,self.T1,self.T2,
-                D1,D2,self.ti,ng,Gnew)
+        T1temp,T2temp = ft_cc_equations.ccsd_stanton(
+            F,I,self.T1,self.T2,D1,D2,self.ti,ng,Gnew)
         At1i = -(1.0/beta)*einsum('via,vai->vi', self.L1, T1temp)
         At1a = -(1.0/beta)*einsum('via,vai->va', self.L1, T1temp)
         At2i = -(1.0/beta)*0.25*einsum('vijab,vabij->vi', self.L2, T2temp)
@@ -1724,16 +1732,16 @@ class ccsd(object):
 
         # multiply unrelaxed RDMs by occupation numbers to form unrelaxed (normal-ordered) RDM
         self.ndia = (einsum('ia,i,a->ia', self.dia[0], sfoa, sfva),
-                einsum('ia,i,a->ia', self.dia[1], sfob, sfvb))
+                     einsum('ia,i,a->ia', self.dia[1], sfob, sfvb))
         self.ndba = (einsum('ba,b,a->ba', self.dba[0], sfva, sfva),
-                einsum('ba,b,a->ba', self.dba[1], sfvb, sfvb))
+                     einsum('ba,b,a->ba', self.dba[1], sfvb, sfvb))
         self.ndji = (einsum('ji,j,i->ji', self.dji[0], sfoa, sfoa),
-                einsum('ji,j,i->ji', self.dji[1], sfob, sfob))
+                     einsum('ji,j,i->ji', self.dji[1], sfob, sfob))
         self.ndai = (einsum('ai,a,i->ai', self.dai[0], sfva, sfoa),
-                einsum('ai,a,i->ai', self.dai[1], sfvb, sfob))
+                     einsum('ai,a,i->ai', self.dai[1], sfvb, sfob))
         if self.athresh > 0.0:
             self.n1rdm = [numpy.zeros((na,na), dtype=self.ndia[0].dtype),
-                    numpy.zeros((nb,nb), dtype=self.ndia[1].dtype)]
+                          numpy.zeros((nb,nb), dtype=self.ndia[1].dtype)]
             self.n1rdm[0][numpy.ix_(iocca,ivira)] += self.ndia[0]/beta
             self.n1rdm[0][numpy.ix_(ivira,ivira)] += self.ndba[0]/beta
             self.n1rdm[0][numpy.ix_(iocca,iocca)] += self.ndji[0]/beta
@@ -1744,7 +1752,7 @@ class ccsd(object):
             self.n1rdm[1][numpy.ix_(ivirb,ioccb)] += self.ndai[1]/beta
         else:
             self.n1rdm = [(self.ndia[0] + self.ndba[0] + self.ndji[0] + self.ndai[0])/beta,
-                    (self.ndia[1] + self.ndba[1] + self.ndji[1] + self.ndai[1])/beta]
+                          (self.ndia[1] + self.ndba[1] + self.ndji[1] + self.ndai[1])/beta]
 
     def _u_ft_2rdm(self):
         assert(self.beta == self.beta_max)
@@ -1983,13 +1991,15 @@ class ccsd(object):
         D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
             - eb[None,None,:,None] - eb[None,None,None,:]
         if self.athresh > 0.0:
-            D1a = D1a[numpy.ix_(ivira,iocca)]
-            D1b = D1b[numpy.ix_(ivirb,ioccb)]
-            D2aa = D2aa[numpy.ix_(ivira,ivira,iocca,iocca)]
-            D2ab = D2ab[numpy.ix_(ivira,ivirb,iocca,ioccb)]
-            D2bb = D2bb[numpy.ix_(ivirb,ivirb,ioccb,ioccb)]
-        T1t,T2t = ft_cc_equations.uccsd_stanton(Fa,Fb,Ia,Ib,Iabab,self.T1[0],self.T1[1],
-                self.T2[0],self.T2[1],self.T2[2],D1a,D1b,D2aa,D2ab,D2bb,self.ti,ng,Gnew)
+            D1a = D1a[numpy.ix_(ivira, iocca)]
+            D1b = D1b[numpy.ix_(ivirb, ioccb)]
+            D2aa = D2aa[numpy.ix_(ivira, ivira, iocca, iocca)]
+            D2ab = D2ab[numpy.ix_(ivira, ivirb, iocca, ioccb)]
+            D2bb = D2bb[numpy.ix_(ivirb, ivirb, ioccb, ioccb)]
+        T1t,T2t = ft_cc_equations.uccsd_stanton(
+            Fa,Fb,Ia,Ib,Iabab,self.T1[0],self.T1[1],
+            self.T2[0],self.T2[1],self.T2[2],
+            D1a,D1b,D2aa,D2ab,D2bb,self.ti,ng,Gnew)
         At1i = -(1.0/beta)*einsum('via,vai->vi', self.L1[0], T1t[0])
         At1I = -(1.0/beta)*einsum('via,vai->vi', self.L1[1], T1t[1])
         At1a = -(1.0/beta)*einsum('via,vai->va', self.L1[0], T1t[0])

@@ -103,8 +103,8 @@ def ccsd_stanton(F, I, T1old, T2old, D1, D2, ti, ng, G):
     T2new = -einsum('v,abij->vabij', Id, I.vvoo)
 
     for y in range(ng):
-        cc_equations._Stanton(T1new[y],T2new[y],
-                F,I,T1old[y],T2old[y],fac=-1.0)
+        cc_equations._Stanton(
+            T1new[y], T2new[y], F, I, T1old[y], T2old[y], fac=-1.0)
 
     # integrate the new T-amplitudes
     T1new = quadrature.int_tbar1(ng, T1new, ti, D1, G)
@@ -127,8 +127,8 @@ def ccsd_stanton_single(ig, F, I, T1old, T2old, T1bar, T2bar, D1, D2, ti, ng, G)
     return T1new,T2new
 
 
-def uccsd_stanton(Fa, Fb, Ia, Ib, Iabab, T1aold, T1bold, T2aaold, T2abold, T2bbold,
-        D1a, D1b, D2aa, D2ab, D2bb, ti, ng, G):
+def uccsd_stanton(Fa, Fb, Ia, Ib, Iabab, T1aold, T1bold, T2aaold, T2abold,
+                  T2bbold, D1a, D1b, D2aa, D2ab, D2bb, ti, ng, G):
     """Time-dependent coupled cluster singles and
     doubles (CCSD) iteration using Stanton-Gauss
     intermediates.
@@ -150,8 +150,9 @@ def uccsd_stanton(Fa, Fb, Ia, Ib, Iabab, T1aold, T1bold, T2aaold, T2abold, T2bbo
         T2ab[y] = -Iabab.vvoo.copy()
         T1olds = (T1aold[y],T1bold[y])
         T2olds = (T2aaold[y],T2abold[y],T2bbold[y])
-        cc_equations._u_Stanton(T1a[y], T1b[y], T2aa[y], T2ab[y], T2bb[y],
-                Fa, Fb, Ia, Ib, Iabab, T1olds, T2olds, fac=-1.0)
+        cc_equations._u_Stanton(
+            T1a[y], T1b[y], T2aa[y], T2ab[y], T2bb[y],
+            Fa, Fb, Ia, Ib, Iabab, T1olds, T2olds, fac=-1.0)
 
     # integrate the new T-amplitudes
     T1a = quadrature.int_tbar1(ng, T1a, ti, D1a, G)
@@ -163,9 +164,9 @@ def uccsd_stanton(Fa, Fb, Ia, Ib, Iabab, T1aold, T1bold, T2aaold, T2abold, T2bbo
     return (T1a,T1b),(T2aa,T2ab,T2bb)
 
 
-def uccsd_stanton_single(ig, Fa, Fb, Ia, Ib, Iabab,
-        T1a, T1b, T2aa, T2ab, T2bb, T1bara, T1barb, T2baraa, T2barab, T2barbb,
-        D1a, D1b, D2aa, D2ab, D2bb, ti, ng, G):
+def uccsd_stanton_single(ig, Fa, Fb, Ia, Ib, Iabab, T1a, T1b, T2aa, T2ab,
+                         T2bb, T1bara, T1barb, T2baraa, T2barab, T2barbb,
+                         D1a, D1b, D2aa, D2ab, D2bb, ti, ng, G):
 
     T1newa = -Fa.vo
     T1newb = -Fb.vo
@@ -188,11 +189,11 @@ def uccsd_stanton_single(ig, Fa, Fb, Ia, Ib, Iabab,
     T2newaa = quadrature.int_tbar2_single(ng, ig, T2baraa, ti, D2aa, G)
     T2newab = quadrature.int_tbar2_single(ng, ig, T2barab, ti, D2ab, G)
     T2newbb = quadrature.int_tbar2_single(ng, ig, T2barbb, ti, D2bb, G)
-    return (T1newa,T1newb),(T2newaa,T2newab,T2newbb)
+    return (T1newa,T1newb), (T2newaa,T2newab,T2newbb)
 
 
-def neq_ccsd_simple(Ff, Fb, F, I, T1oldf, T1oldb, T1oldi,
-        T2oldf, T2oldb, T2oldi, D1, D2, tir, tii, ngr, ngi, Gr, Gi):
+def neq_ccsd_simple(Ff, Fb, F, I, T1oldf, T1oldb, T1oldi, T2oldf, T2oldb,
+                    T2oldi, D1, D2, tir, tii, ngr, ngi, Gr, Gi):
 
     T1newf = -Ff.vo.copy()
     T1newb = -Fb.vo.copy()
@@ -260,8 +261,8 @@ def neq_ccsd_simple(Ff, Fb, F, I, T1oldf, T1oldb, T1oldi,
     return T1newf,T1newb,T1newi,T2newf,T2newb,T2newi
 
 
-def neq_ccsd_stanton(Ff, Fb, F, I, T1oldf, T1oldb, T1oldi,
-        T2oldf, T2oldb, T2oldi, D1, D2, tir, tii, ngr, ngi, Gr, Gi):
+def neq_ccsd_stanton(Ff, Fb, F, I, T1oldf, T1oldb, T1oldi, T2oldf, T2oldb,
+                     T2oldi, D1, D2, tir, tii, ngr, ngi, Gr, Gi):
 
     T1newf = -Ff.vo.copy()
     T1newb = -Fb.vo.copy()
@@ -395,8 +396,8 @@ def ccsd_lambda_opt(F, I, T1old, T2old, L1old, L2old, D1, D2, ti, ng, g, G, beta
 
     # amplitude term
     for y in range(ng):
-        cc_equations._Lambda_opt(L1[y], L2[y], F, I,
-                L1int[y], L2int[y], T1old[y], T2old[y], fac=-1.0)
+        cc_equations._Lambda_opt(L1[y], L2[y], F, I, L1int[y], L2int[y],
+                                 T1old[y], T2old[y], fac=-1.0)
 
     # energy term
     Id = numpy.ones((ng))
@@ -408,8 +409,9 @@ def ccsd_lambda_opt(F, I, T1old, T2old, L1old, L2old, D1, D2, ti, ng, g, G, beta
     return L1,L2
 
 
-def uccsd_lambda_opt(Fa, Fb, Ia, Ib, Iabab, T1aold, T1bold, T2aaold, T2abold, T2bbold,
-        L1aold, L1bold, L2aaold, L2abold, L2bbold, D1a, D1b, D2aa, D2ab, D2bb, ti, ng, g, G, beta):
+def uccsd_lambda_opt(Fa, Fb, Ia, Ib, Iabab, T1aold, T1bold, T2aaold, T2abold,
+                     T2bbold, L1aold, L1bold, L2aaold, L2abold, L2bbold, D1a,
+                     D1b, D2aa, D2ab, D2bb, ti, ng, g, G, beta):
     """Time-dependent coupled cluster singles and doubles (CCSD)
     Lambda iteration with intermediates.
     """
@@ -425,11 +427,11 @@ def uccsd_lambda_opt(Fa, Fb, Ia, Ib, Iabab, T1aold, T1bold, T2aaold, T2abold, T2
     L2bbint = quadrature.int_L2(ng, L2bbold, ti, D2bb, g, G)
 
     # initialize lambda amplitudes
-    L1a = numpy.zeros((ng,noa,nva), dtype=L1aold.dtype)
-    L1b = numpy.zeros((ng,nob,nvb), dtype=L1bold.dtype)
-    L2aa = numpy.zeros((ng,noa,noa,nva,nva), dtype=L2aaold.dtype)
-    L2ab = numpy.zeros((ng,noa,nob,nva,nvb), dtype=L2abold.dtype)
-    L2bb = numpy.zeros((ng,nob,nob,nvb,nvb), dtype=L2bbold.dtype)
+    L1a = numpy.zeros((ng, noa, nva), dtype=L1aold.dtype)
+    L1b = numpy.zeros((ng, nob, nvb), dtype=L1bold.dtype)
+    L2aa = numpy.zeros((ng, noa, noa, nva, nva), dtype=L2aaold.dtype)
+    L2ab = numpy.zeros((ng, noa, nob, nva, nvb), dtype=L2abold.dtype)
+    L2bb = numpy.zeros((ng, nob, nob, nvb, nvb), dtype=L2bbold.dtype)
 
     # amplitude term
     for y in range(ng):
@@ -477,8 +479,8 @@ def ccsd_lambda_opt_int(F, I, T1old, T2old, L1old, L2old, intor, D1, D2, ti, ng,
 
     # amplitude term
     for y in range(ng):
-        cc_equations._Lambda_opt_int(L1[y], L2[y], F, I,
-            L1int[y], L2int[y], T1old[y], T2old[y], intor[y], fac=-1.0)
+        cc_equations._Lambda_opt_int(L1[y], L2[y], F, I, L1int[y], L2int[y],
+                                     T1old[y], T2old[y], intor[y], fac=-1.0)
 
     # energy term
     Id = numpy.ones((ng))
@@ -532,9 +534,9 @@ def uccd_lambda_guess(Ia, Ib, Iabab, beta, ng):
     return L2aa,L2ab,L2bb
 
 
-def neq_lambda_simple(Ff, Fb, F, I, L1oldf, L1oldb, L1oldi,
-        L2oldf, L2oldb, L2oldi, T1oldf, T1oldb, T1oldi,
-        T2oldf, T2oldb, T2oldi, D1, D2, tir, tii, ngr, ngi, gr, gi, Gr, Gi):
+def neq_lambda_simple(Ff, Fb, F, I, L1oldf, L1oldb, L1oldi, L2oldf, L2oldb,
+                      L2oldi, T1oldf, T1oldb, T1oldi, T2oldf, T2oldb, T2oldi,
+                      D1, D2, tir, tii, ngr, ngi, gr, gi, Gr, Gi):
 
     # integrate old lambda amplitudes
     L1intf,L1intb,L1inti = quadrature.int_L1_keldysh(
@@ -628,15 +630,15 @@ def neq_lambda_simple(Ff, Fb, F, I, L1oldf, L1oldb, L1oldi,
     return L1f,L1b,L1i,L2f,L2b,L2i
 
 
-def neq_lambda_opt(Ff, Fb, F, I, L1oldf, L1oldb, L1oldi,
-        L2oldf, L2oldb, L2oldi, T1oldf, T1oldb, T1oldi,
-        T2oldf, T2oldb, T2oldi, D1, D2, tir, tii, ngr, ngi, gr, gi, Gr, Gi):
+def neq_lambda_opt(Ff, Fb, F, I, L1oldf, L1oldb, L1oldi, L2oldf, L2oldb,
+                   L2oldi, T1oldf, T1oldb, T1oldi, T2oldf, T2oldb, T2oldi,
+                   D1, D2, tir, tii, ngr, ngi, gr, gi, Gr, Gi):
 
     # integrate old lambda amplitudes
     L1intf,L1intb,L1inti = quadrature.int_L1_keldysh(
-            ngr,ngi,L1oldf,L1oldb,L1oldi,tir,tii,D1,gr,gi,Gr,Gi)
+        ngr,ngi,L1oldf,L1oldb,L1oldi,tir,tii,D1,gr,gi,Gr,Gi)
     L2intf,L2intb,L2inti = quadrature.int_L2_keldysh(
-            ngr,ngi,L2oldf,L2oldb,L2oldi,tir,tii,D2,gr,gi,Gr,Gi)
+        ngr,ngi,L2oldf,L2oldb,L2oldi,tir,tii,D2,gr,gi,Gr,Gi)
 
     # initialize lambda amplitudes
     L1f = numpy.zeros(L1oldf.shape, dtype=complex)
@@ -648,16 +650,16 @@ def neq_lambda_opt(Ff, Fb, F, I, L1oldf, L1oldb, L1oldi,
 
     # amplitude term
     for y in range(ngr):
-        Fftemp = one_e_blocks(Ff.oo[y],Ff.ov[y],Ff.vo[y],Ff.vv[y])
-        cc_equations._Lambda_opt(L1f[y], L2f[y], Fftemp, I,
-                L1intf[y], L2intf[y], T1oldf[y], T2oldf[y], fac=-1.0)
+        Fftemp = one_e_blocks(Ff.oo[y], Ff.ov[y], Ff.vo[y], Ff.vv[y])
+        cc_equations._Lambda_opt(L1f[y], L2f[y], Fftemp, I, L1intf[y],
+                                 L2intf[y], T1oldf[y], T2oldf[y], fac=-1.0)
         Fbtemp = one_e_blocks(Fb.oo[y],Fb.ov[y],Fb.vo[y],Fb.vv[y])
-        cc_equations._Lambda_opt(L1b[y], L2b[y], Fbtemp, I,
-                L1intb[y], L2intb[y], T1oldb[y], T2oldb[y], fac=-1.0)
+        cc_equations._Lambda_opt(L1b[y], L2b[y], Fbtemp, I, L1intb[y],
+                                 L2intb[y], T1oldb[y], T2oldb[y], fac=-1.0)
 
     for y in range(ngi):
-        cc_equations._Lambda_opt(L1i[y], L2i[y], F, I,
-                L1inti[y], L2inti[y], T1oldi[y], T2oldi[y], fac=-1.0)
+        cc_equations._Lambda_opt(L1i[y], L2i[y], F, I, L1inti[y], L2inti[y],
+                                 T1oldi[y], T2oldi[y], fac=-1.0)
 
     # energy term
     for y in range(ngr):
@@ -753,7 +755,7 @@ def ccsd_2rdm(T1, T2, L1, L2, D1, D2, ti, ng, g, G):
 
 
 def uccsd_1rdm(T1a, T1b, T2aa, T2ab, T2bb, L1a, L1b, L2aa, L2ab, L2bb,
-        D1a, D1b, D2aa, D2ab, D2bb, ti, ng, g, G):
+               D1a, D1b, D2aa, D2ab, D2bb, ti, ng, g, G):
 
     # integrate the new L-amplitudes
     nt1,nva,noa = T1a.shape
@@ -798,7 +800,7 @@ def uccsd_1rdm(T1a, T1b, T2aa, T2ab, T2bb, L1a, L1b, L2aa, L2ab, L2bb,
 
 
 def uccsd_2rdm(T1a, T1b, T2aa, T2ab, T2bb, L1a, L1b, L2aa, L2ab, L2bb,
-        D1a, D1b, D2aa, D2ab, D2bb, ti, ng, g, G):
+               D1a, D1b, D2aa, D2ab, D2bb, ti, ng, g, G):
     nt1,nva,noa = T1a.shape
     nt2,nvb,nob = T1b.shape
     assert(nt1 == ng and nt2 == ng)
