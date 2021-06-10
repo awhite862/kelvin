@@ -55,21 +55,21 @@ def get_suite():
     #suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_Beplus")) # 55s 0%
     #suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_pueg")) # 1m10s 0%
     suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_hubbard"))
-    #suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_Hubbard_gu")) # 4s 0%
+    suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_Hubbard_gu")) # 4s 0%
     #suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_Be_gen_active")) # 1m50s 1%
     #suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_Be_gen_prop_active")) # 3m22s 1%
     suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_ueg_gen"))
-    #suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_ueg_scf_gen")) #  10s 0%
+    suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_ueg_scf_gen")) #  10s 0%
     #suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_ueg")) # 22s 0%
     #suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_Be_active")) # 3m45s 3%
 
     suite.addTest(test_ft_ccsd.FTCCSDTest("test_2orb"))
-    #suite.addTest(test_ft_ccsd.FTCCSDTest("test_Be")) # 5s 0%
+    suite.addTest(test_ft_ccsd.FTCCSDTest("test_Be")) # 5s 0%
     #suite.addTest(test_ft_ccsd.FTCCSDTest("test_ueg")) # 20s 0%
-    #suite.addTest(test_ft_ccsd.FTCCSDTest("test_pueg")) # 1s 0%
+    suite.addTest(test_ft_ccsd.FTCCSDTest("test_pueg")) # 1s 0%
     #suite.addTest(test_ft_ccsd.FTCCSDTest("test_ueg_gen_conv"))
     suite.addTest(test_ft_ccsd.FTCCSDTest("test_ueg_conv"))
-    #suite.addTest(test_ft_ccsd.FTCCSDTest("test_ueg_gen")) # 1s 0%
+    suite.addTest(test_ft_ccsd.FTCCSDTest("test_ueg_gen")) # 1s 0%
     suite.addTest(test_ft_ccsd.FTCCSDTest("test_Be_rt"))
     #suite.addTest(test_ft_ccsd.FTCCSDTest("test_Be_active")) # 1m45s 0%
     #suite.addTest(test_ft_ccsd.FTCCSDTest("test_Be_uactive")) # 45s 0%
@@ -94,11 +94,11 @@ def get_suite():
     #suite.addTest(test_ft_deriv.FTDerivTest("test_Be_sto3g_gen_active")) # 1m54s 1.2%
     #suite.addTest(test_ft_deriv.FTDerivTest("test_Be_sto3g_active")) # 2m6s 2.7%
     #suite.addTest(test_ft_deriv.FTDerivTest("test_Be_sto3g")) # 2s 0.0%
-    #suite.addTest(test_ft_deriv.FTDerivTest("test_Be_sto3g_ln")) # 4s 0.1%
+    suite.addTest(test_ft_deriv.FTDerivTest("test_Be_sto3g_ln")) # 4s 0.1%
     #suite.addTest(test_ft_deriv.FTDerivTest("test_UEG")) # 14s 0.0%
-    #suite.addTest(test_ft_deriv.FTDerivTest("test_UEG2")) # 7s 0.6%
-    #suite.addTest(test_ft_deriv.FTDerivTest("test_PUEG")) # 2s 0.6%
-    #suite.addTest(test_ft_deriv.FTDerivTest("test_hubbard")) # 4s 0.0%
+    suite.addTest(test_ft_deriv.FTDerivTest("test_UEG2")) # 7s 0.6%
+    suite.addTest(test_ft_deriv.FTDerivTest("test_PUEG")) # 2s 0.6%
+    suite.addTest(test_ft_deriv.FTDerivTest("test_hubbard")) # 4s 0.0%
     #suite.addTest(test_ft_deriv.FTDerivTest("test_UEG_gen")) # 17s 0.0%
 
     #suite.addTest(test_ft_lambda.FTLambdaTest("test_Be_sto3g_gen")) # 2m25s 0.0%
@@ -110,19 +110,19 @@ def get_suite():
     suite.addTest(test_ft_lambda_equations.FTLambdaEquationsTest("test_uccsd_opt"))
 
     #suite.addTest(test_ft_mp2.FTMP2Test("test_Be_vs_fd_all")) # 55s 0.5%
-    #suite.addTest(test_ft_mp2.FTMP2Test("test_0T_Be_sto3g")) # 1s 0.5%
+    suite.addTest(test_ft_mp2.FTMP2Test("test_0T_Be_sto3g")) # 1s 0.5%
 
     suite.addTest(test_hubbard.HubbardTest("test_2_1"))
     #suite.addTest(test_hubbard.HubbardTest("test_4_1"))
     suite.addTest(test_hubbard.HubbardTest("test_4_1_pbc"))
     suite.addTest(test_hubbard.HubbardTest("test_ccsd_site"))
     suite.addTest(test_hubbard.HubbardTest("test_ccsd"))
-    #suite.addTest(test_hubbard.HubbardTest("test_ft_ccsd")) # 5s 0.1%
+    suite.addTest(test_hubbard.HubbardTest("test_ft_ccsd")) # 5s 0.1%
     #suite.addTest(test_hubbard.HubbardTest("test_6_2_pbc")) # 6s 0.0%
     #suite.addTest(test_hubbard.HubbardTest("test_ft_ccsd_u_g")) # 0s 0.0%
 
     suite.addTest(test_lambda.LambdaTest("test_Be_sto3g"))
-    #suite.addTest(test_lambda.LambdaTest("test_Be_sto3g_gen")) # 1s 0.4%
+    suite.addTest(test_lambda.LambdaTest("test_Be_sto3g_gen")) # 1s 0.4%
     #suite.addTest(test_lambda.LambdaTest("test_N2p_sto3g")) # 1m30s 0.0%
 
     suite.addTest(test_mp2.MP2Test("test_N2p_631G"))
@@ -142,7 +142,7 @@ def get_suite():
     suite.addTest(test_neq_lambda_equation.NEQLambdaEquationsTest("test_L1_simple"))
     suite.addTest(test_neq_lambda_equation.NEQLambdaEquationsTest("test_L2_simple"))
 
-    #suite.addTest(test_neq_prop.NEQPropTest("test_h2_field_deriv")) # 1s 1.4%
+    suite.addTest(test_neq_prop.NEQPropTest("test_h2_field_deriv")) # 1s 1.4%
     #suite.addTest(test_neq_prop.NEQPropTest("test_h2_field")) # 45s 1.4%
     #suite.addTest(test_neq_prop.NEQPropTest("test_h2_field2")) # 6m45s 1.4%
 
@@ -159,8 +159,8 @@ def get_suite():
     suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_ccd"))
     #suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_rk1")) # 7s 0.1%
     #suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_rk2")) # 5s 0.1%
-    #suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_cn")) # 6s 0.4%
-    #suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_am2")) # 6s 0.4%
+    suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_cn")) # 6s 0.4%
+    suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_am2")) # 6s 0.4%
     #suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_active")) # 45s 0.2%
     #suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_u_vs_g")) # 5s 0.0%
     #suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_u_vs_g_active")) # 5s 0.0%
@@ -209,8 +209,8 @@ def get_suite():
 
     #suite.addTest(test_scf.SCFTest("test_Be_sto3g_energy")) # 12s 0.0%
     #suite.addTest(test_scf.SCFTest("test_diamond_energy")) # 15s 0.0%
-    #suite.addTest(test_scf.SCFTest("test_Be_sto3g_ft_deriv")) # 0s 0.0%
-    #suite.addTest(test_scf.SCFTest("test_diamond_ft_deriv")) # 2s 0.1%
+    suite.addTest(test_scf.SCFTest("test_Be_sto3g_ft_deriv")) # 0s 0.0%
+    suite.addTest(test_scf.SCFTest("test_diamond_ft_deriv")) # 2s 0.1%
     #suite.addTest(test_scf.SCFTest("test_Be_sto3g_ft_mp_deriv")) # 35s 0.1%
     #suite.addTest(test_scf.SCFTest("test_diamond_ft_mp_deriv_k")) # 11s 0.3%
     #suite.addTest(test_scf.SCFTest("test_diamond_ft_mp_deriv")) # 15s 0.3%
@@ -226,7 +226,7 @@ def get_suite():
     #suite.addTest(test_hubbard_field.HubbardFieldTest("test_cc_vs_fci")) # 3m 0.8%
 
     suite.addTest(test_kel_ccsd.KelCCSDTest("test_h2_field"))
-    #suite.addTest(test_kel_ccsd.KelCCSDTest("test_h2_field_save")) # 1s 0.2%
+    suite.addTest(test_kel_ccsd.KelCCSDTest("test_h2_field_save")) # 1s 0.2%
 
     return suite
 

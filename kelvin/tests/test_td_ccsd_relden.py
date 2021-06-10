@@ -44,7 +44,6 @@ class TDCCSDReldenTest(unittest.TestCase):
         diff = numpy.linalg.norm(ccsdT.rorbo - tdccsdT.rorbo)/numpy.sqrt(float(ccsdT.rorbo.size))
         self.assertTrue(diff < 1e-5, "Error in rorbo: {}".format(diff))
         diff = numpy.linalg.norm(ccsdT.rorbv - tdccsdT.rorbv)/numpy.sqrt(float(ccsdT.rorbv.size))
-        print(1,diff, 1e-5)
         self.assertTrue(diff < 1e-5, "Error in rorbv: {}".format(diff))
 
     def test_Be_rk4_active(self):
