@@ -154,7 +154,7 @@ class FTLambdaTest(unittest.TestCase):
         T = 0.03
         mu = 0.0
         sys = SCFSystem(m, T, mu, orbtype='g')
-        ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, damp=0.45, max_iter=240, ngrid=25, econv=1e-10, tconv=1e-9, athresh=1e-20)
+        ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, damp=0.45, max_iter=240, ngrid=20, econv=1e-10, tconv=1e-9, athresh=1e-20)
         Etot, Ecc = ccsdT.run()
         ccsdT._ft_ccsd_lambda()
         out = test_L1(ccsdT, 1e-7)
@@ -168,7 +168,7 @@ class FTLambdaTest(unittest.TestCase):
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
         m.scf()
-        ng = 10
+        ng = 7
         sys = SCFSystem(m, self.T, self.mu, orbtype='u')
         ccsdT = ccsd(sys, T=self.T, mu=self.mu, ngrid=ng, iprint=0, max_iter=44, econv=1e-12)
         Etot, Ecc = ccsdT.run()
@@ -192,7 +192,7 @@ class FTLambdaTest(unittest.TestCase):
                 ccsdT.T1[0][y], ccsdT.T1[1][y], na, na, nb, nb)
             T2[y] = spin_utils.T2_to_spin(
                 ccsdT.T2[0][y], ccsdT.T2[1][y], ccsdT.T2[2][y], na, na, nb, nb)
-        nccsdT = ccsd(sys, T=self.T, mu=self.mu, iprint=0, max_iter=44, econv=1e-12)
+        nccsdT = ccsd(sys, T=self.T, mu=self.mu, ngrid=ng, iprint=0, max_iter=44, econv=1e-12)
         nccsdT.L1 = L1
         nccsdT.L2 = L2
         nccsdT.T1 = T1
@@ -208,7 +208,7 @@ class FTLambdaTest(unittest.TestCase):
         m = scf.RHF(mol)
         m.conv_tol = 1e-13
         m.scf()
-        ng = 10
+        ng = 7
         T = self.T
         mu = self.mu
         sys = SCFSystem(m, T, mu, orbtype='g')

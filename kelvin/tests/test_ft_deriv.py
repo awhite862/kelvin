@@ -58,7 +58,7 @@ class FTDerivTest(unittest.TestCase):
         m.scf()
         T = 2.0
         mu = 0.0
-        ng = 10
+        ng = 8
         sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=35, damp=0.0, ngrid=ng, econv=1e-10, singles=True)
         Ecctot, Ecc = ccsdT.run()
@@ -84,7 +84,7 @@ class FTDerivTest(unittest.TestCase):
         m.scf()
         T = 2.0
         mu = 0.0
-        ng = 10
+        ng = 8
         sys = SCFSystem(m, T, mu, orbtype='u')
         ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=35, damp=0.0, ngrid=ng, econv=1e-10, singles=True)
         Ecctot, Ecc = ccsdT.run()
@@ -164,7 +164,7 @@ class FTDerivTest(unittest.TestCase):
         m.scf()
         T = 2.0
         mu = 0.0
-        ng = 10
+        ng = 8
         sys = SCFSystem(m, T, mu, orbtype='u')
         ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=35, damp=0.0, ngrid=ng, econv=1e-10, quad='ln')
         Ecctot, Ecc = ccsdT.run()
@@ -190,7 +190,7 @@ class FTDerivTest(unittest.TestCase):
         m.scf()
         T = 2.0
         mu = 0.0
-        ng = 10
+        ng = 8
         sys = SCFSystem(m, T, mu, orbtype='u')
         ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=35, damp=0.0, ngrid=ng, econv=1e-10, quad='sin')
         Ecctot, Ecc = ccsdT.run()
@@ -214,7 +214,7 @@ class FTDerivTest(unittest.TestCase):
         cut = 1.2
         damp = 0.2
         mi = 50
-        ng = 10
+        ng = 8
         ueg = UEGSystem(T, L, cut, mu=mu, norb=norb)
         ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=ng)
         Ecctot, Ecc = ccsdT.run()
@@ -264,7 +264,7 @@ class FTDerivTest(unittest.TestCase):
         cut = 1.2
         damp = 0.2
         mi = 50
-        ng = 10
+        ng = 8
         ueg = UEGSCFSystem(T, L, cut, mu=mu, norb=norb)
         ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=ng)
         Ecctot, Ecc = ccsdT.run()
@@ -314,7 +314,7 @@ class FTDerivTest(unittest.TestCase):
         cut = 1.2
         damp = 0.2
         mi = 50
-        ng = 10
+        ng = 8
         ueg = UEGSystem(T, L, cut, mu=mu, norb=norb, orbtype='g')
         ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=ng)
         Ecctot, Ecc = ccsdT.run()
@@ -364,7 +364,7 @@ class FTDerivTest(unittest.TestCase):
         cut = 1.2
         damp = 0.2
         mi = 50
-        ng = 10
+        ng = 8
         ueg = PUEGSystem(T, L, cut, mu=mu, norb=norb)
         ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=ng)
         Ecctot, Ecc = ccsdT.run()

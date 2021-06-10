@@ -25,7 +25,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
     def setUp(self):
         self.n = 4
         self.thresh = 1e-10
-        self.ng = 10
+        self.ng = 9
         self.beta = 2.0
 
     def test_dia(self):

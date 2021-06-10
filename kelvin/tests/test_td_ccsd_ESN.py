@@ -18,7 +18,7 @@ class TDCCSDESNTest(unittest.TestCase):
         m.scf()
         T = 2.0
         mu = 0.0
-        ng = 30
+        ng = 25
         sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=35, damp=0.0, ngrid=ng, econv=1e-10, singles=True)
         Ecctot, ecc = ccsdT.run()
@@ -82,7 +82,7 @@ class TDCCSDESNTest(unittest.TestCase):
         m.scf()
         T = 0.02
         mu = 0.0
-        ng = 200
+        ng = 180
         athresh = 1e-20
         sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=100, damp=0.1, ngrid=ng, econv=1e-10, athresh=athresh, singles=True)
@@ -213,12 +213,12 @@ class TDCCSDESNTest(unittest.TestCase):
         self.assertTrue(dN < 1e-5, eN)
 
     def test_UEG_r_vs_u(self):
-        T = 0.1
+        T = 0.2
         mu = 0.1
         L = 2*numpy.pi/numpy.sqrt(1.0)
         norb = 7
         cut = 1.2
-        ng = 40
+        ng = 15
         ueg = UEGSystem(T, L, cut, mu=mu, norb=norb, orbtype='u')
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(ueg, prop, T=T, mu=mu, ngrid=ng)
@@ -256,7 +256,7 @@ class TDCCSDESNTest(unittest.TestCase):
         m.scf()
         T = 0.02
         mu = 0.0
-        ng = 280
+        ng = 200
         athresh = 1e-20
         sys = SCFSystem(m, T, mu, orbtype='u')
         prop = {"tprop": "rk4", "lprop": "rk4"}

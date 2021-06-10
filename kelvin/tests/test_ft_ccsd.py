@@ -36,7 +36,7 @@ class FTCCSDTest(unittest.TestCase):
         T = 1.0
         mu = 0.0
         sys = SCFSystem(m, T, mu)
-        ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=24, econv=1e-11, ngrid=220)
+        ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=24, econv=1e-11, ngrid=200)
         Ecc = ccsdT.run()
 
         fciT = FCI(sys, T=T, mu=mu)

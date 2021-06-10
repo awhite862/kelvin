@@ -24,7 +24,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         mu = 0.0
         sys = SCFSystem(m, T, mu, orbtype='g')
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=120)
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=85)
         Eref, Eccref = tdccsdT.run()
         Eout, Eccout = tdccsdT._ccsd_lambda()
         diff = abs(Eccref - Eccout)
@@ -44,12 +44,12 @@ class TDCCSDLambdaTest(unittest.TestCase):
         mu = 0.0
         sys = SCFSystem(m, T, mu, orbtype='g')
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160, athresh=1e-20, iprint=0, saveT=True)
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=100, athresh=1e-20, iprint=0, saveT=True)
         Eref, Eccref = tdccsdT.run()
         Eout, Eccout = tdccsdT._ccsd_lambda()
         diff = abs(Eccref - Eccout)
         error = "Expected: {}  Actual: {}".format(Eccref, Eccout)
-        self.assertTrue(diff < 1e-6, error)
+        self.assertTrue(diff < 1e-10, error)
 
     def test_Be_rk1(self):
         mol = gto.M(
@@ -65,7 +65,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         sys = SCFSystem(m, T, mu, orbtype='g')
 
         # compute \bar{Lambda} at \tau = 0
-        ccsdT = ccsd(sys, T=T, mu=mu, ngrid=80, iprint=0, quad="mid")
+        ccsdT = ccsd(sys, T=T, mu=mu, ngrid=25, iprint=0, quad="mid")
         Eref, Eccref = ccsdT.run()
         ccsdT._ft_ccsd_lambda()
         ng = ccsdT.ngrid
@@ -83,7 +83,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
 
         # compute \bar{Lambda} from propagation using rk1
         prop = {"tprop": "rk1", "lprop": "rk1"}
-        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80)
         Eout, Eccout = tdccsdT.run()
         Etmp, Ecctmp = tdccsdT._ccsd_lambda()
         d1 = numpy.linalg.norm(tdccsdT.L1 - L1new[0])/numpy.sqrt(L1new[0].size)
@@ -107,7 +107,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         sys = SCFSystem(m, T, mu, orbtype='g')
 
         # compute \bar{Lambda} at \tau = 0
-        ccsdT = ccsd(sys, T=T, mu=mu, ngrid=320, iprint=0, quad="mid")
+        ccsdT = ccsd(sys, T=T, mu=mu, ngrid=280, iprint=0, quad="mid")
         Eref, Eccref = ccsdT.run()
         ccsdT._ft_ccsd_lambda()
         ng = ccsdT.ngrid
@@ -149,7 +149,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         sys = SCFSystem(m, T, mu, orbtype='g')
 
         # compute \bar{Lambda} at \tau = 0
-        ccsdT = ccsd(sys, T=T, mu=mu, ngrid=320, iprint=0, quad="mid")
+        ccsdT = ccsd(sys, T=T, mu=mu, ngrid=300, iprint=0, quad="mid")
         Eref, Eccref = ccsdT.run()
         ccsdT._ft_ccsd_lambda()
         ng = ccsdT.ngrid
@@ -175,7 +175,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         error1 = "Difference in L1: {}".format(d1)
         error2 = "Difference in L2: {}".format(d2)
         self.assertTrue(d1 < 5e-5, error1)
-        self.assertTrue(d2 < 2e-4, error2)
+        self.assertTrue(d2 < 5e-5, error2)
 
     def test_Be_rk124(self):
         mol = gto.M(
@@ -188,29 +188,29 @@ class TDCCSDLambdaTest(unittest.TestCase):
         m.scf()
         T = 0.5
         mu = 0.0
-        sys = SCFSystem(m, T, mu, orbtype='g')
+        sys = SCFSystem(m, T, mu, orbtype='r')
 
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        tdccsdT4 = TDCCSD(sys, prop, T=T, mu=mu, ngrid=320)
+        tdccsdT4 = TDCCSD(sys, prop, T=T, mu=mu, ngrid=320, saveT=True)
         Eout, Eccout = tdccsdT4.run()
         Etmp, Ecctmp = tdccsdT4._ccsd_lambda()
         prop = {"tprop": "rk2", "lprop": "rk2"}
-        tdccsdT2 = TDCCSD(sys, prop, T=T, mu=mu, ngrid=2400)
+        tdccsdT2 = TDCCSD(sys, prop, T=T, mu=mu, ngrid=2400, saveT=True)
         Eout, Eccout = tdccsdT2.run()
         Etmp, Ecctmp = tdccsdT2._ccsd_lambda()
         prop = {"tprop": "rk1", "lprop": "rk1"}
-        tdccsdT1 = TDCCSD(sys, prop, T=T, mu=mu, ngrid=2400)
+        tdccsdT1 = TDCCSD(sys, prop, T=T, mu=mu, ngrid=2400, saveT=True)
         Eout, Eccout = tdccsdT1.run()
         Etmp, Ecctmp = tdccsdT1._ccsd_lambda()
-        d1_14 = numpy.linalg.norm(tdccsdT4.L1 - tdccsdT1.L1)/numpy.sqrt(tdccsdT1.L1.size)
-        d2_14 = numpy.linalg.norm(tdccsdT4.L2 - tdccsdT1.L2)/numpy.sqrt(tdccsdT1.L2.size)
+        d1_14 = numpy.linalg.norm(tdccsdT4.L1 - tdccsdT1.L1)/numpy.linalg.norm(tdccsdT4.L1)
+        d2_14 = numpy.linalg.norm(tdccsdT4.L2 - tdccsdT1.L2)/numpy.linalg.norm(tdccsdT4.L2)
         error1 = "Difference in 1-4 L1: {}".format(d1_14)
         error2 = "Difference in 1-4 L2: {}".format(d2_14)
         self.assertTrue(d1_14 < 1e-1, error1)
         self.assertTrue(d2_14 < 1e-1, error2)
 
-        d1_24 = numpy.linalg.norm(tdccsdT4.L1 - tdccsdT2.L1)/numpy.sqrt(tdccsdT2.L1.size)
-        d2_24 = numpy.linalg.norm(tdccsdT4.L2 - tdccsdT2.L2)/numpy.sqrt(tdccsdT2.L2.size)
+        d1_24 = numpy.linalg.norm(tdccsdT4.L1 - tdccsdT2.L1)/numpy.linalg.norm(tdccsdT4.L1)
+        d2_24 = numpy.linalg.norm(tdccsdT4.L2 - tdccsdT2.L2)/numpy.linalg.norm(tdccsdT4.L2)
         error1 = "Difference in 2-4 L1: {}".format(d1_24)
         error2 = "Difference in 2-4 L2: {}".format(d2_24)
         self.assertTrue(d1_24 < 1e-4, error1)
@@ -260,7 +260,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         ea,eb = sys.u_energies_tot()
         na = ea.shape[0]
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80, saveT=True)
         Etmp, Ecctmp = tdccsdT.run()
         Eref,Eccref = tdccsdT._ccsd_lambda()
         l1aref = tdccsdT.L1[:na,:na]
@@ -271,7 +271,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         # compute normal-order 1-rdm from propagation
         sys = SCFSystem(m, T, mu, orbtype='u')
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80, saveT=True)
         Etmp, Ecctmp = tdccsdT.run()
         Eout, Eccout = tdccsdT._uccsd_lambda()
         d1a = numpy.linalg.norm(l1aref - tdccsdT.L1[0])/numpy.linalg.norm(l1aref)
@@ -331,7 +331,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         sys = SCFSystem(m, T, mu, orbtype='g')
 
         # compute \bar{Lambda} at \tau = 0
-        ccsdT = ccsd(sys, T=T, mu=mu, ngrid=320, iprint=0, quad="mid", singles=False)
+        ccsdT = ccsd(sys, T=T, mu=mu, ngrid=140, iprint=0, quad="mid", singles=False)
         Eref, Eccref = ccsdT.run()
         ccsdT._ft_ccsd_lambda()
         ng = ccsdT.ngrid
@@ -346,7 +346,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
 
         # compute \bar{Lambda} from propagation using rk1
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80, singles=False)
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=40, singles=False)
         Eout, Eccout = tdccsdT.run()
         Etmp,Ecctmp = tdccsdT._ccsd_lambda()
         d2 = numpy.linalg.norm(tdccsdT.L2 - L2new[0])/numpy.sqrt(L2new[0].size)

@@ -21,13 +21,13 @@ class TDCCSD1RDMTest(unittest.TestCase):
         sys = SCFSystem(m, T, mu, orbtype='g')
 
         # compute normal-ordered 1-rdm
-        ccsdT = ccsd(sys, T=T, mu=mu, ngrid=40, iprint=0)
+        ccsdT = ccsd(sys, T=T, mu=mu, ngrid=25, iprint=0)
         ccsdT.run()
         ccsdT._g_ft_1rdm()
 
         # compute normal-order 1-rdm from propagation
         prop = {"tprop": "rk1", "lprop": "rk1"}
-        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=150)
         tdccsdT.run()
         tdccsdT._ccsd_lambda()
         eia = numpy.linalg.norm(ccsdT.dia - tdccsdT.dia)
@@ -57,13 +57,13 @@ class TDCCSD1RDMTest(unittest.TestCase):
         sys = SCFSystem(m, T, mu, orbtype='g')
 
         # compute normal-ordered 1-rdm
-        ccsdT = ccsd(sys, T=T, mu=mu, ngrid=40, iprint=0)
+        ccsdT = ccsd(sys, T=T, mu=mu, ngrid=30, iprint=0)
         ccsdT.run()
         ccsdT._g_ft_1rdm()
 
         # compute normal-order 1-rdm from propagation
         prop = {"tprop": "rk2", "lprop": "rk2"}
-        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=150)
         tdccsdT.run()
         tdccsdT._ccsd_lambda()
         eia = numpy.linalg.norm(ccsdT.dia - tdccsdT.dia)
@@ -93,13 +93,13 @@ class TDCCSD1RDMTest(unittest.TestCase):
         sys = SCFSystem(m, T, mu, orbtype='g')
 
         # compute normal-ordered 1-rdm
-        ccsdT = ccsd(sys, T=T, mu=mu, ngrid=80, iprint=0)
+        ccsdT = ccsd(sys, T=T, mu=mu, ngrid=70, iprint=0)
         ccsdT.run()
         ccsdT._g_ft_1rdm()
 
         # compute normal-order 1-rdm from propagation
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=150)
         tdccsdT.run()
         tdccsdT._ccsd_lambda()
         eia = numpy.linalg.norm(ccsdT.dia - tdccsdT.dia)
@@ -135,7 +135,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
 
         # compute normal-order 1-rdm from propagation
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=640, athresh=1e-20, saveT=True)
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=400, athresh=1e-20, saveT=True)
         tdccsdT.run()
         tdccsdT._ccsd_lambda()
         eia = numpy.linalg.norm(ccsdT.dia - tdccsdT.dia)
@@ -166,7 +166,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
         # compute normal-order 1-rdm from propagation
         sys = SCFSystem(m, T, mu, orbtype='g')
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=20)
         tdccsdT.run()
         tdccsdT._ccsd_lambda()
         dia = tdccsdT.dia
@@ -178,7 +178,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
         ea, eb = sys.u_energies_tot()
         na = ea.shape[0]
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=20)
         Etmp, Ecctmp = tdccsdT.run()
         Eout, Eccout = tdccsdT._uccsd_lambda()
         eia = numpy.linalg.norm(tdccsdT.dia[0] - dia[:na,:na])
@@ -221,7 +221,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
         # compute normal-order 1-rdm from propagation
         sys = SCFSystem(m, T, mu, orbtype='g')
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=320, athresh=1e-20, saveT=True)
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=200, athresh=1e-20, saveT=True)
         tdccsdT.run()
         tdccsdT._ccsd_lambda()
         dia = tdccsdT.dia
@@ -235,7 +235,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
         noa = na
         nva = na - 1
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=320, athresh=1e-20, saveT=True)
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=200, athresh=1e-20, saveT=True)
         Etmp, Ecctmp = tdccsdT.run()
         Eout, Eccout = tdccsdT._uccsd_lambda()
         eia = numpy.linalg.norm(tdccsdT.dia[0] - dia[:noa,:nva])
@@ -278,7 +278,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
         # compute normal-order 1-rdm from propagation
         sys = SCFSystem(m, T, mu, orbtype='u')
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=20)
         tdccsdT.run()
         tdccsdT._uccsd_lambda()
         dia = tdccsdT.dia
@@ -289,7 +289,7 @@ class TDCCSD1RDMTest(unittest.TestCase):
         sys = SCFSystem(m, T, mu, orbtype='r')
         ea, eb = sys.u_energies_tot()
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=160)
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=20)
         Etmp, Ecctmp = tdccsdT.run()
         Eout, Eccout = tdccsdT._rccsd_lambda()
         eia = numpy.linalg.norm(dia[0] - tdccsdT.dia)

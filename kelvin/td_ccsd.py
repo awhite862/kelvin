@@ -970,7 +970,7 @@ class TDCCSD(object):
             t1,t2 = var
             k1s = -D1*t1 - F.vo.copy()
             k1d = -D2*t2 - I.vvoo.copy()
-            cc_equations._Stanton(k1s,k1d,F,I,t1,t2,fac=-1.0)
+            cc_equations._Stanton(k1s, k1d, F, I, t1, t2, fac=-1.0)
             if not singles:
                 k1s = numpy.zeros(k1s.shape, k1s.dtype)
             return [(-1.0)*k1s,(-1.0)*k1d]
@@ -1053,9 +1053,9 @@ class TDCCSD(object):
 
             # increment the RDMs
             pia += g[ng - i - 1]*l1
-            pji += g[ng - i - 1]*cc_equations.ccsd_1rdm_ji_opt(t1e,t2e,l1,l2)
-            pba += g[ng - i - 1]*cc_equations.ccsd_1rdm_ba_opt(t1e,t2e,l1,l2)
-            pai += g[ng - i - 1]*cc_equations.ccsd_1rdm_ai_opt(t1e,t2e,l1,l2)
+            pji += g[ng - i - 1]*cc_equations.ccsd_1rdm_ji_opt(t1e, t2e, l1, l2)
+            pba += g[ng - i - 1]*cc_equations.ccsd_1rdm_ba_opt(t1e, t2e, l1, l2)
+            pai += g[ng - i - 1]*cc_equations.ccsd_1rdm_ai_opt(t1e, t2e, l1, l2)
             if rdm2:
                 Pcdab += g[ng - 1 - i]*cc_equations.ccsd_2rdm_cdab_opt(t1e, t2e, l1, l2)
                 Pciab += g[ng - 1 - i]*cc_equations.ccsd_2rdm_ciab_opt(t1e, t2e, l1, l2)
@@ -1089,10 +1089,10 @@ class TDCCSD(object):
         self.ndji = numpy.einsum('ji,j,i->ji', self.dji, sfo, sfo)
         self.ndai = numpy.einsum('ai,a,i->ai', self.dai, sfv, sfo)
         self.n1rdm = numpy.zeros((n,n), dtype=pia.dtype)
-        self.n1rdm[numpy.ix_(self.iocc,self.ivir)] += self.ndia/beta
-        self.n1rdm[numpy.ix_(self.ivir,self.ivir)] += self.ndba/beta
-        self.n1rdm[numpy.ix_(self.iocc,self.iocc)] += self.ndji/beta
-        self.n1rdm[numpy.ix_(self.ivir,self.iocc)] += self.ndai/beta
+        self.n1rdm[numpy.ix_(self.iocc, self.ivir)] += self.ndia/beta
+        self.n1rdm[numpy.ix_(self.ivir, self.ivir)] += self.ndba/beta
+        self.n1rdm[numpy.ix_(self.iocc, self.iocc)] += self.ndji/beta
+        self.n1rdm[numpy.ix_(self.ivir, self.iocc)] += self.ndai/beta
 
         if rdm2:
             self.P2 = (Pcdab, Pciab, Pbcai, Pijab, Pbjai, Pabij, Pjkai, Pkaij, Pklij)

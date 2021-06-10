@@ -21,13 +21,13 @@ class TDCCSD2RDMTest(unittest.TestCase):
         sys = SCFSystem(m, T, mu, orbtype='g')
 
         # compute normal-ordered 1-rdm
-        ccsdT = ccsd(sys, T=T, mu=mu, ngrid=220, iprint=0)
+        ccsdT = ccsd(sys, T=T, mu=mu, ngrid=180, iprint=0)
         Eref, Eccref = ccsdT.run()
         ccsdT._g_ft_2rdm()
 
         # compute normal-order 1-rdm from propagation
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=320)
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=280)
         Eout, Eccout = tdccsdT.run()
         Etmp, Ecctmp = tdccsdT._ccsd_lambda(rdm2=True)
         names = ["cdab", "ciab", "bcai", "ijab", "bjai", "abij", "jkai", "kaij", "klij"]
@@ -50,7 +50,7 @@ class TDCCSD2RDMTest(unittest.TestCase):
         sys = SCFSystem(m, T, mu, orbtype='g')
 
         # compute normal-ordered 1-rdm
-        ccsdT = ccsd(sys, T=T, mu=mu, ngrid=220, iprint=0, athresh=1e-20)
+        ccsdT = ccsd(sys, T=T, mu=mu, ngrid=200, iprint=0, athresh=1e-20)
         Eref, Eccref = ccsdT.run()
         ccsdT._g_ft_2rdm()
 
@@ -79,12 +79,12 @@ class TDCCSD2RDMTest(unittest.TestCase):
         # compute normal-order 1-rdm from propagation (g)
         sys = SCFSystem(m, T, mu, orbtype='g')
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        ccg = TDCCSD(sys, prop, T=T, mu=mu, ngrid=320)
+        ccg = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80)
         Eout, Eccout = ccg.run()
         Etmp, Ecctmp = ccg._ccsd_lambda(rdm2=True)
         sys = SCFSystem(m, T, mu, orbtype='u')
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        ccu = TDCCSD(sys, prop, T=T, mu=mu, ngrid=320)
+        ccu = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80)
         Eout, Eccout = ccu.run()
         Etmp, Ecctmp = ccu._uccsd_lambda(rdm2=True)
         na = 5
@@ -205,12 +205,12 @@ class TDCCSD2RDMTest(unittest.TestCase):
         # compute normal-order 1/n-rdm from propagation (u)
         sys = SCFSystem(m, T, mu, orbtype='u')
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        ccu = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80)
+        ccu = TDCCSD(sys, prop, T=T, mu=mu, ngrid=20)
         Eout, Eccout = ccu.run()
         Etmp, Ecctmp = ccu._uccsd_lambda(rdm2=True)
         sys = SCFSystem(m, T, mu, orbtype='r')
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        ccr = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80)
+        ccr = TDCCSD(sys, prop, T=T, mu=mu, ngrid=20)
         Eout, Eccout = ccr.run()
         Etmp, Ecctmp = ccr._rccsd_lambda(rdm2=True)
         na = 5

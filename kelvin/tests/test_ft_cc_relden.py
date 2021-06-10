@@ -46,8 +46,8 @@ class FTCCReldenTest(unittest.TestCase):
         T = 2.0
         mu = 0.0
         thresh = 5e-7
-        ngrid = 10
-        damp = 0.1
+        ngrid = 6
+        damp = 0.0
         mi = 100
         mol = gto.M(
             verbose=0,
@@ -103,7 +103,7 @@ class FTCCReldenTest(unittest.TestCase):
         m.conv_tol = 1e-12
         m.scf()
         sys = SCFSystem(m, T, mu, orbtype='g')
-        ccsdT = ccsd(sys, T=T, mu=mu, damp=0.1, ngrid=80, athresh=1e-30, iprint=0)
+        ccsdT = ccsd(sys, T=T, mu=mu, damp=0.1, ngrid=60, athresh=1e-30, iprint=0)
         ccsdT.run()
         ccsdT.compute_ESN()
         Nref = ccsdT.N
@@ -117,7 +117,7 @@ class FTCCReldenTest(unittest.TestCase):
         T = 0.02
         mu = 0.0
         thresh = 5e-7
-        ngrid = 80
+        ngrid = 60
         mi = 100
         mol = gto.M(
             verbose=0,
@@ -172,10 +172,10 @@ class FTCCReldenTest(unittest.TestCase):
         L = 2*numpy.pi/numpy.sqrt(1.0)
         norb = 19
         cut = 1.2
-        damp = 0.2
+        damp = 0.1
         mi = 50
         ueg = PUEGSystem(T, L, cut, mu=mu, norb=norb)
-        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=10)
+        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=8)
         ccsdT.run()
         ccsdT.compute_ESN()
         Nref = ccsdT.N
@@ -191,10 +191,10 @@ class FTCCReldenTest(unittest.TestCase):
         L = 2*numpy.pi/numpy.sqrt(1.0)
         norb = 7
         cut = 1.2
-        damp = 0.2
+        damp = 0.1
         mi = 50
         ueg = UEGSystem(T, L, cut, mu=mu, norb=norb, orbtype='g')
-        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=10)
+        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=8)
         ccsdT.run()
         ccsdT.compute_ESN()
         Nref = ccsdT.N
@@ -210,10 +210,10 @@ class FTCCReldenTest(unittest.TestCase):
         L = 2*numpy.pi/numpy.sqrt(1.0)
         norb = 7
         cut = 1.2
-        damp = 0.2
+        damp = 0.1
         mi = 50
         ueg = UEGSCFSystem(T, L, cut, mu=mu, norb=norb, orbtype='g')
-        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=10)
+        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=8)
         ccsdT.run()
         ccsdT.compute_ESN()
         Nref = ccsdT.N
@@ -229,17 +229,17 @@ class FTCCReldenTest(unittest.TestCase):
         L = 2*numpy.pi/numpy.sqrt(1.0)
         norb = 7
         cut = 1.2
-        damp = 0.2
+        damp = 0.1
         mi = 50
         econv = 1e-12
         thresh = 1e-12
         ueg = UEGSystem(T, L, cut, mu=mu, norb=norb, orbtype='g')
-        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, econv=econv, damp=damp, ngrid=10)
+        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, econv=econv, damp=damp, ngrid=8)
         ccsdT.run()
         ccsdT._grel_ft_1rdm()
 
         ueg = UEGSystem(T, L, cut, mu=mu, norb=norb, orbtype='u')
-        uccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, econv=econv, damp=damp, ngrid=10)
+        uccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, econv=econv, damp=damp, ngrid=8)
         uccsdT.run()
         uccsdT._urel_ft_1rdm()
 
@@ -267,17 +267,17 @@ class FTCCReldenTest(unittest.TestCase):
         L = 2*numpy.pi/numpy.sqrt(1.0)
         norb = 7
         cut = 1.2
-        damp = 0.2
+        damp = 0.1
         mi = 50
         econv = 1e-12
         thresh = 1e-12
         ueg = UEGSCFSystem(T, L, cut, mu=mu, norb=norb, orbtype='g')
-        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, econv=econv, damp=damp, ngrid=10)
+        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, econv=econv, damp=damp, ngrid=8)
         ccsdT.run()
         ccsdT._grel_ft_1rdm()
 
         ueg = UEGSCFSystem(T, L, cut, mu=mu, norb=norb, orbtype='u')
-        uccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, econv=econv, damp=damp, ngrid=10)
+        uccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, econv=econv, damp=damp, ngrid=8)
         uccsdT.run()
         uccsdT._urel_ft_1rdm()
 
@@ -313,12 +313,12 @@ class FTCCReldenTest(unittest.TestCase):
         m.conv_tol = 1e-12
         m.scf()
         sys = SCFSystem(m, T, mu, orbtype='g')
-        ccsdT = ccsd(sys, T=T, mu=mu, damp=0.1, ngrid=80, athresh=1e-30, iprint=0, econv=ethresh, max_iter=mi)
+        ccsdT = ccsd(sys, T=T, mu=mu, damp=0.1, ngrid=60, athresh=1e-30, iprint=0, econv=ethresh, max_iter=mi)
         ccsdT.run()
         ccsdT._grel_ft_1rdm()
 
         sys = SCFSystem(m, T, mu, orbtype='u')
-        uccsdT = ccsd(sys, T=T, mu=mu, damp=0.1, ngrid=80, athresh=1e-30, iprint=0, econv=ethresh, max_iter=mi)
+        uccsdT = ccsd(sys, T=T, mu=mu, damp=0.1, ngrid=60, athresh=1e-30, iprint=0, econv=ethresh, max_iter=mi)
         uccsdT.run()
         uccsdT._urel_ft_1rdm()
 
@@ -358,12 +358,12 @@ class FTCCReldenTest(unittest.TestCase):
         m.conv_tol = 1e-12
         m.scf()
         sys = SCFSystem(m, T, mu, orbtype='g')
-        ccsdT = ccsd(sys, T=T, mu=mu, damp=0.1, ngrid=40, iprint=0, econv=ethresh, max_iter=mi)
+        ccsdT = ccsd(sys, T=T, mu=mu, damp=0.05, ngrid=15, iprint=0, econv=ethresh, max_iter=mi)
         ccsdT.run()
         ccsdT._grel_ft_1rdm()
 
         sys = SCFSystem(m, T, mu, orbtype='u')
-        uccsdT = ccsd(sys, T=T, mu=mu, damp=0.1, ngrid=40, iprint=0, econv=ethresh, max_iter=mi)
+        uccsdT = ccsd(sys, T=T, mu=mu, damp=0.05, ngrid=15, iprint=0, econv=ethresh, max_iter=mi)
         uccsdT.run()
         uccsdT._urel_ft_1rdm()
 
@@ -392,7 +392,7 @@ class FTCCReldenTest(unittest.TestCase):
         L = 2
         U = 2.0
         mu = 0.0
-        damp = 0.2
+        damp = 0.1
         mi = 50
         Oa = numpy.zeros((2))
         Ob = numpy.zeros((2))
@@ -402,7 +402,7 @@ class FTCCReldenTest(unittest.TestCase):
         Pb = numpy.einsum('i,j->ij', Ob, Ob)
         hub = Hubbard1D(L, 1.0, U, boundary='o')
         sys = HubbardSystem(T, hub, Pa, Pb, mu=mu, orbtype='u')
-        ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=10)
+        ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=8)
         ccsdT.run()
         ccsdT.compute_ESN()
         Nref = ccsdT.N
@@ -415,11 +415,11 @@ class FTCCReldenTest(unittest.TestCase):
 
     @unittest.skipUnless(has_lattice, "Lattice module cannot be found")
     def test_Hubbard_gu(self):
-        T = 1.0
+        T = 2.0
         L = 2
         U = 2.0
         mu = 0.0
-        damp = 0.2
+        damp = 0.1
         mi = 50
         ethresh = 1e-12
         thresh = 1e-11
@@ -431,12 +431,12 @@ class FTCCReldenTest(unittest.TestCase):
         Pb = numpy.einsum('i,j->ij', Ob, Ob)
         hub = Hubbard1D(L, 1.0, U, boundary='o')
         sys = HubbardSystem(T, hub, Pa, Pb, mu=mu, orbtype='g')
-        ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, damp=damp, ngrid=10, econv=ethresh, max_iter=mi)
+        ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, damp=damp, ngrid=7, econv=ethresh, max_iter=mi)
         ccsdT.run()
         ccsdT._grel_ft_1rdm()
 
         sys = HubbardSystem(T, hub, Pa, Pb, mu=mu, orbtype='u')
-        uccsdT = ccsd(sys, T=T, mu=mu, damp=0.1, ngrid=10, iprint=0, econv=ethresh, max_iter=mi)
+        uccsdT = ccsd(sys, T=T, mu=mu, damp=damp, ngrid=7, iprint=0, econv=ethresh, max_iter=mi)
         uccsdT.run()
         uccsdT._urel_ft_1rdm()
 

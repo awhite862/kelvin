@@ -141,10 +141,11 @@ class HubbardTest(unittest.TestCase):
     def test_ft_ccsd(self):
         L = 2
         U = 1.0
-        T = 1.0
+        T = 2.0
         mu = 0.0
         hub = Hubbard1D(L, 1.0, U, boundary='o')
         Eref = compute_fci_kelvinT(hub, T, mu)
+        ng = 8
 
         Oa = numpy.zeros((2))
         Ob = numpy.zeros((2))
@@ -153,7 +154,7 @@ class HubbardTest(unittest.TestCase):
         Pa = numpy.einsum('i,j->ij', Oa, Oa)
         Pb = numpy.einsum('i,j->ij', Ob, Ob)
         sys = HubbardSystem(T, hub, Pa, Pb, mu=mu)
-        cc = ccsd(sys, iprint=0, max_iter=80, econv=1e-11, T=T, mu=mu)
+        cc = ccsd(sys, iprint=0, max_iter=80, econv=1e-11, T=T, mu=mu, ngrid=ng)
         Eout, Ecc = cc.run()
         diff = abs(Eout - Eref)
         msg = "Expected: {} Actual: {}".format(Eref, Eout)
@@ -182,7 +183,7 @@ class HubbardTest(unittest.TestCase):
     def test_ft_ccsd_u_g(self):
         L = 2
         U = 1.0
-        T = 1.0
+        T = 2.0
         mu = 0.0
         hub = Hubbard1D(L, 1.0, U, boundary='o')
 
@@ -190,13 +191,14 @@ class HubbardTest(unittest.TestCase):
         Ob = numpy.zeros((2))
         Oa[0] = 1.0
         Ob[1] = 1.0
+        ng = 8
         Pa = numpy.einsum('i,j->ij', Oa, Oa)
         Pb = numpy.einsum('i,j->ij', Ob, Ob)
         sys = HubbardSystem(T, hub, Pa, Pb, mu=mu, orbtype='g')
-        cc = ccsd(sys, iprint=0, max_iter=80, econv=1e-11, T=T, mu=mu)
+        cc = ccsd(sys, iprint=0, max_iter=80, econv=1e-11, T=T, mu=mu, ngrid=ng)
         Eoutg, Eccg = cc.run()
         sys = HubbardSystem(T, hub, Pa, Pb, mu=mu, orbtype='u')
-        cc = ccsd(sys, iprint=0, max_iter=80, econv=1e-11, T=T, mu=mu)
+        cc = ccsd(sys, iprint=0, max_iter=80, econv=1e-11, T=T, mu=mu, ngrid=ng)
         Eoutu, Eccu = cc.run()
         diff = abs(Eoutg - Eoutu)
         msg = "General: {} Unrestricted: {}".format(Eoutg, Eoutu)

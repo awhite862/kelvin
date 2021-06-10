@@ -71,7 +71,7 @@ class HubbardFieldTest(unittest.TestCase):
         omega = 4.4
         tmax = 0.5
         ng = 400
-        ngi = 10
+        ngi = 8
         deltat = tmax / ng
 
         T = 1.0
@@ -104,7 +104,7 @@ class HubbardFieldTest(unittest.TestCase):
         phi = 0.0
         tmax = 0.5
         ng = 400
-        ngi = 20
+        ngi = 10
         deltat = tmax / ng
 
         T = 1.5
@@ -210,8 +210,8 @@ class HubbardFieldTest(unittest.TestCase):
         omega = 4.4
         phi = 0.0
         tmax = 0.5
-        ng = 400
-        ngi = 80
+        ng = 380
+        ngi = 40
         deltat = tmax / ng
 
         T = 1.5
