@@ -1,6 +1,7 @@
 import unittest
 import numpy
 from pyscf import gto, scf
+from cqcpy import utils
 from cqcpy import cc_energy
 from cqcpy import cc_equations
 from cqcpy import spin_utils
@@ -10,11 +11,10 @@ from kelvin.scf_system import SCFSystem
 
 def test_L1(cc, thresh):
     eo,ev = cc.sys.g_energies()
-    Dov = 1.0/(eo[:,None] - ev[None,:])
-    Doovv = 1.0/(eo[:,None,None,None] + eo[None,:,None,None]
-                 - ev[None,None,:,None] - ev[None,None,None,:])
-    Nov = 1.0/Dov
-    Noovv = 1.0/Doovv
+    Nov = utils.D1(eo, ev)
+    Noovv = utils.D2(eo, ev)
+    Dov = 1/Nov
+    Doovv = 1/Noovv
     no = eo.shape[0]
     nv = ev.shape[0]
 
@@ -71,11 +71,10 @@ def test_L1(cc, thresh):
 
 def test_L2(cc, thresh):
     eo,ev = cc.sys.g_energies()
-    Dov = 1.0/(eo[:,None] - ev[None,:])
-    Doovv = 1.0/(eo[:,None,None,None] + eo[None,:,None,None]
-                 - ev[None,None,:,None] - ev[None,None,None,:])
-    Nov = 1.0/Dov
-    Noovv = 1.0/Doovv
+    Nov = utils.D1(eo, ev)
+    Noovv = utils.D2(eo, ev)
+    Dov = 1/Nov
+    Doovv = 1/Noovv
     no = eo.shape[0]
     nv = ev.shape[0]
 

@@ -1,6 +1,7 @@
 import unittest
 import numpy
 from pyscf import gto, scf
+from cqcpy import utils
 from kelvin.td_ccsd import TDCCSD
 from kelvin.ccsd import ccsd
 from kelvin.scf_system import SCFSystem
@@ -75,9 +76,8 @@ class TDCCSDLambdaTest(unittest.TestCase):
         g = ccsdT.g
         G = ccsdT.G
         en = sys.g_energies_tot()
-        D1 = en[:,None] - en[None,:]
-        D2 = en[:,None,None,None] + en[None,:,None,None] \
-            - en[None,None,:,None] - en[None,None,None,:]
+        D1 = utils.D1(en, en)
+        D2 = utils.D2(en, en)
         L1new = quadrature.int_L1(ng, L1, ti, D1, g, G)
         L2new = quadrature.int_L2(ng, L2, ti, D2, g, G)
 
@@ -117,9 +117,8 @@ class TDCCSDLambdaTest(unittest.TestCase):
         g = ccsdT.g
         G = ccsdT.G
         en = sys.g_energies_tot()
-        D1 = en[:,None] - en[None,:]
-        D2 = en[:,None,None,None] + en[None,:,None,None] \
-            - en[None,None,:,None] - en[None,None,None,:]
+        D1 = utils.D1(en, en)
+        D2 = utils.D2(en, en)
         L1new = quadrature.int_L1(ng, L1, ti, D1, g, G)
         L2new = quadrature.int_L2(ng, L2, ti, D2, g, G)
 
@@ -159,9 +158,8 @@ class TDCCSDLambdaTest(unittest.TestCase):
         g = ccsdT.g
         G = ccsdT.G
         en = sys.g_energies_tot()
-        D1 = en[:,None] - en[None,:]
-        D2 = en[:,None,None,None] + en[None,:,None,None] \
-            - en[None,None,:,None] - en[None,None,None,:]
+        D1 = utils.D1(en, en)
+        D2 = utils.D2(en, en)
         L1new = quadrature.int_L1(ng, L1, ti, D1, g, G)
         L2new = quadrature.int_L2(ng, L2, ti, D2, g, G)
 
@@ -340,8 +338,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         g = ccsdT.g
         G = ccsdT.G
         en = sys.g_energies_tot()
-        D2 = en[:,None,None,None] + en[None,:,None,None] \
-            - en[None,None,:,None] - en[None,None,None,:]
+        D2 = utils.D2(en, en)
         L2new = quadrature.int_L2(ng, L2, ti, D2, g, G)
 
         # compute \bar{Lambda} from propagation using rk1

@@ -1,5 +1,6 @@
 import unittest
 import numpy
+from cqcpy import utils
 from kelvin import cc_utils
 from kelvin import ft_cc_energy
 from kelvin import ft_cc_equations
@@ -49,9 +50,8 @@ def test_L1(cc, thresh):
     tii, gi, Gi = quadrature.simpsons(ngi, beta)
     tir, gr, Gr = quadrature.midpoint(ngr, cc.tmax)
     en = cc.sys.g_energies_tot()
-    D1 = en[:,None] - en[None,:]
-    D2 = en[:,None,None,None] + en[None,:,None,None] \
-        - en[None,None,:,None] - en[None,None,None,:]
+    D1 = utils.D1(en, en)
+    D2 = utils.D2(en, en)
     F, Ff, Fb, I = cc_utils.get_ft_integrals_neq(cc.sys, en, beta, mu)
     n = cc.L2f.shape[1]
     for y in range(ngi):
@@ -135,9 +135,8 @@ class NEQLambdaTest(unittest.TestCase):
         tii, gi, Gi = quadrature.simpsons(ngi, beta)
         tir, gr, Gr = quadrature.midpoint(ngr, tmax)
         en = cc.sys.g_energies_tot()
-        D1 = en[:,None] - en[None,:]
-        D2 = en[:,None,None,None] + en[None,:,None,None] \
-            - en[None,None,:,None] - en[None,None,None,:]
+        D1 = utils.D1(en, en)
+        D2 = utils.D2(en, en)
         F, Ff, Fb, I = cc_utils.get_ft_integrals_neq(cc.sys, en, beta, mu)
         L = evalL(cc.T1f, cc.T1b, cc.T1i, cc.T2f, cc.T2b, cc.T2i,
                   cc.L1f, cc.L1b, cc.L1i, cc.L2f, cc.L2b, cc.L2i,
@@ -169,9 +168,8 @@ class NEQLambdaTest(unittest.TestCase):
 
         # Check that L is zero
         en = ccsdT.sys.g_energies_tot()
-        D1 = en[:,None] - en[None,:]
-        D2 = en[:,None,None,None] + en[None,:,None,None] \
-            - en[None,None,:,None] - en[None,None,None,:]
+        D1 = utils.D1(en, en)
+        D2 = utils.D2(en, en)
         cc = ccsdT
         F, Ff, Fb, I = cc_utils.get_ft_integrals_neq(cc.sys, en, beta, mu)
         L = evalL(cc.T1f, cc.T1b, cc.T1i, cc.T2f, cc.T2b, cc.T2i,

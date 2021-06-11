@@ -55,7 +55,7 @@ def get_diamond_k():
     cell.unit = 'B'
     cell.verbose = 0
     cell.build()
-    mf = pbc_scf.RHF(cell, kpt=(0.1,0.1,0.1), exxdiv=None)
+    mf = pbc_scf.RHF(cell, kpt=(0.1, 0.1, 0.1), exxdiv=None)
     mf.conv_tol_grad = 1e-8
     mf.conv_tol = 1e-12
     return mf

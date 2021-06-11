@@ -2,6 +2,7 @@ import unittest
 import numpy
 from pyscf import gto, scf
 from cqcpy import ft_utils
+from cqcpy import utils
 from cqcpy.ov_blocks import one_e_blocks
 from cqcpy.ov_blocks import two_e_blocks
 from cqcpy import integrals
@@ -121,9 +122,8 @@ class NEQPropTest(unittest.TestCase):
         fv = ft_utils.ffv(beta, en, mu)
 
         # get energy differences
-        D1 = en[:,None] - en[None,:]
-        D2 = en[:,None,None,None] + en[None,:,None,None] \
-            - en[None,None,:,None] - en[None,None,None,:]
+        D1 = utils.D1(en, en)
+        D2 = utils.D2(en, en)
 
         # compute first order part
         E1 = numpy.einsum('ii,i->', field, fo)

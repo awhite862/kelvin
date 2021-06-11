@@ -2,6 +2,7 @@ import unittest
 import numpy
 from pyscf import gto, scf
 from cqcpy import ft_utils
+from cqcpy import utils
 from cqcpy import spin_utils
 from cqcpy import test_utils
 from kelvin.ccsd import ccsd
@@ -22,6 +23,8 @@ def test_L1(cc, thresh):
     en = cc.sys.g_energies_tot()
     fo = ft_utils.ff(beta, en, mu)
     fv = ft_utils.ffv(beta, en, mu)
+    D1 = utils.D1(en, en)
+    D2 = utils.D2(en, en)
     if cc.athresh > 0.0:
         athresh = cc.athresh
         focc = [x for x in fo if x > athresh]
@@ -30,15 +33,9 @@ def test_L1(cc, thresh):
         ivir = [i for i,x in enumerate(fv) if x > athresh]
         F,I = cc_utils.ft_active_integrals(cc.sys, en, focc, fvir, iocc, ivir)
 
-        D1 = en[:,None] - en[None,:]
-        D2 = en[:,None,None,None] + en[None,:,None,None] \
-            - en[None,None,:,None] - en[None,None,None,:]
         D1 = D1[numpy.ix_(ivir, iocc)]
         D2 = D2[numpy.ix_(ivir, ivir, iocc, iocc)]
     else:
-        D1 = en[:,None] - en[None,:]
-        D2 = en[:,None,None,None] + en[None,:,None,None] \
-            - en[None,None,:,None] - en[None,None,None,:]
         F,I = cc_utils.ft_integrals(cc.sys, en, beta, mu)
     ng,no,nv = cc.L1.shape
     d = 1e-4
@@ -79,9 +76,8 @@ def test_L2(cc, thresh):
     ng = cc.ngrid
     ti,g,G = quadrature.simpsons(ng, beta)
     en = cc.sys.g_energies_tot()
-    D1 = en[:,None] - en[None,:]
-    D2 = en[:,None,None,None] + en[None,:,None,None] \
-        - en[None,None,:,None] - en[None,None,None,:]
+    D1 = utils.D1(en, en)
+    D2 = utils.D2(en, en)
     F,I = cc_utils.ft_integrals(cc.sys, en, beta, mu)
     n = cc.L2.shape[1]
     d = 1e-4
@@ -226,9 +222,8 @@ class FTLambdaTest(unittest.TestCase):
         T = cc.T
         beta = 1.0/T
         en = cc.sys.g_energies_tot()
-        D1 = en[:,None] - en[None,:]
-        D2 = en[:,None,None,None] + en[None,:,None,None] \
-            - en[None,None,:,None] - en[None,None,None,:]
+        D1 = utils.D1(en, en)
+        D2 = utils.D2(en, en)
         F,I = cc_utils.ft_integrals(sys, en, beta, mu)
         dT1 = numpy.zeros((ng, n, n))
         for y in range(ng):
