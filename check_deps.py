@@ -7,7 +7,6 @@ except ImportError:
     no_pyscf = True
     print("Failed to import 'pyscf'")  
 
-if no_lattice or no_cqcpy:
 no_lattice = False
 try:
     import lattice

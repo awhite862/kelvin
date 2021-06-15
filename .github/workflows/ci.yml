@@ -29,6 +29,7 @@ jobs:
         python -m pip install coverage
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         ./.github/workflows/clone_deps.sh
+        python check_deps.py
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
@@ -37,4 +38,4 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with unittest
       run: |
-        python check_deps.py
+        python test_ci.py
