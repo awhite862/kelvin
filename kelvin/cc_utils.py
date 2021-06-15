@@ -205,7 +205,7 @@ def ft_cc_iter_extrap(method, F, I, D1, D2, g, G, beta, ng, ti,
         if ig == 0:
             t1bar[0] = -F.vo
             t2bar[0] = -I.vvoo
-            continue # don't bother computing at T = inf
+            continue  # don't bother computing at T = inf
         elif ig == 1:
             t1bar[ig] = -F.vo
             t2bar[ig] = -I.vvoo
@@ -359,7 +359,7 @@ def ft_ucc_iter_extrap(method, Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb
             t2baraa[0] = -Ia.vvoo
             t2barab[0] = -Iabab.vvoo
             t2barbb[0] = -Ib.vvoo
-            continue # don't bother computing at T = inf
+            continue  # don't bother computing at T = inf
         elif ig == 1:
             t1bara[ig] = -Fa.vo
             t1barb[ig] = -Fb.vo

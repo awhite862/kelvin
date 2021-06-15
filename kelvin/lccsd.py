@@ -92,8 +92,8 @@ class lccsd(object):
 
         # get Fock matrix
         F = self.sys.g_fock()
-        F.oo = F.oo - numpy.diag(eo) # subtract diagonal
-        F.vv = F.vv - numpy.diag(ev) # subtract diagonal
+        F.oo = F.oo - numpy.diag(eo)  # subtract diagonal
+        F.vv = F.vv - numpy.diag(ev)  # subtract diagonal
 
         # get ERIs
         I = self.sys.g_aint()
@@ -156,8 +156,8 @@ class lccsd(object):
 
         # get Fock matrix
         F = self.sys.g_fock()
-        F.oo = F.oo - numpy.diag(eo) # subtract diagonal
-        F.vv = F.vv - numpy.diag(ev) # subtract diagonal
+        F.oo = F.oo - numpy.diag(eo)  # subtract diagonal
+        F.vv = F.vv - numpy.diag(ev)  # subtract diagonal
 
         # get ERIs
         I = self.sys.g_aint()

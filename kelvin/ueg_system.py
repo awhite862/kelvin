@@ -99,7 +99,7 @@ class UEGSystem(System):
                 E1 = einsum('ijij,i,j->', V - V.transpose((0,1,3,2)), fo, fo)
                 E1 += einsum('ijij,i,j->', V, fo, fo)
                 return E1
-            else: # TODO fix this
+            else:  # TODO fix this
                 Va,Vb,Vabab = self.u_aint()
                 E1 = 0.5*numpy.einsum('ijij->', Va.oooo)
                 E1 += 0.5*numpy.einsum('ijij->', Vb.oooo)

@@ -92,8 +92,8 @@ class MP2(object):
 
         # compute requisite memory
         n = en.shape[0]
-        mem1e = 4*n*n # include memory for D1
-        mem2e = 2*n*n*n*n # include memory for D2
+        mem1e = 4*n*n  # include memory for D1
+        mem2e = 2*n*n*n*n  # include memory for D2
         mem_mb = (mem1e + mem2e)*8.0/1024.0/1024.0
         assert(mem_mb < 4000)
         logging.info('  FT-RMP2 will use %f mb' % mem_mb)

@@ -183,17 +183,17 @@ class ccsd(object):
         E0 = beta*B0.sum() + mu*N0 + self.G0
 
         # higher order contributions
-        dvec = -numpy.ones(en.shape) # mu derivative
+        dvec = -numpy.ones(en.shape)  # mu derivative
         N1 = numpy.einsum('i,i->', dvec, self.ron1)
         Ncc = numpy.einsum('i,i->', dvec, self.rono + self.ronv)
-        N1 *= -1.0 # N = - dG/dmu
+        N1 *= -1.0  # N = - dG/dmu
         Ncc *= -1.0
-        dvec = (en - mu)/beta # beta derivative
+        dvec = (en - mu)/beta  # beta derivative
         B1 = numpy.einsum('i,i->', dvec, self.ron1)
         Bcc = numpy.einsum('i,i->', dvec, self.rono + self.ronv)
 
         # compute other contributions to CC derivative
-        Bcc -= self.Gcc/(beta) # derivative from factors of 1/beta
+        Bcc -= self.Gcc/(beta)  # derivative from factors of 1/beta
         if gderiv:
             dg,dG = self._g_nocc_gderiv()
             Bcc += dG + dg
@@ -234,13 +234,13 @@ class ccsd(object):
         E0 = beta*(B0a.sum() + B0b.sum()) + mu*N0 + self.G0
 
         # higher order contributions
-        dveca = -numpy.ones(ea.shape) # mu derivative
-        dvecb = -numpy.ones(eb.shape) # mu derivative
+        dveca = -numpy.ones(ea.shape)  # mu derivative
+        dvecb = -numpy.ones(eb.shape)  # mu derivative
         N1 = numpy.einsum('i,i->', dveca, self.ron1[0])
         N1 += numpy.einsum('i,i->', dvecb, self.ron1[1])
         Ncc = numpy.einsum('i,i->', dveca, self.rono[0] + self.ronv[1])
         Ncc += numpy.einsum('i,i->', dvecb, self.rono[0] + self.ronv[1])
-        N1 *= -1.0 # N = - dG/dmu
+        N1 *= -1.0  # N = - dG/dmu
         Ncc *= -1.0
         dveca = (ea - mu)/beta
         dvecb = (eb - mu)/beta
@@ -292,14 +292,14 @@ class ccsd(object):
         nv = ev.shape[0]
         mem1e = no*no + 5*no*nv + nv*nv  # include memory for D1
         mem2e = 6*no*no*nv*nv + nv*nv*nv*nv + 2*nv*nv*nv*no + \
-            2*nv*no*no*no + no*no*no*no # include memory for D2
+            2*nv*no*no*no + no*no*no*no  # include memory for D2
         mem_mb = 2.0*(mem1e + mem2e)*8.0/1024.0/1024.0
         logging.info('  CCSD will use %f mb' % mem_mb)
 
         # get Fock matrix
         F = self.sys.g_fock()
-        F.oo = F.oo - numpy.diag(eo) # subtract diagonal
-        F.vv = F.vv - numpy.diag(ev) # subtract diagonal
+        F.oo = F.oo - numpy.diag(eo)  # subtract diagonal
+        F.vv = F.vv - numpy.diag(ev)  # subtract diagonal
 
         # get ERIs
         I = self.sys.g_aint()
@@ -378,16 +378,16 @@ class ccsd(object):
         nv = nva + nvb
         mem1e = no*no + 5*no*nv + nv*nv  # include memory for D1
         mem2e = 6*no*no*nv*nv + nv*nv*nv*nv + 2*nv*nv*nv*no + \
-            2*nv*no*no*no + no*no*no*no # include memory for D2
+            2*nv*no*no*no + no*no*no*no  # include memory for D2
         mem_mb = 2.0*(mem1e + mem2e)*8.0/1024.0/1024.0
         logging.info('  CCSD will use %f mb' % mem_mb)
 
         # get Fock matrix
         Fa,Fb = self.sys.u_fock()
-        Fa.oo = Fa.oo - numpy.diag(eoa) # subtract diagonal
-        Fa.vv = Fa.vv - numpy.diag(eva) # subtract diagonal
-        Fb.oo = Fb.oo - numpy.diag(eob) # subtract diagonal
-        Fb.vv = Fb.vv - numpy.diag(evb) # subtract diagonal
+        Fa.oo = Fa.oo - numpy.diag(eoa)  # subtract diagonal
+        Fa.vv = Fa.vv - numpy.diag(eva)  # subtract diagonal
+        Fb.oo = Fb.oo - numpy.diag(eob)  # subtract diagonal
+        Fb.vv = Fb.vv - numpy.diag(evb)  # subtract diagonal
 
         # get ERIs
         Ia, Ib, Iabab = self.sys.u_aint()
@@ -476,8 +476,8 @@ class ccsd(object):
 
         # get Fock matrix
         F = self.sys.g_fock()
-        F.oo = F.oo - numpy.diag(eo) # subtract diagonal
-        F.vv = F.vv - numpy.diag(ev) # subtract diagonal
+        F.oo = F.oo - numpy.diag(eo)  # subtract diagonal
+        F.vv = F.vv - numpy.diag(ev)  # subtract diagonal
 
         # get ERIs
         I = self.sys.g_aint()
@@ -535,10 +535,10 @@ class ccsd(object):
 
         # get Fock matrix
         Fa,Fb = self.sys.u_fock()
-        Fa.oo = Fa.oo - numpy.diag(eoa) # subtract diagonal
-        Fa.vv = Fa.vv - numpy.diag(eva) # subtract diagonal
-        Fb.oo = Fb.oo - numpy.diag(eob) # subtract diagonal
-        Fb.vv = Fb.vv - numpy.diag(evb) # subtract diagonal
+        Fa.oo = Fa.oo - numpy.diag(eoa)  # subtract diagonal
+        Fa.vv = Fa.vv - numpy.diag(eva)  # subtract diagonal
+        Fb.oo = Fb.oo - numpy.diag(eob)  # subtract diagonal
+        Fb.vv = Fb.vv - numpy.diag(evb)  # subtract diagonal
 
         # get ERIs
         Ia, Ib, Iabab = self.sys.u_aint()
@@ -629,8 +629,8 @@ class ccsd(object):
 
             # get Fock matrix
             F = self.sys.g_fock()
-            F.oo = F.oo - numpy.diag(eo) # subtract diagonal
-            F.vv = F.vv - numpy.diag(ev) # subtract diagonal
+            F.oo = F.oo - numpy.diag(eo)  # subtract diagonal
+            F.vv = F.vv - numpy.diag(ev)  # subtract diagonal
 
             # get ERIs
             I = self.sys.g_aint()
@@ -840,10 +840,10 @@ class ccsd(object):
 
             # get Fock matrix
             Fa,Fb = self.sys.u_fock()
-            Fa.oo = Fa.oo - numpy.diag(eoa) # subtract diagonal
-            Fa.vv = Fa.vv - numpy.diag(eva) # subtract diagonal
-            Fb.oo = Fb.oo - numpy.diag(eob) # subtract diagonal
-            Fb.vv = Fb.vv - numpy.diag(evb) # subtract diagonal
+            Fa.oo = Fa.oo - numpy.diag(eoa)  # subtract diagonal
+            Fa.vv = Fa.vv - numpy.diag(eva)  # subtract diagonal
+            Fb.oo = Fb.oo - numpy.diag(eob)  # subtract diagonal
+            Fb.vv = Fb.vv - numpy.diag(evb)  # subtract diagonal
 
             # get ERIs
             Ia, Ib, Iabab = self.sys.u_aint()

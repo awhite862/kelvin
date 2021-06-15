@@ -45,7 +45,7 @@ class MP3(object):
         nv = ev.shape[0]
         mem1e = no*no + 3*no*nv + nv*nv  # include memory for D1
         mem2e = 4*no*no*nv*nv + nv*nv*nv*nv + 2*nv*nv*nv*no + \
-            2*nv*no*no*no + no*no*no*no # include memory for D2
+            2*nv*no*no*no + no*no*no*no  # include memory for D2
         mem_mb = (mem1e + mem2e)*8.0/1024.0/1024.0
         assert(mem_mb < 4000)
         logging.info('  RMP3 will use %f mb' % mem_mb)
@@ -59,8 +59,8 @@ class MP3(object):
 
         # get Fock matrix
         F = self.sys.g_fock()
-        F.oo = F.oo - numpy.diag(eo) # subtract diagonal
-        F.vv = F.vv - numpy.diag(ev) # subtract diagonal
+        F.oo = F.oo - numpy.diag(eo)  # subtract diagonal
+        F.vv = F.vv - numpy.diag(ev)  # subtract diagonal
 
         # get first order energy
         E1 = self.sys.get_mp1()
@@ -87,8 +87,8 @@ class MP3(object):
 
         # compute requisite memory
         n = en.shape[0]
-        mem1e = 5*n*n # include memory for D1
-        mem2e = 3*n*n*n*n # include memory for D2
+        mem1e = 5*n*n  # include memory for D1
+        mem2e = 3*n*n*n*n  # include memory for D2
         mem_mb = (mem1e + mem2e)*8.0/1024.0/1024.0
         assert(mem_mb < 4000)
         logging.info('  FT-RMP3 will use %f mb' % mem_mb)
