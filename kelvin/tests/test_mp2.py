@@ -4,7 +4,7 @@ from kelvin.mp2 import MP2
 from kelvin.scf_system import SCFSystem
 
 
-def test_mp2(m):
+def get_mp2(m):
     sys = SCFSystem(m, 0.0, 0.0)
     mp20 = MP2(sys, iprint=0)
     E00, E10, E20 = mp20.run()
@@ -27,7 +27,7 @@ class MP2Test(unittest.TestCase):
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
         m.scf()
-        res = test_mp2(m)
+        res = get_mp2(m)
         diff = abs(res[1] - res[0])
         self.assertTrue(diff < self.thresh)
 
@@ -41,7 +41,7 @@ class MP2Test(unittest.TestCase):
         m = scf.UHF(mol)
         m.conv_tol = 1e-12
         m.scf()
-        res = test_mp2(m)
+        res = get_mp2(m)
         diff = abs(res[1] - res[0])
         self.assertTrue(diff < self.thresh)
 

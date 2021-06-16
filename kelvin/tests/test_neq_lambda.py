@@ -41,7 +41,7 @@ def evalL(T1f, T1b, T1i, T2f, T2b, T2i, L1f, L1b, L1i, L2f, L2b, L2i,
     return E + Te
 
 
-def test_L1(cc, thresh):
+def fd_test_L1(cc, thresh):
     T = cc.T
     beta = 1.0/T
     mu = cc.mu
@@ -143,7 +143,7 @@ class NEQLambdaTest(unittest.TestCase):
                   Ff, Fb, F, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
         self.assertTrue(abs(L - E[1]) < self.thresh, "Lagrangian does not equal the Energy: {}".format(L))
 
-        out = test_L1(cc, self.thresh)
+        out = fd_test_L1(cc, self.thresh)
         self.assertTrue(out[1], out[0])
 
     def test_h2_field(self):
@@ -177,7 +177,7 @@ class NEQLambdaTest(unittest.TestCase):
                   Ff, Fb, F, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
         self.assertTrue(abs(L - E[1]) < self.thresh, "Lagrangian does not equal the Energy: {}  {}".format(L, E[1]))
 
-        out = test_L1(ccsdT, self.thresh)
+        out = fd_test_L1(ccsdT, self.thresh)
         self.assertTrue(out[1], out[0])
 
 

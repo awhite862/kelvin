@@ -9,7 +9,7 @@ from kelvin.ccsd import ccsd
 from kelvin.scf_system import SCFSystem
 
 
-def test_L1(cc, thresh):
+def fd_test_L1(cc, thresh):
     eo,ev = cc.sys.g_energies()
     Nov = utils.D1(eo, ev)
     Noovv = utils.D2(eo, ev)
@@ -69,7 +69,7 @@ def test_L1(cc, thresh):
     return ("pass",True)
 
 
-def test_L2(cc, thresh):
+def fd_test_L2(cc, thresh):
     eo,ev = cc.sys.g_energies()
     Nov = utils.D1(eo, ev)
     Noovv = utils.D2(eo, ev)
@@ -161,7 +161,7 @@ class LambdaTest(unittest.TestCase):
         ccsd0 = ccsd(sys, iprint=0, max_iter=44, econv=1e-12)
         Etot, Ecc = ccsd0.run()
         ccsd0._ccsd_lambda()
-        out = test_L2(ccsd0, self.thresh)
+        out = fd_test_L2(ccsd0, self.thresh)
         self.assertTrue(out[1], out[0])
 
     def test_N2p_sto3g_gen(self):
@@ -178,9 +178,9 @@ class LambdaTest(unittest.TestCase):
         ccsd0 = ccsd(sys, iprint=0, max_iter=44, econv=1e-12, tconv=1e-10)
         Etot, Ecc = ccsd0.run()
         ccsd0._ccsd_lambda()
-        outs = test_L1(ccsd0, self.thresh)
+        outs = fd_test_L1(ccsd0, self.thresh)
         self.assertTrue(outs[1], outs[0])
-        outd = test_L2(ccsd0, self.thresh)
+        outd = fd_test_L2(ccsd0, self.thresh)
         self.assertTrue(outd[1], outd[0])
 
     def test_Be_sto3g(self):
@@ -195,7 +195,7 @@ class LambdaTest(unittest.TestCase):
         ccsd0 = ccsd(sys, iprint=0, max_iter=44, econv=1e-12)
         Etot, Ecc = ccsd0.run()
         ccsd0._uccsd_lambda()
-        out = test_L2(ccsd0, self.thresh)
+        out = fd_test_L2(ccsd0, self.thresh)
         self.assertTrue(out[1], out[0])
 
     def test_N2p_sto3g(self):
@@ -212,9 +212,9 @@ class LambdaTest(unittest.TestCase):
         ccsd0 = ccsd(sys, iprint=0, max_iter=44, econv=1e-12)
         Etot, Ecc = ccsd0.run()
         ccsd0._uccsd_lambda()
-        outs = test_L1(ccsd0, self.thresh)
+        outs = fd_test_L1(ccsd0, self.thresh)
         self.assertTrue(outs[1], outs[0])
-        outd = test_L2(ccsd0, self.thresh)
+        outd = fd_test_L2(ccsd0, self.thresh)
         self.assertTrue(outd[1], outd[0])
 
 

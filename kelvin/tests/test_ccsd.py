@@ -5,7 +5,7 @@ from kelvin.ccsd import ccsd
 from kelvin.scf_system import SCFSystem
 
 
-def test_ccsd_gen(m):
+def get_ccsd_gen(m):
     mycc = cc.CCSD(m)
     mycc.conv_tol = 1e-12
     mycc.run()
@@ -16,7 +16,7 @@ def test_ccsd_gen(m):
     return (mycc.e_corr, Ecc)
 
 
-def test_ccsd(m):
+def get_ccsd(m):
     mycc = cc.CCSD(m)
     mycc.conv_tol = 1e-12
     mycc.run()
@@ -39,7 +39,7 @@ class CCSDTest(unittest.TestCase):
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
         m.scf()
-        res = test_ccsd_gen(m)
+        res = get_ccsd_gen(m)
         diff = abs(res[1] - res[0])
         error = "Expected: {}  Actual: {}".format(res[0], res[1])
         self.assertTrue(diff < self.thresh, error)
@@ -55,7 +55,7 @@ class CCSDTest(unittest.TestCase):
         m = scf.UHF(mol)
         m.conv_tol = 1e-12
         m.scf()
-        res = test_ccsd_gen(m)
+        res = get_ccsd_gen(m)
         diff = abs(res[1] - res[0])
         error = "Expected: {}  Actual: {}".format(res[0], res[1])
         self.assertTrue(diff < self.thresh, error)
@@ -68,7 +68,7 @@ class CCSDTest(unittest.TestCase):
         m = scf.RHF(mol)
         m.conv_tol = 1e-12
         m.scf()
-        res = test_ccsd(m)
+        res = get_ccsd(m)
         diff = abs(res[1] - res[0])
         error = "Expected: {}  Actual: {}".format(res[0], res[1])
         self.assertTrue(diff < self.thresh, error)
@@ -84,7 +84,7 @@ class CCSDTest(unittest.TestCase):
         m = scf.UHF(mol)
         m.conv_tol = 1e-13
         m.scf()
-        res = test_ccsd(m)
+        res = get_ccsd(m)
         diff = abs(res[1] - res[0])
         error = "Expected: {}  Actual: {}".format(res[0], res[1])
         self.assertTrue(diff < self.thresh, error)
