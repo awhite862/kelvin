@@ -323,8 +323,8 @@ class CCUtilsTest(unittest.TestCase):
         dvec = -beta*numpy.ones(en.shape)
         fo = ft_utils.ff(beta, en, mu)
         fv = ft_utils.ffv(beta, en, mu)
-        iocc = [i for i,x in enumerate(fo) if x > athresh]
-        ivir = [i for i,x in enumerate(fv) if x > athresh]
+        iocc = [i for i, x in enumerate(fo) if x > athresh]
+        ivir = [i for i, x in enumerate(fv) if x > athresh]
         F, I = cc_utils.ft_d_active_integrals(sys, en, fo, fv, iocc, ivir, dvec)
         Fg, Ig = cc_utils.ft_d_integrals(sys, en, fo, fv, dvec)
 
@@ -398,10 +398,10 @@ class CCUtilsTest(unittest.TestCase):
         fvira = [x for x in fva if x > athresh]
         foccb = [x for x in fob if x > athresh]
         fvirb = [x for x in fvb if x > athresh]
-        iocca = [i for i,x in enumerate(foa) if x > athresh]
-        ivira = [i for i,x in enumerate(fva) if x > athresh]
-        ioccb = [i for i,x in enumerate(fob) if x > athresh]
-        ivirb = [i for i,x in enumerate(fvb) if x > athresh]
+        iocca = [i for i, x in enumerate(foa) if x > athresh]
+        ivira = [i for i, x in enumerate(fva) if x > athresh]
+        ioccb = [i for i, x in enumerate(fob) if x > athresh]
+        ivirb = [i for i, x in enumerate(fvb) if x > athresh]
         Fa, Fb, Ia, Ib, Iabab = cc_utils.uft_d_active_integrals(
                 sys, ea, eb, focca, fvira, foccb, fvirb, iocca,
                 ivira, ioccb, ivirb, dveca, dvecb)

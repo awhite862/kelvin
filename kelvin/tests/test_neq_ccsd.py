@@ -49,7 +49,7 @@ class NEQ_CCSDTest(unittest.TestCase):
         Hint[2,1] = field[1,0]
         Hint[3,3] = field[0,0] + field[1,1]
 
-        e0,v0 = numpy.linalg.eigh(H)
+        e0, v0 = numpy.linalg.eigh(H)
         exp = numpy.exp(-beta*(e0))
         Z = exp.sum()
         p0 = numpy.einsum('mi,i,ni->mn', v0, exp, v0) / Z
@@ -61,7 +61,7 @@ class NEQ_CCSDTest(unittest.TestCase):
             t = i*deltat
             ti[i] = t
             Ht = H + numpy.sin(omega*t)*Hint
-            e,v = numpy.linalg.eigh(Ht)
+            e, v = numpy.linalg.eigh(Ht)
             ee = numpy.exp(-deltat*1.j*e)
             U = numpy.einsum('ai,i,bi->ab', v, ee, numpy.conj(v))
             p = numpy.einsum('ps,pq,qr->sr', numpy.conj(U), p, U)
@@ -87,7 +87,7 @@ class NEQ_CCSDTest(unittest.TestCase):
             Eb = cc.run()
             A.append((Ef[0] - Eb[0])/(2*d))
 
-        for i,out in enumerate(A):
+        for i, out in enumerate(A):
             ref = A_ref[i]
             diff = abs(ref - out)
             msg = "{} -- Expected: {}  Actual: {} ".format(i, ref, out)
@@ -135,7 +135,7 @@ class NEQ_CCSDTest(unittest.TestCase):
         Htest = numpy.zeros((4, 4))
         Htest[3,3] = eri[0,1,0,1] - eri[0,1,1,0]
 
-        e0,v0 = numpy.linalg.eigh(H)
+        e0, v0 = numpy.linalg.eigh(H)
         exp = numpy.exp(-beta*(e0))
         Z = exp.sum()
         p0 = numpy.einsum('mi,i,ni->mn', v0, exp, v0) / Z
@@ -147,7 +147,7 @@ class NEQ_CCSDTest(unittest.TestCase):
             t = i*deltat
             ti[i] = t
             Ht = H + numpy.sin(omega*t)*Hint
-            e,v = numpy.linalg.eigh(Ht)
+            e, v = numpy.linalg.eigh(Ht)
             ee = numpy.exp(-deltat*1.j*e)
             U = numpy.einsum('ai,i,bi->ab', v, ee, numpy.conj(v))
             p = numpy.einsum('ps,pq,qr->sr', numpy.conj(U), p, U)
@@ -173,7 +173,7 @@ class NEQ_CCSDTest(unittest.TestCase):
             At = cc.compute_2e_prop(test, index)
             A.append(At)
 
-        for i,out in enumerate(A):
+        for i, out in enumerate(A):
             ref = A_ref[i]
             diff = abs(ref - out)
             msg = "{} -- Expected: {}  Actual: {} ".format(i, ref, out)

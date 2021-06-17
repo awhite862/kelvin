@@ -45,13 +45,13 @@ class HubbardTest(unittest.TestCase):
         hub = Hubbard1D(L, t, U, boundary='o')
         Es = compute_FCISimple(hub, nelec)
         Ec = compute_fci_kelvin(hub, nelec)
-        return (Es,Ec)
+        return (Es, Ec)
 
     def _compare_pbc(self, nelec, L, U, t=1.0):
         hub = Hubbard1D(L, t, U)
         Es = compute_FCISimple(hub, nelec)
         Ec = compute_fci_kelvin(hub, nelec)
-        return (Es,Ec)
+        return (Es, Ec)
 
     def test_2_1(self):
         nelec = 2

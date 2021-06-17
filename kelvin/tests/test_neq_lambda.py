@@ -105,7 +105,7 @@ def fd_test_L1(cc, thresh):
                 diff = (LP - LM)/(2*d)
                 if numpy.abs(diff) > thresh:
                     return ('F-- {} {} {}: {}'.format(y, i, a, diff), False)
-    return ("pass",True)
+    return ("pass", True)
 
 
 class NEQLambdaTest(unittest.TestCase):

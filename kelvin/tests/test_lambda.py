@@ -13,8 +13,6 @@ def fd_test_L1(cc, thresh):
     eo,ev = cc.sys.g_energies()
     Nov = utils.D1(eo, ev)
     Noovv = utils.D2(eo, ev)
-    Dov = 1/Nov
-    Doovv = 1/Noovv
     no = eo.shape[0]
     nv = ev.shape[0]
 
@@ -66,15 +64,13 @@ def fd_test_L1(cc, thresh):
             diff = (fw - bw)/(2*delta)
             if numpy.abs(diff) > thresh:
                 return('{} {}: {}'.format(i, a, diff), False)
-    return ("pass",True)
+    return ("pass", True)
 
 
 def fd_test_L2(cc, thresh):
     eo,ev = cc.sys.g_energies()
     Nov = utils.D1(eo, ev)
     Noovv = utils.D2(eo, ev)
-    Dov = 1/Nov
-    Doovv = 1/Noovv
     no = eo.shape[0]
     nv = ev.shape[0]
 
@@ -141,7 +137,7 @@ def fd_test_L2(cc, thresh):
                     diff = (fw - bw)/(2*delta)
                     if abs(diff) > thresh:
                         return ('{} {} {} {}: {}'.format(i, j, a, b, diff), False)
-    return ("pass",True)
+    return ("pass", True)
 
 
 class LambdaTest(unittest.TestCase):

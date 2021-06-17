@@ -12,7 +12,7 @@ def get_mp2(m):
     pt = mp.MP2(m)
     Emp, temp = pt.kernel()
 
-    return (Emp,E20)
+    return (Emp, E20)
 
 
 class MP2Test(unittest.TestCase):

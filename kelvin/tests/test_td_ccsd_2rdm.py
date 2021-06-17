@@ -31,9 +31,9 @@ class TDCCSD2RDMTest(unittest.TestCase):
         Eout, Eccout = tdccsdT.run()
         Etmp, Ecctmp = tdccsdT._ccsd_lambda(rdm2=True)
         names = ["cdab", "ciab", "bcai", "ijab", "bjai", "abij", "jkai", "kaij", "klij"]
-        diffs = [numpy.linalg.norm(r - o)/numpy.linalg.norm(r) for r,o in zip(ccsdT.P2, tdccsdT.P2)]
-        errs = ["Difference in {}: {}".format(n, d) for n,d in zip(names, diffs)]
-        for d,e in zip(diffs, errs):
+        diffs = [numpy.linalg.norm(r - o)/numpy.linalg.norm(r) for r, o in zip(ccsdT.P2, tdccsdT.P2)]
+        errs = ["Difference in {}: {}".format(n, d) for n, d in zip(names, diffs)]
+        for d, e in zip(diffs, errs):
             self.assertTrue(d < 5e-5, e)
 
     def test_Be_rk4_active(self):
@@ -60,9 +60,9 @@ class TDCCSD2RDMTest(unittest.TestCase):
         Eout, Eccout = tdccsdT.run()
         Etmp, Ecctmp = tdccsdT._ccsd_lambda(rdm2=True)
         names = ["cdab", "ciab", "bcai", "ijab", "bjai", "abij", "jkai", "kaij", "klij"]
-        diffs = [numpy.linalg.norm(r - o)/numpy.linalg.norm(r) for r,o in zip(ccsdT.P2, tdccsdT.P2)]
-        errs = ["Difference in {}: {}".format(n, d) for n,d in zip(names, diffs)]
-        for d,e in zip(diffs, errs):
+        diffs = [numpy.linalg.norm(r - o)/numpy.linalg.norm(r) for r, o in zip(ccsdT.P2, tdccsdT.P2)]
+        errs = ["Difference in {}: {}".format(n, d) for n, d in zip(names, diffs)]
+        for d, e in zip(diffs, errs):
             self.assertTrue(d < 1e-4, e)
 
     def test_Be_u_vs_g(self):

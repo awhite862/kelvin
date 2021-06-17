@@ -327,7 +327,7 @@ class NEQPropTest(unittest.TestCase):
         eri = integrals.get_phys(mol, mos, mos, mos, mos)
         hcore = numpy.einsum('mp,mn,nq->pq', mos, m.get_hcore(m.mol), mos)
         F = hcore + eri[:,0,:,0] - eri[:,0,0,:]
-        en,vvvvv = numpy.linalg.eigh(F)
+        en, vvvvv = numpy.linalg.eigh(F)
 
         E = numpy.zeros((3))
         E[2] = 1.0
@@ -364,7 +364,7 @@ class NEQPropTest(unittest.TestCase):
         cc._neq_ccsd_lambda()
         cc._neq_1rdm()
 
-        for i,ref in enumerate(Aref):
+        for i, ref in enumerate(Aref):
             t = (i+1)*int(0.1/deltat)
             out = cc.compute_prop(field, t - 1)
             diff = abs(ref - out)
@@ -410,7 +410,7 @@ class NEQPropTest(unittest.TestCase):
         Hint[2,1] = field[1,0]
         Hint[3,3] = field[0,0] + field[1,1]
 
-        e0,v0 = numpy.linalg.eigh(H)
+        e0, v0 = numpy.linalg.eigh(H)
         exp = numpy.exp(-beta*(e0))
         Z = exp.sum()
         p0 = numpy.einsum('mi,i,ni->mn', v0, exp, v0) / Z
@@ -422,7 +422,7 @@ class NEQPropTest(unittest.TestCase):
             t = i*deltat
             ti[i] = t
             Ht = H + numpy.sin(omega*t)*Hint
-            e,v = numpy.linalg.eigh(Ht)
+            e, v = numpy.linalg.eigh(Ht)
             ee = numpy.exp(-deltat*1.j*e)
             ee2 = numpy.exp(deltat*1.j*e)
             U = numpy.einsum('ai,i,bi->ab', v, ee, numpy.conj(v))
@@ -442,7 +442,7 @@ class NEQPropTest(unittest.TestCase):
         cc._neq_ccsd_lambda()
         cc._neq_1rdm()
 
-        for i,ref in enumerate(Aref):
+        for i, ref in enumerate(Aref):
             t = i*int(0.1/deltat)
             tg = t if i == 0 else t - 1
             out = cc.compute_prop(field, tg)

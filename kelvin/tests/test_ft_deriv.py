@@ -39,7 +39,7 @@ def fd_ESN(m, T, mu, ng, Ecctot, athresh=0.0, quad='lin', damp=0.0, mi=35, delta
     Sx = -(Ef - Eb)/(2*delta)
     Ex = Ecctot + T*Sx + mu*Nx
 
-    return (Ex,Nx,Sx)
+    return (Ex, Nx, Sx)
 
 
 class FTDerivTest(unittest.TestCase):

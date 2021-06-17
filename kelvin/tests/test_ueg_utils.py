@@ -44,17 +44,17 @@ class UEGUtilsTest(unittest.TestCase):
         ueg = UEGSystem(0.0, L, 7.4, mu=mu, norb=7, orbtype='u')
         Fa,Fb = ueg.u_fock()
         F = ueg.g_fock()
-        diff = numpy.linalg.norm(Fa.vv - F.vv[:6,:6])
+        diff = numpy.linalg.norm(Fa.vv - F.vv[:6, :6])
         self.assertTrue(diff < 1e-12)
-        diff = numpy.linalg.norm(Fa.oo - F.oo[:1,:1])
+        diff = numpy.linalg.norm(Fa.oo - F.oo[:1, :1])
         self.assertTrue(diff < 1e-12)
 
         ueg = UEGSCFSystem(0.0, L, 7.4, mu=mu, norb=7, orbtype='u')
         Fa,Fb = ueg.u_fock()
         F = ueg.g_fock()
-        diff = numpy.linalg.norm(Fa.vv - F.vv[:6,:6])
+        diff = numpy.linalg.norm(Fa.vv - F.vv[:6, :6])
         self.assertTrue(diff < 1e-12)
-        diff = numpy.linalg.norm(Fa.oo - F.oo[:1,:1])
+        diff = numpy.linalg.norm(Fa.oo - F.oo[:1, :1])
         self.assertTrue(diff < 1e-12)
 
 

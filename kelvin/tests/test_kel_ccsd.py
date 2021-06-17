@@ -48,7 +48,7 @@ class KelCCSDTest(unittest.TestCase):
         Hint[2,1] = field[1,0]
         Hint[3,3] = field[0,0] + field[1,1]
 
-        e0,v0 = numpy.linalg.eigh(H)
+        e0, v0 = numpy.linalg.eigh(H)
         exp = numpy.exp(-beta*(e0))
         Z = exp.sum()
         p0 = numpy.einsum('mi,i,ni->mn', v0, exp, v0) / Z
@@ -60,7 +60,7 @@ class KelCCSDTest(unittest.TestCase):
             t = i*deltat
             ti[i] = t
             Ht = H + numpy.sin(omega*t)*Hint
-            e,v = numpy.linalg.eigh(Ht)
+            e, v = numpy.linalg.eigh(Ht)
             ee = numpy.exp(-deltat*1.j*e)
             U = numpy.einsum('ai,i,bi->ab', v, ee, numpy.conj(v))
             p = numpy.einsum('ps,pq,qr->sr', numpy.conj(U), p, U)
@@ -78,11 +78,11 @@ class KelCCSDTest(unittest.TestCase):
         kccsd.init_from_ftccsd(mycc, contour="keldysh")
         kccsd._ccsd(nstep=200, step=0.005)
         A = []
-        for i,p in enumerate(kccsd.P):
+        for i, p in enumerate(kccsd.P):
             if i % 20 == 0:
                 A.append(numpy.einsum('ij,ji->', field, p))
 
-        for i,out in enumerate(A):
+        for i, out in enumerate(A):
             ref = A_ref[i]
             diff = abs(ref - out)
             msg = "{} -- Expected: {}  Actual: {} ".format(i, ref, out)
@@ -120,7 +120,7 @@ class KelCCSDTest(unittest.TestCase):
         kccsd.init_from_ftccsd(mycc, contour="keldysh")
         kccsd._ccsd(nstep=200, step=0.005)
         Aref = []
-        for i,p in enumerate(kccsd.P):
+        for i, p in enumerate(kccsd.P):
             if i % 20 == 0:
                 Aref.append(numpy.einsum('ij,ji->', field, p))
 
@@ -128,11 +128,11 @@ class KelCCSDTest(unittest.TestCase):
         kccsd2.init_from_ftccsd(mycc, contour="keldysh")
         kccsd2._ccsd(nstep=200, step=0.005, save=20)
         A = []
-        for i,p in enumerate(kccsd2.P):
+        for i, p in enumerate(kccsd2.P):
             A.append(numpy.einsum('ij,ji->', field, p))
 
         thresh = 1e-12
-        for i,out in enumerate(A):
+        for i, out in enumerate(A):
             ref = Aref[i]
             diff = abs(ref - out)
             msg = "{} -- Expected: {}  Actual: {} ".format(i, ref, out)

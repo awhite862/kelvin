@@ -29,8 +29,8 @@ def test_L1(cc, thresh):
         athresh = cc.athresh
         focc = [x for x in fo if x > athresh]
         fvir = [x for x in fv if x > athresh]
-        iocc = [i for i,x in enumerate(fo) if x > athresh]
-        ivir = [i for i,x in enumerate(fv) if x > athresh]
+        iocc = [i for i, x in enumerate(fo) if x > athresh]
+        ivir = [i for i, x in enumerate(fv) if x > athresh]
         F,I = cc_utils.ft_active_integrals(cc.sys, en, focc, fvir, iocc, ivir)
 
         D1 = D1[numpy.ix_(ivir, iocc)]
@@ -65,7 +65,7 @@ def test_L1(cc, thresh):
                 diff = (fw - bw)/(2*d)
                 if numpy.abs(diff) > thresh:
                     return ('{} {} {}: {}'.format(y, i, a, diff), False)
-    return ("pass",True)
+    return ("pass", True)
 
 
 def test_L2(cc, thresh):
@@ -115,7 +115,7 @@ def test_L2(cc, thresh):
                         diff = (fw - bw)/(2*d)
                         if numpy.abs(diff) > 1e-7:
                             return ('{} {} {} {} {}: {}'.format(y, i, j, a, b, diff), False)
-    return ("pass",True)
+    return ("pass", True)
 
 
 class FTLambdaTest(unittest.TestCase):
