@@ -13,7 +13,7 @@ from kelvin import ft_cc_equations
 from kelvin import quadrature
 
 
-def test_L1(cc, thresh):
+def fd_test_L1(cc, thresh):
     # test lambdas
     T = cc.T
     beta = 1.0/T
@@ -68,7 +68,7 @@ def test_L1(cc, thresh):
     return ("pass", True)
 
 
-def test_L2(cc, thresh):
+def fd_test_L2(cc, thresh):
     # test lambdas
     T = cc.T
     beta = 1.0/T
@@ -136,7 +136,7 @@ class FTLambdaTest(unittest.TestCase):
         ccsdT = ccsd(sys, T=self.T, mu=self.mu, iprint=0, max_iter=44, econv=1e-12)
         Etot, Ecc = ccsdT.run()
         ccsdT._ft_ccsd_lambda()
-        out = test_L1(ccsdT, self.thresh)
+        out = fd_test_L1(ccsdT, self.thresh)
         self.assertTrue(out[1], out[0])
 
     def test_Be_sto3g_gen_active(self):
@@ -153,7 +153,7 @@ class FTLambdaTest(unittest.TestCase):
         ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, damp=0.45, max_iter=240, ngrid=20, econv=1e-10, tconv=1e-9, athresh=1e-20)
         Etot, Ecc = ccsdT.run()
         ccsdT._ft_ccsd_lambda()
-        out = test_L1(ccsdT, 1e-7)
+        out = fd_test_L1(ccsdT, 1e-7)
         self.assertTrue(out[1], out[0])
 
     def test_Be_sto3g(self):
@@ -193,7 +193,7 @@ class FTLambdaTest(unittest.TestCase):
         nccsdT.L2 = L2
         nccsdT.T1 = T1
         nccsdT.T2 = T2
-        out = test_L1(nccsdT, self.thresh)
+        out = fd_test_L1(nccsdT, self.thresh)
         self.assertTrue(out[1], out[0])
 
     def test_Be_deriv(self):

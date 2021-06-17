@@ -210,7 +210,7 @@ class HubbardFieldTest(unittest.TestCase):
         omega = 4.4
         phi = 0.0
         tmax = 0.5
-        ng = 380
+        ng = 400
         ngi = 40
         deltat = tmax / ng
 
