@@ -37,8 +37,8 @@ class QuadTest(unittest.TestCase):
         D1, D2 = test_utils.make_random_ft_D(n)
         T1f, T2f = test_utils.make_random_ft_T(ngr, n)
         T1i, T2i = test_utils.make_random_ft_T(ngi, n)
-        tir,gr,Gr = quadrature.simpsons(ngr, tmax)
-        tii,gi,Gi = quadrature.simpsons(ngi, self.beta)
+        tir, gr, Gr = quadrature.simpsons(ngr, tmax)
+        tii, gi, Gi = quadrature.simpsons(ngi, self.beta)
         make_t(T1f, tir)
         make_t(T2f, tir)
         T1b = T1f.copy()
@@ -68,8 +68,8 @@ class QuadTest(unittest.TestCase):
         D1, D2 = test_utils.make_random_ft_D(n)
         L1f, L2f = test_utils.make_random_ft_T(ngr, n)
         L1i, L2i = test_utils.make_random_ft_T(ngi, n)
-        tir,gr,Gr = quadrature.simpsons(ngr, tmax)
-        tii,gi,Gi = quadrature.simpsons(ngi, self.beta)
+        tir, gr, Gr = quadrature.simpsons(ngr, tmax)
+        tii, gi, Gi = quadrature.simpsons(ngi, self.beta)
         make_l(L1f, tir)
         make_l(L2f, tir)
         L1b = L1f.copy()
@@ -95,9 +95,9 @@ class QuadTest(unittest.TestCase):
         ng = 10
         beta = 10.0
         delta = 5e-4
-        ti,gp,Gp = quadrature.simpsons(ng, beta + delta)
-        ti,gm,Gm = quadrature.simpsons(ng, beta - delta)
-        gd,Gd = quadrature.d_simpsons(ng, beta)
+        ti, gp, Gp = quadrature.simpsons(ng, beta + delta)
+        ti, gm, Gm = quadrature.simpsons(ng, beta - delta)
+        gd, Gd = quadrature.d_simpsons(ng, beta)
         go = (gp - gm)/(2.0*delta)
         Go = (Gp - Gm)/(2.0*delta)
         eg = numpy.linalg.norm(go - gd)
@@ -109,9 +109,9 @@ class QuadTest(unittest.TestCase):
         ng = 10
         beta = 10.0
         delta = 5e-4
-        ti,gp,Gp = quadrature.simpsons_ln(ng, beta + delta)
-        ti,gm,Gm = quadrature.simpsons_ln(ng, beta - delta)
-        gd,Gd = quadrature.d_simpsons_ln(ng, beta)
+        ti, gp, Gp = quadrature.simpsons_ln(ng, beta + delta)
+        ti, gm, Gm = quadrature.simpsons_ln(ng, beta - delta)
+        gd, Gd = quadrature.d_simpsons_ln(ng, beta)
         go = (gp - gm)/(2.0*delta)
         Go = (Gp - Gm)/(2.0*delta)
         eg = numpy.linalg.norm(go - gd)
@@ -123,9 +123,9 @@ class QuadTest(unittest.TestCase):
         ng = 10
         beta = 10.0
         delta = 5e-4
-        ti,gp,Gp = quadrature.simpsons_sin(ng, beta + delta)
-        ti,gm,Gm = quadrature.simpsons_sin(ng, beta - delta)
-        gd,Gd = quadrature.d_simpsons_sin(ng, beta)
+        ti, gp, Gp = quadrature.simpsons_sin(ng, beta + delta)
+        ti, gm, Gm = quadrature.simpsons_sin(ng, beta - delta)
+        gd, Gd = quadrature.d_simpsons_sin(ng, beta)
         go = (gp - gm)/(2.0*delta)
         Go = (Gp - Gm)/(2.0*delta)
         eg = numpy.linalg.norm(go - gd)
@@ -137,9 +137,9 @@ class QuadTest(unittest.TestCase):
         ng = 10
         beta = 10.0
         delta = 5e-4
-        ti,gp,Gp = quadrature.simpsons_exp(ng, beta + delta)
-        ti,gm,Gm = quadrature.simpsons_exp(ng, beta - delta)
-        gd,Gd = quadrature.d_simpsons_exp(ng, beta)
+        ti, gp, Gp = quadrature.simpsons_exp(ng, beta + delta)
+        ti, gm, Gm = quadrature.simpsons_exp(ng, beta - delta)
+        gd, Gd = quadrature.d_simpsons_exp(ng, beta)
         go = (gp - gm)/(2.0*delta)
         Go = (Gp - Gm)/(2.0*delta)
         eg = numpy.linalg.norm(go - gd)
@@ -152,9 +152,9 @@ class QuadTest(unittest.TestCase):
         beta = 10.0
         delta = 5e-4
         n = 3
-        ti,gp,Gp = quadrature.simpsons_p(ng, beta + delta, n)
-        ti,gm,Gm = quadrature.simpsons_p(ng, beta - delta, n)
-        gd,Gd = quadrature.d_simpsons_p(ng, beta, n)
+        ti, gp, Gp = quadrature.simpsons_p(ng, beta + delta, n)
+        ti, gm, Gm = quadrature.simpsons_p(ng, beta - delta, n)
+        gd, Gd = quadrature.d_simpsons_p(ng, beta, n)
         go = (gp - gm)/(2.0*delta)
         Go = (Gp - Gm)/(2.0*delta)
         eg = numpy.linalg.norm(go - gd)

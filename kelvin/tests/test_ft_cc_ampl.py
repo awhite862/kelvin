@@ -84,11 +84,11 @@ class FTamplEquationsTest(unittest.TestCase):
         D1 = spin_utils.T1_to_spin(D1a, D1b, na, na, nb, nb)
         D2 = spin_utils.D2_to_spin(D2aa, D2ab, D2bb, na, na, nb, nb)
 
-        ti,g,G = quadrature.simpsons(ng, self.beta)
+        ti, g, G = quadrature.simpsons(ng, self.beta)
 
-        T1ref,T2ref = ft_cc_equations.ccsd_stanton(
+        T1ref, T2ref = ft_cc_equations.ccsd_stanton(
             F, I, T1old, T2old, D1, D2, ti, ng, G)
-        T1out,T2out = ft_cc_equations.uccsd_stanton(
+        T1out, T2out = ft_cc_equations.uccsd_stanton(
             Fa, Fb, Ia, Ib, Iabab, T1a, T1b, T2aa, T2ab, T2bb,
             D1a, D1b, D2aa, D2ab, D2bb, ti, ng, G)
 

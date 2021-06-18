@@ -63,7 +63,7 @@ class FTDerivTest(unittest.TestCase):
         ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=35, damp=0.0, ngrid=ng, econv=1e-10, singles=True)
         Ecctot, Ecc = ccsdT.run()
         ccsdT.compute_ESN()
-        Ex,Nx,Sx = fd_ESN(m, T, mu, ng, Ecctot)
+        Ex, Nx, Sx = fd_ESN(m, T, mu, ng, Ecctot)
         dE = abs((ccsdT.E - Ex)/Ex)
         dS = abs((ccsdT.S - Sx)/Sx)
         dN = abs((ccsdT.N - Nx)/Nx)
@@ -89,7 +89,7 @@ class FTDerivTest(unittest.TestCase):
         ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=35, damp=0.0, ngrid=ng, econv=1e-10, singles=True)
         Ecctot, Ecc = ccsdT.run()
         ccsdT.compute_ESN()
-        Ex,Nx,Sx = fd_ESN(m, T, mu, ng, Ecctot)
+        Ex, Nx, Sx = fd_ESN(m, T, mu, ng, Ecctot)
         dE = abs((ccsdT.E - Ex)/Ex)
         dS = abs((ccsdT.S - Sx)/Sx)
         dN = abs((ccsdT.N - Nx)/Nx)
@@ -116,7 +116,7 @@ class FTDerivTest(unittest.TestCase):
         ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=100, damp=0.3, ngrid=ng, econv=1e-10, athresh=athresh, singles=True)
         Ecctot, Ecc = ccsdT.run()
         ccsdT.compute_ESN()
-        Ex,Nx,Sx = fd_ESN(m, T, mu, ng, Ecctot, athresh=athresh, damp=0.3, mi=100, delta=2e-5)
+        Ex, Nx, Sx = fd_ESN(m, T, mu, ng, Ecctot, athresh=athresh, damp=0.3, mi=100, delta=2e-5)
         dE = abs((ccsdT.E - Ex)/Ex)
         dS = abs((ccsdT.S - Sx)/Sx)
         dN = abs((ccsdT.N - Nx)/Nx)
@@ -143,7 +143,7 @@ class FTDerivTest(unittest.TestCase):
         ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=100, damp=0.3, ngrid=ng, econv=1e-10, athresh=athresh, singles=True)
         Ecctot, Ecc = ccsdT.run()
         ccsdT.compute_ESN()
-        Ex,Nx,Sx = fd_ESN(m, T, mu, ng, Ecctot, athresh=athresh, damp=0.3, mi=100, delta=2e-5)
+        Ex, Nx, Sx = fd_ESN(m, T, mu, ng, Ecctot, athresh=athresh, damp=0.3, mi=100, delta=2e-5)
         dE = abs((ccsdT.E - Ex)/Ex)
         dS = abs((ccsdT.S - Sx)/Sx)
         dN = abs((ccsdT.N - Nx)/Nx)
@@ -169,7 +169,7 @@ class FTDerivTest(unittest.TestCase):
         ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=35, damp=0.0, ngrid=ng, econv=1e-10, quad='ln')
         Ecctot, Ecc = ccsdT.run()
         ccsdT.compute_ESN()
-        Ex,Nx,Sx = fd_ESN(m, T, mu, ng, Ecctot, quad='ln')
+        Ex, Nx, Sx = fd_ESN(m, T, mu, ng, Ecctot, quad='ln')
         dE = abs((ccsdT.E - Ex)/Ex)
         dS = abs((ccsdT.S - Sx)/Sx)
         dN = abs((ccsdT.N - Nx)/Nx)
@@ -195,7 +195,7 @@ class FTDerivTest(unittest.TestCase):
         ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=35, damp=0.0, ngrid=ng, econv=1e-10, quad='sin')
         Ecctot, Ecc = ccsdT.run()
         ccsdT.compute_ESN()
-        Ex,Nx,Sx = fd_ESN(m, T, mu, ng, Ecctot, quad='sin')
+        Ex, Nx, Sx = fd_ESN(m, T, mu, ng, Ecctot, quad='sin')
         dE = abs((ccsdT.E - Ex)/Ex)
         dS = abs((ccsdT.S - Sx)/Sx)
         dN = abs((ccsdT.N - Nx)/Nx)
@@ -414,10 +414,10 @@ class FTDerivTest(unittest.TestCase):
         model = Hubbard1D(4, 1.0, U)
         Pa = numpy.zeros((4, 4))
         Pb = numpy.zeros((4, 4))
-        Pa[0,0] = 1.0
-        Pa[2,2] = 1.0
-        Pb[1,1] = 1.0
-        Pb[3,3] = 1.0
+        Pa[0, 0] = 1.0
+        Pa[2, 2] = 1.0
+        Pb[1, 1] = 1.0
+        Pb[3, 3] = 1.0
         sys = HubbardSystem(T, model, Pa=Pa, Pb=Pb, mu=mu)
 
         cc = ccsd(sys, T=T, mu=mu, iprint=0)

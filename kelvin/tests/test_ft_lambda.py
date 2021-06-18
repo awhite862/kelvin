@@ -19,7 +19,7 @@ def fd_test_L1(cc, thresh):
     beta = 1.0/T
     mu = cc.mu
     ng = cc.ngrid
-    ti,g,G = quadrature.simpsons(ng, beta)
+    ti, g, G = quadrature.simpsons(ng, beta)
     en = cc.sys.g_energies_tot()
     fo = ft_utils.ff(beta, en, mu)
     fv = ft_utils.ffv(beta, en, mu)
@@ -31,21 +31,21 @@ def fd_test_L1(cc, thresh):
         fvir = [x for x in fv if x > athresh]
         iocc = [i for i, x in enumerate(fo) if x > athresh]
         ivir = [i for i, x in enumerate(fv) if x > athresh]
-        F,I = cc_utils.ft_active_integrals(cc.sys, en, focc, fvir, iocc, ivir)
+        F, I = cc_utils.ft_active_integrals(cc.sys, en, focc, fvir, iocc, ivir)
 
         D1 = D1[numpy.ix_(ivir, iocc)]
         D2 = D2[numpy.ix_(ivir, ivir, iocc, iocc)]
     else:
-        F,I = cc_utils.ft_integrals(cc.sys, en, beta, mu)
-    ng,no,nv = cc.L1.shape
+        F, I = cc_utils.ft_integrals(cc.sys, en, beta, mu)
+    ng, no, nv = cc.L1.shape
     d = 1e-4
     for y in range(ng):
         for i in range(no):
             for a in range(nv):
                 TF = cc.T1.copy()
                 TB = cc.T1.copy()
-                TF[y,a,i] += d
-                TB[y,a,i] -= d
+                TF[y, a, i] += d
+                TB[y, a, i] -= d
                 EF = ft_cc_energy.ft_cc_energy(TF, cc.T2, F.ov, I.oovv, g, beta)
                 EB = ft_cc_energy.ft_cc_energy(TB, cc.T2, F.ov, I.oovv, g, beta)
                 TF1, TF2 = ft_cc_equations.ccsd_stanton(F, I, TF, cc.T2, D1, D2, ti, ng, G)
@@ -74,11 +74,11 @@ def fd_test_L2(cc, thresh):
     beta = 1.0/T
     mu = cc.mu
     ng = cc.ngrid
-    ti,g,G = quadrature.simpsons(ng, beta)
+    ti, g, G = quadrature.simpsons(ng, beta)
     en = cc.sys.g_energies_tot()
     D1 = utils.D1(en, en)
     D2 = utils.D2(en, en)
-    F,I = cc_utils.ft_integrals(cc.sys, en, beta, mu)
+    F, I = cc_utils.ft_integrals(cc.sys, en, beta, mu)
     n = cc.L2.shape[1]
     d = 1e-4
     for y in range(ng):
@@ -88,14 +88,14 @@ def fd_test_L2(cc, thresh):
                     for b in range(n):
                         TF = cc.T2.copy()
                         TB = cc.T2.copy()
-                        TF[y,a,b,i,j] += d
-                        TF[y,a,b,j,i] -= d
-                        TF[y,b,a,i,j] -= d
-                        TF[y,b,a,j,i] += d
-                        TB[y,a,b,i,j] -= d
-                        TB[y,a,b,j,i] += d
-                        TB[y,b,a,i,j] += d
-                        TB[y,b,a,j,i] -= d
+                        TF[y, a, b, i, j] += d
+                        TF[y, a, b, j, i] -= d
+                        TF[y, b, a, i, j] -= d
+                        TF[y, b, a, j, i] += d
+                        TB[y, a, b, i, j] -= d
+                        TB[y, a, b, j, i] += d
+                        TB[y, b, a, i, j] += d
+                        TB[y, b, a, j, i] -= d
                         EF = ft_cc_energy.ft_cc_energy(cc.T1, TF, F.ov, I.oovv, g, beta)
                         EB = ft_cc_energy.ft_cc_energy(cc.T1, TB, F.ov, I.oovv, g, beta)
                         TF1, TF2 = ft_cc_equations.ccsd_stanton(F, I, cc.T1, TF, D1, D2, ti, ng, G)
@@ -169,7 +169,7 @@ class FTLambdaTest(unittest.TestCase):
         ccsdT = ccsd(sys, T=self.T, mu=self.mu, ngrid=ng, iprint=0, max_iter=44, econv=1e-12)
         Etot, Ecc = ccsdT.run()
         ccsdT._ft_uccsd_lambda()
-        ea,eb = ccsdT.sys.u_energies_tot()
+        ea, eb = ccsdT.sys.u_energies_tot()
         na = ea.shape[0]
         nb = eb.shape[0]
         n = na + nb
@@ -224,7 +224,7 @@ class FTLambdaTest(unittest.TestCase):
         en = cc.sys.g_energies_tot()
         D1 = utils.D1(en, en)
         D2 = utils.D2(en, en)
-        F,I = cc_utils.ft_integrals(sys, en, beta, mu)
+        F, I = cc_utils.ft_integrals(sys, en, beta, mu)
         dT1 = numpy.zeros((ng, n, n))
         for y in range(ng):
             for i in range(n):
@@ -232,8 +232,8 @@ class FTLambdaTest(unittest.TestCase):
                     d = 1.e-4
                     TF = cc.T1.copy()
                     TB = cc.T1.copy()
-                    TF[y,a,i] += d
-                    TB[y,a,i] -= d
+                    TF[y, a, i] += d
+                    TB[y, a, i] -= d
                     EF = ft_cc_energy.ft_cc_energy(TF, cc.T2, F.ov, I.oovv, g, beta)
                     EB = ft_cc_energy.ft_cc_energy(TB, cc.T2, F.ov, I.oovv, g, beta)
                     TF1, TF2 = ft_cc_equations.ccsd_stanton(F, I, TF, cc.T2, D1, D2, ti, ng, G)
@@ -250,7 +250,7 @@ class FTLambdaTest(unittest.TestCase):
                     Teb = (1.0/beta)*numpy.einsum('y,y->', TEb, g)
                     fw = EF - Tef
                     bw = EB - Teb
-                    dT1[y,a,i] = (fw - bw)/(2*d)
+                    dT1[y, a, i] = (fw - bw)/(2*d)
 
         # compute derivative from Lambda equations
         dT1L = numpy.zeros((ng, n, n))

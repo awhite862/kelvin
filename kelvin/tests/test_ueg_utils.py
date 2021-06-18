@@ -26,10 +26,10 @@ class UEGUtilsTest(unittest.TestCase):
         I = ueg.g_aint_tot()
         n = I.shape[0]
         na = n//2
-        Irefaa = I[:na,:na,:na,:na]
+        Irefaa = I[:na, :na, :na, :na]
         Irefbb = Irefaa
-        Irefab = I[:na,na:,:na,na:]
-        Ia,Ib,Iabab = ueg.u_aint_tot()
+        Irefab = I[:na, na:, :na, na:]
+        Ia, Ib, Iabab = ueg.u_aint_tot()
 
         da = numpy.linalg.norm(Irefaa - Ia)/numpy.sqrt(Ia.size)
         db = numpy.linalg.norm(Irefbb - Ib)/numpy.sqrt(Ib.size)
@@ -42,7 +42,7 @@ class UEGUtilsTest(unittest.TestCase):
         L = 3.8855
         mu = 0.01
         ueg = UEGSystem(0.0, L, 7.4, mu=mu, norb=7, orbtype='u')
-        Fa,Fb = ueg.u_fock()
+        Fa, Fb = ueg.u_fock()
         F = ueg.g_fock()
         diff = numpy.linalg.norm(Fa.vv - F.vv[:6, :6])
         self.assertTrue(diff < 1e-12)
@@ -50,7 +50,7 @@ class UEGUtilsTest(unittest.TestCase):
         self.assertTrue(diff < 1e-12)
 
         ueg = UEGSCFSystem(0.0, L, 7.4, mu=mu, norb=7, orbtype='u')
-        Fa,Fb = ueg.u_fock()
+        Fa, Fb = ueg.u_fock()
         F = ueg.g_fock()
         diff = numpy.linalg.norm(Fa.vv - F.vv[:6, :6])
         self.assertTrue(diff < 1e-12)

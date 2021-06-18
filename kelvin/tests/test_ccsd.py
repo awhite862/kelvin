@@ -179,7 +179,7 @@ class CCSDTest(unittest.TestCase):
         cell.pseudo = 'gth-pade'
         cell.verbose = 4
         cell.build()
-        kpt = cell.make_kpts((1,1,1), scaled_center=(0,0,1./3.))
+        kpt = cell.make_kpts((1, 1, 1), scaled_center=(0, 0, 1./3.))
 
         mf = scf.RHF(cell, kpt=kpt, exxdiv=None)
         mf.conv_tol_grad = 1e-8

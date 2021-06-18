@@ -15,7 +15,7 @@ def evalL(T1f, T1b, T1i, T2f, T2b, T2i, L1f, L1b, L1i, L2f, L2b, L2i,
     E = ft_cc_energy.ft_cc_energy_neq(
             T1f, T1b, T1i, T2f, T2b, T2i,
             Ff.ov, Fb.ov, F.ov, I.oovv, gr, gi, beta)
-    T1f_,T1b_,T1i_,T2f_,T2b_,T2i_ =\
+    T1f_, T1b_, T1i_, T2f_, T2b_, T2i_ =\
         ft_cc_equations.neq_ccsd_simple(
             Ff, Fb, F, I, T1f, T1b, T1i, T2f, T2b, T2i,
             D1, D2, tir, tii, ngr, ngi, Gr, Gi)
@@ -63,8 +63,8 @@ class NEQDensityTest(unittest.TestCase):
         L2b = L2b.astype(complex)
         D1, D2 = test_utils.make_random_ft_D(n)
         D1 = numpy.zeros((n, n))
-        tii,gi,Gi = quadrature.midpoint(ngi, beta)
-        tir,gr,Gr = quadrature.midpoint(ngr, tmax)
+        tii, gi, Gi = quadrature.midpoint(ngi, beta)
+        tir, gr, Gr = quadrature.midpoint(ngr, tmax)
         Aov = numpy.random.random((ngr, n, n))
         Avv = numpy.random.random((ngr, n, n))
         Aoo = numpy.random.random((ngr, n, n))
@@ -95,7 +95,7 @@ class NEQDensityTest(unittest.TestCase):
             T1f, T1b, T1i, T2f, T2b, T2i, L1f, L1b, L1i, L2f, L2b, L2i,
             Ftemp, Fzr, Fzi, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
 
-        pia,pba,pji,pai = ft_cc_equations.neq_1rdm(
+        pia, pba, pji, pai = ft_cc_equations.neq_1rdm(
                 T1f, T1b, T1i, T2f, T2b, T2i,
                 L1f, L1b, L1i, L2f, L2b, L2i,
                 D1, D2, tir, tii, ngr, ngi, gr, gi, Gr, Gi)

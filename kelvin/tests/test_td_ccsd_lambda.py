@@ -167,7 +167,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         prop = {"tprop": "cn", "lprop": "cn", "max_iter": 200, "damp": 0.3, "thresh": 1e-5}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80)
         Eout, Eccout = tdccsdT.run()
-        Etmp,Ecctmp = tdccsdT._ccsd_lambda()
+        Etmp, Ecctmp = tdccsdT._ccsd_lambda()
         d1 = numpy.linalg.norm(tdccsdT.L1 - L1new[0])/numpy.sqrt(L1new[0].size)
         d2 = numpy.linalg.norm(tdccsdT.L2 - L2new[0])/numpy.sqrt(L2new[0].size)
         error1 = "Difference in L1: {}".format(d1)
@@ -255,17 +255,17 @@ class TDCCSDLambdaTest(unittest.TestCase):
 
         # compute normal-order 1-rdm from propagation
         sys = SCFSystem(m, T, mu, orbtype='g')
-        ea,eb = sys.u_energies_tot()
+        ea, eb = sys.u_energies_tot()
         na = ea.shape[0]
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=80, saveT=True)
         Etmp, Ecctmp = tdccsdT.run()
-        Eref,Eccref = tdccsdT._ccsd_lambda()
-        l1aref = tdccsdT.L1[:na,:na]
-        l1bref = tdccsdT.L1[na:,na:]
-        l2aaref = tdccsdT.L2[:na,:na,:na,:na]
-        l2abref = tdccsdT.L2[:na,na:,:na,na:]
-        l2bbref = tdccsdT.L2[na:,na:,na:,na:]
+        Eref, Eccref = tdccsdT._ccsd_lambda()
+        l1aref = tdccsdT.L1[:na, :na]
+        l1bref = tdccsdT.L1[na:, na:]
+        l2aaref = tdccsdT.L2[:na, :na, :na, :na]
+        l2abref = tdccsdT.L2[:na, na:, :na, na:]
+        l2bbref = tdccsdT.L2[na:, na:, na:, na:]
         # compute normal-order 1-rdm from propagation
         sys = SCFSystem(m, T, mu, orbtype='u')
         prop = {"tprop": "rk4", "lprop": "rk4"}
@@ -345,7 +345,7 @@ class TDCCSDLambdaTest(unittest.TestCase):
         prop = {"tprop": "rk4", "lprop": "rk4"}
         tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=40, singles=False)
         Eout, Eccout = tdccsdT.run()
-        Etmp,Ecctmp = tdccsdT._ccsd_lambda()
+        Etmp, Ecctmp = tdccsdT._ccsd_lambda()
         d2 = numpy.linalg.norm(tdccsdT.L2 - L2new[0])/numpy.sqrt(L2new[0].size)
         error2 = "Difference in L2: {}".format(d2)
         self.assertTrue(d2 < 5e-5, error2)

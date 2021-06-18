@@ -80,8 +80,8 @@ class FTCC2RDMTest(unittest.TestCase):
         hub = Hubbard1D(2, 1.0, U)
         Pa = numpy.zeros((2, 2))
         Pb = numpy.zeros((2, 2))
-        Pa[0,0] = 1.0
-        Pb[1,1] = 1.0
+        Pa[0, 0] = 1.0
+        Pb[1, 1] = 1.0
         sys = HubbardSystem(T, hub, Pa, Pb, mu=mu, orbtype='g')
         cmat = utils.block_diag(sys.ua, sys.ub)
         Mg = sys._transform1(Mg, cmat)

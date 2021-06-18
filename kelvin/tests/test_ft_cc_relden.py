@@ -244,8 +244,8 @@ class FTCCReldenTest(unittest.TestCase):
         uccsdT._urel_ft_1rdm()
 
         # compare relaxed 1rdm
-        daout,dbout = uccsdT.r1rdm
-        naout,nbout = uccsdT.n1rdm
+        daout, dbout = uccsdT.r1rdm
+        naout, nbout = uccsdT.n1rdm
         dref = ccsdT.r1rdm
         nref = ccsdT.n1rdm
         daref = dref[:norb, :norb]
@@ -282,8 +282,8 @@ class FTCCReldenTest(unittest.TestCase):
         uccsdT._urel_ft_1rdm()
 
         # compare relaxed 1rdm
-        daout,dbout = uccsdT.r1rdm
-        naout,nbout = uccsdT.n1rdm
+        daout, dbout = uccsdT.r1rdm
+        naout, nbout = uccsdT.n1rdm
         dref = ccsdT.r1rdm
         nref = ccsdT.n1rdm
         daref = dref[:norb, :norb]
@@ -323,8 +323,8 @@ class FTCCReldenTest(unittest.TestCase):
         uccsdT._urel_ft_1rdm()
 
         # compare relaxed 1rdm
-        daout,dbout = uccsdT.r1rdm
-        naout,nbout = uccsdT.n1rdm
+        daout, dbout = uccsdT.r1rdm
+        naout, nbout = uccsdT.n1rdm
         norb = daout.shape[0]
         dref = ccsdT.r1rdm
         nref = ccsdT.n1rdm
@@ -368,8 +368,8 @@ class FTCCReldenTest(unittest.TestCase):
         uccsdT._urel_ft_1rdm()
 
         # compare relaxed 1rdm
-        daout,dbout = uccsdT.r1rdm
-        naout,nbout = uccsdT.n1rdm
+        daout, dbout = uccsdT.r1rdm
+        naout, nbout = uccsdT.n1rdm
         norb = daout.shape[0]
         dref = ccsdT.r1rdm
         nref = ccsdT.n1rdm
@@ -441,8 +441,8 @@ class FTCCReldenTest(unittest.TestCase):
         uccsdT._urel_ft_1rdm()
 
         # compare relaxed 1rdm
-        daout,dbout = uccsdT.r1rdm
-        naout,nbout = uccsdT.n1rdm
+        daout, dbout = uccsdT.r1rdm
+        naout, nbout = uccsdT.n1rdm
         norb = daout.shape[0]
         dref = ccsdT.r1rdm
         nref = ccsdT.n1rdm

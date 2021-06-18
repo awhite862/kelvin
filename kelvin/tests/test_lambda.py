@@ -10,7 +10,7 @@ from kelvin.scf_system import SCFSystem
 
 
 def fd_test_L1(cc, thresh):
-    eo,ev = cc.sys.g_energies()
+    eo, ev = cc.sys.g_energies()
     Nov = utils.D1(eo, ev)
     Noovv = utils.D2(eo, ev)
     no = eo.shape[0]
@@ -45,8 +45,8 @@ def fd_test_L1(cc, thresh):
         for a in range(nv):
             TF = T1.copy()
             TB = T1.copy()
-            TF[a,i] += delta
-            TB[a,i] -= delta
+            TF[a, i] += delta
+            TB[a, i] -= delta
             EF = cc_energy.cc_energy(TF, T2, F.ov, I.oovv)
             EB = cc_energy.cc_energy(TB, T2, F.ov, I.oovv)
             TF1, TF2 = cc_equations.ccsd_stanton(F, I, TF, T2)
@@ -68,7 +68,7 @@ def fd_test_L1(cc, thresh):
 
 
 def fd_test_L2(cc, thresh):
-    eo,ev = cc.sys.g_energies()
+    eo, ev = cc.sys.g_energies()
     Nov = utils.D1(eo, ev)
     Noovv = utils.D2(eo, ev)
     no = eo.shape[0]
@@ -106,19 +106,19 @@ def fd_test_L2(cc, thresh):
                 for b in range(nv):
                     TF = T2.copy()
                     TB = T2.copy()
-                    TF[a,b,i,j] += delta
-                    TF[b,a,i,j] -= delta
-                    TF[b,a,j,i] += delta
-                    TF[a,b,j,i] -= delta
-                    TB[a,b,i,j] -= delta
-                    TB[b,a,i,j] += delta
-                    TB[a,b,j,i] += delta
-                    TB[b,a,j,i] -= delta
+                    TF[a, b, i, j] += delta
+                    TF[b, a, i, j] -= delta
+                    TF[b, a, j, i] += delta
+                    TF[a, b, j, i] -= delta
+                    TB[a, b, i, j] -= delta
+                    TB[b, a, i, j] += delta
+                    TB[a, b, j, i] += delta
+                    TB[b, a, j, i] -= delta
                     EF = cc_energy.cc_energy(T1, TF, F.ov, I.oovv)
                     EB = cc_energy.cc_energy(T1, TB, F.ov, I.oovv)
                     if cc.singles:
-                        TF1,TF2 = cc_equations.ccsd_stanton(F, I, T1, TF)
-                        TB1,TB2 = cc_equations.ccsd_stanton(F, I, T1, TB)
+                        TF1, TF2 = cc_equations.ccsd_stanton(F, I, T1, TF)
+                        TB1, TB2 = cc_equations.ccsd_stanton(F, I, T1, TB)
                     else:
                         TF2 = cc_equations.ccd_simple(F, I, TF)
                         TB2 = cc_equations.ccd_simple(F, I, TB)

@@ -10,10 +10,10 @@ einsum = numpy.einsum
 
 
 def compute_ref(T1, T2, L1, L2, F, I, D1, D2, ti, ng, g, G, beta):
-    T1temp,T2temp = ft_cc_equations.ccsd_simple(
+    T1temp, T2temp = ft_cc_equations.ccsd_simple(
         F, I, T1, T2, D1, D2, ti, ng, G)
 
-    Eterm = ft_cc_energy.ft_cc_energy(T1, T2, F.ov, I.oovv, g,beta)
+    Eterm = ft_cc_energy.ft_cc_energy(T1, T2, F.ov, I.oovv, g, beta)
     A1 = (1.0/beta)*einsum('via,vai->v', L1, T1temp)
     A2 = (1.0/beta)*0.25*einsum('vijab,vabij->v', L2, T2temp)
     A1g = einsum('v,v->', A1, g)
@@ -87,7 +87,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
         # compute the trace from the CC equations
         ref = compute_ref(T1old, T2old, L1old, L2old, F, I, D1, D2, ti, ng, g, G, beta)
         # compute the trace from the rdms
-        pia,pba,pji,pai = ft_cc_equations.ccsd_1rdm(T1old, T2old, L1old, L2old, D1, D2, ti, ng, g, G)
+        pia, pba, pji, pai = ft_cc_equations.ccsd_1rdm(T1old, T2old, L1old, L2old, D1, D2, ti, ng, g, G)
         out = (1.0/beta)*numpy.einsum('ba,ab->', pba, F.vv)
 
         diff = abs(out - ref)/abs(ref)
@@ -118,9 +118,9 @@ class FTCCSD_RDMTest(unittest.TestCase):
         ti, g, G = quadrature.simpsons(ng, beta)
 
         # compute the trace from the CC equations
-        ref = compute_ref(T1old, T2old, L1old, L2old,F, I, D1, D2, ti, ng, g, G, beta)
+        ref = compute_ref(T1old, T2old, L1old, L2old, F, I, D1, D2, ti, ng, g, G, beta)
         # compute the trace from the rdms
-        pia,pba,pji,pai = ft_cc_equations.ccsd_1rdm(T1old, T2old, L1old, L2old, D1, D2, ti, ng, g, G)
+        pia, pba, pji, pai = ft_cc_equations.ccsd_1rdm(T1old, T2old, L1old, L2old, D1, D2, ti, ng, g, G)
         out = (1.0/beta)*numpy.einsum('ji,ij->', pji, F.oo)
 
         diff = abs(out - ref)/abs(ref)
@@ -153,7 +153,7 @@ class FTCCSD_RDMTest(unittest.TestCase):
         # compute the trace from the CC equations
         ref = compute_ref(T1old, T2old, L1old, L2old, F, I, D1, D2, ti, ng, g, G, beta)
         # compute the trace from the rdms
-        pia,pba,pji,pai = ft_cc_equations.ccsd_1rdm(T1old, T2old, L1old, L2old, D1, D2, ti, ng, g, G)
+        pia, pba, pji, pai = ft_cc_equations.ccsd_1rdm(T1old, T2old, L1old, L2old, D1, D2, ti, ng, g, G)
         out = (1.0/beta)*numpy.einsum('ai,ia->', pai, F.ov)
 
         diff = abs(out - ref)/abs(ref)

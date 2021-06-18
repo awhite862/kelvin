@@ -22,7 +22,7 @@ def evalLd(T1f, T1b, T1i, T2f, T2b, T2i, L1f, L1b, L1i, L2f, L2b, L2i,
     E = ft_cc_energy.ft_cc_energy_neq(
         T1f, T1b, T1i, T2f, T2b, T2i,
         Ff.ov, Fb.ov, F.ov, I.oovv, gr, gi, beta)
-    T1f_,T1b_,T1i_,T2f_,T2b_,T2i_ =\
+    T1f_, T1b_, T1i_, T2f_, T2b_, T2i_ =\
         ft_cc_equations.neq_ccsd_simple(
             Ff, Fb, F, I, T1f, T1b, T1i, T2f, T2b, T2i,
             D1, D2, tir, tii, ngr, ngi, Gr, Gi)
@@ -73,8 +73,8 @@ class NEQPropTest(unittest.TestCase):
         tmax = 1.0
         ng = int(tmax/deltat)
         ngr = ng
-        tii,gi,Gi = quadrature.simpsons(ngi, beta)
-        tir,gr,Gr = quadrature.midpoint(ngr, tmax)
+        tii, gi, Gi = quadrature.simpsons(ngi, beta)
+        tir, gr, Gr = quadrature.midpoint(ngr, tmax)
         d = 1e-4
         sys = h2_field_system(T, mu, omega, tir, O=(d*field), ot=ng - 1)
         en = sys.g_energies_tot()
@@ -171,45 +171,45 @@ class NEQPropTest(unittest.TestCase):
                     d = 2.e-4
                     TP = cc.T1i.copy()
                     TM = cc.T1i.copy()
-                    TP[y,a,i] += d
-                    TM[y,a,i] -= d
+                    TP[y, a, i] += d
+                    TM[y, a, i] -= d
                     EP = ft_cc_energy.ft_cc_energy_neq(
                         cc.T1f, cc.T1b, TP, cc.T2f, cc.T2b, cc.T2i,
                         Ff.ov, Fb.ov, F.ov, I.oovv, gr, gi, beta)
                     EM = ft_cc_energy.ft_cc_energy_neq(
                         cc.T1f, cc.T1b, TM, cc.T2f, cc.T2b, cc.T2i,
                         Ff.ov, Fb.ov, F.ov, I.oovv, gr, gi, beta)
-                    dT1i[y,i,a] = (EP - EM)/(2*d)
+                    dT1i[y, i, a] = (EP - EM)/(2*d)
         for y in range(ngr):
             for i in range(n):
                 for a in range(n):
                     d = 2.e-4
                     TP = cc.T1b.copy()
                     TM = cc.T1b.copy()
-                    TP[y,a,i] += d
-                    TM[y,a,i] -= d
+                    TP[y, a, i] += d
+                    TM[y, a, i] -= d
                     EP = ft_cc_energy.ft_cc_energy_neq(
                         cc.T1f, TP, cc.T1i, cc.T2f, cc.T2b, cc.T2i,
                         Ff.ov, Fb.ov, F.ov, I.oovv, gr, gi, beta)
                     EM = ft_cc_energy.ft_cc_energy_neq(
                         cc.T1f, TM, cc.T1i, cc.T2f, cc.T2b, cc.T2i,
                         Ff.ov, Fb.ov, F.ov, I.oovv, gr, gi, beta)
-                    dT1b[y,i,a] = (EP - EM)/(2*d)
+                    dT1b[y, i, a] = (EP - EM)/(2*d)
         for y in range(ngr):
             for i in range(n):
                 for a in range(n):
                     d = 2.e-4
                     TP = cc.T1f.copy()
                     TM = cc.T1f.copy()
-                    TP[y,a,i] += d
-                    TM[y,a,i] -= d
+                    TP[y, a, i] += d
+                    TM[y, a, i] -= d
                     EP = ft_cc_energy.ft_cc_energy_neq(
                         TP, cc.T1b, cc.T1i, cc.T2f, cc.T2b, cc.T2i,
                         Ff.ov, Fb.ov, F.ov, I.oovv, gr, gi, beta)
                     EM = ft_cc_energy.ft_cc_energy_neq(
                         TM, cc.T1b, cc.T1i, cc.T2f, cc.T2b, cc.T2i,
                         Ff.ov, Fb.ov, F.ov, I.oovv, gr, gi, beta)
-                    dT1f[y,i,a] = (EP - EM)/(2*d)
+                    dT1f[y, i, a] = (EP - EM)/(2*d)
 
         dT2i = numpy.zeros((ngi, n, n, n, n), dtype=complex)
         dT2b = numpy.zeros((ngr, n, n, n, n), dtype=complex)
@@ -222,21 +222,21 @@ class NEQPropTest(unittest.TestCase):
                             d = 2.e-4
                             TP = cc.T2i.copy()
                             TM = cc.T2i.copy()
-                            TP[y,a,b,i,j] += d
-                            TP[y,a,b,j,i] -= d
-                            TP[y,b,a,i,j] -= d
-                            TP[y,b,a,j,i] += d
-                            TM[y,a,b,i,j] -= d
-                            TM[y,a,b,j,i] += d
-                            TM[y,b,a,i,j] += d
-                            TM[y,b,a,j,i] -= d
+                            TP[y, a, b, i, j] += d
+                            TP[y, a, b, j, i] -= d
+                            TP[y, b, a, i, j] -= d
+                            TP[y, b, a, j, i] += d
+                            TM[y, a, b, i, j] -= d
+                            TM[y, a, b, j, i] += d
+                            TM[y, b, a, i, j] += d
+                            TM[y, b, a, j, i] -= d
                             EP = ft_cc_energy.ft_cc_energy_neq(
                                 cc.T1f, cc.T1b, cc.T1i, cc.T2f, cc.T2b, TP,
                                 Ff.ov, Fb.ov, F.ov, I.oovv, gr, gi, beta)
                             EM = ft_cc_energy.ft_cc_energy_neq(
                                 cc.T1f, cc.T1b, cc.T1i, cc.T2f, cc.T2b, TM,
                                 Ff.ov, Fb.ov, F.ov, I.oovv, gr, gi, beta)
-                            dT2i[y,i,j,a,b] = (EP - EM)/(2*d)
+                            dT2i[y, i, j, a, b] = (EP - EM)/(2*d)
         for y in range(ngr):
             for i in range(n):
                 for j in range(n):
@@ -245,21 +245,21 @@ class NEQPropTest(unittest.TestCase):
                             d = 2.e-4
                             TP = cc.T2b.copy()
                             TM = cc.T2b.copy()
-                            TP[y,a,b,i,j] += d
-                            TP[y,a,b,j,i] -= d
-                            TP[y,b,a,i,j] -= d
-                            TP[y,b,a,j,i] += d
-                            TM[y,a,b,i,j] -= d
-                            TM[y,a,b,j,i] += d
-                            TM[y,b,a,i,j] += d
-                            TM[y,b,a,j,i] -= d
+                            TP[y, a, b, i, j] += d
+                            TP[y, a, b, j, i] -= d
+                            TP[y, b, a, i, j] -= d
+                            TP[y, b, a, j, i] += d
+                            TM[y, a, b, i, j] -= d
+                            TM[y, a, b, j, i] += d
+                            TM[y, b, a, i, j] += d
+                            TM[y, b, a, j, i] -= d
                             EP = ft_cc_energy.ft_cc_energy_neq(
                                 cc.T1f, cc.T1b, cc.T1i, cc.T2f, TP, cc.T2i,
                                 Ff.ov, Fb.ov, F.ov, I.oovv, gr, gi, beta)
                             EM = ft_cc_energy.ft_cc_energy_neq(
                                 cc.T1f, cc.T1b, cc.T1i, cc.T2f, TM, cc.T2i,
                                 Ff.ov, Fb.ov, F.ov, I.oovv, gr, gi, beta)
-                            dT2b[y,i,j,a,b] = (EP - EM)/(2*d)
+                            dT2b[y, i, j, a, b] = (EP - EM)/(2*d)
         for y in range(ngr):
             for i in range(n):
                 for j in range(n):
@@ -268,21 +268,21 @@ class NEQPropTest(unittest.TestCase):
                             d = 2.e-4
                             TP = cc.T2f.copy()
                             TM = cc.T2f.copy()
-                            TP[y,a,b,i,j] += d
-                            TP[y,a,b,j,i] -= d
-                            TP[y,b,a,i,j] -= d
-                            TP[y,b,a,j,i] += d
-                            TM[y,a,b,i,j] -= d
-                            TM[y,a,b,j,i] += d
-                            TM[y,b,a,i,j] += d
-                            TM[y,b,a,j,i] -= d
+                            TP[y, a, b, i, j] += d
+                            TP[y, a, b, j, i] -= d
+                            TP[y, b, a, i, j] -= d
+                            TP[y, b, a, j, i] += d
+                            TM[y, a, b, i, j] -= d
+                            TM[y, a, b, j, i] += d
+                            TM[y, b, a, i, j] += d
+                            TM[y, b, a, j, i] -= d
                             EP = ft_cc_energy.ft_cc_energy_neq(
                                 cc.T1f, cc.T1b, cc.T1i, TP, cc.T2b, cc.T2i,
                                 Ff.ov, Fb.ov, F.ov, I.oovv, gr, gi, beta)
                             EM = ft_cc_energy.ft_cc_energy_neq(
                                 cc.T1f, cc.T1b, cc.T1i, TM, cc.T2b, cc.T2i,
                                 Ff.ov, Fb.ov, F.ov, I.oovv, gr, gi, beta)
-                            dT2f[y,i,j,a,b] = (EP - EM)/(2*d)
+                            dT2f[y, i, j, a, b] = (EP - EM)/(2*d)
         Ers1 = numpy.einsum('yia,yai->', dT1f, td1f)
         Ers1 += numpy.einsum('yia,yai->', dT1b, td1b)
         Ers1 += numpy.einsum('yia,yai->', dT1i, td1i)
@@ -326,7 +326,7 @@ class NEQPropTest(unittest.TestCase):
 
         eri = integrals.get_phys(mol, mos, mos, mos, mos)
         hcore = numpy.einsum('mp,mn,nq->pq', mos, m.get_hcore(m.mol), mos)
-        F = hcore + eri[:,0,:,0] - eri[:,0,0,:]
+        F = hcore + eri[:, 0, :, 0] - eri[:, 0, 0, :]
         en, vvvvv = numpy.linalg.eigh(F)
 
         E = numpy.zeros((3))
@@ -398,17 +398,17 @@ class NEQPropTest(unittest.TestCase):
         field = numpy.einsum('x,xij->ij', E, mol.intor('cint1e_r_sph', comp=3))
         field = numpy.einsum('mp,mn,nq->pq', mos, field, mos)
         H = numpy.zeros((4, 4))
-        H[1,1] += hcore[0,0]
-        H[2,2] += hcore[1,1]
-        H[1,2] += hcore[0,1]
-        H[2,1] += hcore[1,0]
-        H[3,3] = hcore[0,0] + hcore[1,1] + eri[0,1,0,1] - eri[0,1,1,0]
+        H[1, 1] += hcore[0, 0]
+        H[2, 2] += hcore[1, 1]
+        H[1, 2] += hcore[0, 1]
+        H[2, 1] += hcore[1, 0]
+        H[3, 3] = hcore[0, 0] + hcore[1, 1] + eri[0, 1, 0, 1] - eri[0, 1, 1, 0]
         Hint = numpy.zeros((4, 4))
-        Hint[1,1] = field[0,0]
-        Hint[2,2] = field[1,1]
-        Hint[1,2] = field[0,1]
-        Hint[2,1] = field[1,0]
-        Hint[3,3] = field[0,0] + field[1,1]
+        Hint[1, 1] = field[0, 0]
+        Hint[2, 2] = field[1, 1]
+        Hint[1, 2] = field[0, 1]
+        Hint[2, 1] = field[1, 0]
+        Hint[3, 3] = field[0, 0] + field[1, 1]
 
         e0, v0 = numpy.linalg.eigh(H)
         exp = numpy.exp(-beta*(e0))

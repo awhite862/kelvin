@@ -57,7 +57,7 @@ class HubbardTest(unittest.TestCase):
         nelec = 2
         L = 2
         U = 1.0
-        Es,Ec = self._compare(nelec, L, U)
+        Es, Ec = self._compare(nelec, L, U)
         diff = abs(Es - Ec)
         msg = "Expected: {}  Actual: {}".format(Es, Ec)
         self.assertTrue(diff < self.thresh, msg)
@@ -66,7 +66,7 @@ class HubbardTest(unittest.TestCase):
         nelec = 4
         L = 4
         U = 1.0
-        Es,Ec = self._compare(nelec, L, U)
+        Es, Ec = self._compare(nelec, L, U)
         diff = abs(Es - Ec)
         msg = "Expected: {}  Actual: {}".format(Es, Ec)
         self.assertTrue(diff < self.thresh, msg)
@@ -75,7 +75,7 @@ class HubbardTest(unittest.TestCase):
         nelec = 4
         L = 4
         U = 1.0
-        Es,Ec = self._compare_pbc(nelec, L, U)
+        Es, Ec = self._compare_pbc(nelec, L, U)
         diff = abs(Es - Ec)
         msg = "Expected: {}  Actual: {}".format(Es, Ec)
         self.assertTrue(diff < self.thresh, msg)
@@ -84,7 +84,7 @@ class HubbardTest(unittest.TestCase):
         nelec = 6
         L = 6
         U = 2.0
-        Es,Ec = self._compare_pbc(nelec, L, U)
+        Es, Ec = self._compare_pbc(nelec, L, U)
         diff = abs(Es - Ec)
         msg = "Expected: {}  Actual: {}".format(Es, Ec)
         self.assertTrue(diff < self.thresh, msg)
@@ -109,10 +109,10 @@ class HubbardTest(unittest.TestCase):
         T2bb = numpy.zeros((1, 1, 1, 1))
         T1a = numpy.zeros((1, 1))
         T1b = numpy.zeros((1, 1))
-        T1a[0,0] = 1.0
-        T1b[0,0] = 1.0
-        T1 = (T1a,T1b)
-        T2 = (T2aa,T2ab,T2bb)
+        T1a[0, 0] = 1.0
+        T1b[0, 0] = 1.0
+        T1 = (T1a, T1b)
+        T2 = (T2aa, T2ab, T2bb)
         Eout, Ecc = cc.run(T1=T1, T2=T2)
         diff = abs(Eout - Eref)
         msg = "Expected: {} Actual: {}".format(Eref, Eout)
