@@ -14,7 +14,8 @@ class CCUtilsTest(unittest.TestCase):
     def _test_fd(self, F, B, D, delta, name, thresh):
         fd = (F - B)/(2.0*delta)
         diff = numpy.linalg.norm(fd - D)
-        self.assertTrue(diff < thresh, "Difference in " + name + ": {}".format(diff))
+        self.assertTrue(
+            diff < thresh, "Difference in " + name + ": {}".format(diff))
 
     def test_Be_active(self):
         mol = gto.M(
@@ -46,8 +47,10 @@ class CCUtilsTest(unittest.TestCase):
         ioccb = [i for i, x in enumerate(fob) if x > athresh]
         ivirb = [i for i, x in enumerate(fvb) if x > athresh]
         Fa, Fb, Ia, Ib, Iabab = cc_utils.uft_active_integrals(
-                sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
-        Fga, Fgb, Iga, Igb, Igabab = cc_utils.uft_integrals(sys, ea, eb, beta, mu)
+            sys, ea, eb, focca, fvira,
+            foccb, fvirb, iocca, ivira, ioccb, ivirb)
+        Fga, Fgb, Iga, Igb, Igabab = cc_utils.uft_integrals(
+            sys, ea, eb, beta, mu)
 
         # test Fock matrix
         Foo = Fga.oo[numpy.ix_(iocca, iocca)]
@@ -240,10 +243,12 @@ class CCUtilsTest(unittest.TestCase):
         m.scf()
         sys = SCFSystem(m, T, mu+delta, orbtype='u')
         ea, eb = sys.u_energies_tot()
-        Faf, Fbf, Iaf, Ibf, Iababf = cc_utils.uft_integrals(sys, ea, eb, beta, mu + delta)
+        Faf, Fbf, Iaf, Ibf, Iababf = cc_utils.uft_integrals(
+            sys, ea, eb, beta, mu + delta)
         sys = SCFSystem(m, T, mu-delta, orbtype='u')
         ea, eb = sys.u_energies_tot()
-        Fab, Fbb, Iab, Ibb, Iababb = cc_utils.uft_integrals(sys, ea, eb, beta, mu - delta)
+        Fab, Fbb, Iab, Ibb, Iababb = cc_utils.uft_integrals(
+            sys, ea, eb, beta, mu - delta)
 
         sys = SCFSystem(m, T, mu, orbtype='u')
         ea, eb = sys.u_energies_tot()
@@ -286,22 +291,38 @@ class CCUtilsTest(unittest.TestCase):
         self._test_fd(Ibf.ooov, Ibb.ooov, dIb.ooov, delta, "Ibooov", thresh)
         self._test_fd(Ibf.oooo, Ibb.oooo, dIb.oooo, delta, "Iboooo", thresh)
 
-        self._test_fd(Iababf.vvvv, Iababb.vvvv, dIabab.vvvv, delta, "Iababvvvv", thresh)
-        self._test_fd(Iababf.vvvo, Iababb.vvvo, dIabab.vvvo, delta, "Iababvvvo", thresh)
-        self._test_fd(Iababf.vvov, Iababb.vvov, dIabab.vvov, delta, "Iababvvov", thresh)
-        self._test_fd(Iababf.vovv, Iababb.vovv, dIabab.vovv, delta, "Iababvovv", thresh)
-        self._test_fd(Iababf.ovvv, Iababb.ovvv, dIabab.ovvv, delta, "Iababovvv", thresh)
-        self._test_fd(Iababf.vvoo, Iababb.vvoo, dIabab.vvoo, delta, "Iababvvoo", thresh)
-        self._test_fd(Iababf.vovo, Iababb.vovo, dIabab.vovo, delta, "Iababvovo", thresh)
-        self._test_fd(Iababf.ovvo, Iababb.ovvo, dIabab.ovvo, delta, "Iababovvo", thresh)
-        self._test_fd(Iababf.voov, Iababb.voov, dIabab.voov, delta, "Iababvoov", thresh)
-        self._test_fd(Iababf.ovov, Iababb.ovov, dIabab.ovov, delta, "Iababovov", thresh)
-        self._test_fd(Iababf.oovv, Iababb.oovv, dIabab.oovv, delta, "Iababoovv", thresh)
-        self._test_fd(Iababf.vooo, Iababb.vooo, dIabab.vooo, delta, "Iababvooo", thresh)
-        self._test_fd(Iababf.ovoo, Iababb.ovoo, dIabab.ovoo, delta, "Iababovoo", thresh)
-        self._test_fd(Iababf.oovo, Iababb.oovo, dIabab.oovo, delta, "Iababoovo", thresh)
-        self._test_fd(Iababf.ooov, Iababb.ooov, dIabab.ooov, delta, "Iababooov", thresh)
-        self._test_fd(Iababf.oooo, Iababb.oooo, dIabab.oooo, delta, "Iababoooo", thresh)
+        self._test_fd(
+            Iababf.vvvv, Iababb.vvvv, dIabab.vvvv, delta, "Iababvvvv", thresh)
+        self._test_fd(
+            Iababf.vvvo, Iababb.vvvo, dIabab.vvvo, delta, "Iababvvvo", thresh)
+        self._test_fd(
+            Iababf.vvov, Iababb.vvov, dIabab.vvov, delta, "Iababvvov", thresh)
+        self._test_fd(
+            Iababf.vovv, Iababb.vovv, dIabab.vovv, delta, "Iababvovv", thresh)
+        self._test_fd(
+            Iababf.ovvv, Iababb.ovvv, dIabab.ovvv, delta, "Iababovvv", thresh)
+        self._test_fd(
+            Iababf.vvoo, Iababb.vvoo, dIabab.vvoo, delta, "Iababvvoo", thresh)
+        self._test_fd(
+            Iababf.vovo, Iababb.vovo, dIabab.vovo, delta, "Iababvovo", thresh)
+        self._test_fd(
+            Iababf.ovvo, Iababb.ovvo, dIabab.ovvo, delta, "Iababovvo", thresh)
+        self._test_fd(
+            Iababf.voov, Iababb.voov, dIabab.voov, delta, "Iababvoov", thresh)
+        self._test_fd(
+            Iababf.ovov, Iababb.ovov, dIabab.ovov, delta, "Iababovov", thresh)
+        self._test_fd(
+            Iababf.oovv, Iababb.oovv, dIabab.oovv, delta, "Iababoovv", thresh)
+        self._test_fd(
+            Iababf.vooo, Iababb.vooo, dIabab.vooo, delta, "Iababvooo", thresh)
+        self._test_fd(
+            Iababf.ovoo, Iababb.ovoo, dIabab.ovoo, delta, "Iababovoo", thresh)
+        self._test_fd(
+            Iababf.oovo, Iababb.oovo, dIabab.oovo, delta, "Iababoovo", thresh)
+        self._test_fd(
+            Iababf.ooov, Iababb.ooov, dIabab.ooov, delta, "Iababooov", thresh)
+        self._test_fd(
+            Iababf.oooo, Iababb.oooo, dIabab.oooo, delta, "Iababoooo", thresh)
 
     def test_Be_gen_active_deriv(self):
         mol = gto.M(
@@ -325,7 +346,8 @@ class CCUtilsTest(unittest.TestCase):
         fv = ft_utils.ffv(beta, en, mu)
         iocc = [i for i, x in enumerate(fo) if x > athresh]
         ivir = [i for i, x in enumerate(fv) if x > athresh]
-        F, I = cc_utils.ft_d_active_integrals(sys, en, fo, fv, iocc, ivir, dvec)
+        F, I = cc_utils.ft_d_active_integrals(
+            sys, en, fo, fv, iocc, ivir, dvec)
         Fg, Ig = cc_utils.ft_d_integrals(sys, en, fo, fv, dvec)
 
         # test Fock matrix

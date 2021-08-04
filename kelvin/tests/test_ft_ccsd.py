@@ -36,7 +36,8 @@ class FTCCSDTest(unittest.TestCase):
         T = 1.0
         mu = 0.0
         sys = SCFSystem(m, T, mu)
-        ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=24, econv=1e-11, ngrid=200)
+        ccsdT = ccsd(sys, iprint=0, T=T, mu=mu,
+                     max_iter=24, econv=1e-11, ngrid=200)
         Ecc = ccsdT.run()
 
         fciT = FCI(sys, T=T, mu=mu)
@@ -124,7 +125,8 @@ class FTCCSDTest(unittest.TestCase):
         damp = 0.2
         mi = 50
         ueg = UEGSystem(T, L, cut, mu=mu, norb=norb, orbtype='g')
-        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=10)
+        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0,
+                     max_iter=mi, damp=damp, ngrid=10)
         Ecctot, Ecc = ccsdT.run()
         diff = abs(self.ueg_ref - Ecc)
         error = "Expected: {}  Actual: {}".format(self.ueg_ref, Ecc)
@@ -139,7 +141,8 @@ class FTCCSDTest(unittest.TestCase):
         damp = 0.2
         mi = 50
         ueg = UEGSystem(T, L, cut, mu=mu, norb=norb)
-        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=10)
+        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0,
+                     max_iter=mi, damp=damp, ngrid=10)
         Ecctot, Ecc = ccsdT.run()
         diff = abs(self.ueg_ref - Ecc)
         error = "Expected: {}  Actual: {}".format(self.ueg_ref, Ecc)
@@ -154,7 +157,8 @@ class FTCCSDTest(unittest.TestCase):
         damp = 0.2
         mi = 50
         ueg = PUEGSystem(T, L, cut, mu=mu, norb=norb)
-        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=10)
+        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0,
+                     max_iter=mi, damp=damp, ngrid=10)
         Ecctot, Ecc = ccsdT.run()
         diff = abs(self.pueg_ref - Ecc)
         error = "Expected: {}  Actual: {}".format(self.pueg_ref, Ecc)
@@ -169,9 +173,11 @@ class FTCCSDTest(unittest.TestCase):
         damp = 0.2
         mi = 50
         ueg = UEGSystem(T, L, cut, mu=mu, norb=norb, orbtype='g')
-        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, tconv=1e-8, ngrid=10)
+        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi,
+                     damp=damp, tconv=1e-8, ngrid=10)
         Ecctot1, Ecc1 = ccsdT.run()
-        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, tconv=1e-8, rt_iter="point")
+        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi,
+                     damp=damp, tconv=1e-8, rt_iter="point")
         Ecctot2, Ecc2 = ccsdT.run()
         diff = abs(Ecc1 - Ecc2)
         error = "Expected: {}  Actual: {}".format(Ecc1, Ecc2)
@@ -186,9 +192,11 @@ class FTCCSDTest(unittest.TestCase):
         damp = 0.2
         mi = 50
         ueg = UEGSystem(T, L, cut, mu=mu, norb=norb, orbtype='u')
-        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, tconv=1e-8, ngrid=10)
+        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi,
+                     damp=damp, tconv=1e-8, ngrid=10)
         Ecctot1, Ecc1 = ccsdT.run()
-        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, tconv=1e-8, rt_iter="point")
+        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi,
+                     damp=damp, tconv=1e-8, rt_iter="point")
         Ecctot2, Ecc2 = ccsdT.run()
         diff = abs(Ecc1 - Ecc2)
         error = "Expected: {}  Actual: {}".format(Ecc1, Ecc2)

@@ -14,8 +14,10 @@ class UEGUtilsTest(unittest.TestCase):
         mu = 2.0
         ueg = UEGSystem(0.0, L, 7.4, mu=mu, norb=19, orbtype='g')
         I = ueg.g_int_tot()
-        P12 = numpy.linalg.norm(I - I.transpose((1, 0, 3, 2)))/numpy.sqrt(I.size)
-        Preal = numpy.linalg.norm(I - I.transpose((2, 3, 0, 1)))/numpy.sqrt(I.size)
+        P12 = numpy.linalg.norm(
+            I - I.transpose((1, 0, 3, 2)))/numpy.sqrt(I.size)
+        Preal = numpy.linalg.norm(
+            I - I.transpose((2, 3, 0, 1)))/numpy.sqrt(I.size)
         self.assertTrue(P12 < 1e-12)
         self.assertTrue(Preal < 1e-12)
 

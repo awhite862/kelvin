@@ -9,7 +9,8 @@ try:
     from lattice.hubbard import Hubbard1D
     from lattice.fci import FCISimple
     from kelvin.hubbard_system import HubbardSystem
-    from kelvin.hubbard_field_system import hubbard_field_system, HubbardFieldSystem
+    from kelvin.hubbard_field_system import hubbard_field_system,\
+        HubbardFieldSystem
     has_lattice = True
 except ImportError:
     has_lattice = False
@@ -85,12 +86,15 @@ class HubbardFieldTest(unittest.TestCase):
         Pb = numpy.zeros((2, 2))
         Pa[0, 0] = 1.0
         Pb[1, 1] = 1.0
-        sys = hubbard_field_system(T, hub, ti, A0, t0, sigma, omega, mu=mu, Pa=Pa, Pb=Pb)
-        cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-9, max_iter=40, damp=0.1, ngr=ng, ngi=ngi, iprint=0)
+        sys = hubbard_field_system(T, hub, ti, A0, t0, sigma,
+                                   omega, mu=mu, Pa=Pa, Pb=Pb)
+        cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-9,
+                      max_iter=40, damp=0.1, ngr=ng, ngi=ngi, iprint=0)
         E, Ecc = cc.run()
 
         sys = HubbardSystem(T, hub, Pa, Pb, mu=mu, orbtype='u')
-        cc = ccsd(sys, iprint=0, max_iter=80, econv=1e-11, T=T, mu=mu, ngrid=ngi)
+        cc = ccsd(sys, iprint=0, max_iter=80,
+                  econv=1e-11, T=T, mu=mu, ngrid=ngi)
         Eoutr, Eccr = cc.run()
         diff = abs(Eoutr - E)
         msg = "Difference: {}".format(diff)
@@ -183,13 +187,15 @@ class HubbardFieldTest(unittest.TestCase):
         Pb = numpy.zeros((2, 2))
         Pa[0, 0] = 1.0
         Pb[1, 1] = 1.0
-        sys = hubbard_field_system(T, hub, ti, A0, t0, sigma, omega, mu=mu, Pa=Pa, Pb=Pb)
+        sys = hubbard_field_system(
+            T, hub, ti, A0, t0, sigma, omega, mu=mu, Pa=Pa, Pb=Pb)
         m = numpy.zeros((2, 2))
         m[0, 0] = 1.0
         ma = numpy.einsum('ij,ip,jq->pq', m, sys.ua, sys.ua)
         mb = numpy.einsum('ij,ip,jq->pq', m, sys.ub, sys.ub)
         mg = block_diag(ma, mb)
-        cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-9, max_iter=40, damp=0.1, ngr=ng, ngi=ngi, iprint=0)
+        cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-9,
+                      max_iter=40, damp=0.1, ngr=ng, ngi=ngi, iprint=0)
         E, Ecc = cc.run()
         cc._neq_ccsd_lambda()
         cc._neq_1rdm()
@@ -290,7 +296,8 @@ class HubbardFieldTest(unittest.TestCase):
         Pb = numpy.zeros((2, 2))
         Pa[0, 0] = 1.0
         Pb[1, 1] = 1.0
-        sys = hubbard_field_system(T, hub, ti, A0, t0, sigma, omega, mu=mu, Pa=Pa, Pb=Pb)
+        sys = hubbard_field_system(
+            T, hub, ti, A0, t0, sigma, omega, mu=mu, Pa=Pa, Pb=Pb)
         m = numpy.zeros((2, 2))
         m[0, 0] = 1.0
         ma = numpy.einsum('ij,ip,jq->pq', m, sys.ua, sys.ua)
@@ -298,9 +305,11 @@ class HubbardFieldTest(unittest.TestCase):
         mg = block_diag(ma, mb)
 
         Mscc2 = []
-        sys = HubbardFieldSystem(T, hub, A0, t0, sigma, omega, mu=mu, Pa=Pa, Pb=Pb)
+        sys = HubbardFieldSystem(
+            T, hub, A0, t0, sigma, omega, mu=mu, Pa=Pa, Pb=Pb)
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        mycc = TDCCSD(sys, prop, T=T, mu=mu, iprint=0, ngrid=ngi, saveT=True, saveL=True)
+        mycc = TDCCSD(sys, prop, T=T, mu=mu, iprint=0,
+                      ngrid=ngi, saveT=True, saveL=True)
         mycc.run()
         mycc._ccsd_lambda()
 

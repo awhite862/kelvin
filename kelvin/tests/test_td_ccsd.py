@@ -132,7 +132,8 @@ class TDCCSDTest(unittest.TestCase):
         ccsdT = ccsd(sys, T=T, mu=mu, ngrid=90, iprint=0, athresh=1e-20)
         Eref, Eccref = ccsdT.run()
         prop = {"tprop": "rk4"}
-        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=100, athresh=1e-20, iprint=0)
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=100,
+                         athresh=1e-20, iprint=0)
         Eout, Eccout = tdccsdT.run()
         diff = abs(Eccref - Eccout)
         error = "Expected: {}  Actual: {}".format(Eccref, Eccout)

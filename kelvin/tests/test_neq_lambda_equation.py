@@ -165,9 +165,12 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         diffi = numpy.linalg.norm(L1in - dT1i)
         diffb = numpy.linalg.norm(L1bn - dT1b)
         difff = numpy.linalg.norm(L1fn - dT1f)
-        self.assertTrue(abs(diffi) < self.thresh, "Error in dTi: {}".format(diffi))
-        self.assertTrue(abs(diffb) < self.thresh, "Error in dTb: {}".format(diffb))
-        self.assertTrue(abs(difff) < self.thresh, "Error in dTf: {}".format(difff))
+        self.assertTrue(
+            abs(diffi) < self.thresh, "Error in dTi: {}".format(diffi))
+        self.assertTrue(
+            abs(diffb) < self.thresh, "Error in dTb: {}".format(diffb))
+        self.assertTrue(
+            abs(difff) < self.thresh, "Error in dTf: {}".format(difff))
 
     def test_L2_simple(self):
         ngr = 4
@@ -314,9 +317,12 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         diffi = numpy.linalg.norm(L2in - dT2i)
         diffb = numpy.linalg.norm(L2bn - dT2b)
         difff = numpy.linalg.norm(L2fn - dT2f)
-        self.assertTrue(abs(diffi) < self.thresh, "Error in dTi: {}".format(diffi))
-        self.assertTrue(abs(diffb) < self.thresh, "Error in dTb: {}".format(diffb))
-        self.assertTrue(abs(difff) < self.thresh, "Error in dTf: {}".format(difff))
+        self.assertTrue(
+            abs(diffi) < self.thresh, "Error in dTi: {}".format(diffi))
+        self.assertTrue(
+            abs(diffb) < self.thresh, "Error in dTb: {}".format(diffb))
+        self.assertTrue(
+            abs(difff) < self.thresh, "Error in dTf: {}".format(difff))
 
     def test_lambda_opt(self):
         ngr = 4
@@ -375,12 +381,18 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         diff1i = numpy.linalg.norm(L1is - L1io)
         diff1b = numpy.linalg.norm(L1bs - L1bo)
         diff1f = numpy.linalg.norm(L1fs - L1fo)
-        self.assertTrue(abs(diff1i) < self.thresh, "Error in T1i: {}".format(diff1i))
-        self.assertTrue(abs(diff1b) < self.thresh, "Error in T1b: {}".format(diff1b))
-        self.assertTrue(abs(diff1f) < self.thresh, "Error in T1f: {}".format(diff1f))
-        self.assertTrue(abs(diff2i) < self.thresh, "Error in T2i: {}".format(diff2i))
-        self.assertTrue(abs(diff2b) < self.thresh, "Error in T2b: {}".format(diff2b))
-        self.assertTrue(abs(diff2f) < self.thresh, "Error in T2f: {}".format(diff2f))
+        self.assertTrue(
+            abs(diff1i) < self.thresh, "Error in T1i: {}".format(diff1i))
+        self.assertTrue(
+            abs(diff1b) < self.thresh, "Error in T1b: {}".format(diff1b))
+        self.assertTrue(
+            abs(diff1f) < self.thresh, "Error in T1f: {}".format(diff1f))
+        self.assertTrue(
+            abs(diff2i) < self.thresh, "Error in T2i: {}".format(diff2i))
+        self.assertTrue(
+            abs(diff2b) < self.thresh, "Error in T2b: {}".format(diff2b))
+        self.assertTrue(
+            abs(diff2f) < self.thresh, "Error in T2f: {}".format(diff2f))
 
 
 if __name__ == '__main__':

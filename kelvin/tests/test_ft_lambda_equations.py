@@ -91,10 +91,10 @@ class FTLambdaEquationsTest(unittest.TestCase):
         T1old = numpy.zeros((ng, n, n))
         T2old = numpy.zeros((ng, n, n, n, n))
         for i in range(ng):
-            T2aat, T2abt, T2bbt = test_utils.make_random_T2_spatial(na, na, nb, nb)
-            T2aaold[i] = T2aat
-            T2abold[i] = T2abt
-            T2bbold[i] = T2bbt
+            T2r = test_utils.make_random_T2_spatial(na, na, nb, nb)
+            T2aaold[i] = T2r[0]
+            T2abold[i] = T2r[1]
+            T2bbold[i] = T2r[2]
         for i in range(ng):
             T1old[i] = spin_utils.T1_to_spin(
                 T1aold[i], T1bold[i], na, na, nb, nb)
@@ -115,10 +115,10 @@ class FTLambdaEquationsTest(unittest.TestCase):
         L1old = numpy.zeros((ng, n, n))
         L2old = numpy.zeros((ng, n, n, n, n))
         for i in range(ng):
-            L2aat, L2abt, L2bbt = test_utils.make_random_T2_spatial(na, na, nb, nb)
-            L2aaold[i] = L2aat
-            L2abold[i] = L2abt
-            L2bbold[i] = L2bbt
+            L2r = test_utils.make_random_T2_spatial(na, na, nb, nb)
+            L2aaold[i] = L2r[0]
+            L2abold[i] = L2r[1]
+            L2bbold[i] = L2r[2]
         for i in range(ng):
             L1old[i] = spin_utils.T1_to_spin(
                 L1aold[i], L1bold[i], na, na, nb, nb)

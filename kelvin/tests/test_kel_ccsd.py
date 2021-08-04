@@ -70,7 +70,8 @@ class KelCCSDTest(unittest.TestCase):
         A = []
         sys = H2FieldSystem(T, mu, omega)
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        mycc = TDCCSD(sys, prop, T=T, mu=mu, iprint=0, ngrid=80, saveT=True, saveL=True)
+        mycc = TDCCSD(sys, prop, T=T, mu=mu, iprint=0,
+                      ngrid=80, saveT=True, saveL=True)
         mycc.run()
         mycc._ccsd_lambda()
 
@@ -112,7 +113,8 @@ class KelCCSDTest(unittest.TestCase):
 
         sys = H2FieldSystem(T, mu, omega)
         prop = {"tprop": "rk1", "lprop": "rk1"}
-        mycc = TDCCSD(sys, prop, T=T, mu=mu, iprint=0, ngrid=80, saveT=True, saveL=True)
+        mycc = TDCCSD(sys, prop, T=T, mu=mu, iprint=0,
+                      ngrid=80, saveT=True, saveL=True)
         mycc.run()
         mycc._ccsd_lambda()
 

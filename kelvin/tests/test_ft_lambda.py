@@ -46,10 +46,14 @@ def fd_test_L1(cc, thresh):
                 TB = cc.T1.copy()
                 TF[y, a, i] += d
                 TB[y, a, i] -= d
-                EF = ft_cc_energy.ft_cc_energy(TF, cc.T2, F.ov, I.oovv, g, beta)
-                EB = ft_cc_energy.ft_cc_energy(TB, cc.T2, F.ov, I.oovv, g, beta)
-                TF1, TF2 = ft_cc_equations.ccsd_stanton(F, I, TF, cc.T2, D1, D2, ti, ng, G)
-                TB1, TB2 = ft_cc_equations.ccsd_stanton(F, I, TB, cc.T2, D1, D2, ti, ng, G)
+                EF = ft_cc_energy.ft_cc_energy(
+                    TF, cc.T2, F.ov, I.oovv, g, beta)
+                EB = ft_cc_energy.ft_cc_energy(
+                    TB, cc.T2, F.ov, I.oovv, g, beta)
+                TF1, TF2 = ft_cc_equations.ccsd_stanton(
+                    F, I, TF, cc.T2, D1, D2, ti, ng, G)
+                TB1, TB2 = ft_cc_equations.ccsd_stanton(
+                    F, I, TB, cc.T2, D1, D2, ti, ng, G)
                 TF2 -= cc.T2
                 TB2 -= cc.T2
                 TF1 -= TF
@@ -96,10 +100,14 @@ def fd_test_L2(cc, thresh):
                         TB[y, a, b, j, i] += d
                         TB[y, b, a, i, j] += d
                         TB[y, b, a, j, i] -= d
-                        EF = ft_cc_energy.ft_cc_energy(cc.T1, TF, F.ov, I.oovv, g, beta)
-                        EB = ft_cc_energy.ft_cc_energy(cc.T1, TB, F.ov, I.oovv, g, beta)
-                        TF1, TF2 = ft_cc_equations.ccsd_stanton(F, I, cc.T1, TF, D1, D2, ti, ng, G)
-                        TB1, TB2 = ft_cc_equations.ccsd_stanton(F, I, cc.T1, TB, D1, D2, ti, ng, G)
+                        EF = ft_cc_energy.ft_cc_energy(
+                            cc.T1, TF, F.ov, I.oovv, g, beta)
+                        EB = ft_cc_energy.ft_cc_energy(
+                            cc.T1, TB, F.ov, I.oovv, g, beta)
+                        TF1, TF2 = ft_cc_equations.ccsd_stanton(
+                            F, I, cc.T1, TF, D1, D2, ti, ng, G)
+                        TB1, TB2 = ft_cc_equations.ccsd_stanton(
+                            F, I, cc.T1, TB, D1, D2, ti, ng, G)
                         TF2 -= TF
                         TB2 -= TB
                         TF1 -= cc.T1
@@ -114,7 +122,8 @@ def fd_test_L2(cc, thresh):
                         bw = EB - Teb
                         diff = (fw - bw)/(2*d)
                         if numpy.abs(diff) > 1e-7:
-                            return ('{} {} {} {} {}: {}'.format(y, i, j, a, b, diff), False)
+                            return ('{} {} {} {} {}: {}'.format(
+                                y, i, j, a, b, diff), False)
     return ("pass", True)
 
 
@@ -133,7 +142,8 @@ class FTLambdaTest(unittest.TestCase):
         m.conv_tol = 1e-13
         m.scf()
         sys = SCFSystem(m, self.T, self.mu, orbtype='g')
-        ccsdT = ccsd(sys, T=self.T, mu=self.mu, iprint=0, max_iter=44, econv=1e-12)
+        ccsdT = ccsd(sys, T=self.T, mu=self.mu,
+                     iprint=0, max_iter=44, econv=1e-12)
         Etot, Ecc = ccsdT.run()
         ccsdT._ft_ccsd_lambda()
         out = fd_test_L1(ccsdT, self.thresh)
@@ -150,7 +160,8 @@ class FTLambdaTest(unittest.TestCase):
         T = 0.03
         mu = 0.0
         sys = SCFSystem(m, T, mu, orbtype='g')
-        ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, damp=0.45, max_iter=240, ngrid=20, econv=1e-10, tconv=1e-9, athresh=1e-20)
+        ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, damp=0.45, max_iter=240,
+                     ngrid=20, econv=1e-10, tconv=1e-9, athresh=1e-20)
         Etot, Ecc = ccsdT.run()
         ccsdT._ft_ccsd_lambda()
         out = fd_test_L1(ccsdT, 1e-7)
@@ -166,7 +177,8 @@ class FTLambdaTest(unittest.TestCase):
         m.scf()
         ng = 7
         sys = SCFSystem(m, self.T, self.mu, orbtype='u')
-        ccsdT = ccsd(sys, T=self.T, mu=self.mu, ngrid=ng, iprint=0, max_iter=44, econv=1e-12)
+        ccsdT = ccsd(sys, T=self.T, mu=self.mu, ngrid=ng,
+                     iprint=0, max_iter=44, econv=1e-12)
         Etot, Ecc = ccsdT.run()
         ccsdT._ft_uccsd_lambda()
         ea, eb = ccsdT.sys.u_energies_tot()
@@ -188,7 +200,8 @@ class FTLambdaTest(unittest.TestCase):
                 ccsdT.T1[0][y], ccsdT.T1[1][y], na, na, nb, nb)
             T2[y] = spin_utils.T2_to_spin(
                 ccsdT.T2[0][y], ccsdT.T2[1][y], ccsdT.T2[2][y], na, na, nb, nb)
-        nccsdT = ccsd(sys, T=self.T, mu=self.mu, ngrid=ng, iprint=0, max_iter=44, econv=1e-12)
+        nccsdT = ccsd(sys, T=self.T, mu=self.mu, ngrid=ng,
+                      iprint=0, max_iter=44, econv=1e-12)
         nccsdT.L1 = L1
         nccsdT.L2 = L2
         nccsdT.T1 = T1
@@ -208,7 +221,8 @@ class FTLambdaTest(unittest.TestCase):
         T = self.T
         mu = self.mu
         sys = SCFSystem(m, T, mu, orbtype='g')
-        cc = ccsd(sys, T=T, mu=mu, iprint=0, max_iter=44, ngrid=ng, econv=1e-12)
+        cc = ccsd(sys, T=T, mu=mu, iprint=0,
+                  max_iter=44, ngrid=ng, econv=1e-12)
         Etot, Ecc = cc.run()
         n = sys.g_energies_tot().shape[0]
         G = cc.G
@@ -234,10 +248,14 @@ class FTLambdaTest(unittest.TestCase):
                     TB = cc.T1.copy()
                     TF[y, a, i] += d
                     TB[y, a, i] -= d
-                    EF = ft_cc_energy.ft_cc_energy(TF, cc.T2, F.ov, I.oovv, g, beta)
-                    EB = ft_cc_energy.ft_cc_energy(TB, cc.T2, F.ov, I.oovv, g, beta)
-                    TF1, TF2 = ft_cc_equations.ccsd_stanton(F, I, TF, cc.T2, D1, D2, ti, ng, G)
-                    TB1, TB2 = ft_cc_equations.ccsd_stanton(F, I, TB, cc.T2, D1, D2, ti, ng, G)
+                    EF = ft_cc_energy.ft_cc_energy(
+                        TF, cc.T2, F.ov, I.oovv, g, beta)
+                    EB = ft_cc_energy.ft_cc_energy(
+                        TB, cc.T2, F.ov, I.oovv, g, beta)
+                    TF1, TF2 = ft_cc_equations.ccsd_stanton(
+                        F, I, TF, cc.T2, D1, D2, ti, ng, G)
+                    TB1, TB2 = ft_cc_equations.ccsd_stanton(
+                        F, I, TB, cc.T2, D1, D2, ti, ng, G)
                     TF2 -= cc.T2
                     TB2 -= cc.T2
                     TF1 -= TF

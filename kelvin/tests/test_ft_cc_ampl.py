@@ -68,10 +68,10 @@ class FTamplEquationsTest(unittest.TestCase):
         T1old = numpy.zeros((ng, n, n))
         T2old = numpy.zeros((ng, n, n, n, n))
         for i in range(ng):
-            T2aat, T2abt, T2bbt = test_utils.make_random_T2_spatial(na, na, nb, nb)
-            T2aa[i] = T2aat
-            T2ab[i] = T2abt
-            T2bb[i] = T2bbt
+            T2r = test_utils.make_random_T2_spatial(na, na, nb, nb)
+            T2aa[i] = T2r[0]
+            T2ab[i] = T2r[1]
+            T2bb[i] = T2r[2]
         for i in range(ng):
             T1old[i] = spin_utils.T1_to_spin(
                 T1a[i], T1b[i], na, na, nb, nb)

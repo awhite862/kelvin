@@ -71,7 +71,8 @@ def get_suite(full):
     suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_Hubbard_gu"))
     if full:
         suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_Be_gen_active"))
-        suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_Be_gen_prop_active"))
+        suite.addTest(
+            test_ft_cc_relden.FTCCReldenTest("test_Be_gen_prop_active"))
         suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_ueg_gen"))
         suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_ueg_scf_gen"))
         suite.addTest(test_ft_cc_relden.FTCCReldenTest("test_ueg"))
@@ -123,8 +124,10 @@ def get_suite(full):
         suite.addTest(test_ft_lambda.FTLambdaTest("test_Be_sto3g"))
         suite.addTest(test_ft_lambda.FTLambdaTest("test_Be_deriv"))
 
-    suite.addTest(test_ft_lambda_equations.FTLambdaEquationsTest("test_ccsd_opt"))
-    suite.addTest(test_ft_lambda_equations.FTLambdaEquationsTest("test_uccsd_opt"))
+    suite.addTest(
+        test_ft_lambda_equations.FTLambdaEquationsTest("test_ccsd_opt"))
+    suite.addTest(
+        test_ft_lambda_equations.FTLambdaEquationsTest("test_uccsd_opt"))
 
     suite.addTest(test_ft_mp2.FTMP2Test("test_Be_vs_fd_all"))
     if full:
@@ -165,9 +168,12 @@ def get_suite(full):
         suite.addTest(test_neq_lambda.NEQLambdaTest("test_h2_null_field"))
         suite.addTest(test_neq_lambda.NEQLambdaTest("test_h2_field"))
 
-    suite.addTest(test_neq_lambda_equation.NEQLambdaEquationsTest("test_lambda_opt"))
-    suite.addTest(test_neq_lambda_equation.NEQLambdaEquationsTest("test_L1_simple"))
-    suite.addTest(test_neq_lambda_equation.NEQLambdaEquationsTest("test_L2_simple"))
+    suite.addTest(
+        test_neq_lambda_equation.NEQLambdaEquationsTest("test_lambda_opt"))
+    suite.addTest(
+        test_neq_lambda_equation.NEQLambdaEquationsTest("test_L1_simple"))
+    suite.addTest(
+        test_neq_lambda_equation.NEQLambdaEquationsTest("test_L2_simple"))
 
     suite.addTest(test_neq_density.NEQDensityTest("test_den"))
 
@@ -211,7 +217,8 @@ def get_suite(full):
     suite.addTest(test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_cn"))
     suite.addTest(test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_u_vs_g"))
     if full:
-        suite.addTest(test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_omega_active"))
+        suite.addTest(
+            test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_omega_active"))
         suite.addTest(test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_rk1"))
         suite.addTest(test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_rk4"))
         suite.addTest(test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_rk124"))
@@ -238,10 +245,14 @@ def get_suite(full):
     suite.addTest(test_td_ccsd_relden.TDCCSDReldenTest("test_Be_r_vs_u"))
     suite.addTest(test_td_ccsd_relden.TDCCSDReldenTest("test_Be_rk4"))
     if full:
-        suite.addTest(test_td_ccsd_relden.TDCCSDReldenTest("test_Be_rk4_active"))
-        suite.addTest(test_td_ccsd_relden.TDCCSDReldenTest("test_Be_r_vs_u_active"))
-        suite.addTest(test_td_ccsd_relden.TDCCSDReldenTest("test_Be_rk4_relden"))
-        suite.addTest(test_td_ccsd_relden.TDCCSDReldenTest("test_Be_rk4_relden_r_vs_u"))
+        suite.addTest(
+            test_td_ccsd_relden.TDCCSDReldenTest("test_Be_rk4_active"))
+        suite.addTest(
+            test_td_ccsd_relden.TDCCSDReldenTest("test_Be_r_vs_u_active"))
+        suite.addTest(
+            test_td_ccsd_relden.TDCCSDReldenTest("test_Be_rk4_relden"))
+        suite.addTest(
+            test_td_ccsd_relden.TDCCSDReldenTest("test_Be_rk4_relden_r_vs_u"))
 
     suite.addTest(test_scf.SCFTest("test_Be_sto3g_energy"))
     suite.addTest(test_scf.SCFTest("test_diamond_energy"))

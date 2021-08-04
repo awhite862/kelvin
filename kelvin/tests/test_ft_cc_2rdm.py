@@ -156,7 +156,8 @@ class FTCC2RDMTest(unittest.TestCase):
         m.scf()
         sys = SCFSystem(m, T, mu, orbtype='g')
         athresh = 1e-20
-        ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, damp=0.16, tconv=1e-10, athresh=athresh, ngrid=40, max_iter=80)
+        ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, damp=0.16, tconv=1e-10,
+                     athresh=athresh, ngrid=40, max_iter=80)
         ccsdT.run()
         ccsdT._ft_ccsd_lambda()
         ccsdT._g_ft_2rdm()
@@ -213,17 +214,23 @@ class FTCC2RDMTest(unittest.TestCase):
         P2u = ccsdT.n2rdm
 
         # aaaa block
-        diff = numpy.linalg.norm(P2u[0] - P2g[:na, :na, :na, :na])/numpy.linalg.norm(P2u[0])
-        self.assertTrue(diff < self.thresh, "Error in 2rdm(aaaa): {}".format(diff))
+        diff = numpy.linalg.norm(
+            P2u[0] - P2g[:na, :na, :na, :na])/numpy.linalg.norm(P2u[0])
+        self.assertTrue(
+            diff < self.thresh, "Error in 2rdm(aaaa): {}".format(diff))
 
         # bbbb block
-        diff = numpy.linalg.norm(P2u[1] - P2g[na:, na:, na:, na:])/numpy.linalg.norm(P2u[1])
-        self.assertTrue(diff < self.thresh, "Error in 2rdm(bbbb): {}".format(diff))
+        diff = numpy.linalg.norm(
+            P2u[1] - P2g[na:, na:, na:, na:])/numpy.linalg.norm(P2u[1])
+        self.assertTrue(
+            diff < self.thresh, "Error in 2rdm(bbbb): {}".format(diff))
 
         # abab block
         P2gab = P2g[:na, na:, :na, na:]
-        diff = numpy.linalg.norm(P2u[2] - P2gab)/numpy.linalg.norm(P2u[2])
-        self.assertTrue(diff < self.thresh, "Error in 2rdm(abab): {}".format(diff))
+        diff = numpy.linalg.norm(
+            P2u[2] - P2gab)/numpy.linalg.norm(P2u[2])
+        self.assertTrue(
+            diff < self.thresh, "Error in 2rdm(abab): {}".format(diff))
 
     def test_Be_active(self):
         T = 0.05
@@ -239,7 +246,8 @@ class FTCC2RDMTest(unittest.TestCase):
         m.conv_tol = 1e-11
         m.scf()
         sys = SCFSystem(m, T, mu, orbtype='g')
-        ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, tconv=1e-11, athresh=athresh, ngrid=ng, damp=0.16, max_iter=80)
+        ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, tconv=1e-11,
+                     athresh=athresh, ngrid=ng, damp=0.16, max_iter=80)
         ccsdT.run()
         ccsdT._ft_ccsd_lambda()
         ccsdT._g_ft_2rdm()
@@ -247,23 +255,27 @@ class FTCC2RDMTest(unittest.TestCase):
 
         sys = SCFSystem(m, T, mu, orbtype='u')
         na = sys.u_energies_tot()[0].shape[0]
-        ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, tconv=1e-11, athresh=athresh, ngrid=ng, damp=0.16, max_iter=80)
+        ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, tconv=1e-11,
+                     athresh=athresh, ngrid=ng, damp=0.16, max_iter=80)
         ccsdT.run()
         ccsdT._ft_uccsd_lambda()
         ccsdT._u_ft_2rdm()
         P2u = ccsdT.n2rdm
 
         # aaaa block
-        diff = numpy.linalg.norm(P2u[0] - P2g[:na, :na, :na, :na])/numpy.linalg.norm(P2u[0])
+        diff = numpy.linalg.norm(
+            P2u[0] - P2g[:na, :na, :na, :na])/numpy.linalg.norm(P2u[0])
         self.assertTrue(diff < 1e-12, "Error in 2rdm(aaaa): {}".format(diff))
 
         # bbbb block
-        diff = numpy.linalg.norm(P2u[1] - P2g[na:, na:, na:, na:])/numpy.linalg.norm(P2u[1])
+        diff = numpy.linalg.norm(
+            P2u[1] - P2g[na:, na:, na:, na:])/numpy.linalg.norm(P2u[1])
         self.assertTrue(diff < 1e-12, "Error in 2rdm(bbbb): {}".format(diff))
 
         # abab block
         P2gab = P2g[:na, na:, :na, na:]
-        diff = numpy.linalg.norm(P2u[2] - P2gab)/numpy.linalg.norm(P2u[2])
+        diff = numpy.linalg.norm(
+            P2u[2] - P2gab)/numpy.linalg.norm(P2u[2])
         self.assertTrue(diff < 1e-12, "Error in 2rdm(abab): {}".format(diff))
 
     def test_Be_active_full(self):
@@ -280,27 +292,32 @@ class FTCC2RDMTest(unittest.TestCase):
         m.conv_tol = 1e-12
         m.scf()
         sys = SCFSystem(m, T, mu, orbtype='g')
-        ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, tconv=1e-11, athresh=athresh, ngrid=ng, damp=0.16, max_iter=80)
+        ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, tconv=1e-11,
+                     athresh=athresh, ngrid=ng, damp=0.16, max_iter=80)
         ccsdT.run()
         P2g = ccsdT.full_2rdm()
 
         sys = SCFSystem(m, T, mu, orbtype='u')
         na = sys.u_energies_tot()[0].shape[0]
-        ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, tconv=1e-11, athresh=athresh, ngrid=ng, damp=0.16, max_iter=80)
+        ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, tconv=1e-11,
+                     athresh=athresh, ngrid=ng, damp=0.16, max_iter=80)
         ccsdT.run()
         P2u = ccsdT.full_2rdm()
 
         # aaaa block
-        diff = numpy.linalg.norm(P2u[0] - P2g[:na, :na, :na, :na])/numpy.linalg.norm(P2u[0])
+        diff = numpy.linalg.norm(
+            P2u[0] - P2g[:na, :na, :na, :na])/numpy.linalg.norm(P2u[0])
         self.assertTrue(diff < 1e-12, "Error in 2rdm(aaaa): {}".format(diff))
 
         # bbbb block
-        diff = numpy.linalg.norm(P2u[1] - P2g[na:, na:, na:, na:])/numpy.linalg.norm(P2u[1])
+        diff = numpy.linalg.norm(
+            P2u[1] - P2g[na:, na:, na:, na:])/numpy.linalg.norm(P2u[1])
         self.assertTrue(diff < 1e-12, "Error in 2rdm(bbbb): {}".format(diff))
 
         # abab block
         P2gab = P2g[:na, na:, :na, na:]
-        diff = numpy.linalg.norm(P2u[2] - P2gab)/numpy.linalg.norm(P2u[2])
+        diff = numpy.linalg.norm(
+            P2u[2] - P2gab)/numpy.linalg.norm(P2u[2])
         self.assertTrue(diff < 1e-12, "Error in 2rdm(abab): {}".format(diff))
 
 

@@ -154,7 +154,8 @@ class HubbardTest(unittest.TestCase):
         Pa = numpy.einsum('i,j->ij', Oa, Oa)
         Pb = numpy.einsum('i,j->ij', Ob, Ob)
         sys = HubbardSystem(T, hub, Pa, Pb, mu=mu)
-        cc = ccsd(sys, iprint=0, max_iter=80, econv=1e-11, T=T, mu=mu, ngrid=ng)
+        cc = ccsd(sys, iprint=0, max_iter=80,
+                  econv=1e-11, T=T, mu=mu, ngrid=ng)
         Eout, Ecc = cc.run()
         diff = abs(Eout - Eref)
         msg = "Expected: {} Actual: {}".format(Eref, Eout)
@@ -195,10 +196,12 @@ class HubbardTest(unittest.TestCase):
         Pa = numpy.einsum('i,j->ij', Oa, Oa)
         Pb = numpy.einsum('i,j->ij', Ob, Ob)
         sys = HubbardSystem(T, hub, Pa, Pb, mu=mu, orbtype='g')
-        cc = ccsd(sys, iprint=0, max_iter=80, econv=1e-11, T=T, mu=mu, ngrid=ng)
+        cc = ccsd(sys, iprint=0, max_iter=80,
+                  econv=1e-11, T=T, mu=mu, ngrid=ng)
         Eoutg, Eccg = cc.run()
         sys = HubbardSystem(T, hub, Pa, Pb, mu=mu, orbtype='u')
-        cc = ccsd(sys, iprint=0, max_iter=80, econv=1e-11, T=T, mu=mu, ngrid=ng)
+        cc = ccsd(sys, iprint=0, max_iter=80,
+                  econv=1e-11, T=T, mu=mu, ngrid=ng)
         Eoutu, Eccu = cc.run()
         diff = abs(Eoutg - Eoutu)
         msg = "General: {} Unrestricted: {}".format(Eoutg, Eoutu)

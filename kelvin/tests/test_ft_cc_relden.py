@@ -68,13 +68,15 @@ class FTCCReldenTest(unittest.TestCase):
         m.get_hcore = lambda *args: h + alpha*field
         m.mo_energy += alpha*fdiag[:na]
         sys = SCFSystem(m, T, mu, orbtype='g')
-        ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, econv=1e-9, ngrid=ngrid, damp=damp, max_iter=mi)
+        ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, econv=1e-9,
+                     ngrid=ngrid, damp=damp, max_iter=mi)
         ccf = ccsdT.run()
 
         m.get_hcore = lambda *args: h - alpha*field
         m.mo_energy -= 2.0*alpha*fdiag[:na]
         sys = SCFSystem(m, T, mu, orbtype='g')
-        ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, econv=1e-9, ngrid=ngrid, damp=damp, max_iter=mi)
+        ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, econv=1e-9,
+                     ngrid=ngrid, damp=damp, max_iter=mi)
         ccb = ccsdT.run()
 
         ref = (ccf[0] - ccb[0])/(2*alpha)
@@ -82,7 +84,8 @@ class FTCCReldenTest(unittest.TestCase):
         m.get_hcore = lambda *args: h
         m.mo_energy += alpha*fdiag[:na]
         sys = SCFSystem(m, T, mu, orbtype='g')
-        ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, econv=1e-9, ngrid=ngrid, damp=damp, max_iter=mi)
+        ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, econv=1e-9,
+                     ngrid=ngrid, damp=damp, max_iter=mi)
         ccsdT.run()
         Dm = ccsdT.full_1rdm(relax=True)
         out = numpy.einsum('ij,ji->', Dm, fmo)
@@ -103,7 +106,8 @@ class FTCCReldenTest(unittest.TestCase):
         m.conv_tol = 1e-12
         m.scf()
         sys = SCFSystem(m, T, mu, orbtype='g')
-        ccsdT = ccsd(sys, T=T, mu=mu, damp=0.1, ngrid=60, athresh=1e-30, iprint=0)
+        ccsdT = ccsd(sys, T=T, mu=mu, damp=0.1,
+                     ngrid=60, athresh=1e-30, iprint=0)
         ccsdT.run()
         ccsdT.compute_ESN()
         Nref = ccsdT.N
@@ -175,7 +179,8 @@ class FTCCReldenTest(unittest.TestCase):
         damp = 0.1
         mi = 50
         ueg = PUEGSystem(T, L, cut, mu=mu, norb=norb)
-        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=8)
+        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0,
+                     max_iter=mi, damp=damp, ngrid=8)
         ccsdT.run()
         ccsdT.compute_ESN()
         Nref = ccsdT.N
@@ -194,7 +199,8 @@ class FTCCReldenTest(unittest.TestCase):
         damp = 0.1
         mi = 50
         ueg = UEGSystem(T, L, cut, mu=mu, norb=norb, orbtype='g')
-        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=8)
+        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0,
+                     max_iter=mi, damp=damp, ngrid=8)
         ccsdT.run()
         ccsdT.compute_ESN()
         Nref = ccsdT.N
@@ -213,7 +219,8 @@ class FTCCReldenTest(unittest.TestCase):
         damp = 0.1
         mi = 50
         ueg = UEGSCFSystem(T, L, cut, mu=mu, norb=norb, orbtype='g')
-        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=8)
+        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0,
+                     max_iter=mi, damp=damp, ngrid=8)
         ccsdT.run()
         ccsdT.compute_ESN()
         Nref = ccsdT.N
@@ -234,12 +241,14 @@ class FTCCReldenTest(unittest.TestCase):
         econv = 1e-12
         thresh = 1e-12
         ueg = UEGSystem(T, L, cut, mu=mu, norb=norb, orbtype='g')
-        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, econv=econv, damp=damp, ngrid=8)
+        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi,
+                     econv=econv, damp=damp, ngrid=8)
         ccsdT.run()
         ccsdT._grel_ft_1rdm()
 
         ueg = UEGSystem(T, L, cut, mu=mu, norb=norb, orbtype='u')
-        uccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, econv=econv, damp=damp, ngrid=8)
+        uccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi,
+                      econv=econv, damp=damp, ngrid=8)
         uccsdT.run()
         uccsdT._urel_ft_1rdm()
 
@@ -254,12 +263,16 @@ class FTCCReldenTest(unittest.TestCase):
         nbref = nref[norb:, norb:]
         diffa = numpy.linalg.norm(daref - daout)/numpy.sqrt(daref.size)
         diffb = numpy.linalg.norm(dbref - dbout)/numpy.sqrt(dbref.size)
-        self.assertTrue(diffa < thresh, "Error in relaxed alpha rdm: {}".format(diffa))
-        self.assertTrue(diffb < thresh, "Error in relaxed beta rdm: {}".format(diffb))
+        self.assertTrue(
+            diffa < thresh, "Error in relaxed alpha rdm: {}".format(diffa))
+        self.assertTrue(
+            diffb < thresh, "Error in relaxed beta rdm: {}".format(diffb))
         diffa = numpy.linalg.norm(naref - naout)/numpy.sqrt(naref.size)
         diffb = numpy.linalg.norm(nbref - nbout)/numpy.sqrt(nbref.size)
-        self.assertTrue(diffa < thresh, "Error in normal-ordered alpha rdm: {}".format(diffa))
-        self.assertTrue(diffb < thresh, "Error in normal-ordered beta rdm: {}".format(diffb))
+        self.assertTrue(diffa < thresh,
+                        "Error in normal-ordered alpha rdm: {}".format(diffa))
+        self.assertTrue(diffb < thresh,
+                        "Error in normal-ordered beta rdm: {}".format(diffb))
 
     def test_ueg_scf(self):
         T = 0.5
@@ -272,12 +285,14 @@ class FTCCReldenTest(unittest.TestCase):
         econv = 1e-12
         thresh = 1e-12
         ueg = UEGSCFSystem(T, L, cut, mu=mu, norb=norb, orbtype='g')
-        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, econv=econv, damp=damp, ngrid=8)
+        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0,
+                     max_iter=mi, econv=econv, damp=damp, ngrid=8)
         ccsdT.run()
         ccsdT._grel_ft_1rdm()
 
         ueg = UEGSCFSystem(T, L, cut, mu=mu, norb=norb, orbtype='u')
-        uccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, econv=econv, damp=damp, ngrid=8)
+        uccsdT = ccsd(ueg, T=T, mu=mu, iprint=0,
+                      max_iter=mi, econv=econv, damp=damp, ngrid=8)
         uccsdT.run()
         uccsdT._urel_ft_1rdm()
 
@@ -292,11 +307,14 @@ class FTCCReldenTest(unittest.TestCase):
         nbref = nref[norb:, norb:]
         diffa = numpy.linalg.norm(daref - daout)/numpy.sqrt(daref.size)
         diffb = numpy.linalg.norm(dbref - dbout)/numpy.sqrt(dbref.size)
-        self.assertTrue(diffa < thresh, "Error in relaxed alpha rdm: {}".format(diffa))
-        self.assertTrue(diffb < thresh, "Error in relaxed beta rdm: {}".format(diffb))
+        self.assertTrue(
+            diffa < thresh, "Error in relaxed alpha rdm: {}".format(diffa))
+        self.assertTrue(
+            diffb < thresh, "Error in relaxed beta rdm: {}".format(diffb))
         diffa = numpy.linalg.norm(naref - naout)/numpy.sqrt(naref.size)
         diffb = numpy.linalg.norm(nbref - nbout)/numpy.sqrt(nbref.size)
-        self.assertTrue(diffa < thresh, "Error in normal-ordered alpha rdm: {}".format(diffa))
+        self.assertTrue(diffa < thresh,
+                        "Error in normal-ordered alpha rdm: {}".format(diffa))
 
     def test_Be_active(self):
         T = 0.02
@@ -313,12 +331,14 @@ class FTCCReldenTest(unittest.TestCase):
         m.conv_tol = 1e-12
         m.scf()
         sys = SCFSystem(m, T, mu, orbtype='g')
-        ccsdT = ccsd(sys, T=T, mu=mu, damp=0.1, ngrid=60, athresh=1e-30, iprint=0, econv=ethresh, max_iter=mi)
+        ccsdT = ccsd(sys, T=T, mu=mu, damp=0.1, ngrid=60,
+                     athresh=1e-30, iprint=0, econv=ethresh, max_iter=mi)
         ccsdT.run()
         ccsdT._grel_ft_1rdm()
 
         sys = SCFSystem(m, T, mu, orbtype='u')
-        uccsdT = ccsd(sys, T=T, mu=mu, damp=0.1, ngrid=60, athresh=1e-30, iprint=0, econv=ethresh, max_iter=mi)
+        uccsdT = ccsd(sys, T=T, mu=mu, damp=0.1, ngrid=60,
+                      athresh=1e-30, iprint=0, econv=ethresh, max_iter=mi)
         uccsdT.run()
         uccsdT._urel_ft_1rdm()
 
@@ -334,12 +354,16 @@ class FTCCReldenTest(unittest.TestCase):
         nbref = nref[norb:, norb:]
         diffa = numpy.linalg.norm(daref - daout)/numpy.sqrt(daref.size)
         diffb = numpy.linalg.norm(dbref - dbout)/numpy.sqrt(dbref.size)
-        self.assertTrue(diffa < thresh, "Error in relaxed alpha rdm: {}".format(diffa))
-        self.assertTrue(diffb < thresh, "Error in relaxed beta rdm: {}".format(diffb))
+        self.assertTrue(diffa < thresh,
+                        "Error in relaxed alpha rdm: {}".format(diffa))
+        self.assertTrue(diffb < thresh,
+                        "Error in relaxed beta rdm: {}".format(diffb))
         diffa = numpy.linalg.norm(naref - naout)/numpy.sqrt(naref.size)
         diffb = numpy.linalg.norm(nbref - nbout)/numpy.sqrt(nbref.size)
-        self.assertTrue(diffa < thresh, "Error in normal-ordered alpha rdm: {}".format(diffa))
-        self.assertTrue(diffb < thresh, "Error in normal-ordered beta rdm: {}".format(diffb))
+        self.assertTrue(diffa < thresh,
+                        "Error in normal-ordered alpha rdm: {}".format(diffa))
+        self.assertTrue(diffb < thresh,
+                        "Error in normal-ordered beta rdm: {}".format(diffb))
 
     def test_Beplus(self):
         T = 0.5
@@ -358,12 +382,14 @@ class FTCCReldenTest(unittest.TestCase):
         m.conv_tol = 1e-12
         m.scf()
         sys = SCFSystem(m, T, mu, orbtype='g')
-        ccsdT = ccsd(sys, T=T, mu=mu, damp=0.05, ngrid=15, iprint=0, econv=ethresh, max_iter=mi)
+        ccsdT = ccsd(sys, T=T, mu=mu, damp=0.05, ngrid=15,
+                     iprint=0, econv=ethresh, max_iter=mi)
         ccsdT.run()
         ccsdT._grel_ft_1rdm()
 
         sys = SCFSystem(m, T, mu, orbtype='u')
-        uccsdT = ccsd(sys, T=T, mu=mu, damp=0.05, ngrid=15, iprint=0, econv=ethresh, max_iter=mi)
+        uccsdT = ccsd(sys, T=T, mu=mu, damp=0.05, ngrid=15,
+                      iprint=0, econv=ethresh, max_iter=mi)
         uccsdT.run()
         uccsdT._urel_ft_1rdm()
 
@@ -379,12 +405,16 @@ class FTCCReldenTest(unittest.TestCase):
         nbref = nref[norb:, norb:]
         diffa = numpy.linalg.norm(daref - daout)/numpy.sqrt(daref.size)
         diffb = numpy.linalg.norm(dbref - dbout)/numpy.sqrt(dbref.size)
-        self.assertTrue(diffa < thresh, "Error in relaxed alpha rdm: {}".format(diffa))
-        self.assertTrue(diffb < thresh, "Error in relaxed beta rdm: {}".format(diffb))
+        self.assertTrue(diffa < thresh,
+                        "Error in relaxed alpha rdm: {}".format(diffa))
+        self.assertTrue(diffb < thresh,
+                        "Error in relaxed beta rdm: {}".format(diffb))
         diffa = numpy.linalg.norm(naref - naout)/numpy.sqrt(naref.size)
         diffb = numpy.linalg.norm(nbref - nbout)/numpy.sqrt(nbref.size)
-        self.assertTrue(diffa < thresh, "Error in normal-ordered alpha rdm: {}".format(diffa))
-        self.assertTrue(diffb < thresh, "Error in normal-ordered beta rdm: {}".format(diffb))
+        self.assertTrue(diffa < thresh,
+                        "Error in normal-ordered alpha rdm: {}".format(diffa))
+        self.assertTrue(diffb < thresh,
+                        "Error in normal-ordered beta rdm: {}".format(diffb))
 
     @unittest.skipUnless(has_lattice, "Lattice module cannot be found")
     def test_hubbard(self):
@@ -402,7 +432,8 @@ class FTCCReldenTest(unittest.TestCase):
         Pb = numpy.einsum('i,j->ij', Ob, Ob)
         hub = Hubbard1D(L, 1.0, U, boundary='o')
         sys = HubbardSystem(T, hub, Pa, Pb, mu=mu, orbtype='u')
-        ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=8)
+        ccsdT = ccsd(sys, T=T, mu=mu, iprint=0,
+                     max_iter=mi, damp=damp, ngrid=8)
         ccsdT.run()
         ccsdT.compute_ESN()
         Nref = ccsdT.N
@@ -431,12 +462,14 @@ class FTCCReldenTest(unittest.TestCase):
         Pb = numpy.einsum('i,j->ij', Ob, Ob)
         hub = Hubbard1D(L, 1.0, U, boundary='o')
         sys = HubbardSystem(T, hub, Pa, Pb, mu=mu, orbtype='g')
-        ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, damp=damp, ngrid=7, econv=ethresh, max_iter=mi)
+        ccsdT = ccsd(sys, T=T, mu=mu, iprint=0, damp=damp,
+                     ngrid=7, econv=ethresh, max_iter=mi)
         ccsdT.run()
         ccsdT._grel_ft_1rdm()
 
         sys = HubbardSystem(T, hub, Pa, Pb, mu=mu, orbtype='u')
-        uccsdT = ccsd(sys, T=T, mu=mu, damp=damp, ngrid=7, iprint=0, econv=ethresh, max_iter=mi)
+        uccsdT = ccsd(sys, T=T, mu=mu, iprint=0, damp=damp,
+                      ngrid=7, econv=ethresh, max_iter=mi)
         uccsdT.run()
         uccsdT._urel_ft_1rdm()
 
@@ -452,12 +485,16 @@ class FTCCReldenTest(unittest.TestCase):
         nbref = nref[norb:, norb:]
         diffa = numpy.linalg.norm(daref - daout)/numpy.sqrt(daref.size)
         diffb = numpy.linalg.norm(dbref - dbout)/numpy.sqrt(dbref.size)
-        self.assertTrue(diffa < thresh, "Error in relaxed alpha rdm: {}".format(diffa))
-        self.assertTrue(diffb < thresh, "Error in relaxed beta rdm: {}".format(diffb))
+        self.assertTrue(diffa < thresh,
+                        "Error in relaxed alpha rdm: {}".format(diffa))
+        self.assertTrue(diffb < thresh,
+                        "Error in relaxed beta rdm: {}".format(diffb))
         diffa = numpy.linalg.norm(naref - naout)/numpy.sqrt(naref.size)
         diffb = numpy.linalg.norm(nbref - nbout)/numpy.sqrt(nbref.size)
-        self.assertTrue(diffa < thresh, "Error in normal-ordered alpha rdm: {}".format(diffa))
-        self.assertTrue(diffb < thresh, "Error in normal-ordered beta rdm: {}".format(diffb))
+        self.assertTrue(diffa < thresh,
+                        "Error in normal-ordered alpha rdm: {}".format(diffa))
+        self.assertTrue(diffb < thresh,
+                        "Error in normal-ordered beta rdm: {}".format(diffb))
 
 
 if __name__ == '__main__':

@@ -31,9 +31,11 @@ def fd_test_L1(cc, thresh):
         nob = eob.shape[0]
         nvb = evb.shape[0]
         T1 = spin_utils.T1_to_spin(cc.T1[0], cc.T1[1], noa, nva, nob, nvb)
-        T2 = spin_utils.T2_to_spin(cc.T2[0], cc.T2[1], cc.T2[2], noa, nva, nob, nvb)
+        T2 = spin_utils.T2_to_spin(
+            cc.T2[0], cc.T2[1], cc.T2[2], noa, nva, nob, nvb)
         L1 = spin_utils.T1_to_spin(cc.L1[0], cc.L1[1], nva, noa, nvb, nob)
-        L2 = spin_utils.T2_to_spin(cc.L2[0], cc.L2[1], cc.L2[2], nva, noa, nvb, nob)
+        L2 = spin_utils.T2_to_spin(
+            cc.L2[0], cc.L2[1], cc.L2[2], nva, noa, nvb, nob)
     else:
         T1 = cc.T1
         T2 = cc.T2
@@ -90,9 +92,11 @@ def fd_test_L2(cc, thresh):
         nob = eob.shape[0]
         nvb = evb.shape[0]
         T1 = spin_utils.T1_to_spin(cc.T1[0], cc.T1[1], noa, nva, nob, nvb)
-        T2 = spin_utils.T2_to_spin(cc.T2[0], cc.T2[1], cc.T2[2], noa, nva, nob, nvb)
+        T2 = spin_utils.T2_to_spin(
+            cc.T2[0], cc.T2[1], cc.T2[2], noa, nva, nob, nvb)
         L1 = spin_utils.T1_to_spin(cc.L1[0], cc.L1[1], nva, noa, nvb, nob)
-        L2 = spin_utils.T2_to_spin(cc.L2[0], cc.L2[1], cc.L2[2], nva, noa, nvb, nob)
+        L2 = spin_utils.T2_to_spin(
+            cc.L2[0], cc.L2[1], cc.L2[2], nva, noa, nvb, nob)
     else:
         T1 = cc.T1
         T2 = cc.T2
@@ -136,7 +140,8 @@ def fd_test_L2(cc, thresh):
                     bw = EB + TEb
                     diff = (fw - bw)/(2*delta)
                     if abs(diff) > thresh:
-                        return ('{} {} {} {}: {}'.format(i, j, a, b, diff), False)
+                        return (
+                            '{} {} {} {}: {}'.format(i, j, a, b, diff), False)
     return ("pass", True)
 
 

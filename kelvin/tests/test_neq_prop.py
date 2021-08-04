@@ -79,7 +79,8 @@ class NEQPropTest(unittest.TestCase):
         sys = h2_field_system(T, mu, omega, tir, O=(d*field), ot=ng - 1)
         en = sys.g_energies_tot()
         F_f, Ff_f, Fb_f, I_f = cc_utils.get_ft_integrals_neq(sys, en, beta, mu)
-        cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-12, max_iter=40, damp=0.0, ngr=ng, ngi=ngi, iprint=0)
+        cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-12,
+                      max_iter=40, damp=0.0, ngr=ng, ngi=ngi, iprint=0)
         Ef = cc.run()
         t1fp = cc.T1f
         t1bp = cc.T1b
@@ -91,7 +92,8 @@ class NEQPropTest(unittest.TestCase):
         sys = h2_field_system(T, mu, omega, tir, O=(-d*field), ot=ng - 1)
         en = sys.g_energies_tot()
         F_b, Ff_b, Fb_b, I_b = cc_utils.get_ft_integrals_neq(sys, en, beta, mu)
-        cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-12, max_iter=40, damp=0.0, ngr=ng, ngi=ngi, iprint=0)
+        cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-12,
+                      max_iter=40, damp=0.0, ngr=ng, ngi=ngi, iprint=0)
         Eb = cc.run()
         t1fm = cc.T1f
         t1bm = cc.T1b
@@ -111,7 +113,8 @@ class NEQPropTest(unittest.TestCase):
 
         # unperturbed Neq-CCSD
         sys = h2_field_system(T, mu, omega, tir, O=None, ot=None)
-        cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-12, max_iter=40, damp=0.0, ngr=ng, ngi=ngi, iprint=0)
+        cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-12,
+                      max_iter=40, damp=0.0, ngr=ng, ngi=ngi, iprint=0)
         cc.run()
         cc._neq_ccsd_lambda()
         cc._neq_1rdm()
@@ -292,20 +295,25 @@ class NEQPropTest(unittest.TestCase):
 
         Ds = abs(Es - Esfd)
         Dd = abs(Ers1 + Ers2 - Efd + E1 + Esfd)
-        self.assertTrue(Ds < self.fd_thresh, "Error in energy response: {}".format(Ds))
-        self.assertTrue(Dd < self.fd_thresh, "Error in amplitude response: {}".format(Dd))
+        self.assertTrue(
+            Ds < self.fd_thresh, "Error in energy response: {}".format(Ds))
+        self.assertTrue(
+            Dd < self.fd_thresh, "Error in amplitude response: {}".format(Dd))
 
-        # evaluate Lagrangian partial and confirm it is equal to the total derivative
+        # evaluate Lagrangian partial and confirm it is equal to the
+        # total derivative
         L = evalLd(cc.T1f, cc.T1b, cc.T1i, cc.T2f, cc.T2b, cc.T2i,
                    cc.L1f, cc.L1b, cc.L1i, cc.L2f, cc.L2b, cc.L2i,
                    Ffn, Fbn, Fn, In, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
         Dl = abs(L - (Efd - E1))
-        self.assertTrue(Dl < self.fd_thresh, "Error in lagrangian response: {}".format(Dl))
+        self.assertTrue(
+            Dl < self.fd_thresh, "Error in lagrangian response: {}".format(Dl))
 
         # evaluate with the density
         out = cc.compute_prop(field, ngr - 1)
         Dp = abs(out - L - E1)
-        self.assertTrue(Dp < self.fd_thresh, "Error in response density: {}".format(Dp))
+        self.assertTrue(
+            Dp < self.fd_thresh, "Error in response density: {}".format(Dp))
 
     def test_h2_field(self):
         beta = 1.0
@@ -346,11 +354,13 @@ class NEQPropTest(unittest.TestCase):
             ti = numpy.asarray([deltat/2 + float(j)*deltat for j in range(ng)])
             PT = field
             sys = h2_field_system(T, mu, omega, ti, O=(d*PT), ot=gf - 1)
-            cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-10, max_iter=40, damp=0.0, ngr=ng, ngi=40, iprint=0)
+            cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-10,
+                          max_iter=40, damp=0.0, ngr=ng, ngi=40, iprint=0)
             Ef = cc.run()
 
             sys = h2_field_system(T, mu, omega, ti, O=(-d*PT), ot=gf - 1)
-            cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-10, max_iter=40, damp=0.0, ngr=ng, ngi=40, iprint=0)
+            cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-10,
+                          max_iter=40, damp=0.0, ngr=ng, ngi=40, iprint=0)
             Eb = cc.run()
             Aref.append((Ef[0] - Eb[0])/(2*d))
 
@@ -359,7 +369,8 @@ class NEQPropTest(unittest.TestCase):
         ng = int(tmax/deltat)
         ti = numpy.asarray([deltat/2 + float(j)*deltat for j in range(ng)])
         sys = h2_field_system(T, mu, omega, ti, O=None, ot=None)
-        cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-10, max_iter=40, damp=0.0, ngr=ng, ngi=40, iprint=0)
+        cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-10,
+                      max_iter=40, damp=0.0, ngr=ng, ngi=40, iprint=0)
         cc.run()
         cc._neq_ccsd_lambda()
         cc._neq_1rdm()
@@ -437,7 +448,8 @@ class NEQPropTest(unittest.TestCase):
         ng = int(tmax/deltat)
         ti = numpy.asarray([deltat/2 + float(j)*deltat for j in range(ng)])
         sys = h2_field_system(T, mu, omega, ti, O=None, ot=None)
-        cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-10, max_iter=40, damp=0.0, ngr=ng, ngi=40, iprint=0)
+        cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-10,
+                      max_iter=40, damp=0.0, ngr=ng, ngi=40, iprint=0)
         cc.run()
         cc._neq_ccsd_lambda()
         cc._neq_1rdm()
@@ -490,7 +502,8 @@ class NEQPropTest(unittest.TestCase):
     #        gf = int(tf/deltat) - 1
     #        print(gf - 1)
     #        d = 1e-2
-    #        ti = numpy.asarray([float(j)*deltat  + deltat/2 for j in range(ng)])
+    #        ti = numpy.asarray(
+    #            [float(j)*deltat  + deltat/2 for j in range(ng)])
     #        D1 = en[:,None] - en[None,:]
     #        dt = (tmax - tf)
     #        #PT = field*numpy.exp(-1.j*D1*dt)

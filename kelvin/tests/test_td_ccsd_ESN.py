@@ -20,7 +20,8 @@ class TDCCSDESNTest(unittest.TestCase):
         mu = 0.0
         ng = 25
         sys = SCFSystem(m, T, mu, orbtype='g')
-        ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=35, damp=0.0, ngrid=ng, econv=1e-10, singles=True)
+        ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=35,
+                     damp=0.0, ngrid=ng, econv=1e-10, singles=True)
         Ecctot, ecc = ccsdT.run()
         ccsdT.compute_ESN()
         prop = {"tprop": "rk4", "lprop": "rk4"}
@@ -48,7 +49,8 @@ class TDCCSDESNTest(unittest.TestCase):
         mi = 50
         ng = 30
         ueg = UEGSystem(T, L, cut, mu=mu, norb=norb, orbtype='g')
-        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=ng)
+        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0,
+                     max_iter=mi, damp=damp, ngrid=ng)
         Ecctot, ecc = ccsdT.run()
         ccsdT.compute_ESN()
         Eref = ccsdT.E
@@ -85,14 +87,16 @@ class TDCCSDESNTest(unittest.TestCase):
         ng = 180
         athresh = 1e-20
         sys = SCFSystem(m, T, mu, orbtype='g')
-        ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=100, damp=0.1, ngrid=ng, econv=1e-10, athresh=athresh, singles=True)
+        ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=100, damp=0.1,
+                     ngrid=ng, econv=1e-10, athresh=athresh, singles=True)
         Ecctot, ecc = ccsdT.run()
         ccsdT.compute_ESN()
         Eref = ccsdT.E
         Sref = ccsdT.S
         Nref = ccsdT.N
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=560, athresh=1e-20, saveT=True)
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=560,
+                         athresh=1e-20, saveT=True)
         Eout, eccout = tdccsdT.run()
         tdccsdT.compute_ESN()
         E = tdccsdT.E
@@ -118,7 +122,8 @@ class TDCCSDESNTest(unittest.TestCase):
         mi = 50
         ng = 30
         ueg = UEGSystem(T, L, cut, mu=mu, norb=norb, orbtype='u')
-        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=ng)
+        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0,
+                     max_iter=mi, damp=damp, ngrid=ng)
         Ecctot, ecc = ccsdT.run()
         ccsdT.compute_ESN()
         Eref = ccsdT.E
@@ -152,14 +157,16 @@ class TDCCSDESNTest(unittest.TestCase):
         mi = 50
         ng = 30
         ueg = UEGSystem(T, L, cut, mu=mu, norb=norb, orbtype='u')
-        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0, max_iter=mi, damp=damp, ngrid=ng)
+        ccsdT = ccsd(ueg, T=T, mu=mu, iprint=0,
+                     max_iter=mi, damp=damp, ngrid=ng)
         Ecctot, ecc = ccsdT.run()
         ccsdT.compute_ESN()
         Eref = ccsdT.E
         Sref = ccsdT.S
         Nref = ccsdT.N
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        tdccsdT = TDCCSD(ueg, prop, T=T, mu=mu, ngrid=40, saveT=True, tmem="hdf5", saveL=True)
+        tdccsdT = TDCCSD(ueg, prop, T=T, mu=mu, ngrid=40,
+                         saveT=True, tmem="hdf5", saveL=True)
         Eout, eccout = tdccsdT.run()
         tdccsdT.compute_ESN()
         E = tdccsdT.E
@@ -189,14 +196,16 @@ class TDCCSDESNTest(unittest.TestCase):
         ng = 200
         athresh = 1e-20
         sys = SCFSystem(m, T, mu, orbtype='u')
-        ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=100, damp=0.1, ngrid=ng, econv=1e-10, athresh=athresh, singles=True)
+        ccsdT = ccsd(sys, iprint=0, T=T, mu=mu, max_iter=100, damp=0.1,
+                     ngrid=ng, econv=1e-10, athresh=athresh, singles=True)
         Ecctot, ecc = ccsdT.run()
         ccsdT.compute_ESN()
         Eref = ccsdT.E
         Sref = ccsdT.S
         Nref = ccsdT.N
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=560, athresh=1e-20, saveT=True)
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=560,
+                         athresh=1e-20, saveT=True)
         Eout, eccout = tdccsdT.run()
         tdccsdT.compute_ESN()
         E = tdccsdT.E
@@ -260,7 +269,8 @@ class TDCCSDESNTest(unittest.TestCase):
         athresh = 1e-20
         sys = SCFSystem(m, T, mu, orbtype='u')
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=ng, athresh=athresh, saveT=True)
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=ng,
+                         athresh=athresh, saveT=True)
         Ecctot, ecc = tdccsdT.run()
         tdccsdT.compute_ESN()
         Eref = tdccsdT.E
@@ -268,7 +278,8 @@ class TDCCSDESNTest(unittest.TestCase):
         Nref = tdccsdT.N
         sys = SCFSystem(m, T, mu, orbtype='r')
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=ng, athresh=athresh, saveT=True)
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=ng,
+                         athresh=athresh, saveT=True)
         Eout, eccout = tdccsdT.run()
         tdccsdT.compute_ESN()
         E = tdccsdT.E

@@ -35,15 +35,20 @@ class TDCCSDReldenTest(unittest.TestCase):
         Etmp, Ecctmp = tdccsdT._ccsd_lambda(rdm2=True, erel=True)
         tdccsdT._g_ft_ron()
 
-        diff = numpy.linalg.norm(ccsdT.ron1 - tdccsdT.ron1)/numpy.linalg.norm(ccsdT.ron1)
+        diff = numpy.linalg.norm(
+            ccsdT.ron1 - tdccsdT.ron1)/numpy.linalg.norm(ccsdT.ron1)
         self.assertTrue(diff < 1e-12, "Error in ron1: {}".format(diff))
-        diff = numpy.linalg.norm(ccsdT.rono - tdccsdT.rono)/numpy.linalg.norm(ccsdT.rono)
+        diff = numpy.linalg.norm(
+            ccsdT.rono - tdccsdT.rono)/numpy.linalg.norm(ccsdT.rono)
         self.assertTrue(diff < 1e-5, "Error in rono: {}".format(diff))
-        diff = numpy.linalg.norm(ccsdT.ronv - tdccsdT.ronv)/numpy.linalg.norm(ccsdT.ronv)
+        diff = numpy.linalg.norm(
+            ccsdT.ronv - tdccsdT.ronv)/numpy.linalg.norm(ccsdT.ronv)
         self.assertTrue(diff < 1e-5, "Error in ronv: {}".format(diff))
-        diff = numpy.linalg.norm(ccsdT.rorbo - tdccsdT.rorbo)/numpy.sqrt(float(ccsdT.rorbo.size))
+        diff = numpy.linalg.norm(
+            ccsdT.rorbo - tdccsdT.rorbo)/numpy.sqrt(float(ccsdT.rorbo.size))
         self.assertTrue(diff < 1e-5, "Error in rorbo: {}".format(diff))
-        diff = numpy.linalg.norm(ccsdT.rorbv - tdccsdT.rorbv)/numpy.sqrt(float(ccsdT.rorbv.size))
+        diff = numpy.linalg.norm(
+            ccsdT.rorbv - tdccsdT.rorbv)/numpy.sqrt(float(ccsdT.rorbv.size))
         self.assertTrue(diff < 1e-5, "Error in rorbv: {}".format(diff))
 
     def test_Be_rk4_active(self):
@@ -69,20 +74,26 @@ class TDCCSDReldenTest(unittest.TestCase):
 
         # compute normal-order 1-rdm from propagation
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=440, athresh=1e-20, saveT=True)
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=440,
+                         athresh=1e-20, saveT=True)
         Eout, Eccout = tdccsdT.run()
         Etmp, Ecctmp = tdccsdT._ccsd_lambda(rdm2=True, erel=True)
         tdccsdT._g_ft_ron()
 
-        diff = numpy.linalg.norm(ccsdT.ron1 - tdccsdT.ron1)/numpy.linalg.norm(ccsdT.ron1)
+        diff = numpy.linalg.norm(
+            ccsdT.ron1 - tdccsdT.ron1)/numpy.linalg.norm(ccsdT.ron1)
         self.assertTrue(diff < 1e-12, "Error in ron1: {}".format(diff))
-        diff = numpy.linalg.norm(ccsdT.rono - tdccsdT.rono)/numpy.linalg.norm(ccsdT.rono)
+        diff = numpy.linalg.norm(
+            ccsdT.rono - tdccsdT.rono)/numpy.linalg.norm(ccsdT.rono)
         self.assertTrue(diff < 1e-5, "Error in rono: {}".format(diff))
-        diff = numpy.linalg.norm(ccsdT.ronv - tdccsdT.ronv)/numpy.linalg.norm(ccsdT.ronv)
+        diff = numpy.linalg.norm(
+            ccsdT.ronv - tdccsdT.ronv)/numpy.linalg.norm(ccsdT.ronv)
         self.assertTrue(diff < 1e-5, "Error in ronv: {}".format(diff))
-        diff = numpy.linalg.norm(ccsdT.rorbo - tdccsdT.rorbo)/numpy.sqrt(float(ccsdT.rorbo.size))
+        diff = numpy.linalg.norm(
+            ccsdT.rorbo - tdccsdT.rorbo)/numpy.sqrt(float(ccsdT.rorbo.size))
         self.assertTrue(diff < 1e-5, "Error in rorbo: {}".format(diff))
-        diff = numpy.linalg.norm(ccsdT.rorbv - tdccsdT.rorbv)/numpy.sqrt(float(ccsdT.rorbv.size))
+        diff = numpy.linalg.norm(
+            ccsdT.rorbv - tdccsdT.rorbv)/numpy.sqrt(float(ccsdT.rorbv.size))
         self.assertTrue(diff < 1e-5, "Error in rorbv: {}".format(diff))
 
     def test_Be_u_vs_g(self):
@@ -199,7 +210,8 @@ class TDCCSDReldenTest(unittest.TestCase):
 
         # compute normal-order 1-rdm from propagation
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=90, athresh=athresh, saveT=True)
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=90,
+                         athresh=athresh, saveT=True)
         Eout, Eccout = tdccsdT.run()
         Etmp, Ecctmp = tdccsdT._rccsd_lambda(rdm2=True, erel=True)
         tdccsdT._r_ft_ron()
@@ -212,7 +224,8 @@ class TDCCSDReldenTest(unittest.TestCase):
         sys = SCFSystem(m, T, mu, orbtype='u')
         # compute normal-order 1-rdm from propagation
         prop = {"tprop": "rk4", "lprop": "rk4"}
-        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=90, athresh=athresh, saveT=True)
+        tdccsdT = TDCCSD(sys, prop, T=T, mu=mu, ngrid=90,
+                         athresh=athresh, saveT=True)
         Eout, Eccout = tdccsdT.run()
         Etmp, Ecctmp = tdccsdT._uccsd_lambda(rdm2=True, erel=True)
         tdccsdT._u_ft_ron()

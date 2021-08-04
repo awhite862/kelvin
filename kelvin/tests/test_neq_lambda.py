@@ -62,12 +62,14 @@ def fd_test_L1(cc, thresh):
                 TM = cc.T1i.copy()
                 TP[y, a, i] += d
                 TM[y, a, i] -= d
-                LP = evalL(cc.T1f, cc.T1b, TP, cc.T2f, cc.T2b, cc.T2i,
-                           cc.L1f, cc.L1b, cc.L1i, cc.L2f, cc.L2b, cc.L2i,
-                           Ff, Fb, F, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
-                LM = evalL(cc.T1f, cc.T1b, TM, cc.T2f, cc.T2b, cc.T2i,
-                           cc.L1f, cc.L1b, cc.L1i, cc.L2f, cc.L2b, cc.L2i,
-                           Ff, Fb, F, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
+                LP = evalL(
+                    cc.T1f, cc.T1b, TP, cc.T2f, cc.T2b, cc.T2i,
+                    cc.L1f, cc.L1b, cc.L1i, cc.L2f, cc.L2b, cc.L2i,
+                    Ff, Fb, F, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
+                LM = evalL(
+                    cc.T1f, cc.T1b, TM, cc.T2f, cc.T2b, cc.T2i,
+                    cc.L1f, cc.L1b, cc.L1i, cc.L2f, cc.L2b, cc.L2i,
+                    Ff, Fb, F, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
                 diff = (LP - LM)/(2*d)
                 if numpy.abs(diff) > thresh:
                     return ('I-- {} {} {}: {}'.format(y, i, a, diff), False)
@@ -79,12 +81,14 @@ def fd_test_L1(cc, thresh):
                 TM = cc.T1b.copy()
                 TP[y, a, i] += d
                 TM[y, a, i] -= d
-                LP = evalL(cc.T1f, TP, cc.T1i, cc.T2f, cc.T2b, cc.T2i,
-                           cc.L1f, cc.L1b, cc.L1i, cc.L2f, cc.L2b, cc.L2i,
-                           Ff, Fb, F, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
-                LM = evalL(cc.T1f, TM, cc.T1i, cc.T2f, cc.T2b, cc.T2i,
-                           cc.L1f, cc.L1b, cc.L1i, cc.L2f, cc.L2b, cc.L2i,
-                           Ff, Fb, F, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
+                LP = evalL(
+                    cc.T1f, TP, cc.T1i, cc.T2f, cc.T2b, cc.T2i,
+                    cc.L1f, cc.L1b, cc.L1i, cc.L2f, cc.L2b, cc.L2i,
+                    Ff, Fb, F, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
+                LM = evalL(
+                    cc.T1f, TM, cc.T1i, cc.T2f, cc.T2b, cc.T2i,
+                    cc.L1f, cc.L1b, cc.L1i, cc.L2f, cc.L2b, cc.L2i,
+                    Ff, Fb, F, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
                 diff = (LP - LM)/(2*d)
                 if numpy.abs(diff) > thresh:
                     return ('B-- {} {} {}: {}'.format(y, i, a, diff), False)
@@ -96,12 +100,14 @@ def fd_test_L1(cc, thresh):
                 TM = cc.T1f.copy()
                 TP[y, a, i] += d
                 TM[y, a, i] -= d
-                LP = evalL(TP, cc.T1b, cc.T1i, cc.T2f, cc.T2b, cc.T2i,
-                           cc.L1f, cc.L1b, cc.L1i, cc.L2f, cc.L2b, cc.L2i,
-                           Ff, Fb, F, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
-                LM = evalL(TM, cc.T1b, cc.T1i, cc.T2f, cc.T2b, cc.T2i,
-                           cc.L1f, cc.L1b, cc.L1i, cc.L2f, cc.L2b, cc.L2i,
-                           Ff, Fb, F, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
+                LP = evalL(
+                    TP, cc.T1b, cc.T1i, cc.T2f, cc.T2b, cc.T2i,
+                    cc.L1f, cc.L1b, cc.L1i, cc.L2f, cc.L2b, cc.L2i,
+                    Ff, Fb, F, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
+                LM = evalL(
+                    TM, cc.T1b, cc.T1i, cc.T2f, cc.T2b, cc.T2i,
+                    cc.L1f, cc.L1b, cc.L1i, cc.L2f, cc.L2b, cc.L2i,
+                    Ff, Fb, F, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
                 diff = (LP - LM)/(2*d)
                 if numpy.abs(diff) > thresh:
                     return ('F-- {} {} {}: {}'.format(y, i, a, diff), False)
@@ -141,7 +147,9 @@ class NEQLambdaTest(unittest.TestCase):
         L = evalL(cc.T1f, cc.T1b, cc.T1i, cc.T2f, cc.T2b, cc.T2i,
                   cc.L1f, cc.L1b, cc.L1i, cc.L2f, cc.L2b, cc.L2i,
                   Ff, Fb, F, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
-        self.assertTrue(abs(L - E[1]) < self.thresh, "Lagrangian does not equal the Energy: {}".format(L))
+        self.assertTrue(
+            abs(L - E[1]) < self.thresh,
+            "Lagrangian does not equal the Energy: {}".format(L))
 
         out = fd_test_L1(cc, self.thresh)
         self.assertTrue(out[1], out[0])
@@ -155,8 +163,8 @@ class NEQLambdaTest(unittest.TestCase):
         ngr = 80
 
         deltat = 0.04
-        tmax = (ngr)*deltat
-        beta = 1.0/T
+        tmax = ngr*deltat
+        beta = 1.0 / T
         tii, gi, Gi = quadrature.simpsons(ngi, beta)
         tir, gr, Gr = quadrature.midpoint(ngr, tmax)
         sys = h2_field_system(T, mu, omega, tir, O=None, ot=None)
@@ -175,7 +183,9 @@ class NEQLambdaTest(unittest.TestCase):
         L = evalL(cc.T1f, cc.T1b, cc.T1i, cc.T2f, cc.T2b, cc.T2i,
                   cc.L1f, cc.L1b, cc.L1i, cc.L2f, cc.L2b, cc.L2i,
                   Ff, Fb, F, I, D1, D2, tir, tii, gr, gi, Gr, Gi, beta)
-        self.assertTrue(abs(L - E[1]) < self.thresh, "Lagrangian does not equal the Energy: {}  {}".format(L, E[1]))
+        self.assertTrue(
+            abs(L - E[1]) < self.thresh,
+            "Lagrangian does not equal the Energy: {}  {}".format(L, E[1]))
 
         out = fd_test_L1(ccsdT, self.thresh)
         self.assertTrue(out[1], out[0])
