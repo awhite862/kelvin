@@ -3,6 +3,7 @@ import numpy
 from cqcpy import cc_energy
 from cqcpy import cc_equations
 from cqcpy import ft_utils
+from cqcpy import utils
 from . import cc_utils
 from . import ft_mp
 from . import ft_cc_energy
@@ -45,7 +46,7 @@ class lccsd(object):
         self.quad = quad
         if self.finite_T:
             self.realtime = True
-        if not sys.verify(self.T,self.mu):
+        if not sys.verify(self.T, self.mu):
             raise Exception("Sytem temperature inconsistent with LCCSD temp")
         self.beta = None
         self.ti = None
@@ -58,7 +59,7 @@ class lccsd(object):
             else:
                 self.beta = None
                 self.beta_max = 80
-            self.ti,self.g,self.G = quadrature.ft_quad(self.ngrid, self.beta_max, self.quad)
+            self.ti, self.g, self.G = quadrature.ft_quad(self.ngrid, self.beta_max, self.quad)
         self.sys = sys
 
         self.sys = sys
@@ -68,9 +69,9 @@ class lccsd(object):
             logging.info('Running LCCSD at an electronic temperature of %f K'
                 % ft_utils.HtoK(self.T))
             if self.athresh > 0.0:
-                return self._ft_lccsd_active(T1in=T1,T2in=T2)
+                return self._ft_lccsd_active(T1in=T1, T2in=T2)
             else:
-                return self._ft_lccsd(T1in=T1,T2in=T2)
+                return self._ft_lccsd(T1in=T1, T2in=T2)
         else:
             logging.info('Running LCCSD at zero Temperature')
             if self.realtime:
@@ -80,7 +81,7 @@ class lccsd(object):
 
     def _lccsd(self):
         # create energies and denominators in spin-orbital basis
-        eo,ev = self.sys.g_energies()
+        eo, ev = self.sys.g_energies()
         Dov = 1.0/(eo[:,None] - ev[None,:])
         Doovv = 1.0/(eo[:,None,None,None] + eo[None,:,None,None]
             - ev[None,None,:,None] - ev[None,None,None,:])
@@ -99,7 +100,7 @@ class lccsd(object):
         I = self.sys.g_aint()
 
         # get MP2 T-amplitudes
-        mp20 = MP2(self.sys,saveT=True)
+        mp20 = MP2(self.sys, saveT=True)
         mp20.run()
         T1old = (mp20.T1 if self.singles else numpy.zeros(F.vo.shape))
         T2old = mp20.T2
@@ -112,14 +113,14 @@ class lccsd(object):
         Eold = 1000000
         while i < max_iter and not converged:
             if self.singles:
-                T1,T2 = cc_equations.lccsd_simple(F, I, T1old, T2old)
+                T1, T2 = cc_equations.lccsd_simple(F, I, T1old, T2old)
             else:
                 T2 = cc_equations.lccd_simple(F, I, T2old)
                 T1 = numpy.zeros(F.vo.shape)
             T1 = numpy.einsum('ai,ia->ai', T1, Dov)
             T2 = numpy.einsum('abij,ijab->abij', T2, Doovv)
-            E = cc_energy.cc_energy(T1,T2,F.ov,I.oovv)
-            logging.info(' %d  %.10f' % (i+1,E))
+            E = cc_energy.cc_energy(T1, T2, F.ov, I.oovv)
+            logging.info(' %d  %.10f' % (i + 1, E))
             i = i + 1
             if numpy.abs(E - Eold) < thresh:
                 converged = True
@@ -136,12 +137,14 @@ class lccsd(object):
 
     def _lccsd_rt(self, T1in=None, T2in=None):
         # create energies in spin-orbital basis
-        eo,ev = self.sys.g_energies()
+        eo, ev = self.sys.g_energies()
         no = eo.shape[0]
         nv = ev.shape[0]
-        Dvo = (ev[:,None] - eo[None,:])
-        Dvvoo = (ev[:,None,None,None] + ev[None,:,None,None]
-            - eo[None,None,:,None] - eo[None,None,None,:])
+        Dvo = utils.D1(ev, eo)
+        Dvvoo = utils.D2(ev, ev, eo, eo)
+        #Dvo = (ev[:,None] - eo[None,:])
+        #Dvvoo = (ev[:,None,None,None] + ev[None,:,None,None]
+        #    - eo[None,None,:,None] - eo[None,None,None,:])
 
         # get time-grid
         ng = self.ngrid
@@ -165,24 +168,26 @@ class lccsd(object):
         # get MP2 T-amplitudes
         Id = numpy.ones(ng)
         if T1in is not None and T2in is not None:
-            T1old = T1in if self.singles else numpy.zeros((ng,nv,no))
+            T1old = T1in if self.singles else numpy.zeros((ng, nv, no))
             T2old = T2in
         else:
             if self.singles:
                 T1old = -numpy.einsum('v,ai->vai', Id, F.vo)
-                T1old = quadrature.int_tbar1(ng,T1old,ti,Dvo,G)
+                T1old = quadrature.int_tbar1(ng, T1old, ti, Dvo, G)
             else:
-                T1old = numpy.zeros((ng,nv,no))
+                T1old = numpy.zeros((ng, nv, no))
             T2old = -numpy.einsum('v,abij->vabij', Id, I.vvoo)
-            T2old = quadrature.int_tbar2(ng,T2old,ti,Dvvoo,G)
+            T2old = quadrature.int_tbar2(ng, T2old, ti, Dvvoo, G)
         E2 = ft_cc_energy.ft_cc_energy(T1old, T2old,
             F.ov, I.oovv, g, self.beta_max, Qterm=False)
         logging.info('MP2 energy: {:.10f}'.format(E2))
 
         # run CC iterations
-        conv_options = {"econv":self.econv, "max_iter":self.max_iter, "damp":self.damp}
+        conv_options = {"econv": self.econv,
+                        "max_iter": self.max_iter,
+                        "damp": self.damp}
         method = "LCCSD" if self.singles else "LCCD"
-        Eccn,T1,T2 = cc_utils.ft_cc_iter(
+        Eccn, T1, T2 = cc_utils.ft_cc_iter(
             method, T1old, T2old, F, I, Dvo, Dvvoo, g, G,
             self.beta_max, ng, ti, self.iprint, conv_options)
         self.T1 = T1
@@ -222,12 +227,14 @@ class lccsd(object):
         E01 = E0 + E1
 
         # get scaled integrals
-        F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
+        F, I = cc_utils.ft_integrals(self.sys, en, beta, mu)
 
         # get energy differences
-        D1 = en[:,None] - en[None,:]
-        D2 = en[:,None,None,None] + en[None,:,None,None] \
-            - en[None,None,:,None] - en[None,None,None,:]
+        D1 = utils.D1(en, en)
+        D2 = utils.D2(en, en, en, en)
+        #D1 = en[:,None] - en[None,:]
+        #D2 = en[:,None,None,None] + en[None,:,None,None] \
+        #    - en[None,None,:,None] - en[None,None,None,:]
 
         # get MP2 T-amplitudes
         if T1in is not None and T2in is not None:
@@ -246,19 +253,19 @@ class lccsd(object):
 
         # run CC iterations
         conv_options = {
-            "econv":self.econv,
-            "tconv":self.tconv,
-            "max_iter":self.max_iter,
-            "damp":self.damp}
+            "econv": self.econv,
+            "tconv": self.tconv,
+            "max_iter": self.max_iter,
+            "damp": self.damp}
         method = "LCCSD" if self.singles else "LCCD"
-        Eccn,T1,T2 = cc_utils.ft_cc_iter(
+        Eccn, T1, T2 = cc_utils.ft_cc_iter(
             method, T1old, T2old, F, I, D1, D2,
             g, G, beta, ng, ti, self.iprint, conv_options)
         self.T1 = T1
         self.T2 = T2
 
         logging.info('total energy: %f' % (Eccn+E01))
-        return (Eccn+E01,Eccn)
+        return (Eccn + E01, Eccn)
 
     def _ft_lccsd_active(self, T1in=None, T2in=None):
         # get T and mu variables
@@ -282,8 +289,8 @@ class lccsd(object):
         athresh = self.athresh
         focc = [x for x in fo if x > athresh]
         fvir = [x for x in fv if x > athresh]
-        iocc = [i for i,x in enumerate(fo) if x > athresh]
-        ivir = [i for i,x in enumerate(fv) if x > athresh]
+        iocc = [i for i, x in enumerate(fo) if x > athresh]
+        ivir = [i for i, x in enumerate(fv) if x > athresh]
         nocc = len(focc)
         nvir = len(fvir)
         nact = nocc + nvir - n
@@ -307,14 +314,16 @@ class lccsd(object):
         E01 = E0 + E1
 
         # get scaled integrals
-        F,I = cc_utils.ft_active_integrals(self.sys, en, focc, fvir, iocc, ivir)
+        F, I = cc_utils.ft_active_integrals(self.sys, en, focc, fvir, iocc, ivir)
 
         # get exponentials
-        D1 = en[:,None] - en[None,:]
-        D2 = en[:,None,None,None] + en[None,:,None,None] \
-            - en[None,None,:,None] - en[None,None,None,:]
-        D1 = D1[numpy.ix_(ivir,iocc)]
-        D2 = D2[numpy.ix_(ivir,ivir,iocc,iocc)]
+        D1 = utils.D1(en, en)
+        D2 = utils.D2(en, en, en, en)
+        #D1 = en[:,None] - en[None,:]
+        #D2 = en[:,None,None,None] + en[None,:,None,None] \
+        #    - en[None,None,:,None] - en[None,None,None,:]
+        D1 = D1[numpy.ix_(ivir, iocc)]
+        D2 = D2[numpy.ix_(ivir, ivir, iocc, iocc)]
 
         # get MP2 T-amplitudes
         if T1in is not None and T2in is not None:
@@ -324,24 +333,24 @@ class lccsd(object):
             Id = numpy.ones((ng))
             T1old = -numpy.einsum('v,ai->vai', Id, F.vo)
             T2old = -numpy.einsum('v,abij->vabij', Id, I.vvoo)
-            T1old = quadrature.int_tbar1(ng,T1old,ti,D1,G)
-            T2old = quadrature.int_tbar2(ng,T2old,ti,D2,G)
+            T1old = quadrature.int_tbar1(ng, T1old, ti, D1, G)
+            T2old = quadrature.int_tbar2(ng, T2old, ti, D2, G)
         #E2 = ft_cc_energy.ft_cc_energy(T1old,T2old,
         #    F.ov,I.oovv,g,beta,Qterm=False)
 
         # run CC iterations
         method = "LCCSD" if self.singles else "LCCD"
         conv_options = {
-            "econv":self.econv,
-            "tconv":self.tconv,
-            "max_iter":self.max_iter,
-            "damp":self.damp}
-        Eccn,T1,T2 = cc_utils.ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G, beta,
+            "econv": self.econv,
+            "tconv": self.tconv,
+            "max_iter": self.max_iter,
+            "damp": self.damp}
+        Eccn, T1, T2 = cc_utils.ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G, beta,
                 ng, ti, self.iprint, conv_options)
         self.T1 = T1
         self.T2 = T2
 
-        return (Eccn+E01,Eccn)
+        return (Eccn + E01, Eccn)
 
     def _ft_lccsd_lambda(self):
         # get T and mu variables
@@ -366,26 +375,28 @@ class lccsd(object):
         logging.info('  FT-LCCSD will use %f mb' % mem_mb)
 
         # get scaled integrals
-        F,I = cc_utils.ft_integrals(self.sys, en, beta, mu)
+        F, I = cc_utils.ft_integrals(self.sys, en, beta, mu)
 
         # get energy differences
-        D1 = en[:,None] - en[None,:]
-        D2 = en[:,None,None,None] + en[None,:,None,None] \
-            - en[None,None,:,None] - en[None,None,None,:]
+        D1 = utils.D1(en, en)
+        D2 = utils.D2(en, en, en, en)
+        #D1 = en[:,None] - en[None,:]
+        #D2 = en[:,None,None,None] + en[None,:,None,None] \
+        #    - en[None,None,:,None] - en[None,None,None,:]
 
         # run Lambda iterations
         if self.singles:
-            L1old = numpy.transpose(self.T1,(0,2,1))
+            L1old = numpy.transpose(self.T1, (0, 2, 1))
         else:
             L1old = numpy.zeros(self.T1.shape)
-        L2old = numpy.transpose(self.T2,(0,3,4,1,2))
+        L2old = numpy.transpose(self.T2, (0, 3, 4, 1, 2))
         method = "LCCSD" if self.singles else "LCCD"
         conv_options = {
-            "econv":self.econv,
-            "tconv":self.tconv,
-            "max_iter":self.max_iter,
-            "damp":self.damp}
-        L1,L2 = cc_utils.ft_lambda_iter(
+            "econv": self.econv,
+            "tconv": self.tconv,
+            "max_iter": self.max_iter,
+            "damp": self.damp}
+        L1, L2 = cc_utils.ft_lambda_iter(
             method, L1old, L2old, self.T1, self.T2, F, I,
             D1, D2, g, G, beta, ng, ti, self.iprint, conv_options)
 

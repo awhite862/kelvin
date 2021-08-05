@@ -107,9 +107,8 @@ def get_suite():
     suite.addTest(test_neq_lambda_equation.NEQLambdaEquationsTest("test_L1_simple"))
     suite.addTest(test_neq_lambda_equation.NEQLambdaEquationsTest("test_L2_simple"))
 
-    suite.addTest(test_neq_prop.NEQPropTest("test_h2_field_deriv")) # 1s 1.4%
-    suite.addTest(test_neq_prop.NEQPropTest("test_h2_field")) # 45s 1.4%
-    #suite.addTest(test_neq_prop.NEQPropTest("test_h2_field2")) # 6m45s 1.4%
+    suite.addTest(test_neq_prop.NEQPropTest("test_h2_field_deriv"))
+    suite.addTest(test_neq_prop.NEQPropTest("test_h2_field"))
 
     suite.addTest(test_quadrature.QuadTest("test_int_keldysh"))
     suite.addTest(test_quadrature.QuadTest("test_Lint_keldysh"))
@@ -126,29 +125,25 @@ def get_suite():
     suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_rk2"))
     suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_cn"))
     suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_am2"))
-    #suite.addTest(test_td_ccsd.TDCCSDTest("test_Be_active")) # 45s 0.2%
 
-    #suite.addTest(test_td_ccsd_ESN.TDCCSDESNTest("test_Be_gen")) # 10w 0.4%
     suite.addTest(test_td_ccsd_ESN.TDCCSDESNTest("test_UEG"))
     suite.addTest(test_td_ccsd_ESN.TDCCSDESNTest("test_UEG_r_vs_u"))
 
     suite.addTest(test_td_ccsd_lambda.TDCCSDLambdaTest("test_Be_rk4_omega"))
 
-    suite.addTest(test_td_ccsd_1rdm.TDCCSD1RDMTest("test_Be_rk1")) # 15s 0.1%
+    suite.addTest(test_td_ccsd_1rdm.TDCCSD1RDMTest("test_Be_rk1"))
     suite.addTest(test_td_ccsd_1rdm.TDCCSD1RDMTest("test_Be_rk4"))
-    suite.addTest(test_td_ccsd_1rdm.TDCCSD1RDMTest("test_Be_rk2")) # 21s 0.2%
+    suite.addTest(test_td_ccsd_1rdm.TDCCSD1RDMTest("test_Be_rk2"))
 
     suite.addTest(test_td_ccsd_2rdm.TDCCSD2RDMTest("test_Be_r_vs_u"))
 
     suite.addTest(test_td_ccsd_relden.TDCCSDReldenTest("test_Be_r_vs_u"))
     suite.addTest(test_td_ccsd_relden.TDCCSDReldenTest("test_Be_rk4"))
-    suite.addTest(test_td_ccsd_relden.TDCCSDReldenTest("test_Be_r_vs_u_active")) # 25s 0.2%
+    suite.addTest(test_td_ccsd_relden.TDCCSDReldenTest("test_Be_r_vs_u_active"))
 
     suite.addTest(test_scf.SCFTest("test_Be_sto3g_ft_deriv"))
     suite.addTest(test_scf.SCFTest("test_diamond_ft_deriv"))
-    #suite.addTest(test_scf.SCFTest("test_Be_sto3g_ft_mp_deriv")) # 35s 0.1%
     suite.addTest(test_scf.SCFTest("test_diamond_ft_mp_deriv_k"))
-    #suite.addTest(test_scf.SCFTest("test_diamond_ft_mp_deriv")) # 15s 0.3%
 
     suite.addTest(test_ueg.UEGTest("test_2_07_4"))
 

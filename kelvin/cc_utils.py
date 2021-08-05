@@ -30,23 +30,23 @@ def form_new_ampl(method, F, I, T1old, T2old, D1, D2, ti, ng, G):
         G (array): Quadrature weight matrix.
     """
     if method == "CCSD":
-        T1,T2 = ft_cc_equations.ccsd_stanton(F,I,T1old,T2old,
-                D1,D2,ti,ng,G)
+        T1, T2 = ft_cc_equations.ccsd_stanton(
+            F, I, T1old, T2old, D1, D2, ti, ng, G)
     elif method == "CCD":
         T1 = T1old
-        T2 = ft_cc_equations.ccd_simple(F,I,T2old,
-                D2,ti,ng,G)
+        T2 = ft_cc_equations.ccd_simple(
+            F, I, T2old, D2, ti, ng, G)
     elif method == "LCCSD":
-        T1,T2 = ft_cc_equations.lccsd_simple(F,I,T1old,T2old,
-                D1,D2,ti,ng,G)
+        T1, T2 = ft_cc_equations.lccsd_simple(
+            F, I, T1old, T2old, D1, D2, ti, ng, G)
     elif method == "LCCD":
         T1 = T1old
-        T2 = ft_cc_equations.lccd_simple(F,I,T2old,
-                D2,ti,ng,G)
+        T2 = ft_cc_equations.lccd_simple(
+            F, I, T2old, D2, ti, ng, G)
     else:
         raise Exception("Unrecognized method keyword")
 
-    return T1,T2
+    return T1, T2
 
 
 def form_new_ampl_u(method, Fa, Fb, Ia, Ib, Iabab, T1aold, T1bold, T2aaold, T2abold, T2bbold,
@@ -66,8 +66,9 @@ def form_new_ampl_u(method, Fa, Fb, Ia, Ib, Iabab, T1aold, T1bold, T2aaold, T2ab
         G (array): Quadrature weight matrix.
     """
     if method == "CCSD":
-        T1out,T2out = ft_cc_equations.uccsd_stanton(Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,
-                T2aaold,T2abold,T2bbold,D1a,D1b,D2aa,D2ab,D2bb,ti,ng,G)
+        T1out, T2out = ft_cc_equations.uccsd_stanton(
+            Fa, Fb, Ia, Ib, Iabab, T1aold, T1bold, T2aaold, T2abold, T2bbold,
+            D1a, D1b, D2aa, D2ab, D2bb, ti, ng, G)
     #elif method == "CCD":
     #    T1 = T1old
     #    T2 = ft_cc_equations.ccd_simple(F,I,T2old,
@@ -82,16 +83,16 @@ def form_new_ampl_u(method, Fa, Fb, Ia, Ib, Iabab, T1aold, T1bold, T2aaold, T2ab
     else:
         raise Exception("Unrecognized method keyword for unrestricted calc")
 
-    return T1out,T2out
+    return T1out, T2out
 
 
 def form_new_ampl_extrap(ig, method, F, I, T1, T2, T1bar, T2bar, D1, D2, ti, ng, G):
     if method == "CCSD":
-        T1,T2 = ft_cc_equations.ccsd_stanton_single(ig,F,I,T1,T2,
-                T1bar,T2bar,D1,D2,ti,ng,G)
+        T1, T2 = ft_cc_equations.ccsd_stanton_single(
+            ig, F, I, T1, T2, T1bar, T2bar, D1, D2, ti, ng, G)
     else:
         raise Exception("Unrecognized method keyword")
-    return T1,T2
+    return T1, T2
 
 
 def form_new_ampl_extrap_u(ig, method, Fa, Fb, Ia, Ib, Iabab,
@@ -99,12 +100,12 @@ def form_new_ampl_extrap_u(ig, method, Fa, Fb, Ia, Ib, Iabab,
                            T2baraa, T2barab, T2barbb, D1a, D1b,
                            D2aa, D2ab, D2bb, ti, ng, G):
     if method == "CCSD":
-        T1,T2 = ft_cc_equations.uccsd_stanton_single(ig,Fa,Fb,Ia,Ib,Iabab,
-                T1a,T1b,T2aa,T2ab,T2bb,T1bara,T1barb,T2baraa,T2barab,T2barbb,
-                D1a,D1b,D2aa,D2ab,D2bb,ti,ng,G)
+        T1, T2 = ft_cc_equations.uccsd_stanton_single(
+            ig, Fa, Fb, Ia, Ib, Iabab, T1a, T1b, T2aa, T2ab, T2bb, T1bara, T1barb,
+            T2baraa, T2barab, T2barbb, D1a, D1b, D2aa, D2ab, D2bb, ti, ng, G)
     else:
         raise Exception("Unrecognized method keyword")
-    return T1,T2
+    return T1, T2
 
 
 def ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G, beta, ng, ti,
@@ -139,7 +140,7 @@ def ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G, beta, ng, ti,
     nl2 = numpy.linalg.norm(T2old) + 0.1
     while i < max_iter and not converged:
         # form new T1 and T2
-        T1,T2 = form_new_ampl(method,F,I,T1old,T2old,D1,D2,ti,ng,G)
+        T1, T2 = form_new_ampl(method, F, I, T1old, T2old, D1, D2, ti, ng, G)
 
         res1 = numpy.linalg.norm(T1 - T1old) / nl1
         res2 = numpy.linalg.norm(T2 - T2old) / nl2
@@ -150,14 +151,14 @@ def ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G, beta, ng, ti,
         nl2 = numpy.linalg.norm(T2old) + 0.1
 
         # compute energy
-        E = ft_cc_energy.ft_cc_energy(T1old,T2old,
-            F.ov,I.oovv,g,beta)
+        E = ft_cc_energy.ft_cc_energy(
+            T1old, T2old, F.ov, I.oovv, g, beta)
 
         # determine convergence
         if isinstance(E, complex):
-            logging.info(' %2d  %.10f  %.3E %.4E' % (i+1,E.real,E.imag,res1+res2))
+            logging.info(' %2d  %.10f  %.3E %.4E' % (i + 1, E.real, E.imag, res1 + res2))
         else:
-            logging.info(' %2d  %.10f   %.4E' % (i+1,E,res1+res2))
+            logging.info(' %2d  %.10f   %.4E' % (i + 1, E, res1 + res2))
         i = i + 1
         if numpy.abs(E - Eold) < ethresh and res1+res2 < tthresh:
             converged = True
@@ -167,9 +168,9 @@ def ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G, beta, ng, ti,
         logging.warning("{} did not converge!".format(method))
 
     tend = time.time()
-    logging.info("Total {} time: {:.4f} s".format(method,(tend - tbeg)))
+    logging.info("Total {} time: {:.4f} s".format(method, (tend - tbeg)))
 
-    return Eold,T1old,T2old
+    return Eold, T1old, T2old
 
 
 def ft_cc_iter_extrap(method, F, I, D1, D2, g, G, beta, ng, ti,
@@ -194,11 +195,11 @@ def ft_cc_iter_extrap(method, F, I, D1, D2, g, G, beta, ng, ti,
     max_iter = conv_options["max_iter"]
     alpha = conv_options["damp"]
 
-    no,nv = F.ov.shape
-    t1bar = numpy.zeros((ng,nv,no), dtype=F.vo.dtype)
-    t2bar = numpy.zeros((ng,nv,nv,no,no), dtype=I.vvoo.dtype)
-    T1new = numpy.zeros((ng,nv,no), dtype=t1bar.dtype)
-    T2new = numpy.zeros((ng,nv,nv,no,no), dtype=t2bar.dtype)
+    no, nv = F.ov.shape
+    t1bar = numpy.zeros((ng, nv, no), dtype=F.vo.dtype)
+    t2bar = numpy.zeros((ng, nv, nv, no, no), dtype=I.vvoo.dtype)
+    T1new = numpy.zeros((ng, nv, no), dtype=t1bar.dtype)
+    T2new = numpy.zeros((ng, nv, nv, no, no), dtype=t2bar.dtype)
 
     # loop over grid points
     for ig in range(ng):
@@ -224,8 +225,8 @@ def ft_cc_iter_extrap(method, F, I, D1, D2, g, G, beta, ng, ti,
         i = 0
         while i < max_iter and not converged:
             # form new T1 and T2
-            T1,T2 = form_new_ampl_extrap(ig,method,F,I,T1new[ig],T2new[ig],
-                    t1bar,t2bar,D1,D2,ti,ng,G)
+            T1, T2 = form_new_ampl_extrap(ig, method, F, I, T1new[ig], T2new[ig],
+                    t1bar, t2bar, D1, D2, ti, ng, G)
 
             res1 = numpy.linalg.norm(T1 - T1new[ig]) / nl1
             res2 = numpy.linalg.norm(T2 - T2new[ig]) / nl2
@@ -234,11 +235,11 @@ def ft_cc_iter_extrap(method, F, I, D1, D2, g, G, beta, ng, ti,
             T2new[ig] = alpha*T2new[ig] + (1.0 - alpha)*T2.copy()
 
             # determine convergence
-            logging.info(' %2d  %.4E' % (i+1,res1+res2))
+            logging.info(' %2d  %.4E' % (i + 1, res1 + res2))
             i = i + 1
             if res1 + res2 < thresh:
                 converged = True
-    return T1new,T2new
+    return T1new, T2new
 
 
 def ft_ucc_iter(method, T1aold, T1bold, T2aaold, T2abold, T2bbold, Fa, Fb, Ia, Ib, Iabab,
@@ -270,7 +271,7 @@ def ft_ucc_iter(method, T1aold, T1bold, T2aaold, T2abold, T2bbold, Fa, Fb, Ia, I
     i = 0
     Eold = 888888888.888888888
     while i < max_iter and not converged:
-        T1out,T2out = form_new_ampl_u(
+        T1out, T2out = form_new_ampl_u(
             method, Fa, Fb, Ia, Ib, Iabab, T1aold, T1bold, T2aaold,
             T2abold, T2bbold, D1a, D1b, D2aa, D2ab, D2bb, ti, ng, G)
 
@@ -294,14 +295,14 @@ def ft_ucc_iter(method, T1aold, T1bold, T2aaold, T2abold, T2bbold, Fa, Fb, Ia, I
         T2bbold = alpha*T2bbold + (1.0 - alpha)*T2out[2]
 
         # compute energy
-        E = ft_cc_energy.ft_ucc_energy(T1aold,T1bold,T2aaold,T2abold,T2bbold,
-            Fa.ov,Fb.ov,Ia.oovv,Ib.oovv,Iabab.oovv,g,beta)
+        E = ft_cc_energy.ft_ucc_energy(T1aold, T1bold, T2aaold, T2abold, T2bbold,
+            Fa.ov, Fb.ov, Ia.oovv, Ib.oovv, Iabab.oovv, g, beta)
 
         # determine convergence
         if isinstance(E, complex):
-            logging.info(' %2d  %.10f  %.3E %.4E' % (i+1,E.real,E.imag,res1+res2))
+            logging.info(' %2d  %.10f  %.3E %.4E' % (i+1, E.real, E.imag, res1+res2))
         else:
-            logging.info(' %2d  %.10f   %.4E' % (i+1,E,res1+res2))
+            logging.info(' %2d  %.10f   %.4E' % (i+1, E, res1+res2))
         i = i + 1
         if numpy.abs(E - Eold) < ethresh and res1+res2 < tthresh:
             converged = True
@@ -311,9 +312,9 @@ def ft_ucc_iter(method, T1aold, T1bold, T2aaold, T2abold, T2bbold, Fa, Fb, Ia, I
         logging.warning("{} did not converge!".format(method))
 
     tend = time.time()
-    logging.info("Total {} time: {:.4f} s".format(method,(tend - tbeg)))
+    logging.info("Total {} time: {:.4f} s".format(method, (tend - tbeg)))
 
-    return Eold,(T1aold,T1bold),(T2aaold,T2abold,T2bbold)
+    return Eold, (T1aold, T1bold), (T2aaold, T2abold, T2bbold)
 
 
 def ft_ucc_iter_extrap(method, Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb,
@@ -338,13 +339,13 @@ def ft_ucc_iter_extrap(method, Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb
     max_iter = conv_options["max_iter"]
     alpha = conv_options["damp"]
 
-    noa,nva = Fa.ov.shape
-    nob,nvb = Fb.ov.shape
-    t1bara = numpy.zeros((ng,nva,noa), dtype=Fa.vo.dtype)
-    t1barb = numpy.zeros((ng,nvb,nob), dtype=Fb.vo.dtype)
-    t2baraa = numpy.zeros((ng,nva,nva,noa,noa), dtype=Ia.vvoo.dtype)
-    t2barab = numpy.zeros((ng,nva,nvb,noa,nob), dtype=Iabab.vvoo.dtype)
-    t2barbb = numpy.zeros((ng,nvb,nvb,nob,nob), dtype=Ib.vvoo.dtype)
+    noa, nva = Fa.ov.shape
+    nob, nvb = Fb.ov.shape
+    t1bara = numpy.zeros((ng, nva, noa), dtype=Fa.vo.dtype)
+    t1barb = numpy.zeros((ng, nvb, nob), dtype=Fb.vo.dtype)
+    t2baraa = numpy.zeros((ng, nva, nva, noa, noa), dtype=Ia.vvoo.dtype)
+    t2barab = numpy.zeros((ng, nva, nvb, noa, nob), dtype=Iabab.vvoo.dtype)
+    t2barbb = numpy.zeros((ng, nvb, nvb, nob, nob), dtype=Ib.vvoo.dtype)
     T1newa = numpy.zeros(t1bara.shape, dtype=t1bara.dtype)
     T1newb = numpy.zeros(t1barb.shape, dtype=t1barb.dtype)
     T2newaa = numpy.zeros(t2baraa.shape, dtype=t2baraa.dtype)
@@ -366,11 +367,11 @@ def ft_ucc_iter_extrap(method, Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb
             t2baraa[ig] = -Ia.vvoo
             t2barab[ig] = -Iabab.vvoo
             t2barbb[ig] = -Ib.vvoo
-            T1newa[ig] = quadrature.int_tbar1_single(ng,ig,t1bara,ti,D1a,G)
-            T1newb[ig] = quadrature.int_tbar1_single(ng,ig,t1barb,ti,D1b,G)
-            T2newaa[ig] = quadrature.int_tbar2_single(ng,ig,t2baraa,ti,D2aa,G)
-            T2newab[ig] = quadrature.int_tbar2_single(ng,ig,t2barab,ti,D2ab,G)
-            T2newbb[ig] = quadrature.int_tbar2_single(ng,ig,t2barbb,ti,D2bb,G)
+            T1newa[ig] = quadrature.int_tbar1_single(ng, ig, t1bara, ti, D1a, G)
+            T1newb[ig] = quadrature.int_tbar1_single(ng, ig, t1barb, ti, D1b, G)
+            T2newaa[ig] = quadrature.int_tbar2_single(ng, ig, t2baraa, ti, D2aa, G)
+            T2newab[ig] = quadrature.int_tbar2_single(ng, ig, t2barab, ti, D2ab, G)
+            T2newbb[ig] = quadrature.int_tbar2_single(ng, ig, t2barbb, ti, D2bb, G)
         else:
             # linear extrapolation
             fac = (ti[ig] - ti[ig - 1])/(ti[ig - 2] - ti[ig - 1])
@@ -386,9 +387,9 @@ def ft_ucc_iter_extrap(method, Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb
         i = 0
         while i < max_iter and not converged:
             # form new T1 and T2
-            (T1a,T1b),(T2aa,T2ab,T2bb) = form_new_ampl_extrap_u(ig,method,Fa,Fb,Ia,Ib,Iabab,
-                    T1newa[ig],T1newb[ig],T2newaa[ig],T2newab[ig],T2newbb[ig],
-                    t1bara,t1barb,t2baraa,t2barab,t2barbb,D1a,D1b,D2aa,D2ab,D2bb,ti,ng,G)
+            (T1a, T1b), (T2aa, T2ab, T2bb) = form_new_ampl_extrap_u(ig, method, Fa, Fb, Ia, Ib, Iabab,
+                    T1newa[ig], T1newb[ig], T2newaa[ig], T2newab[ig], T2newbb[ig],
+                    t1bara, t1barb, t2baraa, t2barab, t2barbb, D1a, D1b, D2aa, D2ab, D2bb, ti, ng, G)
 
             res1 = numpy.linalg.norm(T1a - T1newa[ig]) / nl1
             res1 += numpy.linalg.norm(T1b - T1newb[ig]) / nl1
@@ -403,11 +404,11 @@ def ft_ucc_iter_extrap(method, Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb
             T2newbb[ig] = alpha*T2newbb[ig] + (1.0 - alpha)*T2bb.copy()
 
             # determine convergence
-            logging.info(' %2d  %.4E' % (i+1,res1+res2))
+            logging.info(' %2d  %.4E' % (i+1, res1+res2))
             i = i + 1
             if res1 + res2 < thresh:
                 converged = True
-    return (T1newa,T1newb),(T2newaa,T2newab,T2newbb)
+    return (T1newa, T1newb), (T2newaa, T2newab, T2newbb)
 
 
 def ft_lambda_iter(method, L1old, L2old, T1, T2, F, I, D1, D2,
@@ -438,19 +439,19 @@ def ft_lambda_iter(method, L1old, L2old, T1, T2, F, I, D1, D2,
     nl2 = numpy.linalg.norm(L2old) + 0.1
     while i < max_iter and not converged:
         if method == "LCCSD":
-            L1,L2 = ft_cc_equations.lccsd_lambda_simple(
-                F,I,T1,T2,L1old,L2old,D1,D2,ti,ng,g,G,beta)
+            L1, L2 = ft_cc_equations.lccsd_lambda_simple(
+                F, I, T1, T2, L1old, L2old, D1, D2, ti, ng, g, G, beta)
         elif method == "LCCD":
             L1 = L1old
-            L2 = ft_cc_equations.lccd_lambda_simple(F,I,T2,
-                    L2old,D2,ti,ng,g,G,beta)
+            L2 = ft_cc_equations.lccd_lambda_simple(F, I, T2,
+                    L2old, D2, ti, ng, g, G, beta)
         elif method == "CCSD":
-            L1,L2 = ft_cc_equations.ccsd_lambda_opt(
-                F,I,T1,T2,L1old,L2old,D1,D2,ti,ng,g,G,beta)
+            L1, L2 = ft_cc_equations.ccsd_lambda_opt(
+                F, I, T1, T2, L1old, L2old, D1, D2, ti, ng, g, G, beta)
         elif method == "CCD":
             L1 = L1old
-            L2 = ft_cc_equations.ccd_lambda_simple(F,I,T2,
-                    L2old,D2,ti,ng,g,G,beta)
+            L2 = ft_cc_equations.ccd_lambda_simple(F, I, T2,
+                    L2old, D2, ti, ng, g, G, beta)
         else:
             raise Exception("Unrecognized method keyword")
 
@@ -465,7 +466,7 @@ def ft_lambda_iter(method, L1old, L2old, T1, T2, F, I, D1, D2,
         L2 = None
 
         # determine convergence
-        logging.info(' %2d  %.10f' % (i+1,res1 + res2))
+        logging.info(' %2d  %.10f' % (i + 1, res1 + res2))
         i = i + 1
         if res1 + res2 < thresh:
             converged = True
@@ -476,7 +477,7 @@ def ft_lambda_iter(method, L1old, L2old, T1, T2, F, I, D1, D2,
     tend = time.time()
     logging.info("Total CCSD Lambda time: %f s" % (tend - tbeg))
 
-    return L1old,L2old
+    return L1old, L2old
 
 
 def ft_ulambda_iter(method, L1ain, L1bin, L2aain, L2abin, L2bbin, T1aold, T1bold,
@@ -520,10 +521,10 @@ def ft_ulambda_iter(method, L1ain, L1bin, L2aain, L2abin, L2bbin, T1aold, T1bold
         elif method == "LCCD":
             raise Exception("U-LCCD lambda equations not implemented")
         elif method == "CCSD":
-            L1a,L1b,L2aa,L2ab,L2bb = ft_cc_equations.uccsd_lambda_opt(
-                Fa,Fb,Ia,Ib,Iabab,T1aold,T1bold,T2aaold,T2abold,T2bbold,
-                L1aold,L1bold,L2aaold,L2abold,L2bbold,D1a,D1b,D2aa,D2ab,D2bb,
-                ti,ng,g,G,beta)
+            L1a, L1b, L2aa, L2ab, L2bb = ft_cc_equations.uccsd_lambda_opt(
+                Fa, Fb, Ia, Ib, Iabab, T1aold, T1bold, T2aaold, T2abold, T2bbold,
+                L1aold, L1bold, L2aaold, L2abold, L2bbold, D1a, D1b, D2aa, D2ab, D2bb,
+                ti, ng, g, G, beta)
         elif method == "CCD":
             raise Exception("UCCD lambda equations not implemented")
         else:
@@ -551,7 +552,7 @@ def ft_ulambda_iter(method, L1ain, L1bin, L2aain, L2abin, L2bbin, T1aold, T1bold
         L2bb = None
 
         # determine convergence
-        logging.info(' %2d  %.10f' % (i+1,res1 + res2))
+        logging.info(' %2d  %.10f' % (i + 1, res1 + res2))
         i = i + 1
         if res1 + res2 < thresh:
             converged = True
@@ -562,7 +563,7 @@ def ft_ulambda_iter(method, L1ain, L1bin, L2aain, L2abin, L2bbin, T1aold, T1bold
     tend = time.time()
     logging.info("Total CCSD Lambda time: %f s" % (tend - tbeg))
 
-    return L1aold,L1bold,L2aaold,L2abold,L2bbold
+    return L1aold, L1bold, L2aaold, L2abold, L2bbold
 
 
 def ft_integrals(sys, en, beta, mu):
@@ -584,7 +585,7 @@ def ft_integrals(sys, en, beta, mu):
     Fov = einsum('ia,i,a->ia', fmo, sfo, sfv)
     Fvo = einsum('ai,a,i->ai', fmo, sfv, sfo)
     Fvv = einsum('ab,a,b->ab', fmo, sfv, sfv)
-    F = one_e_blocks(Foo,Fov,Fvo,Fvv)
+    F = one_e_blocks(Foo, Fov, Fvo, Fvv)
 
     Ivvvv = einsum('abcd,a,b,c,d->abcd', eri, sfv, sfv, sfv, sfv)
     Ivvvo = einsum('abci,a,b,c,i->abci', eri, sfv, sfv, sfv, sfo)
@@ -596,9 +597,9 @@ def ft_integrals(sys, en, beta, mu):
     Iooov = einsum('jkia,j,k,i,a->jkia', eri, sfo, sfo, sfo, sfv)
     Ioooo = einsum('klij,k,l,i,j->klij', eri, sfo, sfo, sfo, sfo)
     I = two_e_blocks(
-        vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-        vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
-    return F,I
+        vvvv=Ivvvv, vvvo=Ivvvo, vovv=Ivovv, vvoo=Ivvoo,
+        vovo=Ivovo, oovv=Ioovv, vooo=Ivooo, ooov=Iooov, oooo=Ioooo)
+    return F, I
 
 
 def ft_integrals_2e(sys, en, beta, mu):
@@ -621,8 +622,8 @@ def ft_integrals_2e(sys, en, beta, mu):
     Iooov = einsum('jkia,j,k,i,a->jkia', eri, sfo, sfo, sfo, sfv)
     Ioooo = einsum('klij,k,l,i,j->klij', eri, sfo, sfo, sfo, sfo)
     I = two_e_blocks(
-        vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-        vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+        vvvv=Ivvvv, vvvo=Ivvvo, vovv=Ivovv, vvoo=Ivvoo,
+        vovo=Ivovo, oovv=Ioovv, vooo=Ivooo, ooov=Iooov, oooo=Ioooo)
     return I
 
 
@@ -642,7 +643,7 @@ def ft_integrals_neq_1e(sys, en, beta, mu, t):
     Fov = einsum('ia,i,a->ia', fmo, sfo, sfv)
     Fvo = einsum('ai,a,i->ai', fmo, sfv, sfo)
     Fvv = einsum('ab,a,b->ab', fmo, sfv, sfv)
-    F = one_e_blocks(Foo,Fov,Fvo,Fvv)
+    F = one_e_blocks(Foo, Fov, Fvo, Fvv)
 
     return F
 
@@ -661,19 +662,19 @@ def get_ft_integrals_neq(sys, en, beta, mu):
     Foo = einsum('ij,j->ij', fmo[0], fo)
     Fvo = einsum('ai,a,i->ai', fmo[0], fv, fo)
     Fvv = einsum('ab,a->ab', fmo[0], fv)
-    F = one_e_blocks(Foo,fmo[0],Fvo,Fvv)
+    F = one_e_blocks(Foo, fmo[0], Fvo, Fvv)
 
     Foo = einsum('yij,j->yij', fmo, fo)
     Fvo = einsum('yai,a,i->yai', fmo, fv, fo)
     Fvv = einsum('yab,a->yab', fmo, fv)
-    Ff = one_e_blocks(Foo,fmo,Fvo,Fvv)
+    Ff = one_e_blocks(Foo, fmo, Fvo, Fvv)
 
     fmo = sys.g_fock_tot(direc='b')
     fmo = (fmo - numpy.diag(en)).astype(complex)
     Foo = einsum('yij,j->yij', fmo, fo)
     Fvo = einsum('yai,a,i->yai', fmo, fv, fo)
     Fvv = einsum('yab,a->yab', fmo, fv)
-    Fb = one_e_blocks(Foo,fmo,Fvo,Fvv)
+    Fb = one_e_blocks(Foo, fmo, Fvo, Fvv)
 
     # get ERIs
     eri = sys.g_aint_tot().astype(complex)
@@ -687,9 +688,9 @@ def get_ft_integrals_neq(sys, en, beta, mu):
     Iooov = einsum('jkia,i->jkia', eri, fo)
     Ioooo = einsum('klij,i,j->klij', eri, fo, fo)
     I = two_e_blocks(
-        vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-        vovo=Ivovo,oovv=eri,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
-    return F,Ff,Fb,I
+        vvvv=Ivvvv, vvvo=Ivvvo, vovv=Ivovv, vvoo=Ivvoo,
+        vovo=Ivovo, oovv=eri, vooo=Ivooo, ooov=Iooov, oooo=Ioooo)
+    return F, Ff, Fb, I
 
 
 def uft_integrals(sys, ea, eb, beta, mu):
@@ -704,7 +705,7 @@ def uft_integrals(sys, ea, eb, beta, mu):
     sfvb = numpy.sqrt(fvb)
 
     # get FT fock matrix
-    fa,fb = sys.u_fock_tot()
+    fa, fb = sys.u_fock_tot()
     fa = fa - numpy.diag(ea)
     fb = fb - numpy.diag(eb)
 
@@ -713,16 +714,16 @@ def uft_integrals(sys, ea, eb, beta, mu):
     Fova = einsum('ia,i,a->ia', fa, sfoa, sfva)
     Fvoa = einsum('ai,a,i->ai', fa, sfva, sfoa)
     Fvva = einsum('ab,a,b->ab', fa, sfva, sfva)
-    Fa = one_e_blocks(Fooa,Fova,Fvoa,Fvva)
+    Fa = one_e_blocks(Fooa, Fova, Fvoa, Fvva)
 
     Foob = einsum('ij,i,j->ij', fb, sfob, sfob)
     Fovb = einsum('ia,i,a->ia', fb, sfob, sfvb)
     Fvob = einsum('ai,a,i->ai', fb, sfvb, sfob)
     Fvvb = einsum('ab,a,b->ab', fb, sfvb, sfvb)
-    Fb = one_e_blocks(Foob,Fovb,Fvob,Fvvb)
+    Fb = one_e_blocks(Foob, Fovb, Fvob, Fvvb)
 
     # get ERIs
-    eriA,eriB,eriAB = sys.u_aint_tot()
+    eriA, eriB, eriAB = sys.u_aint_tot()
     Ivvvv = einsum('abcd,a,b,c,d->abcd', eriA, sfva, sfva, sfva, sfva)
     Ivvvo = einsum('abci,a,b,c,i->abci', eriA, sfva, sfva, sfva, sfoa)
     Ivovv = einsum('aibc,a,i,b,c->aibc', eriA, sfva, sfoa, sfva, sfva)
@@ -733,8 +734,8 @@ def uft_integrals(sys, ea, eb, beta, mu):
     Iooov = einsum('jkia,j,k,i,a->jkia', eriA, sfoa, sfoa, sfoa, sfva)
     Ioooo = einsum('klij,k,l,i,j->klij', eriA, sfoa, sfoa, sfoa, sfoa)
     Ia = two_e_blocks(
-        vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-        vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+        vvvv=Ivvvv, vvvo=Ivvvo, vovv=Ivovv, vvoo=Ivvoo,
+        vovo=Ivovo, oovv=Ioovv, vooo=Ivooo, ooov=Iooov, oooo=Ioooo)
 
     Ivvvv = einsum('abcd,a,b,c,d->abcd', eriB, sfvb, sfvb, sfvb, sfvb)
     Ivvvo = einsum('abci,a,b,c,i->abci', eriB, sfvb, sfvb, sfvb, sfob)
@@ -746,8 +747,8 @@ def uft_integrals(sys, ea, eb, beta, mu):
     Iooov = einsum('jkia,j,k,i,a->jkia', eriB, sfob, sfob, sfob, sfvb)
     Ioooo = einsum('klij,k,l,i,j->klij', eriB, sfob, sfob, sfob, sfob)
     Ib = two_e_blocks(
-        vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-        vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+        vvvv=Ivvvv, vvvo=Ivvvo, vovv=Ivovv, vvoo=Ivvoo,
+        vovo=Ivovo, oovv=Ioovv, vooo=Ivooo, ooov=Iooov, oooo=Ioooo)
 
     Ivvvv = einsum('abcd,a,b,c,d->abcd', eriAB, sfva, sfvb, sfva, sfvb)
     Ivvvo = einsum('abci,a,b,c,i->abci', eriAB, sfva, sfvb, sfva, sfob)
@@ -765,17 +766,15 @@ def uft_integrals(sys, ea, eb, beta, mu):
     Ioovo = einsum('jkai,j,k,a,i->jkai', eriAB, sfoa, sfob, sfva, sfob)
     Iooov = einsum('jkia,j,k,i,a->jkia', eriAB, sfoa, sfob, sfoa, sfvb)
     Ioooo = einsum('klij,k,l,i,j->klij', eriAB, sfoa, sfob, sfoa, sfob)
-    Iabab = two_e_blocks_full(vvvv=Ivvvv,
-            vvvo=Ivvvo,vvov=Ivvov,
-            vovv=Ivovv,ovvv=Iovvv,
-            vvoo=Ivvoo,vovo=Ivovo,
-            ovvo=Iovvo,voov=Ivoov,
-            ovov=Iovov,oovv=Ioovv,
-            vooo=Ivooo,ovoo=Iovoo,
-            oovo=Ioovo,ooov=Iooov,
+    Iabab = two_e_blocks_full(
+            vvvv=Ivvvv, vvvo=Ivvvo, vvov=Ivvov,
+            vovv=Ivovv, ovvv=Iovvv, vvoo=Ivvoo,
+            vovo=Ivovo, ovvo=Iovvo, voov=Ivoov,
+            ovov=Iovov, oovv=Ioovv, vooo=Ivooo,
+            ovoo=Iovoo, oovo=Ioovo, ooov=Iooov,
             oooo=Ioooo)
 
-    return Fa,Fb,Ia,Ib,Iabab
+    return Fa, Fb, Ia, Ib, Iabab
 
 
 def rft_integrals(sys, en, beta, mu):
@@ -797,7 +796,7 @@ def rft_integrals(sys, en, beta, mu):
     Fov = einsum('ia,i,a->ia', fmo, sfo, sfv)
     Fvo = einsum('ai,a,i->ai', fmo, sfv, sfo)
     Fvv = einsum('ab,a,b->ab', fmo, sfv, sfv)
-    F = one_e_blocks(Foo,Fov,Fvo,Fvv)
+    F = one_e_blocks(Foo, Fov, Fvo, Fvv)
 
     Ivvvv = einsum('abcd,a,b,c,d->abcd', eri, sfv, sfv, sfv, sfv)
     Ivvvo = einsum('abci,a,b,c,i->abci', eri, sfv, sfv, sfv, sfo)
@@ -820,7 +819,7 @@ def rft_integrals(sys, en, beta, mu):
         ovvv=Iovvv, vvoo=Ivvoo, vovo=Ivovo, ovvo=Iovvo,
         voov=Ivoov, ovov=Iovov, oovv=Ioovv, vooo=Ivooo,
         ovoo=Iovoo, oovo=Ioovo, ooov=Iooov, oooo=Ioooo)
-    return F,I
+    return F, I
 
 
 def ft_active_integrals(sys, en, focc, fvir, iocc, ivir):
@@ -841,7 +840,7 @@ def ft_active_integrals(sys, en, focc, fvir, iocc, ivir):
     Fov = einsum('ia,i,a->ia', fmo[numpy.ix_(iocc, ivir)], sfo, sfv)
     Fvo = einsum('ai,a,i->ai', fmo[numpy.ix_(ivir, iocc)], sfv, sfo)
     Fvv = einsum('ab,a,b->ab', fmo[numpy.ix_(ivir, ivir)], sfv, sfv)
-    F = one_e_blocks(Foo,Fov,Fvo,Fvv)
+    F = one_e_blocks(Foo, Fov, Fvo, Fvv)
 
     Ivvvv = einsum('abcd,a,b,c,d->abcd', eri[numpy.ix_(ivir, ivir, ivir, ivir)], sfv, sfv, sfv, sfv)
     Ivvvo = einsum('abci,a,b,c,i->abci', eri[numpy.ix_(ivir, ivir, ivir, iocc)], sfv, sfv, sfv, sfo)
@@ -853,17 +852,17 @@ def ft_active_integrals(sys, en, focc, fvir, iocc, ivir):
     Iooov = einsum('jkia,j,k,i,a->jkia', eri[numpy.ix_(iocc, iocc, iocc, ivir)], sfo, sfo, sfo, sfv)
     Ioooo = einsum('klij,k,l,i,j->klij', eri[numpy.ix_(iocc, iocc, iocc, iocc)], sfo, sfo, sfo, sfo)
     I = two_e_blocks(
-        vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-        vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+        vvvv=Ivvvv, vvvo=Ivvvo, vovv=Ivovv, vvoo=Ivvoo,
+        vovo=Ivovo, oovv=Ioovv, vooo=Ivooo, ooov=Iooov, oooo=Ioooo)
 
-    return F,I
+    return F, I
 
 
 def uft_active_integrals(sys, ea, eb, foa, fva, fob, fvb, iocca, ivira, ioccb, ivirb):
     """Return one and two-electron integrals in the general spin orbital basis
     with small occupations excluded."""
     # get FT Fock matrix
-    fa,fb = sys.u_fock_tot()
+    fa, fb = sys.u_fock_tot()
     fa = fa - numpy.diag(ea)
     fb = fb - numpy.diag(eb)
 
@@ -877,16 +876,16 @@ def uft_active_integrals(sys, ea, eb, foa, fva, fob, fvb, iocca, ivira, ioccb, i
     Fova = einsum('ia,i,a->ia', fa[numpy.ix_(iocca, ivira)], sfoa, sfva)
     Fvoa = einsum('ai,a,i->ai', fa[numpy.ix_(ivira, iocca)], sfva, sfoa)
     Fvva = einsum('ab,a,b->ab', fa[numpy.ix_(ivira, ivira)], sfva, sfva)
-    Fa = one_e_blocks(Fooa,Fova,Fvoa,Fvva)
+    Fa = one_e_blocks(Fooa, Fova, Fvoa, Fvva)
 
     Foob = einsum('ij,i,j->ij', fb[numpy.ix_(ioccb, ioccb)], sfob, sfob)
     Fovb = einsum('ia,i,a->ia', fb[numpy.ix_(ioccb, ivirb)], sfob, sfvb)
     Fvob = einsum('ai,a,i->ai', fb[numpy.ix_(ivirb, ioccb)], sfvb, sfob)
     Fvvb = einsum('ab,a,b->ab', fb[numpy.ix_(ivirb, ivirb)], sfvb, sfvb)
-    Fb = one_e_blocks(Foob,Fovb,Fvob,Fvvb)
+    Fb = one_e_blocks(Foob, Fovb, Fvob, Fvvb)
 
     # get ERIs
-    eriA,eriB,eriAB = sys.u_aint_tot()
+    eriA, eriB, eriAB = sys.u_aint_tot()
 
     Ivvvv = einsum('abcd,a,b,c,d->abcd', eriA[numpy.ix_(ivira, ivira, ivira, ivira)], sfva, sfva, sfva, sfva)
     Ivvvo = einsum('abci,a,b,c,i->abci', eriA[numpy.ix_(ivira, ivira, ivira, iocca)], sfva, sfva, sfva, sfoa)
@@ -898,8 +897,8 @@ def uft_active_integrals(sys, ea, eb, foa, fva, fob, fvb, iocca, ivira, ioccb, i
     Iooov = einsum('jkia,j,k,i,a->jkia', eriA[numpy.ix_(iocca, iocca, iocca, ivira)], sfoa, sfoa, sfoa, sfva)
     Ioooo = einsum('klij,k,l,i,j->klij', eriA[numpy.ix_(iocca, iocca, iocca, iocca)], sfoa, sfoa, sfoa, sfoa)
     Ia = two_e_blocks(
-        vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-        vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+        vvvv=Ivvvv, vvvo=Ivvvo, vovv=Ivovv, vvoo=Ivvoo,
+        vovo=Ivovo, oovv=Ioovv, vooo=Ivooo, ooov=Iooov, oooo=Ioooo)
 
     Ivvvv = einsum('abcd,a,b,c,d->abcd', eriB[numpy.ix_(ivirb, ivirb, ivirb, ivirb)], sfvb, sfvb, sfvb, sfvb)
     Ivvvo = einsum('abci,a,b,c,i->abci', eriB[numpy.ix_(ivirb, ivirb, ivirb, ioccb)], sfvb, sfvb, sfvb, sfob)
@@ -911,8 +910,8 @@ def uft_active_integrals(sys, ea, eb, foa, fva, fob, fvb, iocca, ivira, ioccb, i
     Iooov = einsum('jkia,j,k,i,a->jkia', eriB[numpy.ix_(ioccb, ioccb, ioccb, ivirb)], sfob, sfob, sfob, sfvb)
     Ioooo = einsum('klij,k,l,i,j->klij', eriB[numpy.ix_(ioccb, ioccb, ioccb, ioccb)], sfob, sfob, sfob, sfob)
     Ib = two_e_blocks(
-        vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-        vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+        vvvv=Ivvvv, vvvo=Ivvvo, vovv=Ivovv, vvoo=Ivvoo,
+        vovo=Ivovo, oovv=Ioovv, vooo=Ivooo, ooov=Iooov, oooo=Ioooo)
 
     Ivvvv = einsum('abcd,a,b,c,d->abcd', eriAB[numpy.ix_(ivira, ivirb, ivira, ivirb)], sfva, sfvb, sfva, sfvb)
     Ivvvo = einsum('abci,a,b,c,i->abci', eriAB[numpy.ix_(ivira, ivirb, ivira, ioccb)], sfva, sfvb, sfva, sfob)
@@ -936,7 +935,7 @@ def uft_active_integrals(sys, ea, eb, foa, fva, fob, fvb, iocca, ivira, ioccb, i
         voov=Ivoov, ovov=Iovov, oovv=Ioovv, vooo=Ivooo,
         ovoo=Iovoo, oovo=Ioovo, ooov=Iooov, oooo=Ioooo)
 
-    return Fa,Fb,Ia,Ib,Iabab
+    return Fa, Fb, Ia, Ib, Iabab
 
 
 def rft_active_integrals(sys, en, focc, fvir, iocc, ivir):
@@ -957,7 +956,7 @@ def rft_active_integrals(sys, en, focc, fvir, iocc, ivir):
     Fov = einsum('ia,i,a->ia', fmo[numpy.ix_(iocc, ivir)], sfo, sfv)
     Fvo = einsum('ai,a,i->ai', fmo[numpy.ix_(ivir, iocc)], sfv, sfo)
     Fvv = einsum('ab,a,b->ab', fmo[numpy.ix_(ivir, ivir)], sfv, sfv)
-    F = one_e_blocks(Foo,Fov,Fvo,Fvv)
+    F = one_e_blocks(Foo, Fov, Fvo, Fvv)
 
     Ivvvv = einsum('abcd,a,b,c,d->abcd', eri[numpy.ix_(ivir, ivir, ivir, ivir)], sfv, sfv, sfv, sfv)
     Ivvvo = einsum('abci,a,b,c,i->abci', eri[numpy.ix_(ivir, ivir, ivir, iocc)], sfv, sfv, sfv, sfo)
@@ -980,7 +979,7 @@ def rft_active_integrals(sys, en, focc, fvir, iocc, ivir):
         ovvv=Iovvv, vvoo=Ivvoo, vovo=Ivovo, ovvo=Iovvo,
         voov=Ivoov, ovov=Iovov, oovv=Ioovv, vooo=Ivooo,
         ovoo=Iovoo, oovo=Ioovo, ooov=Iooov, oooo=Ioooo)
-    return F,I
+    return F, I
 
 
 def _form_ft_d_eris(eri, sfo, sfv, dso, dsv):
@@ -1030,8 +1029,8 @@ def _form_ft_d_eris(eri, sfo, sfv, dso, dsv):
           + einsum('klij,k,l,i,j->klij', eri, sfo, sfo, sfo, dso)
 
     I = two_e_blocks(
-        vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-        vovo=Ivovo,oovv=Ioovv,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+        vvvv=Ivvvv, vvvo=Ivvvo, vovv=Ivovv, vvoo=Ivvoo,
+        vovo=Ivovo, oovv=Ioovv, vooo=Ivooo, ooov=Iooov, oooo=Ioooo)
     return I
 
 
@@ -1116,20 +1115,20 @@ def ft_d_integrals(sys, en, fo, fv, dvec):
     Fvv = einsum('ab,a,b->ab', fd, sfv, sfv)\
             + einsum('ab,a,b->ab', fmo, dsv, sfv)\
             + einsum('ab,a,b->ab', fmo, sfv, dsv)
-    F = one_e_blocks(Foo,Fov,Fvo,Fvv)
+    F = one_e_blocks(Foo, Fov, Fvo, Fvv)
 
-    I = _form_ft_d_eris(eri,sfo,sfv,dso,dsv)
-    return F,I
+    I = _form_ft_d_eris(eri, sfo, sfv, dso, dsv)
+    return F, I
 
 
 def u_ft_d_integrals(sys, ea, eb, foa, fva, fob, fvb, dveca, dvecb):
     """form unrestricted integrals contracted with derivatives of occupation numbers."""
 
     # get FT Fock matrices
-    fa,fb = sys.u_fock_tot()
+    fa, fb = sys.u_fock_tot()
     fa = fa - numpy.diag(ea)
     fb = fb - numpy.diag(eb)
-    fda,fdb = sys.u_fock_d_tot(dveca,dvecb)
+    fda, fdb = sys.u_fock_d_tot(dveca, dvecb)
 
     sfoa = numpy.sqrt(foa)
     sfva = numpy.sqrt(fva)
@@ -1153,7 +1152,7 @@ def u_ft_d_integrals(sys, ea, eb, foa, fva, fob, fvb, dveca, dvecb):
     Fvva = einsum('ab,a,b->ab', fda, sfva, sfva)\
             + einsum('ab,a,b->ab', fa, dsva, sfva)\
             + einsum('ab,a,b->ab', fa, sfva, dsva)
-    Fa = one_e_blocks(Fooa,Fova,Fvoa,Fvva)
+    Fa = one_e_blocks(Fooa, Fova, Fvoa, Fvva)
 
     Foob = einsum('ij,i,j->ij', fdb, sfob, sfob)\
             + einsum('ij,i,j->ij', fb, dsob, sfob)\
@@ -1167,10 +1166,10 @@ def u_ft_d_integrals(sys, ea, eb, foa, fva, fob, fvb, dveca, dvecb):
     Fvvb = einsum('ab,a,b->ab', fdb, sfvb, sfvb)\
             + einsum('ab,a,b->ab', fb, dsvb, sfvb)\
             + einsum('ab,a,b->ab', fb, sfvb, dsvb)
-    Fb = one_e_blocks(Foob,Fovb,Fvob,Fvvb)
+    Fb = one_e_blocks(Foob, Fovb, Fvob, Fvvb)
 
     # get ERIs
-    Ia,Ib,Iabab = sys.u_aint_tot()
+    Ia, Ib, Iabab = sys.u_aint_tot()
 
     Ia = _form_ft_d_eris(Ia, sfoa, sfva, dsoa, dsva)
     Ib = _form_ft_d_eris(Ib, sfob, sfvb, dsob, dsvb)
@@ -1261,7 +1260,7 @@ def u_ft_d_integrals(sys, ea, eb, foa, fva, fob, fvb, dveca, dvecb):
         voov=Ivoov, ovov=Iovov, oovv=Ioovv, vooo=Ivooo,
         ovoo=Iovoo, oovo=Ioovo, ooov=Iooov, oooo=Ioooo)
 
-    return Fa,Fb,Ia,Ib,Iabab
+    return Fa, Fb, Ia, Ib, Iabab
 
 
 def ft_d_active_integrals(sys, en, fo, fv, iocc, ivir, dvec):
@@ -1292,12 +1291,12 @@ def ft_d_active_integrals(sys, en, fo, fv, iocc, ivir, dvec):
     Fvv = einsum('ab,a,b->ab', fd[numpy.ix_(ivir, ivir)], sfv, sfv)\
             + einsum('ab,a,b->ab', fmo[numpy.ix_(ivir, ivir)], dsv, sfv)\
             + einsum('ab,a,b->ab', fmo[numpy.ix_(ivir, ivir)], sfv, dsv)
-    F = one_e_blocks(Foo,Fov,Fvo,Fvv)
+    F = one_e_blocks(Foo, Fov, Fvo, Fvv)
 
     # get ERIs
     eri = sys.g_aint_tot()
     I = _form_ft_d_active_eris(eri, sfo, sfv, dso, dsv, iocc, ivir)
-    return F,I
+    return F, I
 
 
 def uft_d_active_integrals(sys, ea, eb, foa, fva, fob, fvb,
@@ -1306,10 +1305,10 @@ def uft_d_active_integrals(sys, ea, eb, foa, fva, fob, fvb,
     with small occupations excluded."""
 
     # get FT Fock matrix
-    fa,fb = sys.u_fock_tot()
+    fa, fb = sys.u_fock_tot()
     fa = fa - numpy.diag(ea)
     fb = fb - numpy.diag(eb)
-    fda,fdb = sys.u_fock_d_tot(dveca,dvecb)
+    fda, fdb = sys.u_fock_d_tot(dveca, dvecb)
 
     sfoa = numpy.sqrt(foa)
     sfva = numpy.sqrt(fva)
@@ -1337,7 +1336,7 @@ def uft_d_active_integrals(sys, ea, eb, foa, fva, fob, fvb,
     Fvv = einsum('ab,a,b->ab', fda[numpy.ix_(ivira, ivira)], sfva, sfva)\
             + einsum('ab,a,b->ab', fa[numpy.ix_(ivira, ivira)], dsva, sfva)\
             + einsum('ab,a,b->ab', fa[numpy.ix_(ivira, ivira)], sfva, dsva)
-    Fa = one_e_blocks(Foo,Fov,Fvo,Fvv)
+    Fa = one_e_blocks(Foo, Fov, Fvo, Fvv)
 
     Foo = einsum('ij,i,j->ij', fdb[numpy.ix_(ioccb, ioccb)], sfob, sfob)\
             + einsum('ij,i,j->ij', fb[numpy.ix_(ioccb, ioccb)], dsob, sfob)\
@@ -1351,10 +1350,10 @@ def uft_d_active_integrals(sys, ea, eb, foa, fva, fob, fvb,
     Fvv = einsum('ab,a,b->ab', fdb[numpy.ix_(ivirb, ivirb)], sfvb, sfvb)\
             + einsum('ab,a,b->ab', fb[numpy.ix_(ivirb, ivirb)], dsvb, sfvb)\
             + einsum('ab,a,b->ab', fb[numpy.ix_(ivirb, ivirb)], sfvb, dsvb)
-    Fb = one_e_blocks(Foo,Fov,Fvo,Fvv)
+    Fb = one_e_blocks(Foo, Fov, Fvo, Fvv)
 
     # get ERIs
-    eriA,eriB,eriAB = sys.u_aint_tot()
+    eriA, eriB, eriAB = sys.u_aint_tot()
     Ia = _form_ft_d_active_eris(eriA, sfoa, sfva, dsoa, dsva, iocca, ivira)
     Ib = _form_ft_d_active_eris(eriB, sfob, sfvb, dsob, dsvb, ioccb, ivirb)
 
@@ -1444,7 +1443,7 @@ def uft_d_active_integrals(sys, ea, eb, foa, fva, fob, fvb,
         voov=Ivoov, ovov=Iovov, oovv=Ioovv, vooo=Ivooo,
         ovoo=Iovoo, oovo=Ioovo, ooov=Iooov, oooo=Ioooo)
 
-    return Fa,Fb,Ia,Ib,Iabab
+    return Fa, Fb, Ia, Ib, Iabab
 
 
 def g_n2rdm_full(beta, sfo, sfv, P2):
@@ -1468,7 +1467,7 @@ def g_n2rdm_full(beta, sfo, sfv, P2):
 
 
 def g_n2rdm_full_active(beta, n, iocc, ivir, sfo, sfv, P2):
-    n2rdm = numpy.zeros((n,n,n,n), dtype=P2[0].dtype)
+    n2rdm = numpy.zeros((n, n, n, n), dtype=P2[0].dtype)
     n2rdm[numpy.ix_(ivir, ivir, ivir, ivir)] += \
         (1.0/beta)*einsum('cdab,c,d,a,b->cdab', P2[0], sfv, sfv, sfv, sfv)
     n2rdm[numpy.ix_(ivir, iocc, ivir, ivir)] += \
@@ -1507,7 +1506,7 @@ def g_n2rdm_full_active(beta, n, iocc, ivir, sfo, sfv, P2):
 def u_n2rdm_full(beta, sfoa, sfva, sfob, sfvb, P2):
     na = sfoa.size
     nb = sfob.size
-    P2aa = numpy.zeros((na,na,na,na), dtype=P2[0][0].dtype)
+    P2aa = numpy.zeros((na, na, na, na), dtype=P2[0][0].dtype)
     P2aa += (1.0/beta)*einsum('cdab,c,d,a,b->cdab', P2[0][0], sfva, sfva, sfva, sfva)
     P2aa += (1.0/beta)*einsum('ciab,c,i,a,b->ciab', P2[1][0], sfva, sfoa, sfva, sfva)
     P2aa -= (1.0/beta)*einsum('ciab,c,i,a,b->icab', P2[1][0], sfva, sfoa, sfva, sfva)
@@ -1525,7 +1524,7 @@ def u_n2rdm_full(beta, sfoa, sfva, sfob, sfvb, P2):
     P2aa -= (1.0/beta)*einsum('kaij,k,a,i,j->akij', P2[7][0], sfoa, sfva, sfoa, sfoa)
     P2aa += (1.0/beta)*einsum('klij,k,l,i,j->klij', P2[8][0], sfoa, sfoa, sfoa, sfoa)
 
-    P2bb = numpy.zeros((nb,nb,nb,nb), dtype=P2[0][1].dtype)
+    P2bb = numpy.zeros((nb, nb, nb, nb), dtype=P2[0][1].dtype)
     P2bb += (1.0/beta)*einsum('cdab,c,d,a,b->cdab', P2[0][1], sfvb, sfvb, sfvb, sfvb)
     P2bb += (1.0/beta)*einsum('ciab,c,i,a,b->ciab', P2[1][1], sfvb, sfob, sfvb, sfvb)
     P2bb -= (1.0/beta)*einsum('ciab,c,i,a,b->icab', P2[1][1], sfvb, sfob, sfvb, sfvb)
@@ -1543,7 +1542,7 @@ def u_n2rdm_full(beta, sfoa, sfva, sfob, sfvb, P2):
     P2bb -= (1.0/beta)*einsum('kaij,k,a,i,j->akij', P2[7][1], sfob, sfvb, sfob, sfob)
     P2bb += (1.0/beta)*einsum('klij,k,l,i,j->klij', P2[8][1], sfob, sfob, sfob, sfob)
 
-    P2ab = numpy.zeros((na,nb,na,nb), dtype=P2[0][2].dtype)
+    P2ab = numpy.zeros((na, nb, na, nb), dtype=P2[0][2].dtype)
     P2ab += (1.0/beta)*einsum('cdab,c,d,a,b->cdab', P2[0][2], sfva, sfvb, sfva, sfvb)
     P2ab += (1.0/beta)*einsum('ciab,c,i,a,b->ciab', P2[1][2], sfva, sfob, sfva, sfvb)
     P2ab += (1.0/beta)*einsum('bcai,b,c,a,i->bcai', P2[2][2], sfva, sfvb, sfva, sfob)
@@ -1554,20 +1553,20 @@ def u_n2rdm_full(beta, sfoa, sfva, sfob, sfvb, P2):
     P2ab += (1.0/beta)*einsum('kaij,k,a,i,j->kaij', P2[7][2], sfoa, sfvb, sfoa, sfob)
     P2ab += (1.0/beta)*einsum('klij,k,l,i,j->klij', P2[8][2], sfoa, sfob, sfoa, sfob)
 
-    P2ab += (1.0/beta)*einsum('ciab,c,i,a,b->ciab', P2[1][3], sfvb, sfoa, sfvb, sfva).transpose((1,0,3,2))
-    P2ab += (1.0/beta)*einsum('bcai,b,c,a,i->bcai', P2[2][3], sfvb, sfva, sfvb, sfoa).transpose((1,0,3,2))
+    P2ab += (1.0/beta)*einsum('ciab,c,i,a,b->ciab', P2[1][3], sfvb, sfoa, sfvb, sfva).transpose((1, 0, 3, 2))
+    P2ab += (1.0/beta)*einsum('bcai,b,c,a,i->bcai', P2[2][3], sfvb, sfva, sfvb, sfoa).transpose((1, 0, 3, 2))
 
-    P2ab += (1.0/beta)*einsum('jkai,j,k,a,i->jkai', P2[6][3], sfob, sfoa, sfvb, sfoa).transpose((1,0,3,2))
-    P2ab += (1.0/beta)*einsum('kaij,k,a,i,j->kaij', P2[7][3], sfob, sfva, sfob, sfoa).transpose((1,0,3,2))
+    P2ab += (1.0/beta)*einsum('jkai,j,k,a,i->jkai', P2[6][3], sfob, sfoa, sfvb, sfoa).transpose((1, 0, 3, 2))
+    P2ab += (1.0/beta)*einsum('kaij,k,a,i,j->kaij', P2[7][3], sfob, sfva, sfob, sfoa).transpose((1, 0, 3, 2))
 
-    P2ab -= (1.0/beta)*einsum('bjai,b,j,a,i->bjai', P2[4][3], sfva, sfob, sfvb, sfoa).transpose((0,1,3,2))
-    P2ab -= (1.0/beta)*einsum('bjai,b,j,a,i->bjai', P2[4][4], sfvb, sfoa, sfva, sfob).transpose((1,0,2,3))
-    P2ab += (1.0/beta)*einsum('bjai,b,j,a,i->bjai', P2[4][5], sfvb, sfoa, sfvb, sfoa).transpose((1,0,3,2))
+    P2ab -= (1.0/beta)*einsum('bjai,b,j,a,i->bjai', P2[4][3], sfva, sfob, sfvb, sfoa).transpose((0, 1, 3, 2))
+    P2ab -= (1.0/beta)*einsum('bjai,b,j,a,i->bjai', P2[4][4], sfvb, sfoa, sfva, sfob).transpose((1, 0, 2, 3))
+    P2ab += (1.0/beta)*einsum('bjai,b,j,a,i->bjai', P2[4][5], sfvb, sfoa, sfvb, sfoa).transpose((1, 0, 3, 2))
     return (P2aa, P2bb, P2ab)
 
 
 def u_n2rdm_full_active(beta, na, nb, iocca, ivira, ioccb, ivirb, sfoa, sfva, sfob, sfvb, P2):
-    P2aa = numpy.zeros((na,na,na,na), dtype=P2[0][0].dtype)
+    P2aa = numpy.zeros((na, na, na, na), dtype=P2[0][0].dtype)
     P2aa[numpy.ix_(ivira, ivira, ivira, ivira)] += (1.0/beta)*einsum('cdab,c,d,a,b->cdab', P2[0][0], sfva, sfva, sfva, sfva)
     P2aa[numpy.ix_(ivira, iocca, ivira, ivira)] += (1.0/beta)*einsum('ciab,c,i,a,b->ciab', P2[1][0], sfva, sfoa, sfva, sfva)
     P2aa[numpy.ix_(iocca, ivira, ivira, ivira)] -= (1.0/beta)*einsum('ciab,c,i,a,b->icab', P2[1][0], sfva, sfoa, sfva, sfva)
@@ -1585,7 +1584,7 @@ def u_n2rdm_full_active(beta, na, nb, iocca, ivira, ioccb, ivirb, sfoa, sfva, sf
     P2aa[numpy.ix_(ivira, iocca, iocca, iocca)] -= (1.0/beta)*einsum('kaij,k,a,i,j->akij', P2[7][0], sfoa, sfva, sfoa, sfoa)
     P2aa[numpy.ix_(iocca, iocca, iocca, iocca)] += (1.0/beta)*einsum('klij,k,l,i,j->klij', P2[8][0], sfoa, sfoa, sfoa, sfoa)
 
-    P2bb = numpy.zeros((nb,nb,nb,nb), dtype=P2[0][1].dtype)
+    P2bb = numpy.zeros((nb, nb, nb, nb), dtype=P2[0][1].dtype)
     P2bb[numpy.ix_(ivirb, ivirb, ivirb, ivirb)] += (1.0/beta)*einsum('cdab,c,d,a,b->cdab', P2[0][1], sfvb, sfvb, sfvb, sfvb)
     P2bb[numpy.ix_(ivirb, ioccb, ivirb, ivirb)] += (1.0/beta)*einsum('ciab,c,i,a,b->ciab', P2[1][1], sfvb, sfob, sfvb, sfvb)
     P2bb[numpy.ix_(ioccb, ivirb, ivirb, ivirb)] -= (1.0/beta)*einsum('ciab,c,i,a,b->icab', P2[1][1], sfvb, sfob, sfvb, sfvb)
@@ -1603,7 +1602,7 @@ def u_n2rdm_full_active(beta, na, nb, iocca, ivira, ioccb, ivirb, sfoa, sfva, sf
     P2bb[numpy.ix_(ivirb, ioccb, ioccb, ioccb)] -= (1.0/beta)*einsum('kaij,k,a,i,j->akij', P2[7][1], sfob, sfvb, sfob, sfob)
     P2bb[numpy.ix_(ioccb, ioccb, ioccb, ioccb)] += (1.0/beta)*einsum('klij,k,l,i,j->klij', P2[8][1], sfob, sfob, sfob, sfob)
 
-    P2ab = numpy.zeros((na,nb,na,nb), dtype=P2[0][2].dtype)
+    P2ab = numpy.zeros((na, nb, na, nb), dtype=P2[0][2].dtype)
     P2ab[numpy.ix_(ivira, ivirb, ivira, ivirb)] += (1.0/beta)*einsum('cdab,c,d,a,b->cdab', P2[0][2], sfva, sfvb, sfva, sfvb)
     P2ab[numpy.ix_(ivira, ioccb, ivira, ivirb)] += (1.0/beta)*einsum('ciab,c,i,a,b->ciab', P2[1][2], sfva, sfob, sfva, sfvb)
     P2ab[numpy.ix_(ivira, ivirb, ivira, ioccb)] += (1.0/beta)*einsum('bcai,b,c,a,i->bcai', P2[2][2], sfva, sfvb, sfva, sfob)
@@ -1614,15 +1613,15 @@ def u_n2rdm_full_active(beta, na, nb, iocca, ivira, ioccb, ivirb, sfoa, sfva, sf
     P2ab[numpy.ix_(iocca, ivirb, iocca, ioccb)] += (1.0/beta)*einsum('kaij,k,a,i,j->kaij', P2[7][2], sfoa, sfvb, sfoa, sfob)
     P2ab[numpy.ix_(iocca, ioccb, iocca, ioccb)] += (1.0/beta)*einsum('klij,k,l,i,j->klij', P2[8][2], sfoa, sfob, sfoa, sfob)
 
-    P2ab[numpy.ix_(iocca, ivirb, ivira, ivirb)] += (1.0/beta)*einsum('ciab,c,i,a,b->ciab', P2[1][3], sfvb, sfoa, sfvb, sfva).transpose((1,0,3,2))
-    P2ab[numpy.ix_(ivira, ivirb, iocca, ivirb)] += (1.0/beta)*einsum('bcai,b,c,a,i->bcai', P2[2][3], sfvb, sfva, sfvb, sfoa).transpose((1,0,3,2))
+    P2ab[numpy.ix_(iocca, ivirb, ivira, ivirb)] += (1.0/beta)*einsum('ciab,c,i,a,b->ciab', P2[1][3], sfvb, sfoa, sfvb, sfva).transpose((1, 0, 3, 2))
+    P2ab[numpy.ix_(ivira, ivirb, iocca, ivirb)] += (1.0/beta)*einsum('bcai,b,c,a,i->bcai', P2[2][3], sfvb, sfva, sfvb, sfoa).transpose((1, 0, 3, 2))
 
-    P2ab[numpy.ix_(iocca, ioccb, iocca, ivirb)] += (1.0/beta)*einsum('jkai,j,k,a,i->jkai', P2[6][3], sfob, sfoa, sfvb, sfoa).transpose((1,0,3,2))
-    P2ab[numpy.ix_(ivira, ioccb, iocca, iocca)] += (1.0/beta)*einsum('kaij,k,a,i,j->kaij', P2[7][3], sfob, sfva, sfob, sfoa).transpose((1,0,3,2))
+    P2ab[numpy.ix_(iocca, ioccb, iocca, ivirb)] += (1.0/beta)*einsum('jkai,j,k,a,i->jkai', P2[6][3], sfob, sfoa, sfvb, sfoa).transpose((1, 0, 3, 2))
+    P2ab[numpy.ix_(ivira, ioccb, iocca, iocca)] += (1.0/beta)*einsum('kaij,k,a,i,j->kaij', P2[7][3], sfob, sfva, sfob, sfoa).transpose((1, 0, 3, 2))
 
-    P2ab[numpy.ix_(ivira, ioccb, iocca, ivirb)] -= (1.0/beta)*einsum('bjai,b,j,a,i->bjai', P2[4][3], sfva, sfob, sfvb, sfoa).transpose((0,1,3,2))
-    P2ab[numpy.ix_(iocca, ivirb, ivira, ioccb)] -= (1.0/beta)*einsum('bjai,b,j,a,i->bjai', P2[4][4], sfvb, sfoa, sfva, sfob).transpose((1,0,2,3))
-    P2ab[numpy.ix_(iocca, ivirb, iocca, ivirb)] += (1.0/beta)*einsum('bjai,b,j,a,i->bjai', P2[4][5], sfvb, sfoa, sfvb, sfoa).transpose((1,0,3,2))
+    P2ab[numpy.ix_(ivira, ioccb, iocca, ivirb)] -= (1.0/beta)*einsum('bjai,b,j,a,i->bjai', P2[4][3], sfva, sfob, sfvb, sfoa).transpose((0, 1, 3, 2))
+    P2ab[numpy.ix_(iocca, ivirb, ivira, ioccb)] -= (1.0/beta)*einsum('bjai,b,j,a,i->bjai', P2[4][4], sfvb, sfoa, sfva, sfob).transpose((1, 0, 2, 3))
+    P2ab[numpy.ix_(iocca, ivirb, iocca, ivirb)] += (1.0/beta)*einsum('bjai,b,j,a,i->bjai', P2[4][5], sfvb, sfoa, sfvb, sfoa).transpose((1, 0, 3, 2))
     return (P2aa, P2bb, P2ab)
 
 
@@ -1936,40 +1935,40 @@ def r_d_on_oo(dso, F, I, dia, dji, dai, P2, jitemp):
     jitemp -= 0.5*einsum('ji,ij->j', dji, F.oo)*dso
     jitemp -= 0.5*einsum('ai,ia->i', dai, F.ov)*dso
 
-    jitemp -= 0.5*0.5*einsum('ijab,abij->i', P2[3] - P2[3].transpose((0,1,3,2)), I.vvoo - I.vvoo.transpose((0,1,3,2)))*dso
+    jitemp -= 0.5*0.5*einsum('ijab,abij->i', P2[3] - P2[3].transpose((0, 1, 3, 2)), I.vvoo - I.vvoo.transpose((0, 1, 3, 2)))*dso
     jitemp -= 0.5*1.0*einsum('iJaB,aBiJ->i', P2[3], I.vvoo)*dso
 
-    jitemp -= 0.5*0.5*einsum('ciab,abci->i', P2[1] - P2[1].transpose((0,1,3,2)), I.vvvo - I.vvov.transpose((0,1,3,2)))*dso
+    jitemp -= 0.5*0.5*einsum('ciab,abci->i', P2[1] - P2[1].transpose((0, 1, 3, 2)), I.vvvo - I.vvov.transpose((0, 1, 3, 2)))*dso
     jitemp -= 0.5*1.0*einsum('ciab,baic->i', P2[1], I.vvov)*dso
 
-    jitemp -= 0.5*0.5*einsum('jkai,aijk->i', P2[7] - P2[7].transpose((1,0,2,3)), I.vooo - I.vooo.transpose((0,1,3,2)))*dso
+    jitemp -= 0.5*0.5*einsum('jkai,aijk->i', P2[7] - P2[7].transpose((1, 0, 2, 3)), I.vooo - I.vooo.transpose((0, 1, 3, 2)))*dso
     jitemp -= 0.5*1.0*einsum('JkAi,iAkJ->i', P2[7], I.ovoo)*dso
-    jitemp -= 0.5*1.0*einsum('jkai,aijk->j', P2[7] - P2[7].transpose((1,0,2,3)), I.vooo - I.vooo.transpose((0,1,3,2)))*dso
+    jitemp -= 0.5*1.0*einsum('jkai,aijk->j', P2[7] - P2[7].transpose((1, 0, 2, 3)), I.vooo - I.vooo.transpose((0, 1, 3, 2)))*dso
     jitemp -= 0.5*1.0*einsum('jKaI,aIjK->j', P2[7], I.vooo)*dso
     jitemp -= 0.5*1.0*einsum('JkAi,iAkJ->k', P2[7], I.ovoo)*dso
 
-    jitemp -= 0.5*1.0*einsum('bjai,aibj->i', P2[4] - P2[5].transpose((0,1,3,2)), I.vovo - I.voov.transpose((0,1,3,2)))*dso
-    jitemp -= 0.5*1.0*einsum('bjai,aibj->j', P2[4] - P2[5].transpose((0,1,3,2)), I.vovo - I.voov.transpose((0,1,3,2)))*dso
-    jitemp -= 0.5*1.0*einsum('bJAi,iAbJ->i', P2[5].transpose((0,1,3,2)), I.ovvo)*dso
-    jitemp -= 0.5*1.0*einsum('BjaI,aIjB->j', P2[5].transpose((0,1,3,2)), I.voov)*dso
+    jitemp -= 0.5*1.0*einsum('bjai,aibj->i', P2[4] - P2[5].transpose((0, 1, 3, 2)), I.vovo - I.voov.transpose((0, 1, 3, 2)))*dso
+    jitemp -= 0.5*1.0*einsum('bjai,aibj->j', P2[4] - P2[5].transpose((0, 1, 3, 2)), I.vovo - I.voov.transpose((0, 1, 3, 2)))*dso
+    jitemp -= 0.5*1.0*einsum('bJAi,iAbJ->i', P2[5].transpose((0, 1, 3, 2)), I.ovvo)*dso
+    jitemp -= 0.5*1.0*einsum('BjaI,aIjB->j', P2[5].transpose((0, 1, 3, 2)), I.voov)*dso
     jitemp -= 0.5*1.0*einsum('BjAi,iAjB->i', P2[4], I.ovov)*dso
     jitemp -= 0.5*1.0*einsum('BjAi,iAjB->j', P2[4], I.ovov)*dso
 
-    jitemp -= 0.5*0.5*einsum('klij,ijkl->i', P2[9] - P2[9].transpose((0,1,3,2)), I.oooo - I.oooo.transpose((0,1,3,2)))*dso
-    jitemp -= 0.5*0.5*einsum('klij,ijkl->k', P2[9] - P2[9].transpose((0,1,3,2)), I.oooo - I.oooo.transpose((0,1,3,2)))*dso
+    jitemp -= 0.5*0.5*einsum('klij,ijkl->i', P2[9] - P2[9].transpose((0, 1, 3, 2)), I.oooo - I.oooo.transpose((0, 1, 3, 2)))*dso
+    jitemp -= 0.5*0.5*einsum('klij,ijkl->k', P2[9] - P2[9].transpose((0, 1, 3, 2)), I.oooo - I.oooo.transpose((0, 1, 3, 2)))*dso
     jitemp -= 0.5*1.0*einsum('kLiJ,iJkL->i', P2[9], I.oooo)*dso
     jitemp -= 0.5*1.0*einsum('kLiJ,iJkL->k', P2[9], I.oooo)*dso
 
-    jitemp -= 0.5*0.5*einsum('bcai,aibc->i', P2[2] - P2[2].transpose((1,0,2,3)), I.vovv - I.vovv.transpose((0,1,3,2)))*dso
+    jitemp -= 0.5*0.5*einsum('bcai,aibc->i', P2[2] - P2[2].transpose((1, 0, 2, 3)), I.vovv - I.vovv.transpose((0, 1, 3, 2)))*dso
     jitemp -= 0.5*1.0*einsum('BcAi,iAcB->i', P2[2], I.ovvv)*dso
 
-    jitemp -= 0.5*1.0*einsum('kaij,ijka->i', P2[8] - P2[8].transpose((0,1,3,2)), I.ooov - I.oovo.transpose((0,1,3,2)))*dso
-    jitemp -= 0.5*0.5*einsum('kaij,ijka->k', P2[8] - P2[8].transpose((0,1,3,2)), I.ooov - I.oovo.transpose((0,1,3,2)))*dso
+    jitemp -= 0.5*1.0*einsum('kaij,ijka->i', P2[8] - P2[8].transpose((0, 1, 3, 2)), I.ooov - I.oovo.transpose((0, 1, 3, 2)))*dso
+    jitemp -= 0.5*0.5*einsum('kaij,ijka->k', P2[8] - P2[8].transpose((0, 1, 3, 2)), I.ooov - I.oovo.transpose((0, 1, 3, 2)))*dso
     jitemp -= 0.5*1.0*einsum('kAiJ,iJkA->i', P2[8], I.ooov)*dso
     jitemp -= 0.5*1.0*einsum('kAiJ,iJkA->k', P2[8], I.ooov)*dso
     jitemp -= 0.5*1.0*einsum('KaIj,jIaK->j', P2[8], I.oovo)*dso
 
-    jitemp -= 0.5*0.5*einsum('abij,ijab->i', P2[6] - P2[6].transpose((1,0,2,3)), I.oovv - I.oovv.transpose((0,1,3,2)))*dso
+    jitemp -= 0.5*0.5*einsum('abij,ijab->i', P2[6] - P2[6].transpose((1, 0, 2, 3)), I.oovv - I.oovv.transpose((0, 1, 3, 2)))*dso
     jitemp -= 0.5*1.0*einsum('aBiJ,iJaB->i', P2[6], I.oovv)*dso
 
 
@@ -1979,40 +1978,40 @@ def r_d_on_vv(dsv, F, I, dia, dba, dai, P2, batemp):
     batemp += 0.5*einsum('ba,ab->b', dba, F.vv)*dsv
     batemp += 0.5*einsum('ai,ia->a', dai, F.ov)*dsv
 
-    batemp += 0.5*0.5*einsum('ijab,abij->a', P2[3] - P2[3].transpose((0,1,3,2)), I.vvoo - I.vvoo.transpose((0,1,3,2)))*dsv
+    batemp += 0.5*0.5*einsum('ijab,abij->a', P2[3] - P2[3].transpose((0, 1, 3, 2)), I.vvoo - I.vvoo.transpose((0, 1, 3, 2)))*dsv
     batemp += 0.5*1.0*einsum('iJaB,aBiJ->a', P2[3], I.vvoo)*dsv
 
-    batemp += 0.5*1.0*einsum('ciab,abci->a', P2[1] - P2[1].transpose((0,1,3,2)), I.vvvo - I.vvov.transpose((0,1,3,2)))*dsv
-    batemp += 0.5*0.5*einsum('ciab,abci->c', P2[1] - P2[1].transpose((0,1,3,2)), I.vvvo - I.vvov.transpose((0,1,3,2)))*dsv
+    batemp += 0.5*1.0*einsum('ciab,abci->a', P2[1] - P2[1].transpose((0, 1, 3, 2)), I.vvvo - I.vvov.transpose((0, 1, 3, 2)))*dsv
+    batemp += 0.5*0.5*einsum('ciab,abci->c', P2[1] - P2[1].transpose((0, 1, 3, 2)), I.vvvo - I.vvov.transpose((0, 1, 3, 2)))*dsv
     batemp += 0.5*1.0*einsum('cIaB,aBcI->a', P2[1], I.vvvo)*dsv
     batemp += 0.5*1.0*einsum('cIaB,aBcI->c', P2[1], I.vvvo)*dsv
     batemp += 0.5*1.0*einsum('CiAb,bAiC->b', P2[1], I.vvov)*dsv
 
-    batemp += 0.5*0.5*einsum('jkai,aijk->a', P2[7] - P2[7].transpose((1,0,2,3)), I.vooo - I.vooo.transpose((0,1,3,2)))*dsv
+    batemp += 0.5*0.5*einsum('jkai,aijk->a', P2[7] - P2[7].transpose((1, 0, 2, 3)), I.vooo - I.vooo.transpose((0, 1, 3, 2)))*dsv
     batemp += 0.5*1.0*einsum('jKaI,aIjK->a', P2[7], I.vooo)*dsv
 
-    batemp += 0.5*0.5*einsum('cdab,abcd->a', P2[0] - P2[0].transpose((0,1,3,2)), I.vvvv - I.vvvv.transpose((0,1,3,2)))*dsv
-    batemp += 0.5*0.5*einsum('cdab,abcd->c', P2[0] - P2[0].transpose((0,1,3,2)), I.vvvv - I.vvvv.transpose((0,1,3,2)))*dsv
+    batemp += 0.5*0.5*einsum('cdab,abcd->a', P2[0] - P2[0].transpose((0, 1, 3, 2)), I.vvvv - I.vvvv.transpose((0, 1, 3, 2)))*dsv
+    batemp += 0.5*0.5*einsum('cdab,abcd->c', P2[0] - P2[0].transpose((0, 1, 3, 2)), I.vvvv - I.vvvv.transpose((0, 1, 3, 2)))*dsv
     batemp += 0.5*1.0*einsum('cDaB,aBcD->a', P2[0], I.vvvv)*dsv
     batemp += 0.5*1.0*einsum('cDaB,aBcD->c', P2[0], I.vvvv)*dsv
 
-    batemp += 0.5*1.0*einsum('bjai,aibj->a', P2[4] - P2[5].transpose((0,1,3,2)), I.vovo - I.voov.transpose((0,1,3,2)))*dsv
-    batemp += 0.5*1.0*einsum('bjai,aibj->b', P2[4] - P2[5].transpose((0,1,3,2)), I.vovo - I.voov.transpose((0,1,3,2)))*dsv
+    batemp += 0.5*1.0*einsum('bjai,aibj->a', P2[4] - P2[5].transpose((0, 1, 3, 2)), I.vovo - I.voov.transpose((0, 1, 3, 2)))*dsv
+    batemp += 0.5*1.0*einsum('bjai,aibj->b', P2[4] - P2[5].transpose((0, 1, 3, 2)), I.vovo - I.voov.transpose((0, 1, 3, 2)))*dsv
     batemp += 0.5*1.0*einsum('bJaI,aIbJ->a', P2[4], I.vovo)*dsv
     batemp += 0.5*1.0*einsum('bJaI,aIbJ->b', P2[4], I.vovo)*dsv
-    batemp += 0.5*1.0*einsum('bJAi,iAbJ->b', P2[5].transpose((0,1,3,2)), I.ovvo)*dsv
-    batemp += 0.5*1.0*einsum('BjaI,aIjB->a', P2[5].transpose((0,1,3,2)), I.voov)*dsv
+    batemp += 0.5*1.0*einsum('bJAi,iAbJ->b', P2[5].transpose((0, 1, 3, 2)), I.ovvo)*dsv
+    batemp += 0.5*1.0*einsum('BjaI,aIjB->a', P2[5].transpose((0, 1, 3, 2)), I.voov)*dsv
 
-    batemp += 0.5*0.5*einsum('bcai,aibc->a', P2[2] - P2[2].transpose((1,0,2,3)), I.vovv - I.vovv.transpose((0,1,3,2)))*dsv
-    batemp += 0.5*1.0*einsum('bcai,aibc->b', P2[2] - P2[2].transpose((1,0,2,3)), I.vovv - I.vovv.transpose((0,1,3,2)))*dsv
+    batemp += 0.5*0.5*einsum('bcai,aibc->a', P2[2] - P2[2].transpose((1, 0, 2, 3)), I.vovv - I.vovv.transpose((0, 1, 3, 2)))*dsv
+    batemp += 0.5*1.0*einsum('bcai,aibc->b', P2[2] - P2[2].transpose((1, 0, 2, 3)), I.vovv - I.vovv.transpose((0, 1, 3, 2)))*dsv
     batemp += 0.5*1.0*einsum('bCaI,aIbC->a', P2[2], I.vovv)*dsv
     batemp += 0.5*1.0*einsum('bCaI,aIbC->b', P2[2], I.vovv)*dsv
     batemp += 0.5*1.0*einsum('BcAi,iAcB->c', P2[2], I.ovvv)*dsv
 
-    batemp += 0.5*0.5*einsum('kaij,ijka->a', P2[8] - P2[8].transpose((0,1,3,2)), I.ooov - I.oovo.transpose((0,1,3,2)))*dsv
+    batemp += 0.5*0.5*einsum('kaij,ijka->a', P2[8] - P2[8].transpose((0, 1, 3, 2)), I.ooov - I.oovo.transpose((0, 1, 3, 2)))*dsv
     batemp += 0.5*1.0*einsum('KaIj,jIaK->a', P2[8], I.oovo)*dsv
 
-    batemp += 0.5*0.5*einsum('abij,ijab->a', P2[6] - P2[6].transpose((0,1,3,2)), I.oovv - I.oovv.transpose((0,1,3,2)))*dsv
+    batemp += 0.5*0.5*einsum('abij,ijab->a', P2[6] - P2[6].transpose((0, 1, 3, 2)), I.oovv - I.oovv.transpose((0, 1, 3, 2)))*dsv
     batemp += 0.5*1.0*einsum('aBiJ,iJaB->a', P2[6], I.oovv)*dsv
 
 
