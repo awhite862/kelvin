@@ -1,4 +1,5 @@
 import numpy
+from cqcpy import utils
 from cqcpy.cc_energy import cc_energy_d
 from cqcpy.cc_energy import cc_energy_s1
 from cqcpy.ov_blocks import one_e_blocks
@@ -31,69 +32,66 @@ def mp1(p, f, h):
 def get_D1c(e):
     """Return conventional 1-electron denominators."""
     n = e.shape[0]
-    D1 = e[:,None] - e[None,:]
+    D1 = utils.D1(e, e)
     for i in range(n):
         for j in range(n):
-            if numpy.abs(D1[i,j]) < 1e-8:
-                D1[i,j] = 1e16
+            if numpy.abs(D1[i, j]) < 1e-8:
+                D1[i, j] = 1e16
     return 1.0/D1
 
 
 def get_D1a(e, T):
     """Return anomalous 1-electron denominators."""
     n = e.shape[0]
-    D1 = e[:,None] - e[None,:]
+    D1 = utils.D1(e, e)
     for i in range(n):
         for j in range(n):
-            if numpy.abs(D1[i,j]) < 1e-8:
-                D1[i,j] = -2*T
+            if numpy.abs(D1[i, j]) < 1e-8:
+                D1[i, j] = -2*T
             else:
-                D1[i,j] = 1e16
+                D1[i, j] = 1e16
     return 1.0/D1
 
 
 def get_D2c(e):
     """Return conventional 2-electron denominators."""
     n = e.shape[0]
-    D2 = e[:,None,None,None] + e[None,:,None,None] \
-        - e[None,None,:,None] - e[None,None,None,:]
+    D2 = utils.D2(e, e)
     for i in range(n):
         for j in range(n):
             for k in range(n):
                 for l in range(n):
-                    if numpy.abs(D2[i,j,k,l]) < 1e-8:
-                        D2[i,j,k,l] = 1e32
+                    if numpy.abs(D2[i, j, k, l]) < 1e-8:
+                        D2[i, j, k, l] = 1e32
     return 1.0/D2
 
 
 def get_D2a(e, T):
     """Return anomalous 2-electron denominators."""
     n = e.shape[0]
-    D2 = e[:,None,None,None] + e[None,:,None,None] \
-        - e[None,None,:,None] - e[None,None,None,:]
+    D2 = utils.D2(e, e)
     for i in range(n):
         for j in range(n):
             for k in range(n):
                 for l in range(n):
-                    if numpy.abs(D2[i,j,k,l]) < 1e-8:
-                        D2[i,j,k,l] = -2*T
+                    if numpy.abs(D2[i, j, k, l]) < 1e-8:
+                        D2[i, j, k, l] = -2*T
                     else:
-                        D2[i,j,k,l] = 1e32
+                        D2[i, j, k, l] = 1e32
     return 1.0/D2
 
 
 def get_D1exp(e, T):
     """Return 1-electron propagator."""
     beta = 1.0/T
-    D1 = e[:,None] - e[None,:]
+    D1 = utils.D1(e, e)
     return numpy.exp(beta*D1) - 1.0
 
 
 def get_D2exp(e, T):
     """Return 2-electron propagator."""
     beta = 1.0/T
-    D2 = e[:,None,None,None] + e[None,:,None,None] \
-        - e[None,None,:,None] - e[None,None,None,:]
+    D2 = utils.D2(e, e)
     return numpy.exp(beta*D2) - 1.0
 
 
@@ -101,14 +99,13 @@ def mp2(en, no, f, eri, T, returnT=False):
     """Return 2nd order correction to the free energy."""
     rpre = 1e-8
     rfac = -2.0*T
-    D1 = en[:,None] - en[None,:]
-    D2 = en[:,None,None,None] + en[None,:,None,None]\
-        - en[None,None,:,None] - en[None,None,None,:]
+    D1 = utils.D1(en, en)
+    D2 = utils.D2(en, en)
 
-    for x in numpy.nditer(D1,op_flags=['readwrite']):
+    for x in numpy.nditer(D1, op_flags=['readwrite']):
         if numpy.abs(x) < rpre:
             x += rfac
-    for x in numpy.nditer(D2,op_flags=['readwrite']):
+    for x in numpy.nditer(D2, op_flags=['readwrite']):
         if numpy.abs(x) < rpre:
             x += rfac
 
@@ -123,7 +120,7 @@ def mp2(en, no, f, eri, T, returnT=False):
         'a,i,b,j,abij,ijab->abij',
         nv, no, nv, no, eri, D2)
 
-    Es = cc_energy_s1(T1, f.transpose(1,0))
+    Es = cc_energy_s1(T1, f.transpose(1, 0))
     Ed = cc_energy_d(T2, eri)
 
     if returnT:
@@ -193,7 +190,7 @@ def mp2_a(D1a, D2a, no, f, eri, T):
         'a,i,b,j,abij,ijab->abij',
         nv, no, nv, no, eri, D2a)
 
-    Es = cc_energy_s1(T1, f.transpose(1,0))
+    Es = cc_energy_s1(T1, f.transpose(1, 0))
     Ed = cc_energy_d(T2, eri)
 
     return Es + Ed
@@ -222,7 +219,7 @@ def mp2_sep(en, no, f, eri, T, returnT=False):
         'a,i,b,j,abij,ijab->abij',
         nv, no, nv, no, eri, D2a)
 
-    Es = cc_energy_s1(T1a + T1n, f.transpose(1,0))
+    Es = cc_energy_s1(T1a + T1n, f.transpose(1, 0))
     Ed = cc_energy_d(T2a + T2a, eri)
 
     if returnT:
@@ -301,7 +298,7 @@ def mp3_singles(no, f, eri, D11, D12, D21, D22):
         no, no, nv, nv, f, eri, f, D11, D12)
     dE = numpy.einsum(
         'i,j,a,b,ai,bj,ijab,ia,ijab->',
-        no,no,nv,nv,f,f,eri,D11,D22)
+        no, no, nv, nv, f, f, eri, D11, D22)
     dF = (-0.5)*numpy.einsum(
         'i,j,k,a,b,abij,ijak,kb,ijab,kb->',
         no, no, no, nv, nv, eri, eri, f, D21, D12)
@@ -416,8 +413,8 @@ def mp3(e, no, f, eri, T):
     raise Exception("This MP3 code is incorrect")
     D1 = get_D1c(e)
     D2 = get_D2c(e)
-    D1a = get_D1a(e,T)
-    D2a = get_D2a(e,T)
+    D1a = get_D1a(e, T)
+    D2a = get_D2a(e, T)
 
     E3d = mp3_doubles(no, eri, D2, D2)
     E3s = mp3_singles(no, f, eri, D1, D1, D2, D2)
@@ -474,11 +471,11 @@ def mp3_new(e, no, f, eri, T):
     raise Exception("This MP3 code contains a bug somewhere")
     D1 = get_D1c(e)
     D2 = get_D2c(e)
-    D1a = -2*T*get_D1a(e,T)
-    D2a = -2*T*get_D2a(e,T)
+    D1a = -2*T*get_D1a(e, T)
+    D2a = -2*T*get_D2a(e, T)
 
-    D1exp = get_D1exp(e,T)
-    D2exp = get_D2exp(e,T)
+    D1exp = get_D1exp(e, T)
+    D2exp = get_D2exp(e, T)
 
     Dtemp = numpy.einsum(
         'ijab,ijab,ijab->ijab', D2, D2, D2exp)
@@ -495,7 +492,7 @@ def mp3_new(e, no, f, eri, T):
 
     DAA = 1.0/(T*T*6.0) * mp3_doubles(no, eri, D2a, D2a)
 
-    D = DN+DN1+DN2+DA1+DA2+DA3+DA4+DAA
+    D = DN + DN1 + DN2 + DA1 + DA2 + DA3 + DA4 + DAA
 
     Stemp = numpy.einsum(
         'ia,ia,ia->ia', D1, D1, D1exp)
@@ -512,8 +509,8 @@ def mp3_new(e, no, f, eri, T):
 
     SAA = 1.0/(T*T*6.0) * mp3_singles(no, f, eri, D1a, D1a, D2a, D2a)
 
-    S = SN+SN1+SN2+SA1+SA2+SA3+SA4+SAA
-    return S+D
+    S = SN + SN1 + SN2 + SA1 + SA2 + SA3 + SA4 + SAA
+    return S + D
 
 
 def mp23_int(e, no, nv, f, eri, T, ngrid=10):
@@ -524,21 +521,20 @@ def mp23_int(e, no, nv, f, eri, T, ngrid=10):
 
     # get time-grid
     ng = ngrid
-    ti,g,G = quadrature.simpsons(ng, beta)
+    ti, g, G = quadrature.simpsons(ng, beta)
 
     # get exponentials
-    D1 = e[:,None] - e[None,:]
-    D2 = e[:,None,None,None] + e[None,:,None,None] \
-        - e[None,None,:,None] - e[None,None,None,:]
+    D1 = utils.D1(e, e)
+    D2 = utils.D2(e, e)
 
     # get MP2 (1st order) T-amplitudes
     Id = numpy.ones((ng))
     T1old = -numpy.einsum('v,ai,a,i->vai', Id, f, nv, no)
     T2old = -numpy.einsum('v,abij,a,b,i,j->vabij', Id, eri, nv, nv, no, no)
-    T1old = quadrature.int_tbar1(ng,T1old,ti,D1,G)
-    T2old = quadrature.int_tbar2(ng,T2old,ti,D2,G)
+    T1old = quadrature.int_tbar1(ng, T1old, ti, D1, G)
+    T2old = quadrature.int_tbar2(ng, T2old, ti, D2, G)
 
-    E23_1 = ft_cc_energy.ft_cc_energy(T1old,T2old,f,eri,g,beta)
+    E23_1 = ft_cc_energy.ft_cc_energy(T1old, T2old, f, eri, g, beta)
     E23_1F = ft_cc_energy.ft_cc_energy(T1old, T2old, f, eri, g, beta, Qterm=False)
     E23_Q = E23_1 - E23_1F
 
@@ -546,7 +542,7 @@ def mp23_int(e, no, nv, f, eri, T, ngrid=10):
     Foo = numpy.einsum('ij,j->ij', f, no)
     Fvo = numpy.einsum('ai,a,i->ai', f, nv, no)
     Fvv = numpy.einsum('ab,a->ab', f, nv)
-    F = one_e_blocks(Foo,f,Fvo,Fvv)
+    F = one_e_blocks(Foo, f, Fvo, Fvv)
 
     Ivvvv = numpy.einsum('abcd,a,b->abcd', eri, nv, nv)
     Ivvvo = numpy.einsum('abci,a,b,i->abci', eri, nv, nv, no)
@@ -557,11 +553,11 @@ def mp23_int(e, no, nv, f, eri, T, ngrid=10):
     Iooov = numpy.einsum('jkia,i->jkia', eri, no)
     Ioooo = numpy.einsum('klij,i,j->klij', eri, no, no)
     I = two_e_blocks(
-        vvvv=Ivvvv,vvvo=Ivvvo,vovv=Ivovv,vvoo=Ivvoo,
-        vovo=Ivovo,oovv=eri,vooo=Ivooo,ooov=Iooov,oooo=Ioooo)
+        vvvv=Ivvvv, vvvo=Ivvvo, vovv=Ivovv, vvoo=Ivvoo,
+        vovo=Ivovo, oovv=eri, vooo=Ivooo, ooov=Iooov, oooo=Ioooo)
 
     # do one iteration of LCCSD
-    T1,T2 = ft_cc_equations.lccsd_simple(F,I,T1old,T2old,D1,D2,ti,ng,G)
-    E23_2 = ft_cc_energy.ft_cc_energy(T1,T2,f,eri,g,beta,Qterm=False)
+    T1, T2 = ft_cc_equations.lccsd_simple(F, I, T1old, T2old, D1, D2, ti, ng, G)
+    E23_2 = ft_cc_energy.ft_cc_energy(T1, T2, f, eri, g, beta, Qterm=False)
 
     return E23_Q + E23_2

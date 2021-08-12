@@ -24,7 +24,7 @@ class PUEGSystem(System):
     def __init__(self, T, L, Emax, mu=None, n=None, norb=None):
         self.T = T
         self.L = L
-        self.basis = UEGBasis(L,Emax,norb=norb)
+        self.basis = UEGBasis(L, Emax, norb=norb)
         if n is None:
             assert(mu is not None)
             self.mu = mu
@@ -109,7 +109,7 @@ class PUEGSystem(System):
         n = int(self.N)
         eo = d[n:]
         ev = d[:n]
-        return (eo,ev)
+        return (eo, ev)
 
     def g_energies_tot(self):
         return self.basis.r_build_diag()
@@ -130,13 +130,13 @@ class PUEGSystem(System):
         oidx = numpy.r_[occ]
         vidx = numpy.r_[vir]
         V = self.g_aint_tot()
-        V = V[numpy.ix_(numpy.arange(n),oidx,numpy.arange(n),oidx)]
+        V = V[numpy.ix_(numpy.arange(n), oidx, numpy.arange(n), oidx)]
         F = F + numpy.einsum('piri->pr', V)
-        Foo = F[numpy.ix_(oidx,oidx)]
-        Fvv = F[numpy.ix_(vidx,vidx)]
-        Fov = F[numpy.ix_(oidx,vidx)]
-        Fvo = F[numpy.ix_(vidx,oidx)]
-        return one_e_blocks(Foo,Fov,Fvo,Fvv)
+        Foo = F[numpy.ix_(oidx, oidx)]
+        Fvv = F[numpy.ix_(vidx, vidx)]
+        Fov = F[numpy.ix_(oidx, vidx)]
+        Fvo = F[numpy.ix_(vidx, oidx)]
+        return one_e_blocks(Foo, Fov, Fvo, Fvv)
 
     def g_fock_tot(self):
         T = self.basis.build_r_ke_matrix()
@@ -148,12 +148,12 @@ class PUEGSystem(System):
             I = numpy.identity(n)
             den = numpy.einsum('pi,i,qi->pq', I, fo, I)
         else:
-            to = numpy.zeros((n,self.N))
+            to = numpy.zeros((n, self.N))
             i = 0
             for p in range(n):
                 if d[p] < self.mu:
-                    to[p,i] = 1.0
-                    i = i+1
+                    to[p, i] = 1.0
+                    i = i + 1
             den = numpy.einsum('pi,qi->pq', to, to)
         V = self.g_aint_tot()
         JK = numpy.einsum('prqs,rs->pq', V, den)
@@ -164,7 +164,7 @@ class PUEGSystem(System):
         n = d.shape[0]
         if self.T == 0.0:
             logging.warning("Derivative of MP1 energy is zero at OK")
-            return numpy.zeros((n,n))
+            return numpy.zeros((n, n))
         beta = 1.0 / self.T
         fo = ft_utils.ff(beta, d, self.mu)
         fv = ft_utils.ffv(beta, d, self.mu)
@@ -180,7 +180,7 @@ class PUEGSystem(System):
         n = d.shape[0]
         if self.T == 0.0:
             logging.warning("Derivative of MP1 energy is zero at OK")
-            return numpy.zeros((n,n))
+            return numpy.zeros((n, n))
         beta = 1.0 / self.T
         fo = ft_utils.ff(beta, d, self.mu)
         fv = ft_utils.ffv(beta, d, self.mu)
@@ -196,7 +196,7 @@ class PUEGSystem(System):
 
     def g_aint_tot(self):
         V = self.basis.build_r2e_matrix()
-        V = V - V.transpose((0,1,3,2))
+        V = V - V.transpose((0, 1, 3, 2))
         return V
 
     def g_aint(self, code=0):
@@ -224,28 +224,28 @@ class PUEGSystem(System):
         oidx = numpy.r_[occ]
         vidx = numpy.r_[vir]
         if code == 0 or code == 1:
-            Vvvvv = V[numpy.ix_(vidx,vidx,vidx,vidx)]
+            Vvvvv = V[numpy.ix_(vidx, vidx, vidx, vidx)]
         if code == 0 or code == 2:
-            Vvvvo = V[numpy.ix_(vidx,vidx,vidx,oidx)]
+            Vvvvo = V[numpy.ix_(vidx, vidx, vidx, oidx)]
         if code == 0 or code == 3:
-            Vvovv = V[numpy.ix_(vidx,oidx,vidx,vidx)]
+            Vvovv = V[numpy.ix_(vidx, oidx, vidx, vidx)]
         if code == 0 or code == 4:
-            Vvvoo = V[numpy.ix_(vidx,vidx,oidx,oidx)]
+            Vvvoo = V[numpy.ix_(vidx, vidx, oidx, oidx)]
         if code == 0 or code == 5:
-            Vvovo = V[numpy.ix_(vidx,oidx,vidx,oidx)]
+            Vvovo = V[numpy.ix_(vidx, oidx, vidx, oidx)]
         if code == 0 or code == 6:
-            Voovv = V[numpy.ix_(oidx,oidx,vidx,vidx)]
+            Voovv = V[numpy.ix_(oidx, oidx, vidx, vidx)]
         if code == 0 or code == 7:
-            Vvooo = V[numpy.ix_(vidx,oidx,oidx,oidx)]
+            Vvooo = V[numpy.ix_(vidx, oidx, oidx, oidx)]
         if code == 0 or code == 8:
-            Vooov = V[numpy.ix_(oidx,oidx,oidx,vidx)]
+            Vooov = V[numpy.ix_(oidx, oidx, oidx, vidx)]
         if code == 0 or code == 9:
-            Voooo = V[numpy.ix_(oidx,oidx,oidx,oidx)]
+            Voooo = V[numpy.ix_(oidx, oidx, oidx, oidx)]
         return two_e_blocks(
-            vvvv=Vvvvv,vvvo=Vvvvo,
-            vovv=Vvovv,vvoo=Vvvoo,
-            vovo=Vvovo,oovv=Voovv,
-            vooo=Vvooo,ooov=Vooov,
+            vvvv=Vvvvv, vvvo=Vvvvo,
+            vovv=Vvovv, vvoo=Vvvoo,
+            vovo=Vvovo, oovv=Voovv,
+            vooo=Vvooo, ooov=Vooov,
             oooo=Voooo)
 
 

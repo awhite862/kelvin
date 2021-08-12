@@ -45,13 +45,13 @@ class mol_field_system(System):
     def get_mp1(self):
         # contribution from imaginary contour
         hcore = self.mf.get_hcore(self.mf.mol)
-        h = utils.block_diag(hcore,hcore)
+        h = utils.block_diag(hcore, hcore)
         en = self.g_energies_tot()
         fo = ft_utils.ff(self.beta, en, self.mu)
         p = scf_utils.get_ao_ft_den(self.mf, fo)
         f0 = scf_utils.get_ao_fock(self.mf)
         fao = scf_utils.get_ao_ft_fock(self.mf, fo)
-        E1 = ft_mp.mp1(p,2*f0 - fao,h)
+        E1 = ft_mp.mp1(p, 2*f0 - fao, h)
 
         # contribution from real-time contour
         if self.O is not None:
@@ -68,18 +68,18 @@ class mol_field_system(System):
         E = numpy.zeros((3))
         E[2] = 1.0
         field = numpy.einsum('x,xij->ij', E, self.mf.mol.intor('cint1e_r_sph', comp=3))
-        field = scf_utils.mo_tran_1e(self.mf,field)
+        field = scf_utils.mo_tran_1e(self.mf, field)
         I = numpy.ones(self.nt)
-        Fock = (I[:,None,None]*F[None,:,:]).astype(complex)
+        Fock = (I[:, None, None]*F[None, :, :]).astype(complex)
         delta = self.ti[self.ot] - self.ti[self.ot - 1]
         ng = len(self.ti)
         for i in range(ng):
             temp = field*numpy.sin(self.omega*self.ti[i])
             Fock[i] += temp
         if direc == 'f':
-            Fock[self.ot] += -3.j*self.beta*utils.block_diag(self.O,self.O)/delta
+            Fock[self.ot] += -3.j*self.beta*utils.block_diag(self.O, self.O)/delta
         elif direc == 'b':
-            Fock[self.ot] -= 0.j*self.beta*utils.block_diag(self.O,self.O)/delta
+            Fock[self.ot] -= 0.j*self.beta*utils.block_diag(self.O, self.O)/delta
         else:
             raise Exception("Unrecognized direction: " + str(direc))
 
@@ -94,19 +94,19 @@ class mol_field_system(System):
     def r_hcore(self, direc='f'):
         hcore = self.mf.get_hcore()
         I = numpy.ones(self.nt)
-        thcore = I[:,None,None,]*hcore[None,:,:]
+        thcore = I[:, None, None]*hcore[None, :, :]
         E = numpy.zeros((3))
         E[2] = 1.0
         F = numpy.einsum('x,xij->ij', E, self.mf.mol.intor('cint1e_r_sph', comp=3))
         for i in range(self.nt):
             thcore[i] += numpy.sin(self.omega*self.ti[i])*F
         for i in range(self.nt):
-            thcore[i] = scf_utils.mo_tran_1e(self.mf,thcore[i])
+            thcore[i] = scf_utils.mo_tran_1e(self.mf, thcore[i])
         if direc == 'f':
             thcore[self.ot] += self.O
         elif direc == 'b':
             thcore[self.ot] -= self.O
-            thcore = numpy.flip(thcore,0)
+            thcore = numpy.flip(thcore, 0)
         return thcore
 
     def g_aint_tot(self):

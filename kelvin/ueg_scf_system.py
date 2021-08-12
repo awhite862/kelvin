@@ -32,7 +32,7 @@ class UEGSCFSystem(System):
                  norb=None, orbtype='u', madelung=None, naref=None):
         self.T = T
         self.L = L
-        self.basis = UEGBasis(L,Emax,norb=norb)
+        self.basis = UEGBasis(L, Emax, norb=norb)
 
         # compute mu if N is specified
         if na is not None:
@@ -61,14 +61,14 @@ class UEGSCFSystem(System):
         else:
             occ = []
             vir = []
-            for p,d in enumerate(d0):
+            for p, d in enumerate(d0):
                 if d < self.mu:
                     occ.append(p)
                 if d > self.mu:
                     vir.append(p)
             self.oidx = numpy.r_[occ]
             self.vidx = numpy.r_[vir]
-            for p,d in enumerate(d0):
+            for p, d in enumerate(d0):
                 if d < self.mu:
                     occ.append(p + n)
                 if d > self.mu:
@@ -125,9 +125,9 @@ class UEGSCFSystem(System):
     def get_mp1(self):
         if self.has_u():
             if self.T > 0:
-                Va,Vb,Vabab = self.u_aint_tot()
+                Va, Vb, Vabab = self.u_aint_tot()
                 beta = 1.0 / self.T
-                ea,eb = self.u_energies_tot()
+                ea, eb = self.u_energies_tot()
                 foa = ft_utils.ff(beta, ea, self.mu)
                 fob = ft_utils.ff(beta, eb, self.mu)
                 tmat = self.r_hcore()
@@ -138,7 +138,7 @@ class UEGSCFSystem(System):
                 E1_2 += einsum('ijij,i,j->', Vabab, foa, fob)
                 return E1_2 + E1_1
             else:
-                Va,Vb,Vabab = self.u_aint()
+                Va, Vb, Vabab = self.u_aint()
                 E1 = -0.5*numpy.einsum('ijij->', Va.oooo)
                 E1 -= 0.5*numpy.einsum('ijij->', Vb.oooo)
                 E1 -= numpy.einsum('ijij->', Vabab.oooo)
@@ -159,9 +159,9 @@ class UEGSCFSystem(System):
 
     def u_d_mp1(self, dveca, dvecb):
         if self.T > 0:
-            Va,Vb,Vabab = self.u_aint_tot()
+            Va, Vb, Vabab = self.u_aint_tot()
             beta = 1.0 / self.T
-            ea,eb = self.u_energies_tot()
+            ea, eb = self.u_energies_tot()
             foa = ft_utils.ff(beta, ea, self.mu)
             fva = ft_utils.ffv(beta, ea, self.mu)
             veca = dveca*foa*fva
@@ -182,9 +182,9 @@ class UEGSCFSystem(System):
 
     def u_mp1_den(self):
         if self.T > 0:
-            Va,Vb,Vabab = self.u_aint_tot()
+            Va, Vb, Vabab = self.u_aint_tot()
             beta = 1.0 / self.T
-            ea,eb = self.u_energies_tot()
+            ea, eb = self.u_energies_tot()
             foa = ft_utils.ff(beta, ea, self.mu)
             fva = ft_utils.ffv(beta, ea, self.mu)
             veca = foa*fva
@@ -198,7 +198,7 @@ class UEGSCFSystem(System):
             Db += -beta*einsum('ijij,i,j->i', Vb, vecb, fob)
             Da += -beta*einsum('ijij,i,j->i', Vabab, veca, fob)
             Db += -beta*einsum('ijij,i,j->j', Vabab, foa, vecb)
-            return Da,Db
+            return Da, Db
         else:
             logging.warning("Derivative of MP1 energy is zero at OK")
             return 0.0
@@ -247,10 +247,10 @@ class UEGSCFSystem(System):
         ev = F.vv.diagonal()
         if self.madelung == "orb":
             eo -= self._mconst
-        return (eo,ev)
+        return (eo, ev)
 
     def u_energies(self):
-        fa,fb = self.u_fock()
+        fa, fb = self.u_fock()
         eoa = fa.oo.diagonal()
         eva = fa.vv.diagonal()
         eob = fb.oo.diagonal()
@@ -258,7 +258,7 @@ class UEGSCFSystem(System):
         if self.madelung == "orb":
             eoa -= self._mconst
             eob -= self._mconst
-        return (eoa,eva,eob,evb)
+        return (eoa, eva, eob, evb)
 
     def g_energies(self):
         if self.T > 0.0:
@@ -271,28 +271,28 @@ class UEGSCFSystem(System):
         eva = d[na:nbsf]
         eob = d[nbsf:nbsf+nb]
         evb = d[-(nbsf-nb):]
-        eo = numpy.hstack((eoa,eob))
-        ev = numpy.hstack((eva,evb))
+        eo = numpy.hstack((eoa, eob))
+        ev = numpy.hstack((eva, evb))
         if self.madelung == "orb":
             eo -= self._mconst
-        return (eo,ev)
+        return (eo, ev)
 
     def r_energies_tot(self):
         e = numpy.asarray(self.basis.Es)
         n = e.shape[0]
         V = self.r_int_tot()
-        Vd = V[numpy.ix_(numpy.arange(n),self.oidx,numpy.arange(n),self.oidx)]
-        Vx = V[numpy.ix_(numpy.arange(n),self.oidx,self.oidx,numpy.arange(n))]
+        Vd = V[numpy.ix_(numpy.arange(n), self.oidx, numpy.arange(n), self.oidx)]
+        Vx = V[numpy.ix_(numpy.arange(n), self.oidx, self.oidx, numpy.arange(n))]
         e += 2*numpy.einsum('pipi->p', Vd) - numpy.einsum('piip->p', Vx)
         return e
 
     def u_energies_tot(self):
         e = self.r_energies_tot()
-        return e,e.copy()
+        return e, e.copy()
 
     def g_energies_tot(self):
-        ea,eb = self.u_energies_tot()
-        return numpy.hstack((ea,eb))
+        ea, eb = self.u_energies_tot()
+        return numpy.hstack((ea, eb))
 
     def r_fock(self):
         if self.T > 0.0:
@@ -300,14 +300,14 @@ class UEGSCFSystem(System):
         F = self.r_hcore()
         V = self.r_int_tot()
         n = F.shape[0]
-        Vd = V[numpy.ix_(numpy.arange(n),self.oidx,numpy.arange(n),self.oidx)]
-        Vx = V[numpy.ix_(numpy.arange(n),self.oidx,self.oidx,numpy.arange(n))]
+        Vd = V[numpy.ix_(numpy.arange(n), self.oidx, numpy.arange(n), self.oidx)]
+        Vx = V[numpy.ix_(numpy.arange(n), self.oidx, self.oidx, numpy.arange(n))]
         F = F + 2*einsum('piri->pr', Vd) - einsum('piir->pr', Vx)
-        Foo = F[numpy.ix_(self.oidx,self.oidx)]
-        Fvv = F[numpy.ix_(self.vidx,self.vidx)]
-        Fov = F[numpy.ix_(self.oidx,self.vidx)]
-        Fvo = F[numpy.ix_(self.vidx,self.oidx)]
-        return one_e_blocks(Foo,Fov,Fvo,Fvv)
+        Foo = F[numpy.ix_(self.oidx, self.oidx)]
+        Fvv = F[numpy.ix_(self.vidx, self.vidx)]
+        Fov = F[numpy.ix_(self.oidx, self.vidx)]
+        Fvo = F[numpy.ix_(self.vidx, self.oidx)]
+        return one_e_blocks(Foo, Fov, Fvo, Fvv)
 
     def u_fock(self):
         if self.T > 0.0:
@@ -317,8 +317,8 @@ class UEGSCFSystem(System):
         oidx = self.oidx
         vidx = self.vidx
         V = self.r_int_tot()
-        Vd = V[numpy.ix_(numpy.arange(n),oidx,numpy.arange(n),oidx)]
-        Vx = V[numpy.ix_(numpy.arange(n),oidx,oidx,numpy.arange(n))]
+        Vd = V[numpy.ix_(numpy.arange(n), oidx, numpy.arange(n), oidx)]
+        Vx = V[numpy.ix_(numpy.arange(n), oidx, oidx, numpy.arange(n))]
         F = F + 2*einsum('piri->pr', Vd) - einsum('piir->pr', Vx)
         Foo = F[numpy.ix_(oidx, oidx)]
         Fvv = F[numpy.ix_(vidx, vidx)]
@@ -326,7 +326,7 @@ class UEGSCFSystem(System):
         Fvo = F[numpy.ix_(vidx, oidx)]
         Fa = one_e_blocks(Foo, Fov, Fvo, Fvv)
         Fb = one_e_blocks(Foo, Fov, Fvo, Fvv)
-        return Fa,Fb
+        return Fa, Fb
 
     def g_fock(self):
         if self.T > 0.0:
@@ -336,7 +336,7 @@ class UEGSCFSystem(System):
         goidx = self.goidx
         gvidx = self.gvidx
         V = self.g_aint_tot()
-        V = V[numpy.ix_(numpy.arange(n),goidx,numpy.arange(n),goidx)]
+        V = V[numpy.ix_(numpy.arange(n), goidx, numpy.arange(n), goidx)]
         F = F + einsum('piri->pr', V)
         Foo = F[numpy.ix_(goidx, goidx)]
         Fvv = F[numpy.ix_(gvidx, gvidx)]
@@ -354,11 +354,11 @@ class UEGSCFSystem(System):
             I = numpy.identity(n)
             den = einsum('pi,i,qi->pq', I, fo, I)
         else:
-            to = numpy.zeros((n,self.N))
+            to = numpy.zeros((n, self.N))
             i = 0
             for p in range(n):
                 if d[p] < self.mu:
-                    to[p,i] = 1.0
+                    to[p, i] = 1.0
                     i = i+1
             den = einsum('pi,qi->pq', to, to)
         V = self.r_int_tot()
@@ -366,8 +366,8 @@ class UEGSCFSystem(System):
         return T + JK
 
     def u_fock_tot(self):
-        Ta,Tb = self.basis.build_u_ke_matrix()
-        da,db = self.u_energies_tot()
+        Ta, Tb = self.basis.build_u_ke_matrix()
+        da, db = self.u_energies_tot()
         na = da.shape[0]
         nb = db.shape[0]
         if self.T > 0.0:
@@ -379,17 +379,17 @@ class UEGSCFSystem(System):
             dena = einsum('pi,i,qi->pq', Ia, foa, Ia)
             denb = einsum('pi,i,qi->pq', Ib, fob, Ib)
         else:
-            dena = numpy.zeros((na,na))
-            denb = numpy.zeros((nb,nb))
+            dena = numpy.zeros((na, na))
+            denb = numpy.zeros((nb, nb))
             for i in range(self.oidx):
-                dena[i,i] = 1.0
-                denb[i,i] = 1.0
-        Va,Vb,Vabab = self.u_aint_tot()
+                dena[i, i] = 1.0
+                denb[i, i] = 1.0
+        Va, Vb, Vabab = self.u_aint_tot()
         JKa = einsum('prqs,rs->pq', Va, dena)
         JKa += einsum('prqs,rs->pq', Vabab, denb)
         JKb = einsum('prqs,rs->pq', Vb, denb)
         JKb += einsum('prqs,rs->pq', Vabab, dena)
-        return (Ta + JKa),(Tb + JKb)
+        return (Ta + JKa), (Tb + JKb)
 
     def g_fock_tot(self):
         T = self.basis.build_g_ke_matrix()
@@ -401,11 +401,11 @@ class UEGSCFSystem(System):
             I = numpy.identity(n)
             den = einsum('pi,i,qi->pq', I, fo, I)
         else:
-            to = numpy.zeros((n,self.N))
+            to = numpy.zeros((n, self.N))
             i = 0
             for p in range(n):
                 if d[p] < self.mu:
-                    to[p,i] = 1.0
+                    to[p, i] = 1.0
                     i = i+1
             den = einsum('pi,qi->pq', to, to)
         V = self.g_aint_tot()
@@ -413,12 +413,12 @@ class UEGSCFSystem(System):
         return T + JK
 
     def u_fock_d_tot(self, dveca, dvecb):
-        da,db = self.u_energies_tot()
+        da, db = self.u_energies_tot()
         na = da.shape[0]
         nb = db.shape[0]
         if self.T == 0.0:
             logging.warning("Occupations derivatives are zero at 0K")
-            return numpy.zeros((na,na)),numpy.zeros((nb,nb))
+            return numpy.zeros((na, na)), numpy.zeros((nb, nb))
         beta = 1.0 / self.T
         foa = ft_utils.ff(beta, da, self.mu)
         fva = ft_utils.ffv(beta, da, self.mu)
@@ -430,20 +430,20 @@ class UEGSCFSystem(System):
         Ib = numpy.identity(nb)
         dena = einsum('pi,i,qi->pq', Ia, veca, Ia)
         denb = einsum('pi,i,qi->pq', Ib, vecb, Ib)
-        Va,Vb,Vabab = self.u_aint_tot()
+        Va, Vb, Vabab = self.u_aint_tot()
         JKa = einsum('prqs,rs->pq', Va, dena)
         JKa += einsum('prqs,rs->pq', Vabab, denb)
         JKb = einsum('prqs,rs->pq', Vb, denb)
         JKb += einsum('prqs,pq->rs', Vabab, dena)
-        return -JKa,-JKb
+        return -JKa, -JKb
 
     def u_fock_d_den(self):
-        da,db = self.u_energies_tot()
+        da, db = self.u_energies_tot()
         na = da.shape[0]
         nb = db.shape[0]
         if self.T == 0.0:
             logging.warning("Occupations derivatives are zero at 0K")
-            return numpy.zeros((na,na)),numpy.zeros((nb,nb))
+            return numpy.zeros((na, na)), numpy.zeros((nb, nb))
         beta = 1.0 / self.T
         foa = ft_utils.ff(beta, da, self.mu)
         fva = ft_utils.ffv(beta, da, self.mu)
@@ -451,19 +451,19 @@ class UEGSCFSystem(System):
         fob = ft_utils.ff(beta, db, self.mu)
         fvb = ft_utils.ffv(beta, db, self.mu)
         vecb = fob*fvb
-        Va,Vb,Vabab = self.u_aint_tot()
+        Va, Vb, Vabab = self.u_aint_tot()
         JKaa = einsum('piqi,i->pqi', Va, veca)
         JKab = einsum('piqi,i->pqi', Vabab, vecb)
         JKbb = einsum('piqi,i->pqi', Vb, vecb)
         JKba = einsum('iris,i->rsi', Vabab, veca)
-        return JKaa,JKab,JKbb,JKba
+        return JKaa, JKab, JKbb, JKba
 
     def g_fock_d_tot(self, dvec):
         d = self.g_energies_tot()
         n = d.shape[0]
         if self.T == 0.0:
             logging.warning("Occupations derivatives are zero at 0K")
-            return numpy.zeros((n,n))
+            return numpy.zeros((n, n))
         beta = 1.0 / self.T
         fo = ft_utils.ff(beta, d, self.mu)
         fv = ft_utils.ffv(beta, d, self.mu)
@@ -479,7 +479,7 @@ class UEGSCFSystem(System):
         n = d.shape[0]
         if self.T == 0.0:
             logging.warning("Occupations derivatives are zero at 0K")
-            return numpy.zeros((n,n))
+            return numpy.zeros((n, n))
         beta = 1.0 / self.T
         fo = ft_utils.ff(beta, d, self.mu)
         fv = ft_utils.ffv(beta, d, self.mu)
@@ -497,7 +497,7 @@ class UEGSCFSystem(System):
     def u_aint(self):
         if self.T > 0.0:
             raise Exception("Undefined ov blocks at FT")
-        Va,Vb,Vabab = self.u_aint_tot()
+        Va, Vb, Vabab = self.u_aint_tot()
         oaidx = self.oidx
         vaidx = self.vidx
         obidx = self.oidx
@@ -559,7 +559,7 @@ class UEGSCFSystem(System):
             oovv=Voovv, vooo=Vvooo,
             ovoo=Vovoo, oovo=Voovo,
             ooov=Vooov, oooo=Voooo)
-        return Va,Vb,Vabab
+        return Va, Vb, Vabab
 
     def g_aint(self, code=0):
         if self.T > 0.0:

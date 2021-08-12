@@ -82,9 +82,8 @@ class lccsd(object):
     def _lccsd(self):
         # create energies and denominators in spin-orbital basis
         eo, ev = self.sys.g_energies()
-        Dov = 1.0/(eo[:,None] - ev[None,:])
-        Doovv = 1.0/(eo[:,None,None,None] + eo[None,:,None,None]
-            - ev[None,None,:,None] - ev[None,None,None,:])
+        Dov = 1.0/utils.D1(eo, ev)
+        Doovv = 1.0/utils.D2(eo, eo, ev, ev)
 
         # get HF energy
         En = self.sys.const_energy()

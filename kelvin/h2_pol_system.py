@@ -47,17 +47,17 @@ class h2_pol_system(System):
         return E1
 
     def g_energies_tot(self):
-        F = self.hcore + self.eri[:,0,:,0] - self.eri[:,0,0,:]
-        e,v = numpy.linalg.eigh(F)
+        F = self.hcore + self.eri[:, 0, :, 0] - self.eri[:, 0, 0, :]
+        e, v = numpy.linalg.eigh(F)
         return e
 
     def g_fock_tot(self):
         en = self.g_energies_tot()
         fo = ft_utils.ff(self.beta, en, self.mu)
         F = self.hcore + \
-            (self.eri[:,0,:,0] - self.eri[:,0,0,:])*fo[0] +\
-            (self.eri[:,1,:,1] - self.eri[:,1,1,:])*fo[1]
+            (self.eri[:, 0, :, 0] - self.eri[:, 0, 0, :])*fo[0] +\
+            (self.eri[:, 1, :, 1] - self.eri[:, 1, 1, :])*fo[1]
         return F
 
     def g_aint_tot(self):
-        return self.eri - self.eri.transpose((0,1,3,2))
+        return self.eri - self.eri.transpose((0, 1, 3, 2))

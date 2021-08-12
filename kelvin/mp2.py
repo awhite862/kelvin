@@ -21,7 +21,7 @@ class MP2(object):
         self.finite_T = False if T == 0 else True
         if self.finite_T:
             self.beta = 1/T
-            if not sys.verify(self.T,self.mu):
+            if not sys.verify(self.T, self.mu):
                 raise Exception("Sytem temperature inconsistent with MP2 temp")
         else:
             self.beta = 1.0e20
@@ -39,7 +39,7 @@ class MP2(object):
             return self._mp2()
 
     def _mp2(self):
-        eo,ev = self.sys.g_energies()
+        eo, ev = self.sys.g_energies()
         no = eo.shape[0]
         nv = ev.shape[0]
         n = no + nv
@@ -66,17 +66,17 @@ class MP2(object):
 
         # compute second order energy
         if self.saveT:
-            E2,T1,T2 = zt_mp.mp2(eo,ev,F.vo,I.vvoo,returnT=True)
+            E2, T1, T2 = zt_mp.mp2(eo, ev, F.vo, I.vvoo, returnT=True)
             self.T1 = T1
             self.T2 = T2
         else:
-            E2 = zt_mp.mp2(eo,ev,F.vo,I.vvoo)
+            E2 = zt_mp.mp2(eo, ev, F.vo, I.vvoo)
 
         # save and return energies
         self.E0 = E0
         self.E1 = E1
         self.E2 = E2
-        return (E0,E1,E2)
+        return (E0, E1, E2)
 
     def _ft_mp2(self):
         mu = self.mu
@@ -110,7 +110,7 @@ class MP2(object):
 
         # compute second order energy
         if self.saveT:
-            E2,T1n,T2n,T1a,T2a = ft_mp.mp2_sep(en, fo, fmo, eri, self.T, returnT=True)
+            E2, T1n, T2n, T1a, T2a = ft_mp.mp2_sep(en, fo, fmo, eri, self.T, returnT=True)
             self.T1n = T1n
             self.T1a = T1a
             self.T2n = T2n
@@ -122,4 +122,4 @@ class MP2(object):
         self.E0 = E0
         self.E1 = E1
         self.E2 = E2
-        return (E0,E1,E2)
+        return (E0, E1, E2)

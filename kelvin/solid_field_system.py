@@ -31,8 +31,8 @@ class solid_field_system(System):
 
     def get_mp1(self):
         if self.T == 0:
-            ea,eb = self.u_energies_tot()
-            Va,Vb,Vabab = self.u_aint_tot()
+            ea, eb = self.u_energies_tot()
+            Va, Vb, Vabab = self.u_aint_tot()
             foa = numpy.zeros(ea.shape)
             fob = numpy.zeros(eb.shape)
             for i in range(self.na):
@@ -42,16 +42,16 @@ class solid_field_system(System):
             E1 = -0.5*numpy.einsum('ijij,i,j->', Va, foa, foa)
             E1 -= 0.5*numpy.einsum('ijij,i,j->', Vb, fob, fob)
             E1 -= numpy.einsum('ijij,i,j->', Vabab, foa, fob)
-            Fa,Fb = self.u_fock()
+            Fa, Fb = self.u_fock()
             Fao = Fa.oo - numpy.diag(self.ea[:self.na])
             Fbo = Fb.oo - numpy.diag(self.eb[:self.nb])
             E1 += numpy.einsum('ii->', Fao)
             E1 += numpy.einsum('ii->', Fbo)
             return E1
         else:
-            Va,Vb,Vabab = self.u_aint_tot()
+            Va, Vb, Vabab = self.u_aint_tot()
             beta = 1.0 / self.T
-            ea,eb = self.u_energies_tot()
+            ea, eb = self.u_energies_tot()
             na = ea.shape[0]
             nb = eb.shape[0]
             foa = ft_utils.ff(beta, ea, self.mu)
@@ -68,7 +68,7 @@ class solid_field_system(System):
             JKb = numpy.einsum('prqs,rs->pq', Vb, denb)
             JKb += numpy.einsum('prqs,pq->rs', Vabab, dena)
             hcore = self.mf.get_hcore(self.mf.mol)
-            hmoa,hmob = scf_utils.u_mo_tran_1e(self.mf, hcore)
+            hmoa, hmob = scf_utils.u_mo_tran_1e(self.mf, hcore)
             Fa = hmoa.copy()
             Fb = hmob.copy()
             Fa += JKa.copy()
@@ -87,24 +87,24 @@ class solid_field_system(System):
 
     def u_fock_tot(self, direc='f'):
         beta = 1.0 / self.T if self.T > 0 else 1.0e20
-        ea,eb = self.u_energies_tot()
+        ea, eb = self.u_energies_tot()
         foa = ft_utils.ff(beta, ea, self.mu)
         fob = ft_utils.ff(beta, eb, self.mu)
-        fa,fb = scf_utils.get_u_ft_fock(self.mf, foa, fob)
+        fa, fb = scf_utils.get_u_ft_fock(self.mf, foa, fob)
         nt = self.ti.shape[0]
         na = ea.shape[0]
         nb = eb.shape[0]
         assert(na == nb)
-        px,py,pz = self.mf.cell.pbc_intor('int1e_ipovlp', hermi=0, comp=3)
-        px = -1.j*px.conj().transpose((1,0))
-        py = -1.j*py.conj().transpose((1,0))
-        pz = -1.j*pz.conj().transpose((1,0))
-        pax,pbx = scf_utils.u_mo_tran_1e(self.mf, px)
-        pay,pby = scf_utils.u_mo_tran_1e(self.mf, py)
-        paz,pbz = scf_utils.u_mo_tran_1e(self.mf, pz)
-        Tta = numpy.zeros((nt,na,na),dtype=complex)
-        Ttb = numpy.zeros((nt,nb,nb),dtype=complex)
-        for i,t in enumerate(self.ti):
+        px, py, pz = self.mf.cell.pbc_intor('int1e_ipovlp', hermi=0, comp=3)
+        px = -1.j*px.conj().transpose((1, 0))
+        py = -1.j*py.conj().transpose((1, 0))
+        pz = -1.j*pz.conj().transpose((1, 0))
+        pax, pbx = scf_utils.u_mo_tran_1e(self.mf, px)
+        pay, pby = scf_utils.u_mo_tran_1e(self.mf, py)
+        paz, pbz = scf_utils.u_mo_tran_1e(self.mf, pz)
+        Tta = numpy.zeros((nt, na, na), dtype=complex)
+        Ttb = numpy.zeros((nt, nb, nb), dtype=complex)
+        for i, t in enumerate(self.ti):
             dt = t - self.t0
             ex = dt*dt/(2*self.sigma*self.sigma)
             phase = self.A0*numpy.exp(-ex)*numpy.cos(self.omega*dt)
@@ -112,8 +112,8 @@ class solid_field_system(System):
             Ttb[i] = phase*pbz
         Fa = Tta.copy()
         Fb = Ttb.copy()
-        Fa += fa[None,:,:]
-        Fb += fb[None,:,:]
+        Fa += fa[None, :, :]
+        Fb += fb[None, :, :]
         if direc == 'b':
             tempa = Fa.copy()
             tempb = Fb.copy()
@@ -121,15 +121,15 @@ class solid_field_system(System):
             for i in range(ng):
                 Fa[i] = tempa[ng - i - 1]
                 Fb[i] = tempb[ng - i - 1]
-        return Fa,Fb
+        return Fa, Fb
 
     def g_fock_tot(self, direc='f'):
-        Fa,Fb = self.u_fock_tot()
-        nt,na1,na2 = Fa.shape
+        Fa, Fb = self.u_fock_tot()
+        nt, na1, na2 = Fa.shape
         assert(na1 == na2)
-        Fock = numpy.zeros((nt,2*na1,2*na2),dtype=complex)
+        Fock = numpy.zeros((nt, 2*na1, 2*na2), dtype=complex)
         for i in range(nt):
-            Fock[i] = utils.block_diag(Fa[i],Fb[i])
+            Fock[i] = utils.block_diag(Fa[i], Fb[i])
         return Fock
 
     def u_aint_tot(self):
@@ -142,11 +142,11 @@ class solid_field_system(System):
             mob = self.mf.mo_coeff[1]
 
         mf = self.mf
-        Ia = integrals.get_phys_gen(mf,moa,moa,moa,moa,anti=True)
-        Ib = integrals.get_phys_gen(mf,mob,mob,mob,mob,anti=True)
-        Iabab = integrals.get_phys_gen(mf,moa,mob,moa,mob,anti=False)
+        Ia = integrals.get_phys_gen(mf, moa, moa, moa, moa, anti=True)
+        Ib = integrals.get_phys_gen(mf, mob, mob, mob, mob, anti=True)
+        Iabab = integrals.get_phys_gen(mf, moa, mob, moa, mob, anti=False)
 
-        return Ia,Ib,Iabab
+        return Ia, Ib, Iabab
 
     def g_aint_tot(self):
         return integrals.get_phys_antiu_all_gen(self.mf)

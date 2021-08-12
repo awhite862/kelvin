@@ -278,9 +278,8 @@ class ccsd(object):
         """Simple CCSD implementation at zero temperature."""
         # create energies and denominators in spin-orbital basis
         eo, ev = self.sys.g_energies()
-        Dov = 1.0/(eo[:,None] - ev[None,:])
-        Doovv = 1.0/(eo[:,None,None,None] + eo[None,:,None,None]
-            - ev[None,None,:,None] - ev[None,None,None,:])
+        Dov = 1.0/utils.D1(eo, ev)
+        Doovv = 1.0/utils.D2(eo, ev)
 
         # get HF energy
         En = self.sys.const_energy()
@@ -355,14 +354,11 @@ class ccsd(object):
         """Simple UCCSD implementation at zero temperature."""
         # create energies and denominators in spin-orbital basis
         eoa, eva, eob, evb = self.sys.u_energies()
-        Dova = 1.0/(eoa[:,None] - eva[None,:])
-        Dovb = 1.0/(eob[:,None] - evb[None,:])
-        Doovvaa = 1.0/(eoa[:,None,None,None] + eoa[None,:,None,None]
-            - eva[None,None,:,None] - eva[None,None,None,:])
-        Doovvbb = 1.0/(eob[:,None,None,None] + eob[None,:,None,None]
-            - evb[None,None,:,None] - evb[None,None,None,:])
-        Doovvab = 1.0/(eoa[:,None,None,None] + eob[None,:,None,None]
-            - eva[None,None,:,None] - evb[None,None,None,:])
+        Dova = 1.0/utils.D1(eoa, eva)
+        Dovb = 1.0/utils.D1(eob, evb)
+        Doovvaa = 1.0/utils.D2(eoa, eva)
+        Doovvbb = 1.0/utils.D2(eob, evb)
+        Doovvab = 1.0/utils.D2u(eoa, eob, eva, evb)
 
         # get HF energy
         En = self.sys.const_energy()
@@ -465,15 +461,14 @@ class ccsd(object):
         self.Etot = Ehf + Eold
         self.T1 = T1olds
         self.T2 = T2olds
-        return (Eold+Ehf,Eold)
+        return (Eold + Ehf, Eold)
 
     def _ccsd_lambda(self):
         """Solve CCSD Lambda equations at zero temperature."""
         # create energies and denominators in spin-orbital basis
         eo, ev = self.sys.g_energies()
-        Dov = 1.0/(eo[:,None] - ev[None,:])
-        Doovv = 1.0/(eo[:,None,None,None] + eo[None,:,None,None]
-            - ev[None,None,:,None] - ev[None,None,None,:])
+        Dov = 1.0/utils.D1(eo, ev)
+        Doovv = 1.0/utils.D2(eo, ev)
 
         # get Fock matrix
         F = self.sys.g_fock()
@@ -508,7 +503,7 @@ class ccsd(object):
             L2 = einsum('ijab,ijab->ijab', L2, Doovv)
             res1 = numpy.linalg.norm(L1 - L1old) / nl1
             res2 = numpy.linalg.norm(L2 - L2old) / nl2
-            logging.info(' %2d  %.10f' % (i+1,res1 + res2))
+            logging.info(' %2d  %.10f' % (i + 1, res1 + res2))
             i = i + 1
             if res1 + res2 < self.tconv:
                 converged = True
@@ -525,14 +520,11 @@ class ccsd(object):
         """Solve CCSD Lambda equations at zero temperature."""
         # create energies and denominators in spin-orbital basis
         eoa, eva, eob, evb = self.sys.u_energies()
-        Dova = 1.0/(eoa[:,None] - eva[None,:])
-        Dovb = 1.0/(eob[:,None] - evb[None,:])
-        Doovvaa = 1.0/(eoa[:,None,None,None] + eoa[None,:,None,None]
-            - eva[None,None,:,None] - eva[None,None,None,:])
-        Doovvbb = 1.0/(eob[:,None,None,None] + eob[None,:,None,None]
-            - evb[None,None,:,None] - evb[None,None,None,:])
-        Doovvab = 1.0/(eoa[:,None,None,None] + eob[None,:,None,None]
-            - eva[None,None,:,None] - evb[None,None,None,:])
+        Dova = 1.0/utils.D1(eoa, eva)
+        Dovb = 1.0/utils.D1(eob, evb)
+        Doovvaa = 1.0/utils.D2(eoa, eva)
+        Doovvbb = 1.0/utils.D2(eob, evb)
+        Doovvab = 1.0/utils.D2u(eoa, eob, eva, evb)
 
         # get Fock matrix
         Fa, Fb = self.sys.u_fock()
@@ -738,6 +730,11 @@ class ccsd(object):
             ea, eb = self.sys.u_energies_tot()
             na = ea.shape[0]
             nb = eb.shape[0]
+            D1a = utils.D1(ea, ea)
+            D1b = utils.D1(eb, eb)
+            D2aa = utils.D2(ea, ea)
+            D2ab = utils.D2u(ea, eb, ea, eb)
+            D2bb = utils.D2(eb, eb)
 
             # get 0th and 1st order contributions
             En = self.sys.const_energy()
@@ -777,11 +774,6 @@ class ccsd(object):
                 logging.info('  nactb: {:d}'.format(nactb))
 
                 # get energy differences
-                D1a = utils.D1(ea, ea)
-                D1b = utils.D1(eb, eb)
-                D2aa = utils.D2(ea, ea)
-                D2ab = utils.D2u(ea, eb, ea, eb)
-                D2bb = utils.D2(eb, eb)
                 D1a = D1a[numpy.ix_(ivira, iocca)]
                 D1b = D1b[numpy.ix_(ivirb, ioccb)]
                 D2aa = D2aa[numpy.ix_(ivira, ivira, iocca, iocca)]
@@ -800,11 +792,6 @@ class ccsd(object):
                 Fa, Fb, Ia, Ib, Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
 
                 # get energy differences
-                D1a = utils.D1(ea, ea)
-                D1b = utils.D1(eb, eb)
-                D2aa = utils.D2(ea, ea)
-                D2ab = utils.D2u(ea, eb, ea, eb)
-                D2bb = utils.D2(eb, eb)
                 T1ashape = (ng, na, na)
                 T1bshape = (ng, nb, nb)
         else:

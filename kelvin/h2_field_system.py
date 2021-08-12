@@ -57,8 +57,8 @@ class h2_field_system(System):
         return E1
 
     def g_energies_tot(self):
-        F = self.hcore + self.eri[:,0,:,0] - self.eri[:,0,0,:]
-        e,v = numpy.linalg.eigh(F)
+        F = self.hcore + self.eri[:, 0, :, 0] - self.eri[:, 0, 0, :]
+        e, v = numpy.linalg.eigh(F)
         return e
 
     def g_fock_tot(self, direc='f'):
@@ -71,11 +71,11 @@ class h2_field_system(System):
         field = numpy.einsum('x,xij->ij', E, mol.intor('cint1e_r_sph', comp=3))
         field = numpy.einsum('mp,mn,nq->pq', mos, field, mos)
         F = self.hcore + \
-            (self.eri[:,0,:,0] - self.eri[:,0,0,:])*fo[0] +\
-            (self.eri[:,1,:,1] - self.eri[:,1,1,:])*fo[1]
+            (self.eri[:, 0, :, 0] - self.eri[:, 0, 0, :])*fo[0] +\
+            (self.eri[:, 1, :, 1] - self.eri[:, 1, 1, :])*fo[1]
         ng = len(self.ti)
         I = numpy.ones(ng)
-        Fock = (I[:,None,None]*F[None,:,:]).astype(complex)
+        Fock = (I[:, None, None]*F[None, :, :]).astype(complex)
         ot = self.ot
         ti = self.ti
         for i in range(ng):
@@ -97,7 +97,7 @@ class h2_field_system(System):
             return Fock
 
     def g_aint_tot(self):
-        return (self.eri - self.eri.transpose((0,1,3,2)))
+        return (self.eri - self.eri.transpose((0, 1, 3, 2)))
 
 
 class H2FieldSystem(NeqSystem):
@@ -142,8 +142,8 @@ class H2FieldSystem(NeqSystem):
         return E1
 
     def g_energies_tot(self):
-        F = self.hcore + self.eri[:,0,:,0] - self.eri[:,0,0,:]
-        e,v = numpy.linalg.eigh(F)
+        F = self.hcore + self.eri[:, 0, :, 0] - self.eri[:, 0, 0, :]
+        e, v = numpy.linalg.eigh(F)
         return e
 
     def g_fock_tot(self, t=0):
@@ -156,12 +156,12 @@ class H2FieldSystem(NeqSystem):
         field = numpy.einsum('x,xij->ij', E, mol.intor('cint1e_r_sph', comp=3))
         field = numpy.einsum('mp,mn,nq->pq', mos, field, mos)
         F = self.hcore + \
-            (self.eri[:,0,:,0] - self.eri[:,0,0,:])*fo[0] +\
-            (self.eri[:,1,:,1] - self.eri[:,1,1,:])*fo[1]
+            (self.eri[:, 0, :, 0] - self.eri[:, 0, 0, :])*fo[0] +\
+            (self.eri[:, 1, :, 1] - self.eri[:, 1, 1, :])*fo[1]
         Fock = F.astype(complex)
         temp = field*numpy.sin(self.omega*t)
         Fock += temp
         return Fock
 
     def g_aint_tot(self):
-        return (self.eri - self.eri.transpose((0,1,3,2)))
+        return (self.eri - self.eri.transpose((0, 1, 3, 2)))

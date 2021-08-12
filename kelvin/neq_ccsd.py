@@ -1,6 +1,6 @@
 import logging
 import numpy
-from cqcpy import ft_utils
+from cqcpy import ft_utils, utils
 from pyscf.lib import einsum
 from . import cc_utils
 from . import ft_cc_energy
@@ -27,7 +27,7 @@ class neq_ccsd(object):
             self.beta = 1.0/T
         else:
             self.beta = 80
-        if not sys.verify(self.T,self.mu):
+        if not sys.verify(self.T, self.mu):
             raise Exception("Sytem temperature inconsistent with CC temp")
         self.sys = sys
 
@@ -38,7 +38,7 @@ class neq_ccsd(object):
 
     def run(self, T1=None, T2=None):
         """Run CCSD calculation."""
-        return self._neq_ccsd(T1in=T1,T2in=T2)
+        return self._neq_ccsd(T1in=T1, T2in=T2)
 
     def _neq_ccsd(self, T1in=None, T2in=None):
 
@@ -49,8 +49,8 @@ class neq_ccsd(object):
         # get time-grid
         ngr = self.ngr
         ngi = self.ngi
-        tii,gi,Gi = quadrature.simpsons(self.ngi, beta)
-        tir,gr,Gr = quadrature.midpoint(ngr, tmax)
+        tii, gi, Gi = quadrature.simpsons(self.ngi, beta)
+        tir, gr, Gr = quadrature.midpoint(ngr, tmax)
         self.gr = gr
         self.Gr = Gr
         self.gi = gi
@@ -69,12 +69,14 @@ class neq_ccsd(object):
         E01 = E0 + E1
 
         # get scaled integrals
-        F,Ff,Fb,I = cc_utils.get_ft_integrals_neq(self.sys, en, beta, mu)
+        F, Ff, Fb, I = cc_utils.get_ft_integrals_neq(self.sys, en, beta, mu)
 
         # get energy differences
-        D1 = en[:,None] - en[None,:]
-        D2 = en[:,None,None,None] + en[None,:,None,None] \
-            - en[None,None,:,None] - en[None,None,None,:]
+        D1 = utils.D1(en, en)
+        D2 = utils.D2(en, en)
+        #D1 = en[:,None] - en[None,:]
+        #D2 = en[:,None,None,None] + en[None,:,None,None] \
+        #    - en[None,None,:,None] - en[None,None,None,:]
 
         # get MP2 T-amplitudes
         if T1in is not None and T2in is not None:
@@ -94,14 +96,14 @@ class neq_ccsd(object):
             T2oldf = T2oldb.copy()
             T2oldi = -numpy.einsum('v,abij->vabij', Idi, I.vvoo)
 
-            T1oldf,T1oldb,T1oldi = quadrature.int_tbar1_keldysh(
-                ngr,ngi,T1oldf,T1oldb,T1oldi,tir,tii,D1,Gr,Gi)
-            T2oldf,T2oldb,T2oldi = quadrature.int_tbar2_keldysh(
-                ngr,ngi,T2oldf,T2oldb,T2oldi,tir,tii,D2,Gr,Gi)
+            T1oldf, T1oldb, T1oldi = quadrature.int_tbar1_keldysh(
+                ngr, ngi, T1oldf, T1oldb, T1oldi, tir, tii, D1, Gr, Gi)
+            T2oldf, T2oldb, T2oldi = quadrature.int_tbar2_keldysh(
+                ngr, ngi, T2oldf, T2oldb, T2oldi, tir, tii, D2, Gr, Gi)
 
         Ei = ft_cc_energy.ft_cc_energy_neq(
-            T1oldf,T1oldb,T1oldi,T2oldf,T2oldb,T2oldi,
-            Ff.ov,Fb.ov,F.ov,I.oovv,gr,gi,beta,Qterm=False)
+            T1oldf, T1oldb, T1oldi, T2oldf, T2oldb, T2oldi,
+            Ff.ov, Fb.ov, F.ov, I.oovv, gr, gi, beta, Qterm=False)
         logging.info("MP2 Energy {:.10f}".format(Ei))
 
         converged = False
@@ -118,10 +120,10 @@ class neq_ccsd(object):
         nl2 += numpy.linalg.norm(T2oldi)
         while i < max_iter and not converged:
             # form new T1 and T2
-            T1f,T1b,T1i,T2f,T2b,T2i = \
+            T1f, T1b, T1i, T2f, T2b, T2i = \
                 ft_cc_equations.neq_ccsd_stanton(
-                    Ff,Fb,F,I,T1oldf,T1oldb,T1oldi,T2oldf,T2oldb,
-                    T2oldi,D1,D2,tir,tii,ngr,ngi,Gr,Gi)
+                    Ff, Fb, F, I, T1oldf, T1oldb, T1oldi, T2oldf, T2oldb,
+                    T2oldi, D1, D2, tir, tii, ngr, ngi, Gr, Gi)
 
             res1 = numpy.linalg.norm(T1f - T1oldf) / nl1
             res1 += numpy.linalg.norm(T1b - T1oldb) / nl1
@@ -149,7 +151,7 @@ class neq_ccsd(object):
                 Ff.ov, Fb.ov, F.ov, I.oovv, gr, gi, beta)
 
             # determine convergence
-            logging.info(' %2d  (%.8f,%.8f)   %.4E' % (i+1,E.real,E.imag,res1+res2))
+            logging.info(' %2d  (%.8f,%.8f)   %.4E' % (i + 1, E.real, E.imag, res1 + res2))
             i = i + 1
             if numpy.abs(E - Eold) < thresh:
                 converged = True
@@ -165,7 +167,7 @@ class neq_ccsd(object):
         self.T2b = T2oldb
         self.T2i = T2oldi
 
-        return (Eold + E01,Eold)
+        return (Eold + E01, Eold)
 
     def _neq_ccsd_lambda(self, L1=None, L2=None):
         """Solve FT-CCSD Lambda equations."""
@@ -192,21 +194,23 @@ class neq_ccsd(object):
         #E01 = E0 + E1
 
         # get scaled integrals
-        F,Ff,Fb,I = cc_utils.get_ft_integrals_neq(self.sys, en, beta, mu)
+        F, Ff, Fb, I = cc_utils.get_ft_integrals_neq(self.sys, en, beta, mu)
 
         # get energy differences
-        D1 = en[:,None] - en[None,:]
-        D2 = en[:,None,None,None] + en[None,:,None,None] \
-            - en[None,None,:,None] - en[None,None,None,:]
+        D1 = utils.D1(en, en)
+        D2 = utils.D2(en, en)
+        #D1 = en[:,None] - en[None,:]
+        #D2 = en[:,None,None,None] + en[None,:,None,None] \
+        #    - en[None,None,:,None] - en[None,None,None,:]
 
         if L2 is None:
             # Use T^{\dagger} as a guess for Lambda
-            L1oldf = numpy.transpose(self.T1f, (0,2,1))
-            L1oldb = numpy.transpose(self.T1b, (0,2,1))
-            L1oldi = numpy.transpose(self.T1i, (0,2,1))
-            L2oldf = numpy.transpose(self.T2f, (0,3,4,1,2))
-            L2oldb = numpy.transpose(self.T2b, (0,3,4,1,2))
-            L2oldi = numpy.transpose(self.T2i, (0,3,4,1,2))
+            L1oldf = numpy.transpose(self.T1f, (0, 2, 1))
+            L1oldb = numpy.transpose(self.T1b, (0, 2, 1))
+            L1oldi = numpy.transpose(self.T1i, (0, 2, 1))
+            L2oldf = numpy.transpose(self.T2f, (0, 3, 4, 1, 2))
+            L2oldb = numpy.transpose(self.T2b, (0, 3, 4, 1, 2))
+            L2oldi = numpy.transpose(self.T2i, (0, 3, 4, 1, 2))
         else:
             L2oldf = L2[0]
             L2oldb = L2[1]
@@ -234,11 +238,11 @@ class neq_ccsd(object):
         converged = False
         while i < max_iter and not converged:
             # form new T1 and T2
-            L1f,L1b,L1i,L2f,L2b,L2i = \
+            L1f, L1b, L1i, L2f, L2b, L2i = \
                 ft_cc_equations.neq_lambda_opt(
-                    Ff,Fb,F,I,L1oldf,L1oldb,L1oldi,L2oldf,L2oldb,
-                    L2oldi,self.T1f,self.T1b,self.T1i,self.T2f,self.T2b,
-                    self.T2i,D1,D2,tir,tii,ngr,ngi,gr,gi,Gr,Gi)
+                    Ff, Fb, F, I, L1oldf, L1oldb, L1oldi, L2oldf, L2oldb,
+                    L2oldi, self.T1f, self.T1b, self.T1i, self.T2f, self.T2b,
+                    self.T2i, D1, D2, tir, tii, ngr, ngi, gr, gi, Gr, Gi)
 
             res1 = numpy.linalg.norm(L1f - L1oldf) / nl1
             res1 += numpy.linalg.norm(L1b - L1oldb) / nl1
@@ -261,7 +265,7 @@ class neq_ccsd(object):
             nl2 += numpy.linalg.norm(L2oldi)
 
             # determine convergence
-            logging.info(' %2d  %.6E' % (i+1,res1+res2))
+            logging.info(' %2d  %.6E' % (i + 1, res1 + res2))
             i = i + 1
             if res1 + res2 < thresh:
                 converged = True
@@ -293,11 +297,13 @@ class neq_ccsd(object):
         en = self.sys.g_energies_tot()
 
         # get energy differences
-        D1 = en[:,None] - en[None,:]
-        D2 = en[:,None,None,None] + en[None,:,None,None] \
-            - en[None,None,:,None] - en[None,None,None,:]
+        D1 = utils.D1(en, en)
+        D2 = utils.D2(en, en)
+        #D1 = en[:,None] - en[None,:]
+        #D2 = en[:,None,None,None] + en[None,:,None,None] \
+        #    - en[None,None,:,None] - en[None,None,None,:]
 
-        pia,pba,pji,pai = ft_cc_equations.neq_1rdm(
+        pia, pba, pji, pai = ft_cc_equations.neq_1rdm(
                 self.T1f, self.T1b, self.T1i,
                 self.T2f, self.T2b, self.T2i,
                 self.L1f, self.L1b, self.L1i,
@@ -327,16 +333,18 @@ class neq_ccsd(object):
         en = self.sys.g_energies_tot()
 
         # get energy differences
-        D1 = en[:,None] - en[None,:]
-        D2 = en[:,None,None,None] + en[None,:,None,None] \
-            - en[None,None,:,None] - en[None,None,None,:]
+        D1 = utils.D1(en, en)
+        D2 = utils.D2(en, en)
+        #D1 = en[:,None] - en[None,:]
+        #D2 = en[:,None,None,None] + en[None,:,None,None] \
+        #    - en[None,None,:,None] - en[None,None,None,:]
 
         P2 = ft_cc_equations.neq_2rdm(
-                self.T1f, self.T1b, self.T1i,
-                self.T2f, self.T2b, self.T2i,
-                self.L1f, self.L1b, self.L1i,
-                self.L2f, self.L2b, self.L2i,
-                D1, D2, tir, tii, ngr, ngi, gr, gi, Gr, Gi, t)
+            self.T1f, self.T1b, self.T1i,
+            self.T2f, self.T2b, self.T2i,
+            self.L1f, self.L1b, self.L1i,
+            self.L2f, self.L2b, self.L2i,
+            D1, D2, tir, tii, ngr, ngi, gr, gi, Gr, Gi, t)
         return P2
 
     def compute_prop(self, A, t):
@@ -415,7 +423,7 @@ class neq_ccsd(object):
         fv = ft_utils.ffv(beta, en, mu)
 
         p = numpy.zeros(self.dai.shape, dtype=complex)
-        p += numpy.diag(fo)[None,:,:]
+        p += numpy.diag(fo)[None, :, :]
         p += einsum('xia,i,a->xai', self.dia, fo, fv)
         p += einsum('xba,a->xba', self.dba, fv)
         p += einsum('xji,j->xji', self.dji, fo)

@@ -21,7 +21,7 @@ class MP3(object):
         self.finite_T = False if T == 0 else True
         if self.finite_T:
             self.beta = 1/T
-            if not sys.verify(self.T,self.mu):
+            if not sys.verify(self.T, self.mu):
                 raise Exception("Sytem temperature inconsistent with MP2 temp")
         else:
             self.beta = 1.0e20
@@ -38,7 +38,7 @@ class MP3(object):
 
     def _mp3(self):
         # create orbitals and energies in spin-orbital basis
-        eo,ev = self.sys.g_energies()
+        eo, ev = self.sys.g_energies()
 
         # compute requisite memory
         no = eo.shape[0]
@@ -66,15 +66,15 @@ class MP3(object):
         E1 = self.sys.get_mp1()
 
         # compute 2nd and 3rd order energies
-        E2 = zt_mp.mp2(eo,ev,F.vo,I.vvoo)
-        E3 = zt_mp.mp3(eo,ev,F,I)
+        E2 = zt_mp.mp2(eo, ev, F.vo, I.vvoo)
+        E3 = zt_mp.mp3(eo, ev, F, I)
 
         # save and return energies
         self.E0 = E0
         self.E1 = E1
         self.E2 = E2
         self.E3 = E3
-        return (E0,E1,E2,E3)
+        return (E0, E1, E2, E3)
 
     def _ft_mp3(self):
         mu = self.mu
@@ -119,4 +119,4 @@ class MP3(object):
         self.E1 = E1
         self.E2 = E2
         self.E3 = E3
-        return (E0,E1,E2,E3)
+        return (E0, E1, E2, E3)

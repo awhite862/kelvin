@@ -1,4 +1,5 @@
 import numpy
+from cqcpy import utils
 from cqcpy.cc_energy import cc_energy_d
 from cqcpy.cc_energy import cc_energy_s1
 
@@ -15,25 +16,24 @@ def ump0(ea, eb):
 
 def mp1(p, f, h):
     """Return the 1st order energy."""
-    ec1 = numpy.tensordot(h,p,axes=([0,1],[0,1]))
-    ec2 = numpy.tensordot(f,p,axes=([0,1],[0,1]))
+    ec1 = numpy.tensordot(h, p, axes=([0, 1], [0, 1]))
+    ec2 = numpy.tensordot(f, p, axes=([0, 1], [0, 1]))
     return 0.5*(ec1 - ec2)
 
 
 def mp2(eo, ev, fvo, Ivvoo, returnT=False):
     """Return the 2nd order energy, and optionally T-amplitudes."""
-    D1 = 1/(eo[:,None] - ev[None,:])
-    D2 = 1/(eo[:,None,None,None] + eo[None,:,None,None]
-        - ev[None,None,:,None] - ev[None,None,None,:])
+    D1 = 1/utils.D1(eo, ev)
+    D2 = 1/utils.D2(eo, ev)
 
     T1 = numpy.einsum('ai,ia->ai', fvo, D1)
     T2 = numpy.einsum('abij,ijab->abij', Ivvoo, D2)
 
-    Es = cc_energy_s1(T1, fvo.transpose(1,0))
-    Ed = cc_energy_d(T2, Ivvoo.transpose(2,3,0,1))
+    Es = cc_energy_s1(T1, fvo.transpose(1, 0))
+    Ed = cc_energy_d(T2, Ivvoo.transpose(2, 3, 0, 1))
 
     if returnT:
-        return (Es + Ed,T1,T2)
+        return (Es + Ed, T1, T2)
     else:
         return Es + Ed
 
@@ -96,10 +96,9 @@ def mp3_doubles(D2, I):
 
 def mp3(eo, ev, F, I):
     """Return the total 3rd order contribution to the energy."""
-    D1 = 1/(eo[:,None] - ev[None,:])
-    D2 = 1/(eo[:,None,None,None] + eo[None,:,None,None]
-        - ev[None,None,:,None] - ev[None,None,None,:])
+    D1 = 1/utils.D1(eo, ev)
+    D2 = 1/utils.D2(eo, ev)
 
-    E3d = mp3_doubles(D2,I)
-    E3s = mp3_singles(D1,D2,F,I)
+    E3d = mp3_doubles(D2, I)
+    E3s = mp3_singles(D1, D2, F, I)
     return E3d + E3s
