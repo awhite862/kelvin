@@ -1,6 +1,7 @@
 # Kelvin
 Quantum chemistry at non-zero temperature
 
+[![Tests](https://github.com/awhite862/kelvin/workflows/CI/badge.svg)](https://github.com/awhite862/kelvin/actions/workflows/ci.yml)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/awhite862/kelvin/master/LICENSE)
 
 ## Features

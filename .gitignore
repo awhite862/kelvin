@@ -1,3 +1,4 @@
 *.pyc
 bench
 .coverage
+*.egg-info
