@@ -14,8 +14,8 @@ def evalL(T1f, T1b, T1i, T2f, T2b, T2i,
     ngr = gr.shape[0]
     ngi = gi.shape[0]
     E = ft_cc_energy.ft_cc_energy_neq(
-            T1f, T1b, T1i, T2f, T2b, T2i,
-            Ff.ov, Fb.ov, F.ov, I.oovv, gr, gi, beta)
+        T1f, T1b, T1i, T2f, T2b, T2i,
+        Ff.ov, Fb.ov, F.ov, I.oovv, gr, gi, beta)
     T1f_, T1b_, T1i_, T2f_, T2b_, T2i_ =\
         ft_cc_equations.neq_ccsd_stanton(
             Ff, Fb, F, I, T1f, T1b, T1i,
@@ -73,10 +73,10 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         Fvo = F.vo.astype(complex)
         Fvv = F.vv.astype(complex)
         Ff = one_e_blocks(
-                numpy.ones(ngr)[:, None, None]*Foo[None, :, :],
-                numpy.ones(ngr)[:, None, None]*Fov[None, :, :],
-                numpy.ones(ngr)[:, None, None]*Fvo[None, :, :],
-                numpy.ones(ngr)[:, None, None]*Fvv[None, :, :])
+            numpy.ones(ngr)[:, None, None]*Foo[None, :, :],
+            numpy.ones(ngr)[:, None, None]*Fov[None, :, :],
+            numpy.ones(ngr)[:, None, None]*Fvo[None, :, :],
+            numpy.ones(ngr)[:, None, None]*Fvv[None, :, :])
         I.vvvv = I.vvvv.astype(complex)
         I.vovo = I.vovo.astype(complex)
         I.vvoo = I.vvoo.astype(complex)
@@ -203,10 +203,10 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         Fvo = F.vo.astype(complex)
         Fvv = F.vv.astype(complex)
         Ff = one_e_blocks(
-                numpy.ones(ngr)[:, None, None]*Foo[None, :, :],
-                numpy.ones(ngr)[:, None, None]*Fov[None, :, :],
-                numpy.ones(ngr)[:, None, None]*Fvo[None, :, :],
-                numpy.ones(ngr)[:, None, None]*Fvv[None, :, :])
+            numpy.ones(ngr)[:, None, None]*Foo[None, :, :],
+            numpy.ones(ngr)[:, None, None]*Fov[None, :, :],
+            numpy.ones(ngr)[:, None, None]*Fvo[None, :, :],
+            numpy.ones(ngr)[:, None, None]*Fvv[None, :, :])
         F = one_e_blocks(Foo, Fov, Fvo, Fvv)
         Fb = Ff
         D1, D2 = test_utils.make_random_ft_D(n)
@@ -302,8 +302,8 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         # compute dL/dt1 from the Lambda equations
         L1fn, L1bn, L1in, L2fn, L2bn, L2in = \
             ft_cc_equations.neq_lambda_simple(
-                    Ff, Fb, F, I, L1f, L1b, L1i, L2f, L2b, L2i, T1f, T1b, T1i,
-                    T2f, T2b, T2i, D1, D2, tir, tii, ngr, ngi, gr, gi, Gr, Gi)
+                Ff, Fb, F, I, L1f, L1b, L1i, L2f, L2b, L2i, T1f, T1b, T1i,
+                T2f, T2b, T2i, D1, D2, tir, tii, ngr, ngi, gr, gi, Gr, Gi)
 
         L2in -= L2i
         L2bn -= L2b
@@ -357,23 +357,23 @@ class NEQLambdaEquationsTest(unittest.TestCase):
         Fvo = F.vo.astype(complex)
         Fvv = F.vv.astype(complex)
         Ff = one_e_blocks(
-                numpy.ones(ngr)[:, None, None]*Foo[None, :, :],
-                numpy.ones(ngr)[:, None, None]*Fov[None, :, :],
-                numpy.ones(ngr)[:, None, None]*Fvo[None, :, :],
-                numpy.ones(ngr)[:, None, None]*Fvv[None, :, :])
+            numpy.ones(ngr)[:, None, None]*Foo[None, :, :],
+            numpy.ones(ngr)[:, None, None]*Fov[None, :, :],
+            numpy.ones(ngr)[:, None, None]*Fvo[None, :, :],
+            numpy.ones(ngr)[:, None, None]*Fvv[None, :, :])
         F = one_e_blocks(Foo, Fov, Fvo, Fvv)
         Fb = Ff
         D1, D2 = test_utils.make_random_ft_D(n)
 
         L1fs, L1bs, L1is, L2fs, L2bs, L2is = \
             ft_cc_equations.neq_lambda_simple(
-                    Ff, Fb, F, I, L1f, L1b, L1i, L2f, L2b, L2i, T1f, T1b, T1i,
-                    T2f, T2b, T2i, D1, D2, tir, tii, ngr, ngi, gr, gi, Gr, Gi)
+                Ff, Fb, F, I, L1f, L1b, L1i, L2f, L2b, L2i, T1f, T1b, T1i,
+                T2f, T2b, T2i, D1, D2, tir, tii, ngr, ngi, gr, gi, Gr, Gi)
 
         L1fo, L1bo, L1io, L2fo, L2bo, L2io = \
             ft_cc_equations.neq_lambda_opt(
-                    Ff, Fb, F, I, L1f, L1b, L1i, L2f, L2b, L2i, T1f, T1b, T1i,
-                    T2f, T2b, T2i, D1, D2, tir, tii, ngr, ngi, gr, gi, Gr, Gi)
+                Ff, Fb, F, I, L1f, L1b, L1i, L2f, L2b, L2i, T1f, T1b, T1i,
+                T2f, T2b, T2i, D1, D2, tir, tii, ngr, ngi, gr, gi, Gr, Gi)
 
         diff2i = numpy.linalg.norm(L2is - L2io)
         diff2b = numpy.linalg.norm(L2bs - L2bo)

@@ -50,7 +50,7 @@ class FTamplEquationsTest(unittest.TestCase):
         Ia = test_utils.make_random_I_anti(na, na)
         Ib = test_utils.make_random_I_anti(nb, nb)
         Iabab = test_utils.make_random_Ifull_gen(
-                na, na, nb, nb, na, na, nb, nb)
+            na, na, nb, nb, na, na, nb, nb)
 
         # Full antisymmetric spin-orbital tensor
         I = spin_utils.int_to_spin2(Ia, Ib, Iabab, na, na, nb, nb)

@@ -39,25 +39,6 @@ class FTLambdaEquationsTest(unittest.TestCase):
         self.assertTrue(s1, e1)
         self.assertTrue(s2, e2)
 
-    #def test_ccsd_opt_int(self):
-    #    ng = self.ng
-    #    n = self.n
-    #    beta = self.beta
-    #    T1old,T2old = test_utils.make_random_ft_T(ng, n)
-    #    L1old,L2old = test_utils.make_random_ft_T(ng, n)
-    #    F,I = test_utils.make_random_integrals(n, n)
-    #    D1,D2 = test_utils.make_random_ft_D(n)
-    #    delta = beta/(ng - 1.0)
-    #    ti = numpy.asarray([float(i)*delta for i in range(ng)])
-    #    G = quadrature.get_G(ng, delta)
-    #    g = quadrature.get_gint(ng, delta)
-    #    intor = ft_cc_equations.ft_ccsd_lambda_int(F,I,T1old,T2old)
-
-    #    L1sim,L2sim = ft_cc_equations.ccsd_lambda_simple(
-    #        F,I,T1old,T2old,L1old,L2old,D1,D2,ti,ng,g,G,beta)
-    #    L1opt,L2opt = ft_cc_equations.ccsd_lambda_opt_int(
-    #        F,I,T1old,T2old,L1old,L2old,intor,D1,D2,ti,ng,g,G,beta)
-
     def test_uccsd_opt(self):
         ng = self.ng
         na = self.n
@@ -71,7 +52,7 @@ class FTLambdaEquationsTest(unittest.TestCase):
         Ia = test_utils.make_random_I_anti(na, na)
         Ib = test_utils.make_random_I_anti(nb, nb)
         Iabab = test_utils.make_random_Ifull_gen(
-                na, na, nb, nb, na, na, nb, nb)
+            na, na, nb, nb, na, na, nb, nb)
 
         # Full antisymmetric spin-orbital tensor
         I = spin_utils.int_to_spin2(Ia, Ib, Iabab, na, na, nb, nb)
@@ -123,7 +104,7 @@ class FTLambdaEquationsTest(unittest.TestCase):
             L1old[i] = spin_utils.T1_to_spin(
                 L1aold[i], L1bold[i], na, na, nb, nb)
             L2old[i] = spin_utils.T2_to_spin(
-                    L2aaold[i], L2abold[i], L2bbold[i], na, na, nb, nb)
+                L2aaold[i], L2abold[i], L2bbold[i], na, na, nb, nb)
 
         D1a, D2aa = test_utils.make_random_ft_D(na)
         D1b, D2bb = test_utils.make_random_ft_D(nb)
@@ -146,7 +127,7 @@ class FTLambdaEquationsTest(unittest.TestCase):
             L1out[i] = spin_utils.T1_to_spin(
                 L1a[i], L1b[i], na, na, nb, nb)
             L2out[i] = spin_utils.T2_to_spin(
-                    L2aa[i], L2ab[i], L2bb[i], na, na, nb, nb)
+                L2aa[i], L2ab[i], L2bb[i], na, na, nb, nb)
 
         diff1 = numpy.linalg.norm(L1out - L1ref)
         diff2 = numpy.linalg.norm(L2out - L2ref)

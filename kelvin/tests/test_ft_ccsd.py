@@ -89,8 +89,8 @@ class FTCCSDTest(unittest.TestCase):
         mu = 0.0
         sys = SCFSystem(m, T, mu, orbtype='g')
         ccsdT = ccsd(
-                sys, iprint=0, singles=True, T=T, mu=mu, damp=0.1,
-                max_iter=80, ngrid=160, athresh=1e-30)
+            sys, iprint=0, singles=True, T=T, mu=mu, damp=0.1,
+            max_iter=80, ngrid=160, athresh=1e-30)
         cc = ccsdT.run()
         diff = abs(self.Be_ref_ac - cc[1])
         error = "Expected: {}  Actual: {}".format(self.Be_ref_ac, cc[1])
@@ -109,8 +109,8 @@ class FTCCSDTest(unittest.TestCase):
         mu = 0.0
         sys = SCFSystem(m, T, mu, orbtype='u')
         ccsdT = ccsd(
-                sys, iprint=0, singles=True, T=T, mu=mu, damp=0.1,
-                max_iter=80, ngrid=160, athresh=1e-30)
+            sys, iprint=0, singles=True, T=T, mu=mu, damp=0.1,
+            max_iter=80, ngrid=160, athresh=1e-30)
         cc = ccsdT.run()
         diff = abs(self.Be_ref_ac - cc[1])
         error = "Expected: {}  Actual: {}".format(self.Be_ref_ac, cc[1])

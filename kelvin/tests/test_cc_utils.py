@@ -259,7 +259,7 @@ class CCUtilsTest(unittest.TestCase):
         dveca = -beta*numpy.ones(ea.shape)
         dvecb = -beta*numpy.ones(eb.shape)
         dFa, dFb, dIa, dIb, dIabab = cc_utils.u_ft_d_integrals(
-                sys, ea, eb, foa, fva, fob, fvb, dveca, dvecb)
+            sys, ea, eb, foa, fva, fob, fvb, dveca, dvecb)
 
         self._test_fd(Faf.oo, Fab.oo, dFa.oo, delta, "Faoo", thresh)
         self._test_fd(Faf.ov, Fab.ov, dFa.ov, delta, "Faov", thresh)
@@ -425,10 +425,10 @@ class CCUtilsTest(unittest.TestCase):
         ioccb = [i for i, x in enumerate(fob) if x > athresh]
         ivirb = [i for i, x in enumerate(fvb) if x > athresh]
         Fa, Fb, Ia, Ib, Iabab = cc_utils.uft_d_active_integrals(
-                sys, ea, eb, focca, fvira, foccb, fvirb, iocca,
-                ivira, ioccb, ivirb, dveca, dvecb)
+            sys, ea, eb, focca, fvira, foccb, fvirb, iocca,
+            ivira, ioccb, ivirb, dveca, dvecb)
         Fga, Fgb, Iga, Igb, Igabab = cc_utils.u_ft_d_integrals(
-                sys, ea, eb, foa, fva, fob, fvb, dveca, dvecb)
+            sys, ea, eb, foa, fva, fob, fvb, dveca, dvecb)
 
         # test Fock matrix
         Foo = Fga.oo[numpy.ix_(iocca, iocca)]

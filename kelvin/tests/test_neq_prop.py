@@ -462,83 +462,73 @@ class NEQPropTest(unittest.TestCase):
             msg = "{} -- Expected: {}  Actual: {} ".format(i, ref, out)
             self.assertTrue(diff < self.thresh, msg)
 
-    #def test_h2_field(self):
-    #    beta = 1.0
-    #    T = 1./beta
-    #    mu = 0.0
-    #    omega = 0.5
+    def test_h2_field3(self):
+        beta = 1.0
+        T = 1./beta
+        mu = 0.0
+        omega = 0.5
 
-    #    #ngrid_ref = 4000
-    #    #deltat = 0.00025
-    #    mol = gto.M(
-    #        verbose = 0,
-    #        atom = 'H 0 0 -0.6; H 0 0 0.0',
-    #        basis = 'STO-3G',
-    #        charge = 1,
-    #        spin = 1)
+        mol = gto.M(
+            verbose=0,
+            atom='H 0 0 -0.6; H 0 0 0.0',
+            basis='STO-3G',
+            charge=1,
+            spin=1)
 
-    #    m = scf.UHF(mol)
-    #    m.scf()
-    #    mos = m.mo_coeff[0]
+        m = scf.UHF(mol)
+        m.scf()
+        mos = m.mo_coeff[0]
 
-    #    eri = integrals.get_phys(mol, mos, mos, mos, mos)
-    #    hcore = numpy.einsum('mp,mn,nq->pq',mos,m.get_hcore(m.mol),mos)
-    #    F = hcore + eri[:,0,:,0] - eri[:,0,0,:]
-    #    en,vvvvv = numpy.linalg.eigh(F)
+        eri = integrals.get_phys(mol, mos, mos, mos, mos)
+        hcore = numpy.einsum('mp,mn,nq->pq', mos, m.get_hcore(m.mol), mos)
+        F = hcore + eri[:, 0, :, 0] - eri[:, 0, 0, :]
+        en, vvvvv = numpy.linalg.eigh(F)
 
-    #    E = numpy.zeros((3))
-    #    E[2] = 1.0
-    #    field = numpy.einsum('x,xij->ij', E, mol.intor('cint1e_r_sph', comp=3))
-    #    field = numpy.einsum('mp,mn,nq->pq',mos,field,mos)
+        E = numpy.zeros((3))
+        E[2] = 1.0
+        field = numpy.einsum('x,xij->ij', E, mol.intor('cint1e_r_sph', comp=3))
+        field = numpy.einsum('mp,mn,nq->pq', mos, field, mos)
 
-    #    # Neq-CCSD reference with FD
-    #    ngi = 10
-    #    Aref = []
-    #    deltat = 0.001
-    #    for i in range(6,9):
-    #        tmax = (i)*0.1
-    #        ng = int(tmax/deltat) - 1
-    #        tf = 6*0.1
-    #        gf = int(tf/deltat) - 1
-    #        print(gf - 1)
-    #        d = 1e-2
-    #        ti = numpy.asarray(
-    #            [float(j)*deltat  + deltat/2 for j in range(ng)])
-    #        D1 = en[:,None] - en[None,:]
-    #        dt = (tmax - tf)
-    #        #PT = field*numpy.exp(-1.j*D1*dt)
-    #        fac = 1.0 #if i == 6 else 0.5
-    #        PT = fac*field
-    #        sys = h2_field_system(T,mu,omega,ti,O=(d*PT),ot=gf - 1)
-    #        cc = neq_ccsd(sys,T,mu=mu,tmax=tmax,econv=1e-10,max_iter=40,damp=0.0,ngr=ng,ngi=40,iprint=0)
-    #        Ef = cc.run()
+        # Neq-CCSD reference with FD
+        Aref = []
+        deltat = 0.001
+        for i in range(6, 9):
+            tmax = (i)*0.1
+            ng = int(tmax/deltat) - 1
+            tf = 6*0.1
+            gf = int(tf/deltat) - 1
+            d = 1e-2
+            ti = numpy.asarray(
+                [float(j)*deltat + deltat/2 for j in range(ng)])
+            fac = 1.0
+            PT = fac*field
+            sys = h2_field_system(T, mu, omega, ti, O=(d*PT), ot=gf - 1)
+            cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-10,
+                          max_iter=40, damp=0.0, ngr=ng, ngi=40, iprint=0)
+            Ef = cc.run()
 
-    #        sys = h2_field_system(T,mu,omega,ti,O=(-d*PT),ot=gf - 1)
-    #        cc = neq_ccsd(sys,T,mu=mu,tmax=tmax,econv=1e-10,max_iter=40,damp=0.0,ngr=ng,ngi=40,iprint=0)
-    #        Eb = cc.run()
-    #        print(Eb[1],Ef[1])
-    #        print((Ef[0] - Eb[0])/(2*d))
-    #        print("\n")
-    #        Aref.append((Ef[0] - Eb[0])/(2*d))
+            sys = h2_field_system(T, mu, omega, ti, O=(-d*PT), ot=gf - 1)
+            cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-10,
+                          max_iter=40, damp=0.0, ngr=ng, ngi=40, iprint=0)
+            Eb = cc.run()
+            Aref.append((Ef[0] - Eb[0])/(2*d))
 
-    #    # Neq-CCSD from density
-    #    tmax = 0.6
-    #    ng = int(tmax/deltat) - 1
-    #    #ti = numpy.asarray([float(j)*deltat for j in range(ng)])
-    #    ti = numpy.asarray([float(j)*deltat  + deltat/2 for j in range(ng)])
-    #    sys = h2_field_system(T,mu,omega,ti,O=None,ot=None)
-    #    cc = neq_ccsd(sys,T,mu=mu,tmax=tmax,econv=1e-10,max_iter=40,damp=0.0,ngr=ng,ngi=40,iprint=1)
-    #    cc.run()
-    #    cc._neq_ccsd_lambda()
-    #    cc._neq_1rdm()
+        # Neq-CCSD from density
+        tmax = 0.6
+        ng = int(tmax/deltat) - 1
+        ti = numpy.asarray([float(j)*deltat + deltat/2 for j in range(ng)])
+        sys = h2_field_system(T, mu, omega, ti, O=None, ot=None)
+        cc = neq_ccsd(sys, T, mu=mu, tmax=tmax, econv=1e-10,
+                      max_iter=40, damp=0.0, ngr=ng, ngi=40, iprint=1)
+        cc.run()
+        cc._neq_ccsd_lambda()
+        cc._neq_1rdm()
 
-    #    for i,ref in enumerate(Aref):
-    #        out = cc.compute_prop(field, 6*int(0.1/deltat) - 2)
-    #        diff = abs(ref - out)
-    #        #print((i + 1)*int(0.1/deltat))
-    #        print("{} -- Expected: {}  Actual: {} ".format(i,ref,out))
-    #        msg = "{} -- Expected: {}  Actual: {} ".format(i,ref,out)
-    #        #self.assertTrue(diff < self.thresh, msg)
+        for i, ref in enumerate(Aref):
+            out = cc.compute_prop(field, 6*int(0.1/deltat) - 2)
+            diff = abs(ref - out)
+            msg = "{} -- Expected: {}  Actual: {} ".format(i, ref, out)
+            self.assertTrue(diff < self.thresh, msg)
 
 
 if __name__ == '__main__':
