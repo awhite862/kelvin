@@ -5,15 +5,15 @@ from . import cc_utils
 from . import propagation
 from .td_ccsd import _get_active
 
-#einsum = numpy.einsum
 einsum = lib.einsum
+# einsum = numpy.einsum
 
 
 class KelCCSD(object):
     """Keldysh-contour CCSD class. This should be used in preference
     to 'neq_ccsd.'"""
-    def __init__(self, sys, prop, T=0.0, mu=0.0, iprint=0, singles=True,
-            athresh=0.0, fthresh=0.0):
+    def __init__(self, sys, prop, T=0.0, mu=0.0, iprint=0,
+                 singles=True, athresh=0.0, fthresh=0.0):
 
         self.sys = sys
         self.T = T
@@ -64,12 +64,10 @@ class KelCCSD(object):
         if contour is not None:
             if contour.lower() == "keldysh":
                 itime = 0
-            elif (contour.lower() == "rkeldysh"
-                    or contour.lower() == "reverse_keldysh"):
+            elif contour.lower() in ["rkeldysh", "reverse_keldysh"]:
                 itime = tdccsd.ngrid - 1
-            elif (contour.lower() == "skeldysh"
-                    or contour.lower() == "symmetric_keldysh"):
-                itime = tdccsd.ngrid//2
+            elif contour.lower() in ["skeldysh", "symmetric_keldysh"]:
+                itime = tdccsd.ngrid // 2
             else:
                 raise Exception("Unrecognized contour!")
         else:
@@ -101,22 +99,12 @@ class KelCCSD(object):
         en = self.sys.g_energies_tot()
         n = en.shape[0]
 
-        # get 0th and 1st order contributions
-        #En = self.sys.const_energy()
-        #g0 = ft_utils.GP0(beta, en, mu)
-        #E0 = ft_mp.mp0(g0) + En
-        #E1 = self.sys.get_mp1()
-        #E01 = E0 + E1
-
         # get scaled integrals
         F, I = cc_utils.ft_active_integrals(self.sys, en, self.focc, self.fvir, self.iocc, self.ivir)
 
         # get exponentials
         D1 = utils.D1(en, en)
         D2 = utils.D2(en, en)
-        #D1 = en[:,None] - en[None,:]
-        #D2 = en[:,None,None,None] + en[None,:,None,None] \
-        #    - en[None,None,:,None] - en[None,None,None,:]
         D1 = D1[numpy.ix_(self.ivir, self.iocc)]
         D2 = D2[numpy.ix_(self.ivir, self.ivir, self.iocc, self.iocc)]
         sfo = numpy.sqrt(self.focc)
@@ -172,8 +160,8 @@ class KelCCSD(object):
                 F = cc_utils.ft_integrals_neq_1e(self.sys, en, beta, mu, t)
                 l1s = 1.j*D1.transpose((1, 0))*l1 + 1.j*F.ov.copy()
                 l1d = 1.j*D2.transpose((2, 3, 0, 1))*l2 + 1.j*I.oovv.copy()
-                cc_equations._Lambda_opt(l1s, l1d, F, I,
-                        l1, l2, t1, t2, fac=1.j)
+                cc_equations._Lambda_opt(
+                    l1s, l1d, F, I, l1, l2, t1, t2, fac=1.j)
                 cc_equations._LS_TS(l1s, I, t1, fac=1.j)
                 if not self.singles:
                     l1s = numpy.zeros(l1s.shape, l1s.dtype)

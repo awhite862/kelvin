@@ -439,9 +439,10 @@ def uccsd_lambda_opt(Fa, Fb, Ia, Ib, Iabab, T1aold, T1bold, T2aaold, T2abold,
         T1olds = (T1aold[y], T1bold[y])
         L2olds = (L2aaint[y], L2abint[y], L2bbint[y])
         T2olds = (T2aaold[y], T2abold[y], T2bbold[y])
-        cc_equations._uccsd_Lambda_opt(L1a[y], L1b[y], L2aa[y],
-                L2ab[y], L2bb[y], Fa, Fb, Ia, Ib, Iabab,
-                L1olds, L2olds, T1olds, T2olds, fac=-1.0)
+        cc_equations._uccsd_Lambda_opt(
+            L1a[y], L1b[y], L2aa[y], L2ab[y], L2bb[y],
+            Fa, Fb, Ia, Ib, Iabab, L1olds, L2olds,
+            T1olds, T2olds, fac=-1.0)
 
     # energy term
     Id = numpy.ones((ng))
@@ -540,9 +541,9 @@ def neq_lambda_simple(Ff, Fb, F, I, L1oldf, L1oldb, L1oldi, L2oldf, L2oldb,
 
     # integrate old lambda amplitudes
     L1intf, L1intb, L1inti = quadrature.int_L1_keldysh(
-            ngr, ngi, L1oldf, L1oldb, L1oldi, tir, tii, D1, gr, gi, Gr, Gi)
+        ngr, ngi, L1oldf, L1oldb, L1oldi, tir, tii, D1, gr, gi, Gr, Gi)
     L2intf, L2intb, L2inti = quadrature.int_L2_keldysh(
-            ngr, ngi, L2oldf, L2oldb, L2oldi, tir, tii, D2, gr, gi, Gr, Gi)
+        ngr, ngi, L2oldf, L2oldb, L2oldi, tir, tii, D2, gr, gi, Gr, Gi)
 
     # initialize lambda amplitudes
     L1f = numpy.zeros(L1oldf.shape, dtype=complex)
@@ -551,7 +552,6 @@ def neq_lambda_simple(Ff, Fb, F, I, L1oldf, L1oldb, L1oldi, L2oldf, L2oldb,
     L2f = numpy.zeros(L2oldf.shape, dtype=complex)
     L2b = numpy.zeros(L2oldb.shape, dtype=complex)
     L2i = numpy.zeros(L2oldi.shape, dtype=complex)
-    #print(L2intf[0])
 
     # amplitude term
     for y in range(ngi):
@@ -697,7 +697,6 @@ def ccd_lambda_simple(F, I, T2old, L2old, D2, ti, ng, g, G, beta):
     # energy term
     Id = numpy.ones((ng))
     L2 -= einsum('v,ijab->vijab', Id, I.oovv)
-    #L2 += (1.0/beta)*numpy.einsum('v,ijab->vijab',Id,I.oovv)
 
     return L2
 

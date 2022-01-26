@@ -9,8 +9,8 @@ def integrate1a(t1, n, ng, delta):
     t1_temp = numpy.zeros(t1.shape)
     t1_temp[1] = 0.5*delta*(t1[0] + t1[1])
     for y in range(2, ng):
-        t1_temp[y] = t1_temp[y - 2] + (delta/3.0)*(t1[y - 2]
-                + 4.0*t1[y - 1] + t1[y])
+        t1_temp[y] = t1_temp[y - 2] + (
+            delta/3.0)*(t1[y - 2] + 4.0*t1[y - 1] + t1[y])
     return t1_temp
 
 
@@ -266,26 +266,26 @@ def d_ft_quad(ng, beta, quad):
 
 #def integrate1(t1,n,ng,delta):
 #    t1_temp = numpy.zeros(t1.shape)
-#    t1_temp[1,:,:] = 0.5*delta*(t1[0,:,:] + t1[1,:,:])
+#    t1_temp[1,:,:] = 0.5*delta*(t1[0] + t1[1])
 #    for y in range(2,ng):
-#        t1_temp[y,:,:] = t1_temp[y - 2,:,:] + (delta/3.0)*(t1[y - 2,:,:]
-#                + 4.0*t1[y - 1,:,:] + t1[y,:,:])
+#        t1_temp[y] = t1_temp[y - 2] + (delta/3.0)*(t1[y - 2]
+#                + 4.0*t1[y - 1] + t1[y])
 #    return t1_temp
 #
 #def integrate1b(t1,n,ng,delta):
 #    t1_temp = numpy.zeros(t1.shape)
-#    t1_temp[1,:,:,:] = 0.5*delta*(t1[0,:,:,:] + t1[1,:,:,:])
+#    t1_temp[1] = 0.5*delta*(t1[0] + t1[1])
 #    for y in range(2,ng):
-#        t1_temp[y,:,:,:] = t1_temp[y - 2,:,:,:] + (delta/3.0)*(t1[y - 2,:,:,:]
-#                + 4.0*t1[y - 1,:,:,:] + t1[y,:,:,:])
+#        t1_temp[y] = t1_temp[y - 2] + (delta/3.0)*(t1[y - 2]
+#                + 4.0*t1[y - 1] + t1[y])
 #    return t1_temp
 #
 #def integrate2(t2,n,ng,delta):
 #    t2_temp = numpy.zeros(t2.shape)
-#    t2_temp[1,:,:,:,:] = 0.5*delta*(t2[0,:,:,:,:] + t2[1,:,:,:,:])
+#    t2_temp[1] = 0.5*delta*(t2[0] + t2[1])
 #    for y in range(2,ng):
-#       t2_temp[y,:,:,:,:] = t2_temp[y-2,:,:,:,:] + (delta/3.0)*(t2[y - 2,:,:,:,:]
-#            + 4.0*t2[y - 1,:,:,:,:] + t2[y,:,:,:,:])
+#       t2_temp[y] = t2_temp[y-2] + (delta/3.0)*(t2[y - 2]
+#            + 4.0*t2[y - 1] + t2[y])
 #    return t2_temp
 
 
@@ -402,7 +402,8 @@ def int_tbar1_keldysh(ngr, ngi, t1barf, t1barb, t1bari, tir, tii, D1, Gr, Gi):
             dt[i] = tii[i] - tii[y]
         gtemp = numpy.exp(dt[:, None, None]*D1[None, :, :])
         t1_temp = gtemp*t1bari
-        t1_outi[y] = einsum('x,xai->ai', Gi[y], t1_temp) + t1_outb[ngr - 1]*numpy.exp(D1*(1.j*tir[0] - tii[y]))
+        t1_outi[y] = einsum('x,xai->ai', Gi[y], t1_temp)\
+            + t1_outb[ngr - 1]*numpy.exp(D1*(1.j*tir[0] - tii[y]))
 
     return t1_outf, t1_outb, t1_outi
 
@@ -414,7 +415,8 @@ def int_tbar2_keldysh(ngr, ngi, t2barf, t2barb, t2bari, tir, tii, D2, Gr, Gi):
     for y in range(ngr):
         for i in range(ngr):
             dt[i] = tir[i] - tir[y]
-        gtemp = numpy.exp(1.j*dt[:, None, None, None, None]*D2[None, :, :, :, :])
+        gtemp = numpy.exp(
+            1.j*dt[:, None, None, None, None]*D2[None, :, :, :, :])
         t2_temp = gtemp*t2barf
         t2_outf[y] = 1.j*einsum('x,xabij->abij', Gr[y], t2_temp)
 
@@ -426,7 +428,8 @@ def int_tbar2_keldysh(ngr, ngi, t2barf, t2barb, t2bari, tir, tii, D2, Gr, Gi):
     for y in range(ngr):
         for i in range(ngr):
             dt[i] = tib[i] - tib[y]
-        gtemp = numpy.exp(1.j*dt[:, None, None, None, None]*D2[None, :, :, :, :])
+        gtemp = numpy.exp(
+            1.j*dt[:, None, None, None, None]*D2[None, :, :, :, :])
         t2_temp = gtemp*t2barb
         t2_outb[y] = -1.j*einsum('x,xabij->abij', Gr[y], t2_temp)\
             + t2_outf[ngr - 1]*numpy.exp(1.j*(tir[ngr - 1] - tib[y])*D2)
@@ -438,7 +441,8 @@ def int_tbar2_keldysh(ngr, ngi, t2barf, t2barb, t2bari, tir, tii, D2, Gr, Gi):
             dt[i] = tii[i] - tii[y]
         gtemp = numpy.exp(dt[:, None, None, None, None]*D2[None, :, :, :, :])
         t2_temp = gtemp*t2bari
-        t2_outi[y] = einsum('x,xabij->abij', Gi[y], t2_temp) + t2_outb[ngr - 1]*numpy.exp(D2*(1.j*tir[0] - tii[y]))
+        t2_outi[y] = einsum('x,xabij->abij', Gi[y], t2_temp)\
+            + t2_outb[ngr - 1]*numpy.exp(D2*(1.j*tir[0] - tii[y]))
 
     return t2_outf, t2_outb, t2_outi
 
@@ -477,9 +481,12 @@ def int_L1_keldysh(ngr, ngi, L1f, L1b, L1i, tir, tii, D1, gr, gi, Gr, Gi):
         L1temp = einsum('yai,yia->yia', gtemp, L1f)
         fac = numpy.exp(1.j*D1[None, :, :]*(tir[s] - tib[:, None, None]))/gr[s]
         add = numpy.exp(D1[None, :, :]*(1.j*tir[s] - tii[:, None, None]))/gr[s]
-        L1f_out[s] = 1.j*einsum('y,yia,y->ia', gr, L1temp, Gr[:, s])/gr[s]
-        L1f_out[s] -= 1.j*numpy.einsum('y,yia,yai->ia', gr, L1b, fac)*Gr[ngr - 1, s]
-        L1f_out[s] += numpy.einsum('y,yia,yai->ia', gi, L1i, add)*Gr[ngr - 1, s]
+        L1f_out[s] = 1.j*einsum(
+            'y,yia,y->ia', gr, L1temp, Gr[:, s])/gr[s]
+        L1f_out[s] -= 1.j*numpy.einsum(
+            'y,yia,yai->ia', gr, L1b, fac)*Gr[ngr - 1, s]
+        L1f_out[s] += numpy.einsum(
+            'y,yia,yai->ia', gi, L1i, add)*Gr[ngr - 1, s]
 
     return L1f_out, L1b_out, L1i_out
 
@@ -503,23 +510,33 @@ def int_L2_keldysh(ngr, ngi, L2f, L2b, L2i, tir, tii, D2, gr, gi, Gr, Gi):
         dt = numpy.zeros((ngr))
         for y in range(s, ngr):
             dt[y] = tib[s] - tib[y]
-        gtemp = numpy.exp(1.j*dt[:, None, None, None, None]*D2[None, :, :, :, :])
+        gtemp = numpy.exp(
+            1.j*dt[:, None, None, None, None]*D2[None, :, :, :, :])
         L2temp = einsum('yabij,yijab->yijab', gtemp, L2b)
-        add = numpy.exp(D2[None, :, :, :, :]*(1.j*tib[s] - tii[:, None, None, None, None]))/gr[s]
-        L2b_out[s] = -1.j*einsum('y,yijab,y->ijab', gr, L2temp, Gr[:, s])/gr[s]
-        L2b_out[s] += numpy.einsum('y,yijab,yabij->ijab', gi, L2i, add)*Gr[ngr - 1, s]
+        add = numpy.exp(D2[None, :, :, :, :]*(
+            1.j*tib[s] - tii[:, None, None, None, None]))/gr[s]
+        L2b_out[s] = -1.j*einsum(
+            'y,yijab,y->ijab', gr, L2temp, Gr[:, s])/gr[s]
+        L2b_out[s] += numpy.einsum(
+            'y,yijab,yabij->ijab', gi, L2i, add)*Gr[ngr - 1, s]
 
     L2f_out = numpy.zeros(L2b.shape, dtype=complex)
     for s in range(ngr):
         dt = numpy.zeros((ngr))
         for y in range(s, ngr):
             dt[y] = tir[s] - tir[y]
-        gtemp = numpy.exp(1.j*dt[:, None, None, None, None]*D2[None, :, :, :, :])
+        gtemp = numpy.exp(
+            1.j*dt[:, None, None, None, None]*D2[None, :, :, :, :])
         L2temp = einsum('yabij,yijab->yijab', gtemp, L2f)
-        fac = numpy.exp(1.j*D2[None, :, :, :, :]*(tir[s] - tib[:, None, None, None, None]))/gr[s]
-        add = numpy.exp(D2[None, :, :, :, :]*(1.j*tir[s] - tii[:, None, None, None, None]))/gr[s]
-        L2f_out[s] = 1.j*einsum('y,yijab,y->ijab', gr, L2temp, Gr[:, s])/gr[s]
-        L2f_out[s] -= 1.j*numpy.einsum('y,yijab,yabij->ijab', gr, L2b, fac)*Gr[ngr - 1, s]
-        L2f_out[s] += numpy.einsum('y,yijab,yabij->ijab', gi, L2i, add)*Gr[ngr - 1, s]
+        fac = numpy.exp(1.j*D2[None, :, :, :, :]*(
+            tir[s] - tib[:, None, None, None, None]))/gr[s]
+        add = numpy.exp(D2[None, :, :, :, :]*(
+            1.j*tir[s] - tii[:, None, None, None, None]))/gr[s]
+        L2f_out[s] = 1.j*einsum(
+            'y,yijab,y->ijab', gr, L2temp, Gr[:, s])/gr[s]
+        L2f_out[s] -= 1.j*numpy.einsum(
+            'y,yijab,yabij->ijab', gr, L2b, fac)*Gr[ngr - 1, s]
+        L2f_out[s] += numpy.einsum(
+            'y,yijab,yabij->ijab', gi, L2i, add)*Gr[ngr - 1, s]
 
     return L2f_out, L2b_out, L2i_out

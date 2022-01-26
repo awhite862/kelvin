@@ -28,7 +28,8 @@ class h2_field_system(System):
         self.ot = ot
         mos = self.m.mo_coeff[0]
         self.eri = integrals.get_phys(mol, mos, mos, mos, mos)
-        self.hcore = numpy.einsum('mp,mn,nq->pq', mos, self.m.get_hcore(mol), mos)
+        self.hcore = numpy.einsum(
+            'mp,mn,nq->pq', mos, self.m.get_hcore(mol), mos)
 
     def reversible(self):
         if self.O is None:
@@ -48,7 +49,8 @@ class h2_field_system(System):
     def get_mp1(self):
         en = self.g_energies_tot()
         fo = ft_utils.ff(self.beta, en, self.mu)
-        E1 = numpy.einsum('ii,i->', self.hcore, fo) - (self.g_energies_tot()*fo).sum()
+        E1 = numpy.einsum('ii,i->', self.hcore, fo)\
+            - (self.g_energies_tot()*fo).sum()
         E1 += 0.5*numpy.einsum('ijij,i,j->', self.eri, fo, fo)
         E1 -= 0.5*numpy.einsum('ijji,i,j->', self.eri, fo, fo)
         if self.O is not None:
@@ -118,7 +120,8 @@ class H2FieldSystem(NeqSystem):
         self.omega = omega
         mos = self.m.mo_coeff[0]
         self.eri = integrals.get_phys(mol, mos, mos, mos, mos)
-        self.hcore = numpy.einsum('mp,mn,nq->pq', mos, self.m.get_hcore(mol), mos)
+        self.hcore = numpy.einsum(
+            'mp,mn,nq->pq', mos, self.m.get_hcore(mol), mos)
 
     def verify(self, T, mu):
         if not (T == self.T and mu == self.mu):
@@ -126,9 +129,14 @@ class H2FieldSystem(NeqSystem):
         else:
             return True
 
-    def has_g(self): return True
-    def has_u(self): return False
-    def has_r(self): return False
+    def has_g(self):
+        return True
+
+    def has_u(self):
+        return False
+
+    def has_r(self):
+        return False
 
     def const_energy(self):
         return self.m.mol.energy_nuc()
@@ -136,7 +144,8 @@ class H2FieldSystem(NeqSystem):
     def get_mp1(self):
         en = self.g_energies_tot()
         fo = ft_utils.ff(self.beta, en, self.mu)
-        E1 = numpy.einsum('ii,i->', self.hcore, fo) - (self.g_energies_tot()*fo).sum()
+        E1 = numpy.einsum('ii,i->', self.hcore, fo)\
+            - (self.g_energies_tot()*fo).sum()
         E1 += 0.5*numpy.einsum('ijij,i,j->', self.eri, fo, fo)
         E1 -= 0.5*numpy.einsum('ijji,i,j->', self.eri, fo, fo)
         return E1

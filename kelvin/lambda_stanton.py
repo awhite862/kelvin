@@ -41,7 +41,8 @@ def _Lambda_Stanton(L1, L2, F, I, L1old, L2old, T1old, T2old, fac=1.0):
     temp = einsum('bj,iabk->iajk', T1old, Wtemp)
     temp += einsum('iljb,abkl->iajk', I.ooov, T2old)
     temp -= temp.transpose((0, 1, 3, 2))
-    Wovoo = -I.vooo.transpose((1, 0, 2, 3)) - einsum('ib,abjk->iajk', Fov, T2old)
+    Wovoo = -I.vooo.transpose((1, 0, 2, 3))\
+        - einsum('ib,abjk->iajk', Fov, T2old)
     Wovoo -= einsum('al,iljk->iajk', T1old, Woooo)
     Wovoo -= 0.5*einsum('aibc,bcjk->iajk', I.vovv, T2B)
     Wovoo += temp

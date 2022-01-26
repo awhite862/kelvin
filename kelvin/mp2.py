@@ -32,7 +32,7 @@ class MP2(object):
     def run(self):
         if self.finite_T:
             logging.info('Running MP2 at an electronic temperature of %f K'
-                % ft_utils.HtoK(self.T))
+                         % ft_utils.HtoK(self.T))
             return self._ft_mp2()
         else:
             logging.info('Running MP2 at zero Temperature')
@@ -110,7 +110,8 @@ class MP2(object):
 
         # compute second order energy
         if self.saveT:
-            E2, T1n, T2n, T1a, T2a = ft_mp.mp2_sep(en, fo, fmo, eri, self.T, returnT=True)
+            E2, T1n, T2n, T1a, T2a =\
+                ft_mp.mp2_sep(en, fo, fmo, eri, self.T, returnT=True)
             self.T1n = T1n
             self.T1a = T1a
             self.T2n = T2n

@@ -1,6 +1,6 @@
 import numpy
 from cqcpy import ft_utils
-from cqcpy import utils
+from cqcpy.utils import block_diag
 from . import integrals
 from . import scf_utils
 from . import ft_mp
@@ -45,7 +45,7 @@ class mol_field_system(System):
     def get_mp1(self):
         # contribution from imaginary contour
         hcore = self.mf.get_hcore(self.mf.mol)
-        h = utils.block_diag(hcore, hcore)
+        h = block_diag(hcore, hcore)
         en = self.g_energies_tot()
         fo = ft_utils.ff(self.beta, en, self.mu)
         p = scf_utils.get_ao_ft_den(self.mf, fo)
@@ -55,7 +55,7 @@ class mol_field_system(System):
 
         # contribution from real-time contour
         if self.O is not None:
-            E1 += numpy.einsum('ii,i->', utils.block_diag(self.O, self.O), fo)
+            E1 += numpy.einsum('ii,i->', block_diag(self.O, self.O), fo)
         return E1
 
     def g_energies_tot(self):
@@ -67,7 +67,8 @@ class mol_field_system(System):
         F = scf_utils.get_mo_ft_fock(self.mf, fo)
         E = numpy.zeros((3))
         E[2] = 1.0
-        field = numpy.einsum('x,xij->ij', E, self.mf.mol.intor('cint1e_r_sph', comp=3))
+        field = numpy.einsum(
+            'x,xij->ij', E, self.mf.mol.intor('cint1e_r_sph', comp=3))
         field = scf_utils.mo_tran_1e(self.mf, field)
         I = numpy.ones(self.nt)
         Fock = (I[:, None, None]*F[None, :, :]).astype(complex)
@@ -77,9 +78,9 @@ class mol_field_system(System):
             temp = field*numpy.sin(self.omega*self.ti[i])
             Fock[i] += temp
         if direc == 'f':
-            Fock[self.ot] += -3.j*self.beta*utils.block_diag(self.O, self.O)/delta
+            Fock[self.ot] += -3.j*self.beta*block_diag(self.O, self.O)/delta
         elif direc == 'b':
-            Fock[self.ot] -= 0.j*self.beta*utils.block_diag(self.O, self.O)/delta
+            Fock[self.ot] -= 0.j*self.beta*block_diag(self.O, self.O)/delta
         else:
             raise Exception("Unrecognized direction: " + str(direc))
 
@@ -97,7 +98,8 @@ class mol_field_system(System):
         thcore = I[:, None, None]*hcore[None, :, :]
         E = numpy.zeros((3))
         E[2] = 1.0
-        F = numpy.einsum('x,xij->ij', E, self.mf.mol.intor('cint1e_r_sph', comp=3))
+        F = numpy.einsum('x,xij->ij', E,
+                         self.mf.mol.intor('cint1e_r_sph', comp=3))
         for i in range(self.nt):
             thcore[i] += numpy.sin(self.omega*self.ti[i])*F
         for i in range(self.nt):

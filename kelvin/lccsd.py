@@ -67,7 +67,7 @@ class lccsd(object):
     def run(self, T1=None, T2=None):
         if self.finite_T:
             logging.info('Running LCCSD at an electronic temperature of %f K'
-                % ft_utils.HtoK(self.T))
+                         % ft_utils.HtoK(self.T))
             if self.athresh > 0.0:
                 return self._ft_lccsd_active(T1in=T1, T2in=T2)
             else:
@@ -152,9 +152,9 @@ class lccsd(object):
         g = self.g
 
         # get HF energy
-        En = self.sys.const_energy()
-        E0 = zt_mp.mp0(eo) + En
-        E1 = self.sys.get_mp1()
+        #En = self.sys.const_energy()
+        #E0 = zt_mp.mp0(eo) + En
+        #E1 = self.sys.get_mp1()
 
         # get Fock matrix
         F = self.sys.g_fock()
@@ -177,8 +177,8 @@ class lccsd(object):
                 T1old = numpy.zeros((ng, nv, no))
             T2old = -numpy.einsum('v,abij->vabij', Id, I.vvoo)
             T2old = quadrature.int_tbar2(ng, T2old, ti, Dvvoo, G)
-        E2 = ft_cc_energy.ft_cc_energy(T1old, T2old,
-            F.ov, I.oovv, g, self.beta_max, Qterm=False)
+        E2 = ft_cc_energy.ft_cc_energy(
+            T1old, T2old, F.ov, I.oovv, g, self.beta_max, Qterm=False)
         logging.info('MP2 energy: {:.10f}'.format(E2))
 
         # run CC iterations
@@ -344,8 +344,9 @@ class lccsd(object):
             "tconv": self.tconv,
             "max_iter": self.max_iter,
             "damp": self.damp}
-        Eccn, T1, T2 = cc_utils.ft_cc_iter(method, T1old, T2old, F, I, D1, D2, g, G, beta,
-                ng, ti, self.iprint, conv_options)
+        Eccn, T1, T2 = cc_utils.ft_cc_iter(
+            method, T1old, T2old, F, I, D1, D2, g, G,
+            beta, ng, ti, self.iprint, conv_options)
         self.T1 = T1
         self.T2 = T2
 
@@ -379,9 +380,6 @@ class lccsd(object):
         # get energy differences
         D1 = utils.D1(en, en)
         D2 = utils.D2(en, en, en, en)
-        #D1 = en[:,None] - en[None,:]
-        #D2 = en[:,None,None,None] + en[None,:,None,None] \
-        #    - en[None,None,:,None] - en[None,None,None,:]
 
         # run Lambda iterations
         if self.singles:

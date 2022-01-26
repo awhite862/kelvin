@@ -304,11 +304,11 @@ class neq_ccsd(object):
         #    - en[None,None,:,None] - en[None,None,None,:]
 
         pia, pba, pji, pai = ft_cc_equations.neq_1rdm(
-                self.T1f, self.T1b, self.T1i,
-                self.T2f, self.T2b, self.T2i,
-                self.L1f, self.L1b, self.L1i,
-                self.L2f, self.L2b, self.L2i,
-                D1, D2, tir, tii, ngr, ngi, gr, gi, Gr, Gi)
+            self.T1f, self.T1b, self.T1i,
+            self.T2f, self.T2b, self.T2i,
+            self.L1f, self.L1b, self.L1i,
+            self.L2f, self.L2b, self.L2i,
+            D1, D2, tir, tii, ngr, ngi, gr, gi, Gr, Gi)
 
         self.dia = pia
         self.dba = pba

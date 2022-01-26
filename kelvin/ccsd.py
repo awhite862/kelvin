@@ -14,7 +14,7 @@ from . import ft_cc_equations
 from . import quadrature
 
 einsum = lib.einsum
-#einsum = numpy.einsum
+# einsum = numpy.einsum
 
 
 class ccsd(object):
@@ -110,7 +110,7 @@ class ccsd(object):
         """Run CCSD calculation."""
         if self.finite_T:
             logging.info('Running CCSD at an electronic temperature of %f K'
-                % ft_utils.HtoK(self.T))
+                         % ft_utils.HtoK(self.T))
             if self.sys.has_u():
                 return self._ft_uccsd(T1in=T1, T2in=T2)
             else:
@@ -143,10 +143,6 @@ class ccsd(object):
             self.S0 = 0
             self.S1 = 0
             self.Scc = 0
-            #print("T = 0: ")
-            #print('  E = {}'.format(self.Etot))
-            #print('  S = {}'.format(0.0))
-            #print('  N = {}'.format(N))
         else:
             if self.L1 is None:
                 if self.sys.has_u():
@@ -430,8 +426,9 @@ class ccsd(object):
             T2aa = einsum('abij,ijab->abij', T2aa, Doovvaa)
             T2ab = einsum('abij,ijab->abij', T2ab, Doovvab)
             T2bb = einsum('abij,ijab->abij', T2bb, Doovvbb)
-            E = cc_energy.ucc_energy((T1a, T1b), (T2aa, T2ab, T2bb),
-                    Fa.ov, Fb.ov, Ia.oovv, Ib.oovv, Iabab.oovv)
+            E = cc_energy.ucc_energy(
+                (T1a, T1b), (T2aa, T2ab, T2bb),
+                Fa.ov, Fb.ov, Ia.oovv, Ib.oovv, Iabab.oovv)
             res1 = numpy.linalg.norm(T1olds[0] - T1a)/nl1
             res1 += numpy.linalg.norm(T1olds[1] - T1b)/nl1
             res2 = numpy.linalg.norm(T2olds[0] - T2aa)/nl2
@@ -545,7 +542,6 @@ class ccsd(object):
             L1bold = T1olds[1].transpose((1, 0))
         else:
             raise Exception("UCCD Lambdas not implemented")
-            #L1old = numpy.zeros(F.ov.shape)
         L2aaold = T2olds[0].transpose((2, 3, 0, 1))
         L2abold = T2olds[1].transpose((2, 3, 0, 1))
         L2bbold = T2olds[2].transpose((2, 3, 0, 1))
@@ -669,10 +665,10 @@ class ccsd(object):
 
         method = "CCSD" if self.singles else "CCD"
         conv_options = {
-                "econv": self.econv,
-                "tconv": self.tconv,
-                "max_iter": self.max_iter,
-                "damp": self.damp}
+            "econv": self.econv,
+            "tconv": self.tconv,
+            "max_iter": self.max_iter,
+            "damp": self.damp}
         if self.rt_iter[0] == 'a' or T2in is not None:
             if self.rt_iter[0] != 'a':
                 logging.warning("Converngece scheme ({}) is being ignored.".format(self.rt_iter))
@@ -690,8 +686,8 @@ class ccsd(object):
                 T2old = -einsum('v,abij->vabij', Id, I.vvoo)
                 T1old = quadrature.int_tbar1(ng, T1old, ti, D1, G)
                 T2old = quadrature.int_tbar2(ng, T2old, ti, D2, G)
-            E2 = ft_cc_energy.ft_cc_energy(T1old, T2old,
-                F.ov, I.oovv, g, self.beta_max, Qterm=False)
+            E2 = ft_cc_energy.ft_cc_energy(
+                T1old, T2old, F.ov, I.oovv, g, self.beta_max, Qterm=False)
             logging.info('MP2 Energy: {:.10f}'.format(E2))
 
             # run CC iterations
@@ -699,8 +695,9 @@ class ccsd(object):
                 method, T1old, T2old, F, I, D1, D2, g, G,
                 self.beta_max, ng, ti, self.iprint, conv_options)
         else:
-            T1, T2 = cc_utils.ft_cc_iter_extrap(method, F, I, D1, D2, g, G, self.beta_max, ng, ti,
-                    self.iprint, conv_options)
+            T1, T2 = cc_utils.ft_cc_iter_extrap(
+                method, F, I, D1, D2, g, G, self.beta_max,
+                ng, ti, self.iprint, conv_options)
             Eccn = ft_cc_energy.ft_cc_energy(
                 T1, T2, F.ov, I.oovv, g, self.beta_max)
 
@@ -782,7 +779,7 @@ class ccsd(object):
 
                 # get scaled integrals
                 Fa, Fb, Ia, Ib, Iabab = cc_utils.uft_active_integrals(
-                        self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
+                    self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
 
                 T1ashape = (ng, nvira, nocca)
                 T1bshape = (ng, nvirb, noccb)
@@ -821,10 +818,10 @@ class ccsd(object):
 
         method = "CCSD" if self.singles else "CCD"
         conv_options = {
-                "econv": self.econv,
-                "tconv": self.tconv,
-                "max_iter": self.max_iter,
-                "damp": self.damp}
+            "econv": self.econv,
+            "tconv": self.tconv,
+            "max_iter": self.max_iter,
+            "damp": self.damp}
         if self.rt_iter[0] == 'a' or T2in is not None:
             if self.rt_iter[0] != 'a':
                 logging.warning("Converngece scheme ({}) is being ignored.".format(self.rt_iter))
@@ -869,7 +866,7 @@ class ccsd(object):
                 method, Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb,
                 g, G, self.beta_max, ng, ti, self.iprint, conv_options)
             Eccn = ft_cc_energy.ft_ucc_energy(
-                T1[0],  T1[1],  T2[0],  T2[1],  T2[2], Fa.ov, Fb.ov,
+                T1[0], T1[1], T2[0], T2[1], T2[2], Fa.ov, Fb.ov,
                 Ia.oovv, Ib.oovv, Iabab.oovv, g, self.beta_max)
 
         # save T amplitudes
@@ -950,10 +947,10 @@ class ccsd(object):
 
         # run lambda iterations
         conv_options = {
-                "econv": self.econv,
-                "tconv": self.tconv,
-                "max_iter": self.max_iter,
-                "damp": self.damp}
+            "econv": self.econv,
+            "tconv": self.tconv,
+            "max_iter": self.max_iter,
+            "damp": self.damp}
         method = "CCSD" if self.singles else "CCD"
         L1, L2 = cc_utils.ft_lambda_iter(
             method, L1old, L2old, self.T1, self.T2, F, I, D1, D2, g, G,
@@ -1022,7 +1019,7 @@ class ccsd(object):
 
             # get scaled integrals
             Fa, Fb, Ia, Ib, Iabab = cc_utils.uft_active_integrals(
-                    self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
+                self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
 
         else:
             # get scaled integrals
@@ -1061,15 +1058,15 @@ class ccsd(object):
 
         # run lambda iterations
         conv_options = {
-                "econv": self.econv,
-                "tconv": self.tconv,
-                "max_iter": self.max_iter,
-                "damp": self.damp}
+            "econv": self.econv,
+            "tconv": self.tconv,
+            "max_iter": self.max_iter,
+            "damp": self.damp}
         method = "CCSD" if self.singles else "CCD"
         L1a, L1b, L2aa, L2ab, L2bb = cc_utils.ft_ulambda_iter(
-                method, L1aold, L1bold, L2aaold, L2abold, L2bbold, T1aold, T1bold,
-                T2aaold, T2abold, T2bbold, Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb,
-                g, G, self.beta_max, ng, ti, self.iprint, conv_options)
+            method, L1aold, L1bold, L2aaold, L2abold, L2bbold, T1aold, T1bold,
+            T2aaold, T2abold, T2bbold, Fa, Fb, Ia, Ib, Iabab, D1a, D1b, D2aa, D2ab, D2bb,
+            g, G, self.beta_max, ng, ti, self.iprint, conv_options)
 
         # save lambda amplitudes
         self.L1 = (L1a, L1b)
@@ -1283,7 +1280,7 @@ class ccsd(object):
             iocc = [i for i, x in enumerate(fo) if x > athresh]
             ivir = [i for i, x in enumerate(fv) if x > athresh]
             F, I = cc_utils.ft_active_integrals(
-                    self.sys, en, focc, fvir, iocc, ivir)
+                self.sys, en, focc, fvir, iocc, ivir)
         else:
             F, I = cc_utils.ft_integrals(self.sys, en, beta, mu)
         t2_temp = 0.25*self.T2[tf] + 0.5*einsum('ai,bj->abij', self.T1[tf], self.T1[tf])
@@ -1317,7 +1314,7 @@ class ccsd(object):
             ioccb = [i for i, x in enumerate(fob) if x > athresh]
             ivirb = [i for i, x in enumerate(fvb) if x > athresh]
             Fa, Fb, Ia, Ib, Iabab = cc_utils.uft_active_integrals(
-                    self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
+                self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
         else:
             Fa, Fb, Ia, Ib, Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
         T1a, T1b = self.T1
@@ -1370,7 +1367,7 @@ class ccsd(object):
         sfv = numpy.sqrt(fvir)
 
         pia, pba, pji, pai = ft_cc_equations.ccsd_1rdm(
-                self.T1, self.T2, self.L1, self.L2, D1, D2, ti, ng, self.g, self.G)
+            self.T1, self.T2, self.L1, self.L2, D1, D2, ti, ng, self.g, self.G)
         self.dia = pia
         self.dba = pba
         self.dji = pji
@@ -1426,7 +1423,7 @@ class ccsd(object):
         sfo = numpy.sqrt(focc)
         sfv = numpy.sqrt(fvir)
         P2 = ft_cc_equations.ccsd_2rdm(
-                self.T1, self.T2, self.L1, self.L2, D1, D2, ti, ng, self.g, self.G)
+            self.T1, self.T2, self.L1, self.L2, D1, D2, ti, ng, self.g, self.G)
         self.P2 = P2
 
         # compute normal-ordered 2rdm
@@ -1458,7 +1455,7 @@ class ccsd(object):
             nocc = len(focc)
             nvir = len(fvir)
             F, I = cc_utils.ft_active_integrals(
-                    self.sys, en, focc, fvir, iocc, ivir)
+                self.sys, en, focc, fvir, iocc, ivir)
         else:
             focc = fo
             fvir = fv
@@ -1478,7 +1475,7 @@ class ccsd(object):
         # perturbed ON contribution to Fock matrix
         if self.athresh > 0.0:
             rono += cc_utils.g_Fd_on_active(
-                    Fd, iocc, ivir, self.ndia, self.ndba, self.ndji, self.ndai)
+                Fd, iocc, ivir, self.ndia, self.ndba, self.ndji, self.ndai)
         else:
             rono += cc_utils.g_Fd_on(Fd, self.ndia, self.ndba, self.ndji, self.ndai)
 
@@ -1515,7 +1512,7 @@ class ccsd(object):
             iocc = [i for i, x in enumerate(fo) if x > athresh]
             ivir = [i for i, x in enumerate(fv) if x > athresh]
             F, I = cc_utils.ft_active_integrals(
-                    self.sys, en, focc, fvir, iocc, ivir)
+                self.sys, en, focc, fvir, iocc, ivir)
         else:
             focc = fo
             fvir = fv
@@ -1729,8 +1726,8 @@ class ccsd(object):
         L1a, L1b = self.L1
         L2aa, L2ab, L2bb = self.L2
         P2 = ft_cc_equations.uccsd_2rdm(
-                T1a, T1b, T2aa, T2ab, T2bb, L1a, L1b, L2aa, L2ab, L2bb,
-                D1a, D1b, D2aa, D2ab, D2bb, ti, ng, self.g, self.G)
+            T1a, T1b, T2aa, T2ab, T2bb, L1a, L1b, L2aa, L2ab, L2bb,
+            D1a, D1b, D2aa, D2ab, D2bb, ti, ng, self.g, self.G)
 
         self.P2 = P2
         if self.athresh > 0.0:
@@ -1817,11 +1814,11 @@ class ccsd(object):
         jitempb = numpy.zeros(noccb, dtype=dtb) if self.athresh > 0.0 else numpy.zeros(nb, dtype=dtb)
         batempb = numpy.zeros(nvirb, dtype=dtb) if self.athresh > 0.0 else numpy.zeros(nb, dtype=dtb)
         cc_utils.u_d_on_oo(
-                dsoa, dsob, Fa, Fb, Ia, Ib, Iabab,
-                self.dia, self.dji, self.dai, self.P2, jitempa, jitempb)
+            dsoa, dsob, Fa, Fb, Ia, Ib, Iabab,
+            self.dia, self.dji, self.dai, self.P2, jitempa, jitempb)
         cc_utils.u_d_on_vv(
-                dsva, dsvb, Fa, Fb, Ia, Ib, Iabab,
-                self.dia, self.dba, self.dai, self.P2, batempa, batempb)
+            dsva, dsvb, Fa, Fb, Ia, Ib, Iabab,
+            self.dia, self.dba, self.dai, self.P2, batempa, batempb)
 
         if self.athresh > 0.0:
             ronoa[numpy.ix_(iocca)] += jitempa

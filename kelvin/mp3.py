@@ -29,8 +29,8 @@ class MP3(object):
 
     def run(self):
         if self.finite_T:
-            logging.info(
-                'Running MP3 at an electronic temperature of %f K' % ft_utils.HtoK(self.T))
+            logging.info('Running MP3 at an electronic temperature of %f K'
+                         % ft_utils.HtoK(self.T))
             return self._ft_mp3()
         else:
             logging.info('Running MP3 at zero Temperature')
@@ -110,7 +110,6 @@ class MP3(object):
 
         # compute second and third order energies
         E2 = ft_mp.mp2(en, fo, fmo, eri, T)
-        #E3 = ft_mp.mp3_new(en, fo, fmo, eri, T) TODO: fix this!
         E23 = ft_mp.mp23_int(en, fo, fv, fmo, eri, T, ngrid=100)
         E3 = E23 - E2
 

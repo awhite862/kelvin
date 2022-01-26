@@ -281,8 +281,10 @@ class UEGSCFSystem(System):
         e = numpy.asarray(self.basis.Es)
         n = e.shape[0]
         V = self.r_int_tot()
-        Vd = V[numpy.ix_(numpy.arange(n), self.oidx, numpy.arange(n), self.oidx)]
-        Vx = V[numpy.ix_(numpy.arange(n), self.oidx, self.oidx, numpy.arange(n))]
+        Vd = V[numpy.ix_(numpy.arange(n), self.oidx,
+                         numpy.arange(n), self.oidx)]
+        Vx = V[numpy.ix_(numpy.arange(n), self.oidx,
+                         self.oidx, numpy.arange(n))]
         e += 2*numpy.einsum('pipi->p', Vd) - numpy.einsum('piip->p', Vx)
         return e
 
@@ -300,8 +302,10 @@ class UEGSCFSystem(System):
         F = self.r_hcore()
         V = self.r_int_tot()
         n = F.shape[0]
-        Vd = V[numpy.ix_(numpy.arange(n), self.oidx, numpy.arange(n), self.oidx)]
-        Vx = V[numpy.ix_(numpy.arange(n), self.oidx, self.oidx, numpy.arange(n))]
+        Vd = V[numpy.ix_(numpy.arange(n), self.oidx,
+                         numpy.arange(n), self.oidx)]
+        Vx = V[numpy.ix_(numpy.arange(n), self.oidx,
+                         self.oidx, numpy.arange(n))]
         F = F + 2*einsum('piri->pr', Vd) - einsum('piir->pr', Vx)
         Foo = F[numpy.ix_(self.oidx, self.oidx)]
         Fvv = F[numpy.ix_(self.vidx, self.vidx)]

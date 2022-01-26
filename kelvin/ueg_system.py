@@ -9,7 +9,7 @@ from .system import System
 from .ueg_utils import UEGBasis
 
 einsum = lib.einsum
-#einsum = einsum
+# einsum = einsum
 
 
 class UEGSystem(System):
@@ -141,7 +141,8 @@ class UEGSystem(System):
             fo = ft_utils.ff(beta, en, self.mu)
             fv = ft_utils.ffv(beta, en, self.mu)
             vec = fo*fv
-            Den = -beta*einsum('ijij,i,j->i', 2.0*V - V.transpose((0, 1, 3, 2)), vec, fo)
+            Den = -beta*einsum(
+                'ijij,i,j->i', 2.0*V - V.transpose((0, 1, 3, 2)), vec, fo)
             return Den
         else:
             logging.warning("Derivative of MP1 energy is zero at OK")

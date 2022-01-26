@@ -128,57 +128,6 @@ def mp2(en, no, f, eri, T, returnT=False):
     else:
         return Es + Ed
 
-#def ump2(ea, eb, noa, nva, nob, nvb, fa, fb, Ia, Ib, Iabab, T, returnT=False):
-#    """Return unrestricted 2nd order correction to the free energy."""
-#    rpre = 1e-8
-#    rfac = -2.0*T
-#    D1a = ea[:,None] - ea[None,:]
-#    D1b = eb[:,None] - eb[None,:]
-#    D2aa = ea[:,None,None,None] + ea[None,:,None,None] \
-#            - ea[None,None,:,None] - ea[None,None,None,:]
-#    D2ab = ea[:,None,None,None] + eb[None,:,None,None] \
-#            - ea[None,None,:,None] - eb[None,None,None,:]
-#    D2bb = eb[:,None,None,None] + eb[None,:,None,None] \
-#            - eb[None,None,:,None] - eb[None,None,None,:]
-#    for x in numpy.nditer(D1a,op_flags=['readwrite']):
-#        if numpy.abs(x) < rpre:
-#            x += rfac
-#    for x in numpy.nditer(D1b,op_flags=['readwrite']):
-#        if numpy.abs(x) < rpre:
-#            x += rfac
-#    for x in numpy.nditer(D2aa,op_flags=['readwrite']):
-#        if numpy.abs(x) < rpre:
-#            x += rfac
-#    for x in numpy.nditer(D2ab,op_flags=['readwrite']):
-#        if numpy.abs(x) < rpre:
-#            x += rfac
-#    for x in numpy.nditer(D2bb,op_flags=['readwrite']):
-#        if numpy.abs(x) < rpre:
-#            x += rfac
-#
-#    D1a = 1.0/D1a
-#    D1b = 1.0/D1b
-#    D2aa = 1.0/D2aa
-#    D2ab = 1.0/D2ab
-#    D2bb = 1.0/D2bb
-#
-#    T1a = numpy.einsum(
-#        'a,i,ai,ia->ai',
-#        nva,noa,fa,D1a)
-#    T1b = numpy.einsum(
-#        'a,i,ai,ia->ai',
-#        nvb,nob,fb,D1b)
-#    T2aa = numpy.einsum('a,b,i,j,abij,ijab->abij',
-#        nva,nva,noa,noa,Ia,D2)
-#
-#    Es = cc_energy_s1(T1, f.transpose(1,0))
-#    Ed = cc_energy_d(T2, eri)
-#
-#    if returnT:
-#        return (Es + Ed, T1, T2)
-#    else:
-#        return Es + Ed
-
 
 def mp2_a(D1a, D2a, no, f, eri, T):
     """Return anomalous 2nd order correction to the free energy."""
@@ -435,7 +384,6 @@ def mp3(e, no, f, eri, T):
     E3daa2 = 2*T*mp3_doubles(no, eri, D2, D2a)
     E3saa1 = 2*T*mp3_singles(no, f, eri, D1a, D1, D2a, D2)
     E3saa2 = 2*T*mp3_singles(no, f, eri, D1, D1a, D2, D2a)
-    #print(E3d,E3daa1,E3daa2,E3da12)
 
     return E3d + E3s + E3da1 + E3da2 + E3sa1 + E3sa2 \
         + E3da12 + E3sa12 + E3daa1 + E3daa2 + E3saa1 + E3saa2
@@ -463,7 +411,8 @@ def mp3_a(D1, D2, D1a, D2a, no, f, eri, T):
     E3saa1 = T*mp3_singles(no, f, eri, D1a, D1, D2a, D2)
     E3saa2 = T*mp3_singles(no, f, eri, D1, D1a, D2, D2a)
 
-    return E3da1 + E3da2 + E3sa1 + E3sa2 + E3da12 + E3sa12 + E3daa1 + E3daa2 + E3saa1 + E3saa2
+    return E3da1 + E3da2 + E3sa1 + E3sa2\
+        + E3da12 + E3sa12 + E3daa1 + E3daa2 + E3saa1 + E3saa2
 
 
 def mp3_new(e, no, f, eri, T):
@@ -535,7 +484,8 @@ def mp23_int(e, no, nv, f, eri, T, ngrid=10):
     T2old = quadrature.int_tbar2(ng, T2old, ti, D2, G)
 
     E23_1 = ft_cc_energy.ft_cc_energy(T1old, T2old, f, eri, g, beta)
-    E23_1F = ft_cc_energy.ft_cc_energy(T1old, T2old, f, eri, g, beta, Qterm=False)
+    E23_1F = ft_cc_energy.ft_cc_energy(
+        T1old, T2old, f, eri, g, beta, Qterm=False)
     E23_Q = E23_1 - E23_1F
 
     # pre-contract with fermi factors

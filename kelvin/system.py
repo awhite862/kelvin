@@ -34,12 +34,14 @@ class System(object):
         raise Exception(err)
 
     def g_d_mp1(self, dvec):
-        """Return the derivative of the MP1 energy with respect to occupation numbers."""
+        """Return the derivative of the MP1 energy with respect to
+        occupation numbers."""
         err = "Base class function g_d_mp1()"
         raise Exception(err)
 
     def u_d_mp1(self, dveca, dvecb):
-        """Return the derivative of the MP1 energy with respect to occupation numbers."""
+        """Return the derivative of the MP1 energy with respect to
+        occupation numbers."""
         err = "Base class function u_d_mp1()"
         raise Exception(err)
 
@@ -74,32 +76,38 @@ class System(object):
         raise Exception(err)
 
     def r_fock(self):
-        """Return the restricted Fock operator (including diagonal) in block form."""
+        """Return the restricted Fock operator (including diagonal)
+        in block form."""
         err = "Base class function r_fock()"
         raise Exception(err)
 
     def u_fock(self):
-        """Return the unrestricted Fock operators (including diagonal) in block form."""
+        """Return the unrestricted Fock operators (including diagonal)
+        in block form."""
         err = "Base class function u_fock()"
         raise Exception(err)
 
     def g_fock(self):
-        """Return the general Fock operator (including diagonal) in block form."""
+        """Return the general Fock operator (including diagonal)
+        in block form."""
         err = "Base class function g_fock()"
         raise Exception(err)
 
     def r_fock_tot(self):
-        """Return the general 1-electron operator (Fock matrix including diagonal)."""
+        """Return the general 1-electron operator
+        (Fock matrix including diagonal)."""
         err = "Base class function r_fock_tot()"
         raise Exception(err)
 
     def u_fock_tot(self):
-        """Return the unrestricted 1-electron operators (Fock matrix including diagonal)."""
+        """Return the unrestricted 1-electron operators
+        (Fock matrix including diagonal)."""
         err = "Base class function u_fock_tot()"
         raise Exception(err)
 
     def g_fock_tot(self):
-        """Return the general 1-electron operator (Fock matrix including diagonal)."""
+        """Return the general 1-electron operator
+        (Fock matrix including diagonal)."""
         err = "Base class function g_fock_tot()"
         raise Exception(err)
 
@@ -114,27 +122,32 @@ class System(object):
         raise Exception(err)
 
     def r_hcore(self):
-        """Return the restricted 1-electron operator (Core Hamiltonian matrix)."""
+        """Return the restricted 1-electron operator
+        (Core Hamiltonian matrix)."""
         err = "Base class function r_hcore()"
         raise Exception(err)
 
     def g_hcore(self):
-        """Return the general orbital 1-electron operator (Core Hamiltonian matrix)."""
+        """Return the general orbital 1-electron operator
+        (Core Hamiltonian matrix)."""
         err = "Base class function g_hcore()"
         raise Exception(err)
 
     def g_aint(self, code=0):
-        """Return general orbital blocks of the anti-symmetrized 2-electron interaction."""
+        """Return general orbital blocks of the anti-symmetrized 2-electron
+        interaction."""
         err = "Base class function g_aint()"
         raise Exception(err)
 
     def u_aint(self):
-        """Return unrestricted blocks of the anti-symmetrized 2-electron interaction."""
+        """Return unrestricted blocks of the anti-symmetrized 2-electron
+        interaction."""
         err = "Base class function u_aint()"
         raise Exception(err)
 
     def u_aint_tot(self):
-        """Return unrestricted blocks of the anti-symmetrized 2-electron interaction."""
+        """Return unrestricted blocks of the anti-symmetrized 2-electron
+        interaction."""
         err = "Base class function u_aint_tot()"
         raise Exception(err)
 
