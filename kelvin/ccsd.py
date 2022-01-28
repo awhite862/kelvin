@@ -1109,7 +1109,6 @@ class ccsd(object):
         else:
             F, I = cc_utils.ft_integrals(self.sys, en, beta, mu)
 
-        A1 = (1.0/beta)*einsum('ia,ai->', self.dia, F.vo)
         # get derivative with respect to g
         Eterm = ft_cc_energy.ft_cc_energy(self.T1, self.T2, F.ov, I.oovv, gd, beta)
 
@@ -1595,8 +1594,6 @@ class ccsd(object):
 
         # get energies and occupation numbers
         ea, eb = self.sys.u_energies_tot()
-        na = ea.shape[0]
-        nb = eb.shape[0]
         foa = ft_utils.ff(beta, ea, mu)
         fva = ft_utils.ffv(beta, ea, mu)
         fob = ft_utils.ff(beta, eb, mu)
@@ -1808,7 +1805,6 @@ class ccsd(object):
             ronob += temp[1]
 
         # Add contributions from occupation number relaxation
-
         jitempa = numpy.zeros(nocca, dtype=dta) if self.athresh > 0.0 else numpy.zeros(na, dtype=dta)
         batempa = numpy.zeros(nvira, dtype=dta) if self.athresh > 0.0 else numpy.zeros(na, dtype=dta)
         jitempb = numpy.zeros(noccb, dtype=dtb) if self.athresh > 0.0 else numpy.zeros(nb, dtype=dtb)

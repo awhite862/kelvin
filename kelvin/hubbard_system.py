@@ -126,8 +126,8 @@ class HubbardSystem(System):
             foa = ft_utils.ff(self.beta, ea, self.mu)
             fob = ft_utils.ff(self.beta, eb, self.mu)
             E1 = -0.5*numpy.einsum('ijij,i,j->', Va, foa, foa)
-            E1 = -0.5*numpy.einsum('ijij,i,j->', Vb, fob, fob)
-            E1 = -numpy.einsum('ijij,i,j->', Vabab, foa, fob)
+            E1 -= 0.5*numpy.einsum('ijij,i,j->', Vb, fob, fob)
+            E1 -= numpy.einsum('ijij,i,j->', Vabab, foa, fob)
             Fa, Fb = self.u_fock_tot()
             Fao = Fa - numpy.diag(ea)
             Fbo = Fb - numpy.diag(eb)
@@ -255,7 +255,7 @@ class HubbardSystem(System):
             return (dtot[dtot < mu], dtot[dtot > mu])
 
     def r_energies_tot(self):
-        raise Exception("Unrestricted reference")
+        raise Exception("Restricted mean-field is not implemented")
 
     def u_energies_tot(self):
         ea = self.ea
@@ -325,8 +325,8 @@ class HubbardSystem(System):
         return one_e_blocks(Foo, Fov, Fvo, Fvv)
 
     def r_fock_tot(self):
-        raise Exception("Restricted Fock operator not defined")
-        return self.model.get_tmatS()
+        raise Exception("Restricted mean-field is not implemented")
+        # return self.model.get_tmatS()
 
     def g_fock_tot(self):
         T = self.model.get_tmat()
@@ -593,8 +593,7 @@ class HubbardSystem(System):
         return U
 
     def r_int_tot(self):
-        raise Exception("Restricted MOs not implemented")
-        return None
+        raise Exception("Restricted mean-field is not implemented")
 
     def g_int_tot(self):
         U = self.model.get_umat()

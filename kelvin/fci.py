@@ -64,8 +64,6 @@ class FCI(object):
         """Run FCI at fixed N."""
         lam = self.lam
         nelec = (nalpha, nbeta)
-        f = self.sys.r_fock_tot()
-        f = f - numpy.diag(self.sys.r_energies_tot())
         f = numpy.diag(self.sys.r_energies_tot())
         h = self.sys.r_hcore()
         h1e = f + lam*(h - f)

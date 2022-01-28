@@ -360,33 +360,33 @@ def mp3_singles2N(no, f, eri, D11, D12, D21, D22):
 def mp3(e, no, f, eri, T):
     """Return the total 3rd order correction to the free energy."""
     raise Exception("This MP3 code is incorrect")
-    D1 = get_D1c(e)
-    D2 = get_D2c(e)
-    D1a = get_D1a(e, T)
-    D2a = get_D2a(e, T)
+    # D1 = get_D1c(e)
+    # D2 = get_D2c(e)
+    # D1a = get_D1a(e, T)
+    # D2a = get_D2a(e, T)
 
-    E3d = mp3_doubles(no, eri, D2, D2)
-    E3s = mp3_singles(no, f, eri, D1, D1, D2, D2)
+    # E3d = mp3_doubles(no, eri, D2, D2)
+    # E3s = mp3_singles(no, f, eri, D1, D1, D2, D2)
 
-    E3da1 = mp3_doubles(no, eri, D2a, D2)
-    E3da2 = mp3_doubles(no, eri, D2, D2a)
-    E3sa1 = mp3_singles(no, f, eri, D1a, D1, D2a, D2)
-    E3sa2 = mp3_singles(no, f, eri, D1, D1a, D2, D2a)
+    # E3da1 = mp3_doubles(no, eri, D2a, D2)
+    # E3da2 = mp3_doubles(no, eri, D2, D2a)
+    # E3sa1 = mp3_singles(no, f, eri, D1a, D1, D2a, D2)
+    # E3sa2 = mp3_singles(no, f, eri, D1, D1a, D2, D2a)
 
-    E3da12 = mp3_doubles(no, eri, D2a, D2a)
-    E3sa12 = mp3_singles(no, f, eri, D1a, D1a, D2a, D2a)
-    E3da12 *= (4.0)/(6.0)
-    E3sa12 *= (4.0)/(6.0)
+    # E3da12 = mp3_doubles(no, eri, D2a, D2a)
+    # E3sa12 = mp3_singles(no, f, eri, D1a, D1a, D2a, D2a)
+    # E3da12 *= (4.0)/(6.0)
+    # E3sa12 *= (4.0)/(6.0)
 
-    D1 = D1**2
-    D2 = D2**2
-    E3daa1 = 2*T*mp3_doubles(no, eri, D2a, D2)
-    E3daa2 = 2*T*mp3_doubles(no, eri, D2, D2a)
-    E3saa1 = 2*T*mp3_singles(no, f, eri, D1a, D1, D2a, D2)
-    E3saa2 = 2*T*mp3_singles(no, f, eri, D1, D1a, D2, D2a)
+    # D1 = D1**2
+    # D2 = D2**2
+    # E3daa1 = 2*T*mp3_doubles(no, eri, D2a, D2)
+    # E3daa2 = 2*T*mp3_doubles(no, eri, D2, D2a)
+    # E3saa1 = 2*T*mp3_singles(no, f, eri, D1a, D1, D2a, D2)
+    # E3saa2 = 2*T*mp3_singles(no, f, eri, D1, D1a, D2, D2a)
 
-    return E3d + E3s + E3da1 + E3da2 + E3sa1 + E3sa2 \
-        + E3da12 + E3sa12 + E3daa1 + E3daa2 + E3saa1 + E3saa2
+    # return E3d + E3s + E3da1 + E3da2 + E3sa1 + E3sa2 \
+    #     + E3da12 + E3sa12 + E3daa1 + E3daa2 + E3saa1 + E3saa2
 
 
 def mp3_a(D1, D2, D1a, D2a, no, f, eri, T):
@@ -394,72 +394,72 @@ def mp3_a(D1, D2, D1a, D2a, no, f, eri, T):
     correction to the free energy.
     """
     raise Exception("MP3 code is incorrect")
-    E3da1 = mp3_doubles(no, eri, D2a, D2)
-    E3da2 = mp3_doubles(no, eri, D2, D2a)
-    E3sa1 = mp3_singles(no, f, eri, D1a, D1, D2a, D2)
-    E3sa2 = mp3_singles(no, f, eri, D1, D1a, D2, D2a)
+    # E3da1 = mp3_doubles(no, eri, D2a, D2)
+    # E3da2 = mp3_doubles(no, eri, D2, D2a)
+    # E3sa1 = mp3_singles(no, f, eri, D1a, D1, D2a, D2)
+    # E3sa2 = mp3_singles(no, f, eri, D1, D1a, D2, D2a)
 
-    E3da12 = mp3_doubles(no, eri, D2a, D2a)
-    E3sa12 = mp3_singles(no, f, eri, D1a, D1a, D2a, D2a)
-    E3da12 *= (4.0)/(6.0)
-    E3sa12 *= (4.0)/(6.0)
+    # E3da12 = mp3_doubles(no, eri, D2a, D2a)
+    # E3sa12 = mp3_singles(no, f, eri, D1a, D1a, D2a, D2a)
+    # E3da12 *= (4.0)/(6.0)
+    # E3sa12 *= (4.0)/(6.0)
 
-    D1 = D1**2
-    D2 = D2**2
-    E3daa1 = T*mp3_doubles(no, eri, D2a, D2)
-    E3daa2 = T*mp3_doubles(no, eri, D2, D2a)
-    E3saa1 = T*mp3_singles(no, f, eri, D1a, D1, D2a, D2)
-    E3saa2 = T*mp3_singles(no, f, eri, D1, D1a, D2, D2a)
+    # D1 = D1**2
+    # D2 = D2**2
+    # E3daa1 = T*mp3_doubles(no, eri, D2a, D2)
+    # E3daa2 = T*mp3_doubles(no, eri, D2, D2a)
+    # E3saa1 = T*mp3_singles(no, f, eri, D1a, D1, D2a, D2)
+    # E3saa2 = T*mp3_singles(no, f, eri, D1, D1a, D2, D2a)
 
-    return E3da1 + E3da2 + E3sa1 + E3sa2\
-        + E3da12 + E3sa12 + E3daa1 + E3daa2 + E3saa1 + E3saa2
+    # return E3da1 + E3da2 + E3sa1 + E3sa2\
+    #     + E3da12 + E3sa12 + E3daa1 + E3daa2 + E3saa1 + E3saa2
 
 
 def mp3_new(e, no, f, eri, T):
     """Return the total 3rd order correction to the free energy."""
     raise Exception("This MP3 code contains a bug somewhere")
-    D1 = get_D1c(e)
-    D2 = get_D2c(e)
-    D1a = -2*T*get_D1a(e, T)
-    D2a = -2*T*get_D2a(e, T)
+    # D1 = get_D1c(e)
+    # D2 = get_D2c(e)
+    # D1a = -2*T*get_D1a(e, T)
+    # D2a = -2*T*get_D2a(e, T)
 
-    D1exp = get_D1exp(e, T)
-    D2exp = get_D2exp(e, T)
+    # D1exp = get_D1exp(e, T)
+    # D2exp = get_D2exp(e, T)
 
-    Dtemp = numpy.einsum(
-        'ijab,ijab,ijab->ijab', D2, D2, D2exp)
-    DN = mp3_doubles(no, eri, D2, D2)
-    DN1 = T*mp3_doubles1N(no, eri, Dtemp, D2)
-    DN2 = T*mp3_doubles2N(no, eri, D2, Dtemp)
+    # Dtemp = numpy.einsum(
+    #     'ijab,ijab,ijab->ijab', D2, D2, D2exp)
+    # DN = mp3_doubles(no, eri, D2, D2)
+    # DN1 = T*mp3_doubles1N(no, eri, Dtemp, D2)
+    # DN2 = T*mp3_doubles2N(no, eri, D2, Dtemp)
 
-    Dtemp = numpy.einsum(
-        'ijab,ijab,ijab,ijab->ijab', D2, D2, D2, D2exp)
-    DA1 = -(1.0/(2.0*T))*mp3_doubles(no, eri, D2a, D2)
-    DA2 = -(1.0/(2.0*T))*mp3_doubles(no, eri, D2, D2a)
-    DA3 = T*mp3_doubles(no, eri, D2a, Dtemp)
-    DA4 = T*mp3_doubles(no, eri, Dtemp, D2a)
+    # Dtemp = numpy.einsum(
+    #     'ijab,ijab,ijab,ijab->ijab', D2, D2, D2, D2exp)
+    # DA1 = -(1.0/(2.0*T))*mp3_doubles(no, eri, D2a, D2)
+    # DA2 = -(1.0/(2.0*T))*mp3_doubles(no, eri, D2, D2a)
+    # DA3 = T*mp3_doubles(no, eri, D2a, Dtemp)
+    # DA4 = T*mp3_doubles(no, eri, Dtemp, D2a)
 
-    DAA = 1.0/(T*T*6.0) * mp3_doubles(no, eri, D2a, D2a)
+    # DAA = 1.0/(T*T*6.0) * mp3_doubles(no, eri, D2a, D2a)
 
-    D = DN + DN1 + DN2 + DA1 + DA2 + DA3 + DA4 + DAA
+    # D = DN + DN1 + DN2 + DA1 + DA2 + DA3 + DA4 + DAA
 
-    Stemp = numpy.einsum(
-        'ia,ia,ia->ia', D1, D1, D1exp)
-    SN = mp3_singles(no, f, eri, D1, D1, D2, D2)
-    SN1 = T*mp3_singles1N(no, f, eri, Stemp, D1, Dtemp, D2)
-    SN2 = T*mp3_singles2N(no, f, eri, D1, Stemp, D2, Dtemp)
+    # Stemp = numpy.einsum(
+    #     'ia,ia,ia->ia', D1, D1, D1exp)
+    # SN = mp3_singles(no, f, eri, D1, D1, D2, D2)
+    # SN1 = T*mp3_singles1N(no, f, eri, Stemp, D1, Dtemp, D2)
+    # SN2 = T*mp3_singles2N(no, f, eri, D1, Stemp, D2, Dtemp)
 
-    Stemp = numpy.einsum(
-        'ia,ia,ia,ia->ia', D1, D1, D1, D1exp)
-    SA1 = -(1.0/(2.0*T))*mp3_singles(no, f, eri, D1a, D1, D2a, D2)
-    SA2 = -(1.0/(2.0*T))*mp3_singles(no, f, eri, D1, D1a, D2, D2a)
-    SA3 = T*mp3_singles(no, f, eri, D1a, Stemp, D2a, Dtemp)
-    SA4 = T*mp3_singles(no, f, eri, Stemp, D1a, Dtemp, D2a)
+    # Stemp = numpy.einsum(
+    #     'ia,ia,ia,ia->ia', D1, D1, D1, D1exp)
+    # SA1 = -(1.0/(2.0*T))*mp3_singles(no, f, eri, D1a, D1, D2a, D2)
+    # SA2 = -(1.0/(2.0*T))*mp3_singles(no, f, eri, D1, D1a, D2, D2a)
+    # SA3 = T*mp3_singles(no, f, eri, D1a, Stemp, D2a, Dtemp)
+    # SA4 = T*mp3_singles(no, f, eri, Stemp, D1a, Dtemp, D2a)
 
-    SAA = 1.0/(T*T*6.0) * mp3_singles(no, f, eri, D1a, D1a, D2a, D2a)
+    # SAA = 1.0/(T*T*6.0) * mp3_singles(no, f, eri, D1a, D1a, D2a, D2a)
 
-    S = SN + SN1 + SN2 + SA1 + SA2 + SA3 + SA4 + SAA
-    return S + D
+    # S = SN + SN1 + SN2 + SA1 + SA2 + SA3 + SA4 + SAA
+    # return S + D
 
 
 def mp23_int(e, no, nv, f, eri, T, ngrid=10):

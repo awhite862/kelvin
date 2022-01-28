@@ -347,7 +347,6 @@ def int_L2(ng, L2old, ti, D2, g, G):
 
 def int_tbar1_single(ng, ig, t1bar, ti, D1, G):
     """Integrate t1bar with exponential factor."""
-    t1_out = numpy.zeros(t1bar.shape)
     dt = numpy.zeros((ng))
     for i in range(ig):
         dt[i] = ti[i] - ti[ig]
@@ -360,7 +359,6 @@ def int_tbar1_single(ng, ig, t1bar, ti, D1, G):
 
 def int_tbar2_single(ng, ig, t2bar, ti, D2, G):
     """Integrate t1bar with exponential factor."""
-    t2_out = numpy.zeros(t2bar.shape)
     dt = numpy.zeros((ng))
     for i in range(ig):
         dt[i] = ti[i] - ti[ig]
