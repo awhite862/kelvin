@@ -1,5 +1,5 @@
 import time
-from pyscf import gto, scf, cc
+from pyscf import gto, scf
 from kelvin.ccsd import ccsd
 from kelvin.scf_system import scf_system
 

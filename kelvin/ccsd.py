@@ -1456,8 +1456,6 @@ class ccsd(object):
             F, I = cc_utils.ft_active_integrals(
                 self.sys, en, focc, fvir, iocc, ivir)
         else:
-            focc = fo
-            fvir = fv
             F, I = cc_utils.ft_integrals(self.sys, en, beta, mu)
         if self.athresh > 0.0:
             dso = fv[numpy.ix_(iocc)]
@@ -1513,8 +1511,6 @@ class ccsd(object):
             F, I = cc_utils.ft_active_integrals(
                 self.sys, en, focc, fvir, iocc, ivir)
         else:
-            focc = fo
-            fvir = fv
             F, I = cc_utils.ft_integrals(self.sys, en, beta, mu)
 
         # orbital energy derivatives
@@ -1857,10 +1853,6 @@ class ccsd(object):
             Fa, Fb, Ia, Ib, Iabab = cc_utils.uft_active_integrals(
                 self.sys, ea, eb, focca, fvira, foccb, fvirb, iocca, ivira, ioccb, ivirb)
         else:
-            focca = foa
-            fvira = fva
-            foccb = fob
-            fvirb = fvb
             Fa, Fb, Ia, Ib, Iabab = cc_utils.uft_integrals(self.sys, ea, eb, beta, mu)
 
         dta = self.T1[0].dtype

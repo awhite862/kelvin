@@ -100,7 +100,7 @@ class TDCCSD(object):
             beta = 80
         self.beta = beta
         ng = self.ngrid
-        self.ti, self.g, G = quadrature.ft_quad(self.ngrid, beta, self.quad)
+        self.ti, self.g, _ = quadrature.ft_quad(self.ngrid, beta, self.quad)
         self.sys = sys
 
         focc, fvir, iocc, ivir = _get_active(self.athresh, self.fthresh, beta, mu, self.sys, iprint)
@@ -725,9 +725,6 @@ class TDCCSD(object):
             E1 = self.sys.get_mp1()
             E01 = E0 + E1
 
-            beta = self.beta
-            mu = self.mu
-
             nocca = len(self.focc[0])
             nvira = len(self.fvir[0])
             noccb = len(self.focc[1])
@@ -1142,9 +1139,6 @@ class TDCCSD(object):
             E0 = ft_mp.ump0(g0[0], g0[1]) + En
             E1 = self.sys.get_mp1()
             E01 = E0 + E1
-
-            beta = self.beta
-            mu = self.mu
 
             noa = len(self.focc[0])
             nva = len(self.fvir[0])

@@ -1,7 +1,5 @@
-from kelvin.fci import fci
 from kelvin.ccsd import ccsd
 from kelvin.ueg_system import ueg_system
-import numpy
 import time
 
 T = 0.5

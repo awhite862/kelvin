@@ -99,8 +99,9 @@ class solid_field_system(System):
         px = -1.j*px.conj().transpose((1, 0))
         py = -1.j*py.conj().transpose((1, 0))
         pz = -1.j*pz.conj().transpose((1, 0))
-        pax, pbx = scf_utils.u_mo_tran_1e(self.mf, px)
-        pay, pby = scf_utils.u_mo_tran_1e(self.mf, py)
+        # For a purely z-field, x and y momenta are not needed
+        # pax, pbx = scf_utils.u_mo_tran_1e(self.mf, px)
+        # pay, pby = scf_utils.u_mo_tran_1e(self.mf, py)
         paz, pbz = scf_utils.u_mo_tran_1e(self.mf, pz)
         Tta = numpy.zeros((nt, na, na), dtype=complex)
         Ttb = numpy.zeros((nt, nb, nb), dtype=complex)
