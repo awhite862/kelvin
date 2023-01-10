@@ -2,8 +2,6 @@
 Quantum chemistry at non-zero temperature
 
 [![Tests](https://github.com/awhite862/kelvin/workflows/CI/badge.svg)](https://github.com/awhite862/kelvin/actions/workflows/ci.yml)
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/awhite862/kelvin.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/awhite862/kelvin/alerts/)
-[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/awhite862/kelvin.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/awhite862/kelvin/context:python)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/awhite862/kelvin/master/LICENSE)
 
 ## Features
